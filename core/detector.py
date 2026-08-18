@@ -43,8 +43,8 @@ FORMAT_COLORS = {
 # ── Complete Conversion Map ──────────────────────────────────────────────────
 # Key: source format -> list of valid target formats
 CONVERSION_MAP = {
-    "ISO":  ["CHD", "CSO", "ECM", "XISO"],
-    "BIN":  ["CHD", "ECM"],
+    "ISO":  ["CHD", "CSO", "ECM", "XISO", "BIN"],
+    "BIN":  ["CHD", "ECM", "ISO"],
     "CUE":  ["CHD"],
     "GDI":  ["CHD"],
     "IMG":  ["CHD"],
@@ -60,8 +60,10 @@ COMMAND_TEMPLATES = {
     ("ISO", "CSO"): "maxcso \"{in}\" -o \"{out}\"",
     ("ISO", "ECM"): "ecm \"{in}\" \"{out}\"",
     ("ISO", "XISO"): "extract-xiso -r \"{in}\"",
+    ("ISO", "BIN"): "bchunk -v \"{in}\" \"{cue}\" \"{out_prefix}\"",
     ("BIN", "CHD"): "chdman createcd -i \"{cue}\" -o \"{out}\"",
     ("BIN", "ECM"): "ecm \"{in}\" \"{out}\"",
+    ("BIN", "ISO"): "bchunk -v \"{in}\" \"{cue}\" \"{out_prefix}\"",
     ("CUE", "CHD"): "chdman createcd -i \"{in}\" -o \"{out}\"",
     ("GDI", "CHD"): "chdman createcd -i \"{in}\" -o \"{out}\"",
     ("IMG", "CHD"): "chdman createdvd -i \"{in}\" -o \"{out}\"",
@@ -102,7 +104,7 @@ def get_command_preview(fmt: str, target: str, filename: str = "game.iso") -> st
     cue = base + ".cue"
 
     return template.format(
-        **{"in": filename, "out": out, "cue": cue, "out_cue": cue}
+        **{"in": filename, "out": out, "cue": cue, "out_cue": cue, "out_prefix": base}
     )
 
 def detect_file(filepath: str) -> dict:

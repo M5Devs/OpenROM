@@ -78,6 +78,7 @@ DEFAULT_CONFIG = {
     "ecm":    "",
     "unecm":  "",
     "xiso":   "",
+    "output_dir": "",
 }
 
 

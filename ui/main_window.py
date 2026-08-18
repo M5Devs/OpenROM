@@ -7,6 +7,7 @@ from tkinter import filedialog, StringVar, messagebox
 from ui.drag_drop import DragDropFrame
 from ui.settings import SettingsWindow
 from ui.about import AboutWindow
+from core.config import load_config, save_config
 from core.detector import (
     detect_file, detect_folder, SUPPORTED_INPUT, get_valid_targets,
     get_command_preview, get_badge_color, get_extension
@@ -40,10 +41,14 @@ class MainWindow(ctk.CTk):
         self.jobs: list[ConversionJob] = []
         self.selected_job_index: int | None = None
 
+        self.config = load_config()
+        saved_output_dir = self.config.get("output_dir", "")
+
         self.compression   = StringVar(value="Normal")
         self.verify_after  = ctk.BooleanVar(value=True)
         self.selected_target = StringVar(value="")
-        self.output_dir    = StringVar(value="")
+        self.output_dir    = StringVar(value=saved_output_dir)
+        self.output_dir.trace_add("write", self._on_output_dir_changed)
         self.same_as_src   = ctk.BooleanVar(value=True)
 
         self._converting   = False
@@ -256,6 +261,34 @@ class MainWindow(ctk.CTk):
             text_color=TEXT_WHITE
         ).pack(anchor="w", padx=16, pady=(4, 6))
 
+        # Save to Row
+        save_to_row = ctk.CTkFrame(self.settings_card, fg_color="transparent")
+        save_to_row.pack(fill="x", padx=16, pady=(0, 8))
+
+        ctk.CTkLabel(
+            save_to_row, text="Save to:",
+            font=ctk.CTkFont(size=12), text_color=TEXT_GRAY
+        ).pack(side="left", padx=(0, 8))
+
+        self.output_dir_entry = ctk.CTkEntry(
+            save_to_row,
+            textvariable=self.output_dir,
+            placeholder_text="Same folder as input file",
+            fg_color=BG_DARK, border_color=BORDER_DARK,
+            text_color=TEXT_WHITE, font=ctk.CTkFont(size=11),
+            height=28
+        )
+        self.output_dir_entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
+
+        browse_btn = ctk.CTkButton(
+            save_to_row, text="Browse",
+            width=65, height=28,
+            fg_color=BORDER_DARK, hover_color="#444444",
+            text_color=TEXT_WHITE, font=ctk.CTkFont(size=11, weight="bold"),
+            command=self._browse_output_dir
+        )
+        browse_btn.pack(side="right")
+
         opt_row = ctk.CTkFrame(self.settings_card, fg_color="transparent")
         opt_row.pack(fill="x", padx=16, pady=(0, 12))
 
@@ -314,8 +347,22 @@ class MainWindow(ctk.CTk):
 
     # ── Queue & Selection Logic ───────────────────────────────────────────────
 
+    def _browse_output_dir(self):
+        folder = filedialog.askdirectory()
+        if folder:
+            self.output_dir.set(folder)
+
+    def _on_output_dir_changed(self, *args):
+        val = self.output_dir.get().strip()
+        self.config["output_dir"] = val
+        save_config(self.config)
+        with self._jobs_lock:
+            for job in self.jobs:
+                job.output_dir = val if val else os.path.dirname(job.filepath)
+
     def _add_files(self, paths: list):
         added_any = False
+        custom_out = self.output_dir.get().strip()
         with self._jobs_lock:
             existing = {j.filepath for j in self.jobs}
             for p in paths:
@@ -331,7 +378,7 @@ class MainWindow(ctk.CTk):
                 default_fmt = valid[0]
                 job = ConversionJob(
                     filepath=p,
-                    output_dir=os.path.dirname(p),
+                    output_dir=custom_out if custom_out else os.path.dirname(p),
                     target_format=default_fmt,
                     compression=self.compression.get(),
                     verify=self.verify_after.get()

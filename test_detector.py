@@ -19,14 +19,14 @@ class TestDetector(unittest.TestCase):
     def test_detect_file_cases(self):
         cases = [
             ("tom_jerry.bin.ecm", "ECM", ["ISO", "BIN"]),
-            ("game.iso", "ISO", ["CHD", "CSO", "ECM", "XISO"]),
-            ("disc.bin", "BIN", ["CHD", "ECM"]),
+            ("game.iso", "ISO", ["CHD", "CSO", "ECM", "XISO", "BIN"]),
+            ("disc.bin", "BIN", ["CHD", "ECM", "ISO"]),
             ("disc.cue", "CUE", ["CHD"]),
             ("sonic.gdi", "GDI", ["CHD"]),
             ("halo.chd", "CHD", ["ISO", "BIN/CUE"]),
             ("psp_game.cso", "CSO", ["ISO"]),
             ("psp_game.zso", "ZSO", ["ISO"]),
-            ("xbox_iso.iso", "ISO", ["CHD", "CSO", "ECM", "XISO"]),
+            ("xbox_iso.iso", "ISO", ["CHD", "CSO", "ECM", "XISO", "BIN"]),
         ]
 
         with tempfile.TemporaryDirectory() as tmpdir:

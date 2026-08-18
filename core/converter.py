@@ -122,6 +122,12 @@ class Converter:
         if tgt == "XISO":
             return self._to_xiso(job, src)
 
+        if fmt == "BIN" and tgt == "ISO":
+            return self._bin_to_iso(job, src, info)
+
+        if fmt == "ISO" and tgt == "BIN":
+            return self._iso_to_bin(job, src)
+
         self._log(f"[ERROR] Unhandled conversion route: {fmt} → {tgt}")
         return False
 
@@ -245,6 +251,75 @@ class Converter:
         cmd  = [xiso, "-x", src, "-d", out_dir]
         self._log(f"[XISO→ISO] Extracting XISO {os.path.basename(src)} to {out_dir}...")
         return self._run(cmd, job)
+
+    # ── BCHUNK conversion (BIN ↔ ISO) ─────────────────────────────────────────
+
+    def _bin_to_iso(self, job: ConversionJob, src: str, info: dict) -> bool:
+        bchunk = get_tool_path("bchunk")
+        cue_input = info.get("paired_cue")
+        if not cue_input:
+            cue_input = self._auto_cue(src, job.output_dir)
+            if cue_input:
+                job._temp_files.append(cue_input)
+
+        if not cue_input:
+            self._log(f"[ERROR] Could not find or generate CUE file for {src}")
+            return False
+
+        base = os.path.basename(src).rsplit('.', 1)[0]
+        out_prefix = os.path.join(job.output_dir, base)
+        cmd = [bchunk, "-v", src, cue_input, out_prefix]
+        self._log(f"[BCHUNK] {os.path.basename(src)} → ISO ({out_prefix}*.iso)")
+
+        ok = self._run(cmd, job)
+        if ok:
+            expected_iso = f"{out_prefix}01.iso"
+            target_iso = os.path.join(job.output_dir, f"{base}.iso")
+            if os.path.isfile(expected_iso) and expected_iso != target_iso:
+                try:
+                    if os.path.isfile(target_iso):
+                        os.remove(target_iso)
+                    shutil.move(expected_iso, target_iso)
+                    self._log(f"[BCHUNK] Renamed output to: {os.path.basename(target_iso)}")
+                except Exception as e:
+                    self._log(f"[WARN] Failed to rename {expected_iso} to {target_iso}: {e}")
+        return ok
+
+    def _iso_to_bin(self, job: ConversionJob, src: str) -> bool:
+        bchunk = get_tool_path("bchunk")
+        base = os.path.basename(src).rsplit('.', 1)[0]
+        cue_input = os.path.join(job.output_dir, f"{base}_temp.cue")
+        try:
+            with open(cue_input, "w", encoding="utf-8") as f:
+                f.write(f'FILE "{os.path.basename(src)}" BINARY\n')
+                f.write("  TRACK 01 MODE1/2048\n")
+                f.write("    INDEX 01 00:00:00\n")
+            job._temp_files.append(cue_input)
+        except Exception as e:
+            self._log(f"[ERROR] Could not write temporary CUE file: {e}")
+            return False
+
+        out_prefix = os.path.join(job.output_dir, base)
+        cmd = [bchunk, "-v", src, cue_input, out_prefix]
+        self._log(f"[BCHUNK] {os.path.basename(src)} → BIN ({out_prefix}*.bin)")
+
+        ok = self._run(cmd, job)
+        if ok:
+            target_bin = os.path.join(job.output_dir, f"{base}.bin")
+            # Find produced track file (e.g. out_prefix01.iso, out_prefix01.ugh, etc.)
+            for fname in os.listdir(job.output_dir):
+                if fname.startswith(os.path.basename(out_prefix)) and fname != os.path.basename(src) and not fname.endswith(".cue"):
+                    created_file = os.path.join(job.output_dir, fname)
+                    if created_file != target_bin and os.path.isfile(created_file):
+                        try:
+                            if os.path.isfile(target_bin):
+                                os.remove(target_bin)
+                            shutil.move(created_file, target_bin)
+                            self._log(f"[BCHUNK] Renamed output {fname} to: {os.path.basename(target_bin)}")
+                            break
+                        except Exception as e:
+                            self._log(f"[WARN] Failed to rename {created_file} to {target_bin}: {e}")
+        return ok
 
     # ── helpers ───────────────────────────────────────────────────────────────
 
