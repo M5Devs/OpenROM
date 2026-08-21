@@ -40,18 +40,20 @@ def get_default_bundled_path(tool: str) -> str:
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     win_names = {
-        "chdman": "chdman.exe",
-        "ecm":    "ecm.exe",
-        "unecm":  "unecm.exe",
-        "maxcso": "maxcso.exe",
-        "xiso":   "extract-xiso.exe",
+        "chdman":       "chdman.exe",
+        "ecm":          "ecm.exe",
+        "unecm":        "unecm.exe",
+        "maxcso":       "maxcso.exe",
+        "extract-xiso": "extract-xiso.exe",
+        "nodtool":      "nodtool.exe",
     }
     unix_names = {
-        "chdman": "chdman",
-        "ecm":    "ecm",
-        "unecm":  "unecm",
-        "maxcso": "maxcso",
-        "xiso":   "extract-xiso",
+        "chdman":       "chdman",
+        "ecm":          "ecm",
+        "unecm":        "unecm",
+        "maxcso":       "maxcso",
+        "extract-xiso": "extract-xiso",
+        "nodtool":      "nodtool",
     }
 
     if system == "Windows":
@@ -73,11 +75,12 @@ def get_default_bundled_path(tool: str) -> str:
 
 
 DEFAULT_CONFIG = {
-    "chdman": "",
-    "maxcso": "",
-    "ecm":    "",
-    "unecm":  "",
-    "xiso":   "",
+    "chdman":       "",
+    "maxcso":       "",
+    "ecm":          "",
+    "unecm":        "",
+    "extract-xiso": "",
+    "nodtool":      "",
 }
 
 
