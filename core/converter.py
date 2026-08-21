@@ -118,6 +118,12 @@ class Converter:
         if tgt == "CSO":
             return self._to_cso(job, src)
 
+        if tgt == "RVZ":
+            return self._to_rvz(job, src)
+
+        if fmt in ("RVZ", "WIA", "WBFS", "GCZ") and tgt == "ISO":
+            return self._from_nodtool(job, src, tgt)
+
         if fmt in ("CSO", "ZSO") and tgt == "ISO":
             return self._cso_to_iso(job, src)
 
@@ -263,6 +269,25 @@ class Converter:
         return self._run(cmd, job)
 
     # ── helpers ───────────────────────────────────────────────────────────────
+
+    def _to_rvz(self, job: ConversionJob, src: str) -> bool:
+        """ISO → RVZ via nodtool convert"""
+        nodtool = get_tool_path("nodtool")
+        out     = get_output_name(src, "rvz")
+        out     = os.path.join(job.output_dir, os.path.basename(out))
+        cmd     = [nodtool, "convert", src, out]
+        self._log(f"[RVZ] {os.path.basename(src)} → {os.path.basename(out)}")
+        return self._run(cmd, job)
+
+    def _from_nodtool(self, job: ConversionJob, src: str, tgt: str) -> bool:
+        """RVZ / WIA / WBFS / GCZ → ISO via nodtool convert"""
+        nodtool = get_tool_path("nodtool")
+        out     = get_output_name(src, "iso")
+        out     = os.path.join(job.output_dir, os.path.basename(out))
+        fmt     = os.path.splitext(src)[1].upper().lstrip(".")
+        cmd     = [nodtool, "convert", src, out]
+        self._log(f"[{fmt}→ISO] {os.path.basename(src)} → {os.path.basename(out)}")
+        return self._run(cmd, job)
 
     def _run(self, cmd: list, job: ConversionJob) -> bool:
         self._log(f"  cmd: {' '.join(os.path.basename(c) if i == 0 else c for i, c in enumerate(cmd))}")
