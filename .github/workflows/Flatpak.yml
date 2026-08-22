@@ -24,7 +24,7 @@ jobs:
 
       - name: Install flatpak-pip-generator deps
         run: |
-          pip3 install requirements-parser aiohttp
+          python3 -m pip install requirements-parser aiohttp
 
       - name: Download flatpak-pip-generator
         run: |
