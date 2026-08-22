@@ -1,0 +1,116 @@
+name: Build Flatpak
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 2.3.0)'
+        required: true
+        default: '2.3.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-flatpak:
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/flathub/flatpak-builder:latest
+
+    steps:
+      - name: Checkout OpenROM
+        uses: actions/checkout@v4
+
+      - name: Install flatpak-pip-generator deps
+        run: |
+          pip3 install requirements-parser aiohttp
+
+      - name: Download flatpak-pip-generator
+        run: |
+          curl -sL https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator \
+            -o /tmp/flatpak_pip_generator.py
+
+      - name: Generate Python deps sources
+        run: |
+          python3 /tmp/flatpak_pip_generator.py \
+            customtkinter \
+            darkdetect \
+            Pillow \
+            packaging \
+            psutil \
+            send2trash \
+            tkinterdnd2 \
+            --output flatpak/python-deps
+
+      - name: Install Flatpak runtimes
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install -y flathub \
+            org.freedesktop.Platform//24.08 \
+            org.freedesktop.Sdk//24.08 \
+            org.freedesktop.Sdk.Extension.python312//24.08
+
+      - name: Update manifest with generated python deps
+        run: |
+          # Inject python-deps.json into the manifest sources
+          python3 - << 'EOF'
+          import json, re
+
+          with open('flatpak/python-deps.json') as f:
+              deps = json.load(f)
+
+          with open('flatpak/io.github.M5Devs.OpenROM.yml') as f:
+              manifest = f.read()
+
+          # Replace placeholder comment with real sources
+          placeholder = "      # Note: run `flatpak-pip-generator customtkinter darkdetect Pillow packaging psutil send2trash tkinterdnd2`\n      # to generate the correct sources with real sha256 hashes"
+          replacement = "      sources: " + json.dumps(deps, indent=8).replace('\n', '\n      ')
+
+          manifest = manifest.replace(placeholder, replacement)
+
+          with open('flatpak/io.github.M5Devs.OpenROM.yml', 'w') as f:
+              f.write(manifest)
+
+          print("✅ Manifest updated with real sha256 hashes")
+          EOF
+
+      - name: Build Flatpak
+        run: |
+          flatpak-builder \
+            --force-clean \
+            --repo=flatpak-repo \
+            --install-deps-from=flathub \
+            flatpak-build \
+            flatpak/io.github.M5Devs.OpenROM.yml
+
+      - name: Bundle Flatpak
+        run: |
+          flatpak build-bundle \
+            flatpak-repo \
+            OpenROM-v${{ github.event.inputs.version }}.flatpak \
+            io.github.M5Devs.OpenROM
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenROM_Flatpak
+          path: OpenROM-v${{ github.event.inputs.version }}.flatpak
+
+      - name: Add to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: OpenROM v${{ github.event.inputs.version }}
+          files: OpenROM-v${{ github.event.inputs.version }}.flatpak
+          body: |
+            ### Linux Flatpak
+            Install via:
+            ```bash
+            flatpak install OpenROM-v${{ github.event.inputs.version }}.flatpak
+            ```
+            Or update existing install:
+            ```bash
+            flatpak update io.github.M5Devs.OpenROM
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
