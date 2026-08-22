@@ -2,17 +2,13 @@ app-id: io.github.M5Devs.OpenROM
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
-
 command: openrom-wrapper.sh
 
 finish-args:
-  # Display
   - --share=ipc
   - --socket=x11
   - --socket=wayland
-  # File access — user's home for ROM files
   - --filesystem=home
-  # No network needed — everything runs locally
   - --unshare=network
 
 modules:
@@ -21,52 +17,44 @@ modules:
   - name: python-deps
     buildsystem: simple
     build-commands:
-      - pip3 install --prefix=/app --no-build-isolation
-          customtkinter
-          darkdetect
-          Pillow
-          packaging
-          psutil
-          send2trash
-          tkinterdnd2
+      - pip3 install --no-index --find-links=. --prefix=/app --no-build-isolation
+          customtkinter darkdetect psutil send2trash tkinterdnd2
     sources:
       - type: file
-        url: https://files.pythonhosted.org/packages/customtkinter-5.2.2-py3-none-any.whl
-        sha256: placeholder-will-be-filled-by-flatpak-builder
-      # Note: run `flatpak-pip-generator customtkinter darkdetect Pillow packaging psutil send2trash tkinterdnd2`
-      # to generate the correct sources with real sha256 hashes
+        url: https://files.pythonhosted.org/packages/b0/63/e2d3387432c5a94dec64031c86b5ba737216de7e7490abb55efd64dec054/customtkinter-6.0.0-py3-none-any.whl
+        sha256: 704fcbf1d2fca06bd7881b0afacfae72aed9864c9b6de2870e632e55eb3a0456
+      - type: file
+        url: https://files.pythonhosted.org/packages/f2/f2/728f041460f1b9739b85ee23b45fa5a505962ea11fd85bdbe2a02b021373/darkdetect-0.8.0-py3-none-any.whl
+        sha256: a7509ccf517eaad92b31c214f593dbcf138ea8a43b2935406bbd565e15527a85
+      - type: file
+        url: https://files.pythonhosted.org/packages/b5/70/5d8df3b09e25bce090399cf48e452d25c935ab72dad19406c77f4e828045/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl
+        sha256: 076a2d2f923fd4821644f5ba89f059523da90dc9014e85f8e45a5774ca5bc6f9
+      - type: file
+        url: https://files.pythonhosted.org/packages/1c/78/504fdd027da3b84ff1aecd9f6957e65f35134534ccc6da8628eb71e76d3f/send2trash-2.1.0-py3-none-any.whl
+        sha256: 0da2f112e6d6bb22de6aa6daa7e144831a4febf2a87261451c4ad849fe9a873c
+      - type: file
+        url: https://files.pythonhosted.org/packages/33/1b/039642c212c24887a941af706b006365f3733d88aab383f0cf151768403c/tkinterdnd2-0.6.2-py3-none-any.whl
+        sha256: b6a8b229d26286c022bb2fbd311c2e431e4d9bbab8133be80e9c98e7bcf9fe59
 
   # ── OpenROM app ───────────────────────────────────────────────────────────
   - name: openrom
     buildsystem: simple
     build-commands:
-      # Copy app source
       - mkdir -p /app/lib/openrom
       - cp -r . /app/lib/openrom/
-
-      # Copy bundled Linux binaries to /app/bin and make executable
-      - install -Dm755 assets/linux/chdman      /app/bin/chdman
-      - install -Dm755 assets/linux/ecm         /app/bin/ecm
-      - install -Dm755 assets/linux/unecm       /app/bin/unecm
-      - install -Dm755 assets/linux/maxcso      /app/bin/maxcso
+      - install -Dm755 assets/linux/chdman       /app/bin/chdman
+      - install -Dm755 assets/linux/ecm          /app/bin/ecm
+      - install -Dm755 assets/linux/unecm        /app/bin/unecm
+      - install -Dm755 assets/linux/maxcso       /app/bin/maxcso
       - install -Dm755 assets/linux/extract-xiso /app/bin/extract-xiso
-      - install -Dm755 assets/linux/nodtool     /app/bin/nodtool
-
-      # Wrapper script that sets up Python path and launches the app
+      - install -Dm755 assets/linux/nodtool      /app/bin/nodtool
       - install -Dm755 flatpak/openrom-wrapper.sh /app/bin/openrom-wrapper.sh
-
-      # Desktop entry
       - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop
           /app/share/applications/io.github.M5Devs.OpenROM.desktop
-
-      # Icons
       - install -Dm644 assets/icons/icon.png
           /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
-
-      # AppStream metadata
       - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml
           /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
-
     sources:
       - type: git
         url: https://github.com/M5Devs/OpenROM.git
