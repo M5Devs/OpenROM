@@ -20,24 +20,28 @@ jobs:
       options: --privileged
 
     steps:
-      - name: Checkout
+      - name: Checkout OpenROM
         uses: actions/checkout@v4
+
+      - name: Checkout flatpak-builder-tools
+        uses: actions/checkout@v4
+        with:
+          repository: flatpak/flatpak-builder-tools
+          path: flatpak-builder-tools
 
       - name: Generate Python deps sources
         run: |
-          curl -sL https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator \
-            -o /tmp/flatpak-pip-generator
-          chmod +x /tmp/flatpak-pip-generator
           pip install requirements-parser aiohttp
-          python3 /tmp/flatpak-pip-generator \
+          python3 flatpak-builder-tools/pip/flatpak-pip-generator.py \
+            --runtime org.freedesktop.Sdk//24.08 \
+            --output flatpak/python-deps \
             customtkinter \
             darkdetect \
             Pillow \
             packaging \
             psutil \
             send2trash \
-            tkinterdnd2 \
-            --output flatpak/python-deps
+            tkinterdnd2
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
