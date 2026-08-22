@@ -1,0 +1,75 @@
+app-id: io.github.M5Devs.OpenROM
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.python312
+
+command: openrom-wrapper.sh
+
+finish-args:
+  # Display
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  # File access — user's home for ROM files
+  - --filesystem=home
+  # No network needed — everything runs locally
+  - --unshare=network
+
+modules:
+
+  # ── Python dependencies ───────────────────────────────────────────────────
+  - name: python-deps
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app --no-build-isolation
+          customtkinter
+          darkdetect
+          Pillow
+          packaging
+          psutil
+          send2trash
+          tkinterdnd2
+    sources:
+      - type: file
+        url: https://files.pythonhosted.org/packages/customtkinter-5.2.2-py3-none-any.whl
+        sha256: placeholder-will-be-filled-by-flatpak-builder
+      # Note: run `flatpak-pip-generator customtkinter darkdetect Pillow packaging psutil send2trash tkinterdnd2`
+      # to generate the correct sources with real sha256 hashes
+
+  # ── OpenROM app ───────────────────────────────────────────────────────────
+  - name: openrom
+    buildsystem: simple
+    build-commands:
+      # Copy app source
+      - mkdir -p /app/lib/openrom
+      - cp -r . /app/lib/openrom/
+
+      # Copy bundled Linux binaries to /app/bin and make executable
+      - install -Dm755 assets/linux/chdman      /app/bin/chdman
+      - install -Dm755 assets/linux/ecm         /app/bin/ecm
+      - install -Dm755 assets/linux/unecm       /app/bin/unecm
+      - install -Dm755 assets/linux/maxcso      /app/bin/maxcso
+      - install -Dm755 assets/linux/extract-xiso /app/bin/extract-xiso
+      - install -Dm755 assets/linux/nodtool     /app/bin/nodtool
+
+      # Wrapper script that sets up Python path and launches the app
+      - install -Dm755 flatpak/openrom-wrapper.sh /app/bin/openrom-wrapper.sh
+
+      # Desktop entry
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop
+          /app/share/applications/io.github.M5Devs.OpenROM.desktop
+
+      # Icons
+      - install -Dm644 assets/icons/icon.png
+          /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
+
+      # AppStream metadata
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml
+          /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
+
+    sources:
+      - type: git
+        url: https://github.com/M5Devs/OpenROM.git
+        branch: main

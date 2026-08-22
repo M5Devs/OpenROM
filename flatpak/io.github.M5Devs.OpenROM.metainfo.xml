@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.M5Devs.OpenROM</id>
+
+  <name>OpenROM</name>
+  <summary>Universal ROM Compression Suite for retro gaming</summary>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-only AND LicenseRef-Commons-Clause</project_license>
+
+  <description>
+    <p>
+      OpenROM is a free, open-source desktop tool for converting retro game ROM files
+      between popular formats. It supports PS1, PS2, PSP, GameCube, Wii, Xbox, Dreamcast,
+      and Sega CD disc images.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Convert between ISO, CHD, CSO, ECM, BIN/CUE, XISO, RVZ, WIA, WBFS, GCZ</li>
+      <li>Drag and drop queue with per-job progress</li>
+      <li>Full CLI included alongside the GUI</li>
+      <li>Bundled tools — no extra installs needed</li>
+      <li>No telemetry, no network requests, runs 100% locally</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">io.github.M5Devs.OpenROM.desktop</launchable>
+
+  <url type="homepage">https://github.com/M5Devs/OpenROM</url>
+  <url type="bugtracker">https://github.com/M5Devs/OpenROM/issues</url>
+
+  <developer id="io.github.M5Devs">
+    <name>M5 Dev</name>
+  </developer>
+
+  <provides>
+    <binary>openrom-wrapper.sh</binary>
+  </provides>
+
+  <categories>
+    <category>Utility</category>
+    <category>Game</category>
+  </categories>
+
+  <keywords>
+    <keyword>ROM</keyword>
+    <keyword>CHD</keyword>
+    <keyword>ISO</keyword>
+    <keyword>emulation</keyword>
+    <keyword>retro</keyword>
+    <keyword>GameCube</keyword>
+    <keyword>PlayStation</keyword>
+  </keywords>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main conversion interface</caption>
+      <image>https://raw.githubusercontent.com/M5Devs/OpenROM/main/assets/icons/screenshot-1.png</image>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="2.2.2" date="2026-08-21">
+      <description>
+        <p>Added RVZ/WIA/WBFS/GCZ support via nodtool, PSP ISO detection, and Convert button fix.</p>
+      </description>
+    </release>
+    <release version="2.2.0" date="2026-08-19">
+      <description>
+        <p>Added CLI interface, per-job progress bar, CHD info panel, and bug fixes.</p>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.1" />
+</component>
