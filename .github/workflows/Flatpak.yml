@@ -15,7 +15,8 @@ jobs:
   build-flatpak:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/flathub/flatpak-builder:latest
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
 
     steps:
       - name: Checkout OpenROM
