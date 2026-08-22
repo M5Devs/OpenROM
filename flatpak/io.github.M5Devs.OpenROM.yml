@@ -2,8 +2,6 @@ app-id: io.github.M5Devs.OpenROM
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.python312
 
 command: openrom-wrapper.sh
 
