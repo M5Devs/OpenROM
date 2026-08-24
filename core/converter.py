@@ -11,9 +11,9 @@ from core.logger import log as global_log
 from core.validator import verify_chd
 
 CHD_COMPRESSION = {
-    "Normal": "cdlz",           # balanced — fast and good ratio
-    "High":   "cdlz,zlib",     # slower, better ratio
-    "Max":    "cdlz,zlib,flac", # slowest, best ratio
+    "Normal": "cdlz",              # max compatibility (AetherSX2/NetherSX2 friendly)
+    "High":   "zstd,zlib,huff",    # slower, better ratio
+    "Max":    "zstd,zlib,huff,flac", # best ratio
 }
 
 
