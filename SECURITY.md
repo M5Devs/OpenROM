@@ -42,7 +42,7 @@ Every binary bundled with OpenROM is open source, built from source via GitHub A
 | `maxcso` | ISC | [unknownbrackets/maxcso](https://github.com/unknownbrackets/maxcso) | GitHub Actions |
 | `ecm` / `unecm` | GPL v2 | [Neill Corlett](https://github.com/alucryd/ecm-tools) | Built from source |
 | `extract-xiso` | GPL v2 | [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) | GitHub Actions |
-| `nodtool` | MIT | [encounter/nod](https://github.com/encounter/nod) | [OpenROM-Binaries](https://github.com/M5Devs/OpenROM-Binaries) |
+| `nodtool` | MIT | [encounter/nod](https://github.com/encounter/nod) | GitHub Actions |
 
 ### Don't Trust Our Binaries?
 
