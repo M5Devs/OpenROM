@@ -193,15 +193,7 @@ jobs:
           cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
           cp dist/openrom-core release/
           chmod +x release/openrom-core
-          cat > release/README.txt << 'EOF'
-OpenROM - Linux
-======================================================
-RUN THIS: ./OpenROM-*.AppImage   <-- this is the app!
-
-openrom-core is the backend engine, do NOT run it directly.
-
-Docs: https://github.com/M5Devs/OpenROM
-EOF
+          printf 'OpenROM - Linux\n======================================================\nRUN THIS: ./OpenROM-*.AppImage   <-- this is the app!\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' > release/README.txt
           cd release
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip .
 
@@ -291,15 +283,7 @@ EOF
           cp OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg release/
           cp dist/openrom-core release/
           chmod +x release/openrom-core
-          cat > release/README.txt << 'EOF'
-OpenROM - macOS
-======================================================
-RUN THIS: Open the .dmg and drag OpenROM to Applications.
-
-openrom-core is the backend engine, do NOT run it directly.
-
-Docs: https://github.com/M5Devs/OpenROM
-EOF
+          printf 'OpenROM - macOS\n======================================================\nRUN THIS: Open the .dmg and drag OpenROM to Applications.\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' > release/README.txt
           cd release
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip .
 
