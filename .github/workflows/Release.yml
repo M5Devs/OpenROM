@@ -1,4 +1,5 @@
 name: Build Release
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,49 +13,56 @@ permissions:
 
 jobs:
 
-  # ── Windows — Portable ZIP (GUI + CLI) ──────────────────────────────────────
+  # ── Windows — Flutter GUI + PyInstaller CLI ─────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
+      # ── Python / PyInstaller → openrom-core.exe ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
           pip install "pyinstaller>=6.0.0"
 
-      - name: Build GUI (OpenROM.exe)
-        run: |
-          pyinstaller `
-            --noconfirm `
-            --onefile `
-            --name "OpenROM" `
-            --add-data "assets;assets" `
-            --icon "assets/icons/icon.ico" `
-            main.py
-
-      - name: Build CLI (openrom-cli.exe)
+      - name: Build openrom-core.exe (headless CLI)
         run: |
           pyinstaller `
             --noconfirm `
             --onefile `
             --console `
-            --name "openrom-cli" `
+            --name "openrom-core" `
             --add-data "assets;assets" `
             core/cli.py
 
+      # ── Flutter → OpenROM.exe ──
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+
+      - name: Flutter dependencies
+        working-directory: openrom_flutter
+        run: flutter pub get
+
+      - name: Build Flutter Windows
+        working-directory: openrom_flutter
+        run: flutter build windows --release
+
+      # ── Package ZIP ──
       - name: Package ZIP
         run: |
           mkdir release
-          cp dist/OpenROM.exe release/
-          cp dist/openrom-cli.exe release/
-          cd release
-          Compress-Archive -Path * -DestinationPath ../OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+          cp dist/openrom-core.exe release/
+          cp -r openrom_flutter/build/windows/x64/runner/Release/. release/
+          cp -r themes/ release/themes/
+          Compress-Archive -Path release/* -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -62,52 +70,63 @@ jobs:
           name: OpenROM_Windows
           path: OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
-  # ── Linux — AppImage (GUI) + binary (CLI) in ZIP ───────────────────────────
+  # ── Linux — Flutter AppImage + PyInstaller CLI ──────────────────────────────
   build-linux:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
+      # ── System deps ──
       - name: Install system dependencies
         run: |
-          # Remove unneeded third-party repos before update to avoid slow mirrors
           sudo rm -f /etc/apt/sources.list.d/google-chrome*.list \
                      /etc/apt/sources.list.d/microsoft-*.list \
                      /etc/apt/sources.list.d/azure-cli.list \
                      /etc/apt/sources.list.d/github-cli.list
           sudo apt-get update -qq
-          sudo apt-get install -y -q python3-tk libfuse2 wget fuse
+          sudo apt-get install -y -q \
+            libfuse2 wget fuse \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libglib2.0-dev libgdk-pixbuf2.0-dev
+
+      # ── Python / PyInstaller → openrom-core ──
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
           pip install "pyinstaller>=6.0.0"
 
-      - name: Build GUI binary
-        run: |
-          pyinstaller \
-            --noconfirm \
-            --onedir \
-            --windowed \
-            --name "OpenROM" \
-            --add-data "assets:assets" \
-            main.py
-
-      - name: Build CLI binary
+      - name: Build openrom-core (headless CLI)
         run: |
           pyinstaller \
             --noconfirm \
             --onefile \
             --console \
-            --name "openrom-cli" \
+            --name "openrom-core" \
             --add-data "assets:assets" \
             core/cli.py
 
+      # ── Flutter → OpenROM binary ──
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+
+      - name: Flutter dependencies
+        working-directory: openrom_flutter
+        run: flutter pub get
+
+      - name: Build Flutter Linux
+        working-directory: openrom_flutter
+        run: flutter build linux --release
+
+      # ── AppImage ──
       - name: Download appimagetool
         run: |
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
@@ -117,24 +136,36 @@ jobs:
         run: |
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          cp -r dist/OpenROM/* AppDir/usr/bin/
+
+          # Flutter output
+          cp -r openrom_flutter/build/linux/x64/release/bundle/. AppDir/usr/bin/
+
+          # openrom-core binary next to the Flutter executable
+          cp dist/openrom-core AppDir/usr/bin/
+          chmod +x AppDir/usr/bin/openrom-core
+
+          # themes
+          cp -r themes/ AppDir/usr/bin/themes/
+
+          # icon
           cp assets/icons/icon.png AppDir/openrom.png
           cp assets/icons/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/openrom.png
 
           cat > AppDir/OpenROM.desktop << EOF
           [Desktop Entry]
           Name=OpenROM
-          Exec=OpenROM
+          Exec=openrom_flutter
           Icon=openrom
           Type=Application
           Categories=Utility;
           Comment=Universal ROM Compression Suite
           EOF
 
-          cat > AppDir/AppRun << EOF
+          cat > AppDir/AppRun << 'EOF'
           #!/bin/bash
-          HERE="\$(dirname "\$(readlink -f "\${0}")")"
-          exec "\$HERE/usr/bin/OpenROM" "\$@"
+          HERE="$(dirname "$(readlink -f "${0}")")"
+          export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
+          exec "$HERE/usr/bin/openrom_flutter" "$@"
           EOF
           chmod +x AppDir/AppRun
 
@@ -143,12 +174,12 @@ jobs:
           ARCH=x86_64 ./appimagetool AppDir OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
           chmod +x OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
 
-      - name: Package ZIP (AppImage + CLI)
+      - name: Package ZIP
         run: |
           mkdir release
           cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
-          cp dist/openrom-cli release/
-          chmod +x release/openrom-cli
+          cp dist/openrom-core release/
+          chmod +x release/openrom-core
           cd release
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip .
 
@@ -158,56 +189,73 @@ jobs:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
-  # ── macOS — DMG (GUI) + CLI binary in ZIP ──────────────────────────────────
+  # ── macOS — Flutter .app DMG + PyInstaller CLI ──────────────────────────────
   build-macos:
     strategy:
       matrix:
         include:
           - os: macos-15
             arch: arm64
+            flutter_arch: arm64
           - os: macos-15-intel
             arch: x86_64
+            flutter_arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
+      # ── Python / PyInstaller → openrom-core ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
           pip install "pyinstaller>=6.0.0"
 
-      - name: Build GUI app bundle
-        run: |
-          pyinstaller \
-            --noconfirm \
-            --onefile \
-            --windowed \
-            --name "OpenROM" \
-            --add-data "assets:assets" \
-            --icon "assets/icons/icon.icns" \
-            --target-arch ${{ matrix.arch }} \
-            main.py
-
-      - name: Build CLI binary
+      - name: Build openrom-core (headless CLI)
         run: |
           pyinstaller \
             --noconfirm \
             --onefile \
             --console \
-            --name "openrom-cli" \
+            --name "openrom-core" \
             --add-data "assets:assets" \
             --target-arch ${{ matrix.arch }} \
             core/cli.py
 
+      # ── Flutter → OpenROM.app ──
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+
+      - name: Flutter dependencies
+        working-directory: openrom_flutter
+        run: flutter pub get
+
+      - name: Build Flutter macOS
+        working-directory: openrom_flutter
+        run: flutter build macos --release
+
+      # ── Copy openrom-core inside .app bundle ──
+      # CoreBridge looks for openrom-core next to the executable inside Contents/MacOS/
+      - name: Embed openrom-core in .app bundle
+        run: |
+          APP_MACOS="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app/Contents/MacOS"
+          cp dist/openrom-core "$APP_MACOS/openrom-core"
+          chmod +x "$APP_MACOS/openrom-core"
+          cp -r themes/ "$APP_MACOS/themes/"
+
+      # ── DMG ──
       - name: Create DMG
         run: |
           mkdir -p dmg_contents
-          cp -r dist/OpenROM dmg_contents/
+          cp -r "openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app" \
+                dmg_contents/OpenROM.app
           hdiutil create \
             -volname "OpenROM" \
             -srcfolder dmg_contents \
@@ -215,12 +263,12 @@ jobs:
             -format UDZO \
             OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg
 
-      - name: Package ZIP (DMG + CLI)
+      - name: Package ZIP
         run: |
           mkdir release
           cp OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg release/
-          cp dist/openrom-cli release/
-          chmod +x release/openrom-cli
+          cp dist/openrom-core release/
+          chmod +x release/openrom-core
           cd release
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip .
 
@@ -230,7 +278,7 @@ jobs:
           name: OpenROM_macOS_${{ matrix.arch }}
           path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip
 
-  # ── GitHub Release ──────────────────────────────────────────────────────────
+  # ── GitHub Release ───────────────────────────────────────────────────────────
   release:
     needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
@@ -251,14 +299,15 @@ jobs:
             Universal ROM Compression Suite for retro gaming.
 
             Each download includes:
-            - **GUI** — graphical interface (OpenROM / OpenROM.app)
-            - **CLI** — command-line tool (`openrom-cli`)
+            - **OpenROM** — Flutter desktop GUI
+            - **openrom-core** — headless CLI (used internally by the GUI)
 
             ### CLI usage
             ```
-            openrom-cli --input game.iso --format CHD
-            openrom-cli --folder /roms/ --format CHD --compression Max
-            openrom-cli --list-formats
+            openrom-core --detect game.iso
+            openrom-core --input game.iso --format CHD
+            openrom-core --folder /roms/ --format CHD --compression Max
+            openrom-core --list-formats
             ```
 
             ### Supported Formats
@@ -266,6 +315,7 @@ jobs:
             - PS2: ISO → CHD, CSO
             - GameCube/Wii: ISO → RVZ
             - Xbox: ISO → XISO
+            - PSP: ISO → CSO
 
             ### Downloads
             | Platform | File |
