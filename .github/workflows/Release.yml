@@ -72,15 +72,8 @@ jobs:
           $out = "openrom_flutter/build/windows/x64/runner/Release"
           cp dist/openrom-core.exe "$out/"
           cp -r themes/ "$out/themes/"
-          $readme = @"
-OpenROM v${{ github.event.inputs.version }} - Windows
-======================================================
-RUN THIS: openrom_flutter.exe   <-- this is the app!
-
-openrom-core.exe is the backend engine, do NOT run it directly.
-
-Docs: https://github.com/M5Devs/OpenROM
-"@
+          $version = "${{ github.event.inputs.version }}"
+          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe   <-- this is the app!`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
           Set-Content -Path "$out/README.txt" -Value $readme
           Compress-Archive -Path "$out/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
