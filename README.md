@@ -1,58 +1,66 @@
-# ⬡ OpenROM
+<p align="center">
+  <img src="assets/icons/OpenROM-Banner.jpeg" alt="OpenROM Banner" width="100%"/>
+</p>
 
-**Universal ROM Compression Suite** — by M5 Dev
+<h1 align="center">⬡ OpenROM</h1>
+<p align="center"><b>Universal ROM Conversion Suite</b> — by M5 Dev</p>
 
-[![License: GPL v3 + Commons Clause](https://img.shields.io/badge/License-GPL%20v3%20%2B%20Commons%20Clause-red.svg)](LICENSE)
-[![SourceForge Downloads](https://img.shields.io/sourceforge/dt/openrom.svg?color=2ea043&logo=sourceforge)](https://sourceforge.net/projects/openrom/files/latest/download)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-cyan)]()
-[![Release](https://img.shields.io/github/v/release/M5Devs/OpenROM)](https://github.com/M5Devs/OpenROM/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/M5Devs/OpenROM/total)](https://github.com/M5Devs/OpenROM/releases/latest)
-[![SourceForge Monthly Downloads](https://img.shields.io/sourceforge/dm/openrom.svg?color=1f6feb&logo=sourceforge)](https://sourceforge.net/projects/openrom/files/latest/download)
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3%20%2B%20Commons%20Clause-red.svg"/></a>
+  <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dt/openrom.svg?color=2ea043&logo=sourceforge"/></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android%20soon-cyan"/>
+  <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/v/release/M5Devs/OpenROM"/></a>
+  <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/downloads/M5Devs/OpenROM/total"/></a>
+  <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dm/openrom.svg?color=1f6feb&logo=sourceforge"/></a>
+</p>
 
-OpenROM is a Universal ROM Compression Suite built to break the monopoly of proprietary ROM tools. It features a modern two-column UI design, real-time command line terminal logging, batch processing, and direct single-click conversions — plus a full CLI for automation and scripting.
+---
 
-![OpenROM Banner](assets/icons/OpenROM-Banner.jpeg)
+> 🎮 Meet **ROMeo** — OpenROM's official mascot. Your friendly pixel-art cartridge companion for all things ROM.
+
+OpenROM is a free, open-source Universal ROM Conversion Suite built to replace every proprietary and fragmented ROM tool out there. Powered by a modern **Flutter desktop UI** with a gaming dashboard aesthetic, real-time terminal logging, batch processing, smart platform detection, and a full headless CLI for automation — all running **100% offline**.
 
 ---
 
 ## ⬇️ Download
 
-| Platform | Official Release (GitHub) | Fast Mirror (SourceForge) |
-|----------|---------------------------|---------------------------|
-| 🪟 Windows | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Download Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🐧 Linux | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Download Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Download Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🍎 macOS Intel | [OpenROM_macOS_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Download Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| Platform | GitHub Release | SourceForge Mirror |
+|----------|---------------|-------------------|
+| 🪟 Windows | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🐧 Linux | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🍎 macOS Intel | [OpenROM_macOS_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🤖 Android | 🚧 Coming soon via Termux | — |
 
-Each download includes both the **GUI** and the **CLI** (`openrom-cli`).
+Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (`openrom-core`).
 
----
-
-📖 **Documentation & Guides:** Check out our [Official Wiki](https://github.com/M5Devs/OpenROM/wiki) for setup guides, Steam Deck setup, and FAQs.
+📖 **Guides & Docs:** [Official Wiki](https://github.com/M5Devs/OpenROM/wiki) — setup, Steam Deck, Termux, FAQs.
 
 ---
 
 ## 🎮 Features
 
-- **Modern Two-Column Design** — Clean split interface with DROP ZONE & Queue on the left, and Conversion Settings / Controls on the right.
-- **Complete Conversion Matrix** — Support for 20+ conversion paths including ISO, BIN, CUE, GDI, IMG, ECM, CHD, CSO, ZSO, XISO, RVZ, WIA, WBFS and GCZ.
-- **Full CLI** — Automate conversions via `openrom-cli` for scripting and batch workflows.
-- **Live Terminal & Logging** — Real-time process logging saved to your OS config directory.
-- **Auto CUE Generation** — Auto-generates CUE files for standalone BIN files with correct track mode detection (MODE1/MODE2/AUDIO).
-- **Smart Platform Detection** — Detects PS1, PS2, PSP, Xbox, GameCube, Wii, and Dreamcast from file headers — not just file size.
-- **Auto ECM Output Format** — Auto-detects extracted format (ISO/BIN) after ECM decompression.
-- **Integrity Verification** — Automatic post-conversion integrity check for CHD files via `chdman verify`.
-- **Drag & Drop** — Native drag and drop support for single files and batch folders.
-- **No Telemetry** — No network requests, no analytics, no cloud. Runs 100% locally.
+- **Gaming Dashboard UI** — Flutter-powered dark interface inspired by PS5/Xbox aesthetics, with ROM cards, platform badges, and real-time progress.
+- **Themeable** — Swap between built-in themes (Gaming Dashboard, Cyberpunk, Terminal, Minimal) or create your own via JSON.
+- **Complete Conversion Matrix** — 20+ conversion paths: ISO, BIN, CUE, GDI, IMG, ECM, CHD, CSO, ZSO, XISO, RVZ, WIA, WBFS, GCZ.
+- **Smart Platform Detection** — Magic byte detection for PS1, PS2, PSP, Xbox, GameCube, Wii, Dreamcast — not size guessing.
+- **Real CHD Header Parsing** — Reads actual CHD v4/v5 headers to determine CD vs DVD type accurately.
+- **Auto CUE Generation** — Generates CUE sheets for standalone BIN files with correct track mode (MODE1/MODE2/AUDIO).
+- **Integrity Verification** — Post-conversion CHD integrity check via `chdman verify`.
+- **Batch Processing** — Drop a whole folder, convert everything at once.
+- **Real-time Terminal Log** — Live process output with timestamps, slides up during conversion.
+- **Drag & Drop** — Native drag and drop for files and folders.
+- **Full Headless CLI** — `openrom-core` for scripting, automation, and Flutter IPC.
+- **No Telemetry** — Zero network requests. No analytics. Runs 100% locally forever.
 
 ---
 
-## 🔁 Complete Conversion Matrix
+## 🔁 Conversion Matrix
 
-| Input Format | Output Target | Tool Used | Notes |
-|--------------|---------------|-----------|-------|
+| Input | Output | Tool | Notes |
+|-------|--------|------|-------|
 | ISO | CHD | chdman | `createcd` for PS1, `createdvd` for PS2/GC |
-| ISO | CSO | maxcso | PSP/PS2 |
+| ISO | CSO | maxcso | PSP / PS2 |
 | ISO | ECM | ecm | |
 | ISO | XISO | extract-xiso | Xbox |
 | ISO | RVZ | nodtool | GameCube / Wii |
@@ -66,7 +74,7 @@ Each download includes both the **GUI** and the **CLI** (`openrom-cli`).
 | CSO | ISO | maxcso | |
 | ZSO | ISO | maxcso | |
 | ECM | ISO / BIN | unecm | Auto-detects output format |
-| XISO | ISO | extract-xiso | |
+| XISO | Files | extract-xiso | Extracts to folder |
 | RVZ | ISO | nodtool | GameCube / Wii |
 | WIA | ISO | nodtool | GameCube / Wii |
 | WBFS | ISO | nodtool | Wii |
@@ -76,53 +84,83 @@ Each download includes both the **GUI** and the **CLI** (`openrom-cli`).
 
 ## 💻 CLI Usage
 
-Every release includes `openrom-cli` alongside the GUI:
-
 ```bash
+# Detect file format and platform
+openrom-core --detect game.iso
+
 # Convert a single file
-openrom-cli --input game.iso --format CHD
+openrom-core --input game.iso --format CHD
 
 # Batch convert a folder
-openrom-cli --folder /roms/ --format CHD --compression Max
+openrom-core --folder /roms/ --format CHD --compression Max
+
+# Convert with verification
+openrom-core --input game.iso --format CHD --verify
 
 # Verify a CHD
-openrom-cli --input game.chd --verify-only
+openrom-core --input game.chd --verify-only
 
 # List supported formats
-openrom-cli --list-formats
+openrom-core --list-formats
+
+# JSON output (for scripting / Flutter IPC)
+openrom-core --json --detect game.iso
 ```
 
 ---
 
-## 🛠️ Tools Bundled
+## 🎨 Themes
 
-All tools are open source, built from source, and verifiable. See [SECURITY.md](SECURITY.md) for details.
+OpenROM ships with 4 built-in themes and supports fully custom themes via JSON files in the `themes/` folder:
+
+| Theme | Description |
+|-------|-------------|
+| `default.json` | Gaming Dashboard — dark navy, red accent |
+| `cyberpunk.json` | Neon on black |
+| `terminal.json` | Green on black, monospace |
+| `minimal.json` | Clean light mode |
+
+Create your own theme by copying any JSON file and editing the color values.
+
+---
+
+## 🛠️ Bundled Tools
+
+All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA256 checksums.
 
 | Tool | Purpose | License |
 |------|---------|---------|
 | **chdman** | CHD conversion (MAME) | GPL v2 |
-| **maxcso** | PSP/PS2 CSO/ZSO compression | ISC |
-| **ecm / unecm** | Error Code Modulator compression | GPL v2 |
-| **extract-xiso** | Xbox ISO extraction & creation | GPL v2 |
-| **nodtool** | GameCube / Wii RVZ/WIA/WBFS/GCZ | MIT |
+| **maxcso** | CSO/ZSO compression | ISC |
+| **ecm / unecm** | ECM compression | GPL v2 |
+| **extract-xiso** | Xbox ISO extraction | GPL v2 |
+| **nodtool** | GameCube / Wii formats | MIT |
 
 ---
 
-## 🚀 Building & Running
+## 🚀 Building from Source
 
 ### Requirements
 - Python 3.10+
-- Dependencies in `requirements.txt`
+- Flutter 3.27+
+- PyInstaller 6.0+
 
-### Running from Source
+### Run Flutter UI from source
 ```bash
 git clone https://github.com/M5Devs/OpenROM
 cd OpenROM
+
+# Build headless Python core
 pip install -r requirements.txt
-python main.py
+pyinstaller --onefile --name openrom-core core/cli.py
+
+# Run Flutter UI
+cd openrom_flutter
+flutter pub get
+flutter run -d windows   # or linux / macos
 ```
 
-### Building
+### Build release packages
 ```bash
 # Windows
 build_windows.bat
@@ -136,9 +174,21 @@ build_windows.bat
 
 ---
 
+## 🗺️ Roadmap
+
+- [x] Flutter UI rewrite (v2.5.0)
+- [x] Magic byte platform detection
+- [x] CHD header parsing
+- [x] Theme system
+- [ ] Android support via Termux 🤖
+- [ ] ROM Checker — No-Intro DAT + RetroAchievements hash verification
+- [ ] ARM builds (Linux ARM64)
+
+---
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to submit bug reports, feature requests, and pull requests.
+Contributions are welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on bug reports, feature requests, and pull requests.
 
 ---
 
@@ -146,10 +196,11 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 
 OpenROM is licensed under **GPL v3 + Commons Clause**.
 
-This means:
-- ✅ Free to use personally
-- ✅ Free to study, modify, and contribute
-- ✅ Forks must remain open source (GPL)
-- ❌ Cannot be sold or bundled in a commercial product without written permission
+| | |
+|---|---|
+| ✅ | Free to use personally |
+| ✅ | Free to study, modify, and contribute |
+| ✅ | Forks must remain open source |
+| ❌ | Cannot be sold or bundled commercially without permission |
 
-For commercial licensing inquiries: [github.com/M5Devs/OpenROM](https://github.com/M5Devs/OpenROM) or Twitter/X: [M5Devs](https://x.com/M5Devs)
+Commercial licensing: open a discussion on GitHub or reach out on [Twitter/X @M5Devs](https://x.com/M5Devs)
