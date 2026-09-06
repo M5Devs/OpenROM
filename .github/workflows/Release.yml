@@ -15,9 +15,19 @@ jobs:
 
   # ── Windows — Flutter GUI + PyInstaller CLI ─────────────────────────────────
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+
+      # ── Visual Studio Build Tools (required by Flutter Windows) ──
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install Flutter Windows dependencies (VC++ workload)
+        run: |
+          choco install visualstudio2022buildtools `
+            --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" `
+            -y --no-progress
 
       # ── Python / PyInstaller → openrom-core.exe ──
       - name: Set up Python
@@ -44,7 +54,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.27.0'
           channel: 'stable'
 
       - name: Flutter dependencies
@@ -115,7 +125,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.27.0'
           channel: 'stable'
 
       - name: Flutter dependencies
@@ -230,7 +240,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.27.0'
           channel: 'stable'
 
       - name: Flutter dependencies
