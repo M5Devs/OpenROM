@@ -30,7 +30,7 @@ ctk.set_appearance_mode("dark")
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("OpenROM v2.0 - Universal ROM Compression Suite")
+        self.title("OpenROM v2.2 - Universal ROM Compression Suite")
         self.geometry("980x680")
         self.minsize(900, 600)
         self.configure(fg_color=BG_DARK)
