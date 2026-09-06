@@ -1,0 +1,15 @@
+{
+  "name": "Retro Terminal",
+  "background": "#000000",
+  "surface": "#0c0c0c",
+  "accent": "#33ff33",
+  "text_primary": "#33ff33",
+  "text_secondary": "#1a991a",
+  "sidebar_bg": "#050505",
+  "card_bg": "#111111",
+  "terminal_bg": "#000000",
+  "terminal_text": "#33ff33",
+  "font_family": "Courier",
+  "border_radius": 4,
+  "layout": "sidebar_left"
+}

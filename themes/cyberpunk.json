@@ -1,0 +1,15 @@
+{
+  "name": "Cyberpunk 2077",
+  "background": "#0a0915",
+  "surface": "#120f24",
+  "accent": "#ff0055",
+  "text_primary": "#00f0ff",
+  "text_secondary": "#8b8ba7",
+  "sidebar_bg": "#080711",
+  "card_bg": "#1a1630",
+  "terminal_bg": "#05040a",
+  "terminal_text": "#fcee0a",
+  "font_family": "Roboto",
+  "border_radius": 8,
+  "layout": "sidebar_left"
+}

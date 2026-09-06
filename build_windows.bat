@@ -5,26 +5,33 @@ echo   M5 Dev
 echo ========================================
 
 :: Install dependencies
-echo [1/3] Installing dependencies...
+echo [1/4] Installing dependencies...
 pip install -r requirements.txt
 pip install pyinstaller>=6.0.0
 
-:: Build
-echo [2/3] Building executable...
+:: Build Python core executable
+echo [2/4] Building openrom-core executable...
 pyinstaller ^
   --noconfirm ^
   --onefile ^
-  --name "OpenROM" ^
+  --name "openrom-core" ^
   --add-data "assets;assets" ^
   --icon "assets/icon.ico" ^
-  main.py
+  core/cli.py
 
-:: Done
+:: Build Flutter desktop executable
+echo [3/4] Building Flutter desktop application...
+cd openrom_flutter
+call flutter build windows --release
+cd ..
+
+:: Package release files
+echo [4/4] Packaging release...
+if not exist "dist\release" mkdir "dist\release"
+xcopy /E /Y "openrom_flutter\build\windows\x64\runner\Release\*" "dist\release\"
+copy /Y "dist\openrom-core.exe" "dist\release\"
+if exist "themes" xcopy /E /Y "themes" "dist\release\themes\"
+if exist "assets" xcopy /E /Y "assets" "dist\release\assets\"
+
 echo.
-echo [3/3] Done!
-if exist "dist\OpenROM.exe" (
-    echo ✅ dist\OpenROM.exe is ready!
-) else (
-    echo ❌ Build failed — check errors above
-)
-pause
+echo ✅ OpenROM Windows Release packaged in dist\release\

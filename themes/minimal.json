@@ -1,0 +1,15 @@
+{
+  "name": "Minimal Dark",
+  "background": "#121212",
+  "surface": "#1e1e1e",
+  "accent": "#bb86fc",
+  "text_primary": "#e0e0e0",
+  "text_secondary": "#9e9e9e",
+  "sidebar_bg": "#181818",
+  "card_bg": "#252525",
+  "terminal_bg": "#151515",
+  "terminal_text": "#03dac6",
+  "font_family": "Inter",
+  "border_radius": 16,
+  "layout": "sidebar_left"
+}
