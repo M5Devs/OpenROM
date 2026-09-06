@@ -11,7 +11,7 @@
 
 OpenROM is a Universal ROM Compression Suite built to break the monopoly of proprietary ROM tools. It features a modern two-column UI design, real-time command line terminal logging, batch processing, and direct single-click conversions — plus a full CLI for automation and scripting.
 
-![OpenROM Screenshot](assets/icons/screenshot-1.png)
+![OpenROM Banner](assets/icons/OpenROM-Banner.png)
 
 ---
 
