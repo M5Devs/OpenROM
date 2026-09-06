@@ -9,12 +9,15 @@ Usage examples:
   openrom --folder /roms/ --format CHD --compression Max
   openrom --input game.chd --verify-only
   openrom --list-formats
+  openrom --json --detect game.iso
+  openrom --json --convert game.iso --format CHD --compression Normal
 """
 
 import sys
 import os
 import argparse
 import threading
+import json
 
 # Allow imports from project root
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -59,6 +62,10 @@ def _clear_progress():
         sys.stdout.write("\r" + " " * 80 + "\r")
         sys.stdout.flush()
 
+def _json_print(obj: dict):
+    with _progress_lock:
+        print(json.dumps(obj), flush=True)
+
 # ── Argument parser ───────────────────────────────────────────────────────────
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -73,6 +80,7 @@ examples:
   openrom --folder /roms/ --format CHD --compression Max
   openrom --input game.chd --verify-only
   openrom --list-formats
+  openrom --json --detect game.iso
         """,
     )
 
@@ -88,6 +96,16 @@ examples:
         metavar="DIR",
         help="convert all supported ROMs in a folder",
     )
+    src.add_argument(
+        "--detect",
+        metavar="FILE",
+        help="detect file format and info",
+    )
+    src.add_argument(
+        "--convert",
+        metavar="FILE",
+        help="single file to convert (alias for --input)",
+    )
 
     # ── Conversion target ────────────────────────────────────────────────────
     parser.add_argument(
@@ -97,6 +115,11 @@ examples:
     )
 
     # ── Options ──────────────────────────────────────────────────────────────
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="output results/progress in JSON format",
+    )
     parser.add_argument(
         "--output", "-o",
         metavar="DIR",
@@ -137,6 +160,24 @@ examples:
 
     return parser
 
+# ── --detect ──────────────────────────────────────────────────────────────────
+def cmd_detect(filepath: str, is_json: bool) -> int:
+    info = detect_file(filepath)
+    info["filepath"] = filepath
+    info["filename"] = os.path.basename(filepath)
+    if is_json:
+        print(json.dumps(info), flush=True)
+    else:
+        if "error" in info:
+            print(f"{RED}✗ Error: {info['error']}{RESET}")
+            return 2
+        print(f"{BOLD}File:{RESET} {info['filename']}")
+        print(f"  Format: {CYAN}{info.get('format')}{RESET}")
+        print(f"  Platform: {YELLOW}{info.get('platform')}{RESET}")
+        print(f"  Size: {info.get('size_str')}")
+        print(f"  Valid targets: {', '.join(info.get('valid_targets', []))}")
+    return 0 if "error" not in info else 2
+
 # ── --list-formats ────────────────────────────────────────────────────────────
 def cmd_list_formats():
     print(f"\n{BOLD}Supported conversions:{RESET}\n")
@@ -148,33 +189,56 @@ def cmd_list_formats():
     print()
 
 # ── --verify-only ─────────────────────────────────────────────────────────────
-def cmd_verify_only(filepath: str) -> int:
+def cmd_verify_only(filepath: str, is_json: bool) -> int:
     if not os.path.isfile(filepath):
-        print(f"{RED}✗ File not found: {filepath}{RESET}")
+        if is_json:
+            _json_print({"type": "error", "message": f"File not found: {filepath}"})
+        else:
+            print(f"{RED}✗ File not found: {filepath}{RESET}")
         return 2
 
     info = detect_file(filepath)
     if info.get("format") != "CHD":
-        print(f"{RED}✗ --verify-only only works on CHD files.{RESET}")
+        if is_json:
+            _json_print({"type": "error", "message": "--verify-only only works on CHD files."})
+        else:
+            print(f"{RED}✗ --verify-only only works on CHD files.{RESET}")
         return 2
 
-    print(f"\n{BOLD}Verifying:{RESET} {os.path.basename(filepath)}")
+    if not is_json:
+        print(f"\n{BOLD}Verifying:{RESET} {os.path.basename(filepath)}")
+
     logs = []
-    ok = verify_chd(filepath, on_log=lambda m: logs.append(m))
-    for line in logs:
-        print(f"  {GRAY}{line}{RESET}")
+
+    def on_log(m: str):
+        logs.append(m)
+        if is_json:
+            _json_print({"type": "log", "message": m})
+
+    ok = verify_chd(filepath, on_log=on_log)
+
+    if not is_json:
+        for line in logs:
+            print(f"  {GRAY}{line}{RESET}")
 
     if ok:
-        print(f"\n{GREEN}✅ CHD is valid.{RESET}\n")
+        if is_json:
+            _json_print({"type": "done", "success": True})
+        else:
+            print(f"\n{GREEN}✅ CHD is valid.{RESET}\n")
         return 0
     else:
-        print(f"\n{RED}❌ CHD verification failed.{RESET}\n")
+        if is_json:
+            _json_print({"type": "done", "success": False})
+        else:
+            print(f"\n{RED}❌ CHD verification failed.{RESET}\n")
         return 1
 
 # ── Collect jobs from args ────────────────────────────────────────────────────
 def collect_jobs(args) -> list[ConversionJob]:
     jobs = []
     target_fmt = args.format.upper() if args.format else None
+    input_file = args.input or args.convert
 
     def _make_job(filepath: str) -> ConversionJob | None:
         job = ConversionJob(
@@ -187,22 +251,28 @@ def collect_jobs(args) -> list[ConversionJob]:
         info = job.get_file_info()
 
         if "error" in info:
-            print(f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: {info['error']}{RESET}")
+            if args.json:
+                _json_print({"type": "error", "message": info['error']})
+            else:
+                print(f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: {info['error']}{RESET}")
             return None
 
         valid = info.get("valid_targets", [])
         if not valid:
-            print(f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: no valid targets{RESET}")
+            if args.json:
+                _json_print({"type": "error", "message": f"No valid targets for {os.path.basename(filepath)}"})
+            else:
+                print(f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: no valid targets{RESET}")
             return None
 
         if target_fmt:
             if target_fmt not in valid and target_fmt != "BIN/CUE":
                 src_fmt = info.get("format", "?")
-                print(
-                    f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: "
-                    f"{src_fmt} → {target_fmt} is not supported. "
-                    f"Valid: {', '.join(valid)}{RESET}"
-                )
+                msg = f"{src_fmt} → {target_fmt} is not supported. Valid: {', '.join(valid)}"
+                if args.json:
+                    _json_print({"type": "error", "message": msg})
+                else:
+                    print(f"{YELLOW}⚠ Skipping {os.path.basename(filepath)}: {msg}{RESET}")
                 return None
             job.target_format = target_fmt
         else:
@@ -210,18 +280,24 @@ def collect_jobs(args) -> list[ConversionJob]:
 
         return job
 
-    if args.input:
-        job = _make_job(args.input)
+    if input_file:
+        job = _make_job(input_file)
         if job:
             jobs.append(job)
 
     elif args.folder:
         if not os.path.isdir(args.folder):
-            print(f"{RED}✗ Folder not found: {args.folder}{RESET}")
+            if args.json:
+                _json_print({"type": "error", "message": f"Folder not found: {args.folder}"})
+            else:
+                print(f"{RED}✗ Folder not found: {args.folder}{RESET}")
             return []
         detected = detect_folder(args.folder)
         if not detected:
-            print(f"{YELLOW}⚠ No supported ROM files found in: {args.folder}{RESET}")
+            if args.json:
+                _json_print({"type": "error", "message": f"No supported ROM files found in: {args.folder}"})
+            else:
+                print(f"{YELLOW}⚠ No supported ROM files found in: {args.folder}{RESET}")
             return []
         for entry in detected:
             job = _make_job(entry["filepath"])
@@ -231,21 +307,34 @@ def collect_jobs(args) -> list[ConversionJob]:
     return jobs
 
 # ── Run batch ─────────────────────────────────────────────────────────────────
-def run_batch(jobs: list[ConversionJob], quiet: bool) -> int:
+def run_batch(jobs: list[ConversionJob], quiet: bool, is_json: bool = False) -> int:
     total   = len(jobs)
     passed  = 0
     failed  = 0
 
-    print(f"\n{BOLD}OpenROM{RESET} — {total} job{'s' if total != 1 else ''} queued\n")
+    if not is_json:
+        print(f"\n{BOLD}OpenROM{RESET} — {total} job{'s' if total != 1 else ''} queued\n")
 
     # Track current job label for the progress renderer
     _current: dict = {"label": ""}
 
     def on_progress(job: ConversionJob, pct: float):
-        _render_progress(_current["label"], pct)
+        if is_json:
+            _json_print({
+                "type": "progress",
+                "file": os.path.basename(job.filepath),
+                "percent": pct
+            })
+        else:
+            _render_progress(_current["label"], pct)
 
     def on_log(msg: str):
-        if not quiet:
+        if is_json:
+            _json_print({
+                "type": "log",
+                "message": msg
+            })
+        elif not quiet:
             _clear_progress()
             print(f"  {GRAY}{msg}{RESET}")
             # Re-render bar after log line
@@ -262,24 +351,33 @@ def run_batch(jobs: list[ConversionJob], quiet: bool) -> int:
         job_ref.clear()
         job_ref.append(job)
 
-        prefix = f"[{idx+1}/{total}]"
-        print(f"{BOLD}{prefix}{RESET} {label}")
+        if not is_json:
+            prefix = f"[{idx+1}/{total}]"
+            print(f"{BOLD}{prefix}{RESET} {label}")
 
         ok = converter.convert(job)
-        _clear_progress()
+        if not is_json:
+            _clear_progress()
 
         if ok:
             passed += 1
-            print(f"  {GREEN}✅ Done{RESET}\n")
+            if is_json:
+                _json_print({"type": "done", "success": True})
+            else:
+                print(f"  {GREEN}✅ Done{RESET}\n")
         else:
             failed += 1
             err = job.error or "conversion failed"
-            print(f"  {RED}❌ Failed — {err}{RESET}\n")
+            if is_json:
+                _json_print({"type": "done", "success": False, "error": err})
+            else:
+                print(f"  {RED}❌ Failed — {err}{RESET}\n")
 
-    # ── Summary ───────────────────────────────────────────────────────────────
-    print("─" * 48)
-    print(f"  {GREEN}✅ Passed: {passed}{RESET}   {RED}❌ Failed: {failed}{RESET}   Total: {total}")
-    print("─" * 48 + "\n")
+    if not is_json:
+        # ── Summary ───────────────────────────────────────────────────────────
+        print("─" * 48)
+        print(f"  {GREEN}✅ Passed: {passed}{RESET}   {RED}❌ Failed: {failed}{RESET}   Total: {total}")
+        print("─" * 48 + "\n")
 
     # Exit codes: 0 = all good, 1 = some failed, 2 = all failed
     if failed == 0:
@@ -300,22 +398,33 @@ def main() -> int:
     args = parser.parse_args()
 
     # ── Dispatch ──────────────────────────────────────────────────────────────
+    if args.detect:
+        return cmd_detect(args.detect, args.json)
+
     if args.list_formats:
         cmd_list_formats()
         return 0
 
     if args.verify_only:
-        if not args.input:
-            print(f"{RED}✗ --verify-only requires --input FILE{RESET}")
+        input_file = args.input or args.convert
+        if not input_file:
+            if args.json:
+                _json_print({"type": "error", "message": "--verify-only requires --input or --convert FILE"})
+            else:
+                print(f"{RED}✗ --verify-only requires --input FILE{RESET}")
             return 2
-        return cmd_verify_only(args.input)
+        return cmd_verify_only(input_file, args.json)
 
-    if not args.input and not args.folder:
-        print(f"{RED}✗ Provide --input FILE or --folder DIR{RESET}")
-        parser.print_usage()
+    input_file = args.input or args.convert
+    if not input_file and not args.folder:
+        if args.json:
+            _json_print({"type": "error", "message": "Provide --input, --convert FILE, or --folder DIR"})
+        else:
+            print(f"{RED}✗ Provide --input FILE or --folder DIR{RESET}")
+            parser.print_usage()
         return 2
 
-    if not args.format and not args.verify_only:
+    if not args.format and not args.verify_only and not args.json:
         print(f"{YELLOW}⚠ No --format specified — will use first valid target for each file.{RESET}\n")
 
     # Validate output dir exists if specified
@@ -323,14 +432,17 @@ def main() -> int:
         try:
             os.makedirs(args.output, exist_ok=True)
         except Exception as e:
-            print(f"{RED}✗ Cannot create output directory: {e}{RESET}")
+            if args.json:
+                _json_print({"type": "error", "message": f"Cannot create output directory: {e}"})
+            else:
+                print(f"{RED}✗ Cannot create output directory: {e}{RESET}")
             return 2
 
     jobs = collect_jobs(args)
     if not jobs:
         return 2
 
-    return run_batch(jobs, quiet=args.quiet)
+    return run_batch(jobs, quiet=args.quiet, is_json=args.json)
 
 
 if __name__ == "__main__":

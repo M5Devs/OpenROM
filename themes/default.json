@@ -1,0 +1,15 @@
+{
+  "name": "Gaming Dashboard",
+  "background": "#0d0d0d",
+  "surface": "#1a1a1a",
+  "accent": "#e94560",
+  "text_primary": "#ffffff",
+  "text_secondary": "#a0a0b0",
+  "sidebar_bg": "#111111",
+  "card_bg": "#1e1e1e",
+  "terminal_bg": "#0a0a0a",
+  "terminal_text": "#00e676",
+  "font_family": "Inter",
+  "border_radius": 12,
+  "layout": "sidebar_left"
+}
