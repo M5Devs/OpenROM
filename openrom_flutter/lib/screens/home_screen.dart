@@ -3,6 +3,8 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../core/error_dialog.dart';
+import '../core/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
@@ -30,18 +32,44 @@ class HomeScreenState extends State<HomeScreen> {
   int get fileCount => _jobs.length;
   bool get isConverting => _isConverting;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkCoreOnStartup();
+    });
+  }
+
+  Future<void> _checkCoreOnStartup() async {
+    try {
+      if (!await CoreBridge.coreExists()) {
+        throw OpenROMException(OpenROMError.coreNotFound);
+      }
+    } on OpenROMException catch (e) {
+      if (mounted) {
+        showOpenROMError(context, e.error, details: e.details);
+      }
+    }
+  }
+
   void addFilesFromPaths(List<String> paths) async {
-    final roms = await FileDetector.detectPaths(paths);
-    for (final rom in roms) {
-      if (!_jobs.any((j) => j.romFile.filepath == rom.filepath)) {
-        final defaultTarget = rom.validTargets.isNotEmpty ? rom.validTargets.first : 'CHD';
-        setState(() {
-          _jobs.add(ConversionJob(
-            id: DateTime.now().microsecondsSinceEpoch.toString(),
-            romFile: rom,
-            targetFormat: defaultTarget,
-          ));
-        });
+    try {
+      final roms = await FileDetector.detectPaths(paths);
+      for (final rom in roms) {
+        if (!_jobs.any((j) => j.romFile.filepath == rom.filepath)) {
+          final defaultTarget = rom.validTargets.isNotEmpty ? rom.validTargets.first : 'CHD';
+          setState(() {
+            _jobs.add(ConversionJob(
+              id: DateTime.now().microsecondsSinceEpoch.toString(),
+              romFile: rom,
+              targetFormat: defaultTarget,
+            ));
+          });
+        }
+      }
+    } on OpenROMException catch (e) {
+      if (mounted) {
+        showOpenROMError(context, e.error, details: e.details);
       }
     }
   }
@@ -84,30 +112,45 @@ class HomeScreenState extends State<HomeScreen> {
         job.status = JobStatus.converting;
       });
 
-      await CoreBridge.runConversion(
-        job: job,
-        outputDir: outputDir,
-        onProgress: (pct) {
-          setState(() {
-            job.progress = pct;
-          });
-        },
-        onLog: (logMsg) {
-          setState(() {
-            job.logs.add(logMsg);
-            _logs.add(logMsg);
-          });
-        },
-        onDone: (success, err) {
-          setState(() {
-            job.status = success ? JobStatus.done : JobStatus.failed;
-            job.errorMessage = err;
-            if (err != null && err.isNotEmpty) {
-              _logs.add('[ERROR] $err');
-            }
-          });
-        },
-      );
+      try {
+        await CoreBridge.runConversion(
+          job: job,
+          outputDir: outputDir,
+          onProgress: (pct) {
+            setState(() {
+              job.progress = pct;
+            });
+          },
+          onLog: (logMsg) {
+            setState(() {
+              job.logs.add(logMsg);
+              _logs.add(logMsg);
+            });
+          },
+          onDone: (success, err) {
+            setState(() {
+              job.status = success ? JobStatus.done : JobStatus.failed;
+              job.errorMessage = err;
+              if (!success) {
+                job.error = OpenROMError.conversionFailed;
+              }
+              if (err != null && err.isNotEmpty) {
+                _logs.add('[ERROR] $err');
+              }
+            });
+          },
+        );
+      } on OpenROMException catch (e) {
+        setState(() {
+          job.status = JobStatus.failed;
+          job.error = e.error;
+          job.errorMessage = e.details ?? e.error.message;
+          _logs.add('[ERROR] ${e.error.title}: ${e.details ?? e.error.message}');
+        });
+        if (mounted) {
+          showOpenROMError(context, e.error, details: e.details);
+        }
+      }
     }
 
     setState(() {

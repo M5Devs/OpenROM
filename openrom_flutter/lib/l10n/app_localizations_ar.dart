@@ -93,7 +93,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorDiskSpace => 'لا توجد مساحة كافية على القرص لهذا التحويل.';
 
   @override
+  String get errorToolFailed =>
+      'تعطلت أداة التحويل (chdman/maxcso) بشكل غير متوقع.';
+
+  @override
   String get errorConversionFailed => 'فشل التحويل. قد يكون ملف ROM تالفًا.';
+
+  @override
+  String get errorFileNotFound => 'تم نقل ملف الإدخال أو حذفه.';
+
+  @override
+  String get errorOutputDirNotFound => 'مجلد الإخراج المحدد لم يعد موجودًا.';
+
+  @override
+  String get errorPermissionDenied => 'لا يمكن لـ OpenROM الكتابة في مجلد الإخراج.';
+
+  @override
+  String get errorCorruptedFile => 'يبدو أن الملف تالف أو بحجم 0 بايت.';
+
+  @override
+  String get errorUnknown => 'حدث خطأ غير متوقع. قد يكون هذا خطأ برمجيا.';
+
+  @override
+  String get errorDetailsLabel => 'التفاصيل';
 
   @override
   String get retryButton => 'إعادة المحاولة';

@@ -2,6 +2,8 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import '../core/error_dialog.dart';
+import '../core/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
@@ -70,146 +72,172 @@ class _RomCardState extends State<RomCard> {
     }
   }
 
+  void _showJobError() {
+    final err = widget.job.error ?? OpenROMError.conversionFailed;
+    final details = (widget.job.errorMessage != null && widget.job.errorMessage!.isNotEmpty)
+        ? widget.job.errorMessage
+        : widget.job.logs.join('\n');
+    showOpenROMError(context, err, details: details);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final rom = widget.job.romFile;
     final badgeColor = _hexToColor(rom.badgeColor);
     final gradient = _getPlatformGradient(rom.platform);
+    final isFailed = widget.job.status == JobStatus.failed;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(widget.theme.borderRadius),
-          border: Border.all(
-            color: _isHovered ? widget.theme.accent : widget.theme.surface,
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
-              blurRadius: _isHovered ? 12 : 6,
-              offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: isFailed ? _showJobError : null,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(widget.theme.borderRadius),
+            border: Border.all(
+              color: isFailed
+                  ? Colors.red
+                  : (_isHovered ? widget.theme.accent : widget.theme.surface),
+              width: 1.5,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.theme.borderRadius),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    // Platform badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: _isHovered ? 0.4 : 0.2),
+                blurRadius: _isHovered ? 12 : 6,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(widget.theme.borderRadius),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      // Platform badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.sports_esports, color: widget.theme.textPrimary, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              rom.platform,
+                              style: TextStyle(
+                                color: widget.theme.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Row(
+                      const SizedBox(width: 12),
+                      // Title & Filename
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              rom.filename,
+                              style: TextStyle(
+                                color: widget.theme.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _getStatusText(l10n),
+                              style: TextStyle(
+                                color: isFailed
+                                    ? Colors.redAccent
+                                    : (widget.job.status == JobStatus.done
+                                        ? Colors.greenAccent
+                                        : widget.theme.textSecondary),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Format badge & Size
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Icon(Icons.sports_esports, color: widget.theme.textPrimary, size: 16),
-                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: badgeColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${rom.format} → ${widget.job.targetFormat}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
                           Text(
-                            rom.platform,
+                            rom.sizeStr,
                             style: TextStyle(
-                              color: widget.theme.textPrimary,
-                              fontWeight: FontWeight.bold,
+                              color: widget.theme.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Title & Filename
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            rom.filename,
-                            style: TextStyle(
-                              color: widget.theme.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _getStatusText(l10n),
-                            style: TextStyle(
-                              color: widget.job.status == JobStatus.failed
-                                  ? Colors.redAccent
-                                  : (widget.job.status == JobStatus.done
-                                      ? Colors.greenAccent
-                                      : widget.theme.textSecondary),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Format badge & Size
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      const SizedBox(width: 8),
+                      // Delete button on hover
+                      if (_isHovered)
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+                          onPressed: widget.onDelete,
+                          tooltip: l10n.removeFile,
+                        )
+                      else
+                        const SizedBox(width: 32),
+                    ],
+                  ),
+                ),
+                // Slim progress bar at bottom edge or error indicator
+                if (widget.job.status == JobStatus.converting)
+                  LinearProgressIndicator(
+                    value: widget.job.progress / 100.0,
+                    backgroundColor: Colors.black26,
+                    color: widget.theme.accent,
+                    minHeight: 4,
+                  )
+                else if (isFailed)
+                  Container(
+                    width: double.infinity,
+                    color: Colors.red.withValues(alpha: 0.2),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: badgeColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${rom.format} → ${widget.job.targetFormat}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          rom.sizeStr,
-                          style: TextStyle(
-                            color: widget.theme.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
+                        Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
                       ],
                     ),
-                    const SizedBox(width: 8),
-                    // Delete button on hover
-                    if (_isHovered)
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white70, size: 20),
-                        onPressed: widget.onDelete,
-                        tooltip: l10n.removeFile,
-                      )
-                    else
-                      const SizedBox(width: 32),
-                  ],
-                ),
-              ),
-              // Slim progress bar at bottom edge
-              if (widget.job.status == JobStatus.converting)
-                LinearProgressIndicator(
-                  value: widget.job.progress / 100.0,
-                  backgroundColor: Colors.black26,
-                  color: widget.theme.accent,
-                  minHeight: 4,
-                ),
-            ],
+                  ),
+              ],
+            ),
           ),
         ),
       ),

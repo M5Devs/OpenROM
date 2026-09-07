@@ -93,7 +93,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorDiskSpace => '変換に必要なディスク容量が不足しています。';
 
   @override
+  String get errorToolFailed => '変換ツールが予期せず終了しました。';
+
+  @override
   String get errorConversionFailed => '変換に失敗しました。ROMファイルが破損している可能性があります。';
+
+  @override
+  String get errorFileNotFound => '入力ファイルが移動または削除されました。';
+
+  @override
+  String get errorOutputDirNotFound => '選択された出力フォルダが存在しません。';
+
+  @override
+  String get errorPermissionDenied => '出力フォルダへの書き込み権限がありません。';
+
+  @override
+  String get errorCorruptedFile => 'ファイルが破損しているか、0バイトです。';
+
+  @override
+  String get errorUnknown => '予期しないエラーが発生しました。';
+
+  @override
+  String get errorDetailsLabel => '詳細';
 
   @override
   String get retryButton => '再試行';

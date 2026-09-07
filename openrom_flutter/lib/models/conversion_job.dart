@@ -1,6 +1,7 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3 + Commons Clause
 
+import '../core/errors.dart';
 import 'rom_file.dart';
 
 enum JobStatus { queued, converting, done, failed }
@@ -15,6 +16,7 @@ class ConversionJob {
   double progress;
   List<String> logs;
   String? errorMessage;
+  OpenROMError? error;
 
   ConversionJob({
     required this.id,
@@ -26,6 +28,7 @@ class ConversionJob {
     this.progress = 0.0,
     List<String>? logs,
     this.errorMessage,
+    this.error,
   }) : logs = logs ?? [];
 
   String get statusText {
