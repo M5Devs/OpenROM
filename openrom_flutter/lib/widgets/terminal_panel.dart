@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 class TerminalPanel extends StatelessWidget {
@@ -20,12 +21,14 @@ class TerminalPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       height: 220,
       decoration: BoxDecoration(
         color: theme.terminalBg,
         border: Border(
-          top: BorderSide(color: theme.accent.withOpacity(0.5), width: 1.5),
+          top: BorderSide(color: theme.accent.withValues(alpha: 0.5), width: 1.5),
         ),
       ),
       child: Column(
@@ -33,7 +36,7 @@ class TerminalPanel extends StatelessWidget {
           // Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             child: Row(
               children: [
                 Icon(Icons.terminal, color: theme.terminalText, size: 18),
@@ -51,13 +54,13 @@ class TerminalPanel extends StatelessWidget {
                   icon: const Icon(Icons.clear_all, size: 18),
                   color: theme.textSecondary,
                   onPressed: onClear,
-                  tooltip: 'Clear Output',
+                  tooltip: l10n.clearQueue,
                 ),
                 IconButton(
                   icon: const Icon(Icons.keyboard_arrow_down, size: 20),
                   color: theme.textSecondary,
                   onPressed: onClose,
-                  tooltip: 'Collapse',
+                  tooltip: l10n.closeButton,
                 ),
               ],
             ),

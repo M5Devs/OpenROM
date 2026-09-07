@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../services/core_bridge.dart';
 
@@ -28,6 +29,7 @@ class _AboutScreenState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = widget.theme;
+    final l10n = AppLocalizations.of(context);
 
     return Center(
       child: SingleChildScrollView(
@@ -38,7 +40,7 @@ class _AboutScreenState extends State<AboutScreen> {
             Icon(Icons.hexagon_outlined, size: 80, color: theme.accent),
             const SizedBox(height: 16),
             Text(
-              'OpenROM',
+              l10n.appTitle,
               style: TextStyle(
                 fontFamily: theme.fontFamily,
                 color: theme.textPrimary,
@@ -48,7 +50,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Universal ROM Compression Suite',
+              l10n.appSubtitle,
               style: TextStyle(color: theme.textSecondary, fontSize: 16),
             ),
             const SizedBox(height: 6),

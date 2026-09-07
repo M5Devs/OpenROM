@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app.dart';
+import 'providers/locale_provider.dart';
 import 'services/theme_service.dart';
 
 void main() async {
@@ -28,5 +29,6 @@ void main() async {
   }
 
   final themeService = ThemeService();
-  runApp(OpenROMApp(themeService: themeService));
+  final localeProvider = LocaleProvider();
+  runApp(OpenROMApp(themeService: themeService, localeProvider: localeProvider));
 }

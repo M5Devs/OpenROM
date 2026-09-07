@@ -2,6 +2,8 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart';
+import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
@@ -11,8 +13,13 @@ import 'widgets/top_bar.dart';
 
 class OpenROMApp extends StatefulWidget {
   final ThemeService themeService;
+  final LocaleProvider localeProvider;
 
-  const OpenROMApp({super.key, required this.themeService});
+  OpenROMApp({
+    super.key,
+    required this.themeService,
+    LocaleProvider? localeProvider,
+  }) : localeProvider = localeProvider ?? LocaleProvider();
 
   @override
   State<OpenROMApp> createState() => _OpenROMAppState();
@@ -30,16 +37,18 @@ class _OpenROMAppState extends State<OpenROMApp> {
   @override
   void initState() {
     super.initState();
-    widget.themeService.addListener(_onThemeChanged);
+    widget.themeService.addListener(_onChanged);
+    widget.localeProvider.addListener(_onChanged);
   }
 
   @override
   void dispose() {
-    widget.themeService.removeListener(_onThemeChanged);
+    widget.themeService.removeListener(_onChanged);
+    widget.localeProvider.removeListener(_onChanged);
     super.dispose();
   }
 
-  void _onThemeChanged() {
+  void _onChanged() {
     setState(() {});
   }
 
@@ -80,6 +89,9 @@ class _OpenROMAppState extends State<OpenROMApp> {
     return MaterialApp(
       title: 'OpenROM',
       debugShowCheckedModeBanner: false,
+      locale: widget.localeProvider.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: theme.background,
@@ -117,6 +129,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
                         SettingsScreen(
                           theme: theme,
                           themeService: widget.themeService,
+                          localeProvider: widget.localeProvider,
                           onSettingsChanged: (format, compression, verify, outputDir, sameFolder) {
                             setState(() {
                               _format = format;

@@ -3,6 +3,7 @@
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 class DropZone extends StatefulWidget {
@@ -26,6 +27,8 @@ class _DropZoneState extends State<DropZone> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DropTarget(
       onDragEntered: (details) => setState(() => _isDragging = true),
       onDragExited: (details) => setState(() => _isDragging = false),
@@ -53,7 +56,7 @@ class _DropZoneState extends State<DropZone> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Drop ROM files here',
+                      l10n.dropZoneHint,
                       style: TextStyle(
                         fontFamily: widget.theme.fontFamily,
                         color: widget.theme.textPrimary,
@@ -63,7 +66,7 @@ class _DropZoneState extends State<DropZone> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Supports ISO, BIN, CUE, GDI, CHD, CSO, ECM, RVZ, XISO, WBFS...',
+                      l10n.dropZoneSubHint,
                       style: TextStyle(
                         color: widget.theme.textSecondary,
                         fontSize: 14,
