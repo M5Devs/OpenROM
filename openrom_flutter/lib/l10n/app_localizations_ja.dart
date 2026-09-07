@@ -169,4 +169,62 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get patcherDropHint => 'ここにROMとパッチファイルをドロップ';
+
+  @override
+  String get toolsTitle => 'ツール';
+
+  @override
+  String get compressorTitle => 'ROM 圧縮ツール';
+
+  @override
+  String get compressorAddFiles => 'ファイルを追加';
+
+  @override
+  String get compressorAddFolder => 'フォルダを追加';
+
+  @override
+  String get compressorOutputFormat => '出力フォーマット';
+
+  @override
+  String get compressorLevel => '圧縮レベル';
+
+  @override
+  String get compressorLevelFast => '高速';
+
+  @override
+  String get compressorLevelNormal => '標準';
+
+  @override
+  String get compressorLevelUltra => '最高';
+
+  @override
+  String get compressorDeleteSource => '完了後に元ファイルを削除';
+
+  @override
+  String get compressorSameFolder => '元ファイルと同じフォルダ';
+
+  @override
+  String compressorButton(int count) {
+    return '圧縮 ($count 個のファイル)';
+  }
+
+  @override
+  String get compressorSkipped => 'スキップ (圧縮済み)';
+
+  @override
+  String get m3uTitle => 'M3U プレイリスト生成';
+
+  @override
+  String get m3uDropHint => 'ディスクファイルをここにドロップ';
+
+  @override
+  String get m3uOutputLabel => '出力フォルダ';
+
+  @override
+  String get m3uButton => 'M3U を生成';
+
+  @override
+  String m3uSuccess(String filename) {
+    return '作成完了: $filename';
+  }
 }
