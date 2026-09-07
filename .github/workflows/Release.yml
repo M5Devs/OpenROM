@@ -13,13 +13,13 @@ permissions:
 
 jobs:
 
-  # ── Windows — Flutter GUI + PyInstaller CLI ─────────────────────────────────
+  # ── Windows — Flutter GUI + Nuitka CLI ──────────────────────────────────────
   build-windows:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
 
-      # ── Visual Studio Build Tools (required by Flutter Windows) ──
+      # ── Visual Studio Build Tools (required by Flutter + Nuitka) ──
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
@@ -29,7 +29,7 @@ jobs:
             --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" `
             -y --no-progress
 
-      # ── Python / PyInstaller → openrom-core.exe ──
+      # ── Python / Nuitka → openrom-core.exe ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -38,16 +38,16 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          pip install "pyinstaller>=6.0.0"
+          pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core.exe (headless CLI)
+      - name: Build openrom-core.exe (Nuitka — lower AV false positives)
         run: |
-          pyinstaller `
-            --noconfirm `
+          python -m nuitka `
             --onefile `
-            --console `
-            --name "openrom-core" `
-            --add-data "assets;assets" `
+            --assume-yes-for-downloads `
+            --output-filename=openrom-core.exe `
+            --include-data-dir=assets=assets `
+            --windows-console-mode=force `
             core/cli.py
 
       # ── Flutter → OpenROM.exe ──
@@ -66,11 +66,10 @@ jobs:
         run: flutter build windows --release
 
       # ── Package ZIP ──
-      # openrom-core.exe and themes/ must sit next to openrom_flutter.exe inside Release/
       - name: Package ZIP
         run: |
           $out = "openrom_flutter/build/windows/x64/runner/Release"
-          cp dist/openrom-core.exe "$out/"
+          cp openrom-core.exe "$out/"
           cp -r themes/ "$out/themes/"
           $version = "${{ github.event.inputs.version }}"
           $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe   <-- this is the app!`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
@@ -83,7 +82,7 @@ jobs:
           name: OpenROM_Windows
           path: OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
-  # ── Linux — Flutter AppImage + PyInstaller CLI ──────────────────────────────
+  # ── Linux — Flutter AppImage + Nuitka CLI ───────────────────────────────────
   build-linux:
     runs-on: ubuntu-22.04
     steps:
@@ -101,9 +100,10 @@ jobs:
             libfuse2 wget fuse \
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
-            libglib2.0-dev libgdk-pixbuf2.0-dev
+            libglib2.0-dev libgdk-pixbuf2.0-dev \
+            patchelf ccache
 
-      # ── Python / PyInstaller → openrom-core ──
+      # ── Python / Nuitka → openrom-core ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -112,17 +112,17 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          pip install "pyinstaller>=6.0.0"
+          pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core (headless CLI)
+      - name: Build openrom-core (Nuitka — lower AV false positives)
         run: |
-          pyinstaller \
-            --noconfirm \
+          python -m nuitka \
             --onefile \
-            --console \
-            --name "openrom-core" \
-            --add-data "assets:assets" \
+            --assume-yes-for-downloads \
+            --output-filename=openrom-core \
+            --include-data-dir=assets=assets \
             core/cli.py
+          chmod +x openrom-core
 
       # ── Flutter → OpenROM binary ──
       - name: Set up Flutter
@@ -150,17 +150,10 @@ jobs:
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
-          # Flutter output
           cp -r openrom_flutter/build/linux/x64/release/bundle/. AppDir/usr/bin/
-
-          # openrom-core binary next to the Flutter executable
-          cp dist/openrom-core AppDir/usr/bin/
+          cp openrom-core AppDir/usr/bin/
           chmod +x AppDir/usr/bin/openrom-core
-
-          # themes
           cp -r themes/ AppDir/usr/bin/themes/
-
-          # icon
           cp assets/icons/icon.png AppDir/openrom.png
           cp assets/icons/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/openrom.png
 
@@ -191,7 +184,7 @@ jobs:
         run: |
           mkdir release
           cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
-          cp dist/openrom-core release/
+          cp openrom-core release/
           chmod +x release/openrom-core
           printf 'OpenROM - Linux\n======================================================\nRUN THIS: ./OpenROM-*.AppImage   <-- this is the app!\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' > release/README.txt
           cd release
@@ -203,22 +196,20 @@ jobs:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
-  # ── macOS — Flutter .app DMG + PyInstaller CLI ──────────────────────────────
+  # ── macOS — Flutter .app DMG + Nuitka CLI ───────────────────────────────────
   build-macos:
     strategy:
       matrix:
         include:
           - os: macos-15
             arch: arm64
-            flutter_arch: arm64
           - os: macos-15-intel
             arch: x86_64
-            flutter_arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      # ── Python / PyInstaller → openrom-core ──
+      # ── Python / Nuitka → openrom-core ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -227,18 +218,18 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          pip install "pyinstaller>=6.0.0"
+          pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core (headless CLI)
+      - name: Build openrom-core (Nuitka — lower AV false positives)
         run: |
-          pyinstaller \
-            --noconfirm \
+          python -m nuitka \
             --onefile \
-            --console \
-            --name "openrom-core" \
-            --add-data "assets:assets" \
-            --target-arch ${{ matrix.arch }} \
+            --assume-yes-for-downloads \
+            --output-filename=openrom-core \
+            --include-data-dir=assets=assets \
+            --macos-target-arch=${{ matrix.arch }} \
             core/cli.py
+          chmod +x openrom-core
 
       # ── Flutter → OpenROM.app ──
       - name: Set up Flutter
@@ -255,12 +246,11 @@ jobs:
         working-directory: openrom_flutter
         run: flutter build macos --release
 
-      # ── Copy openrom-core inside .app bundle ──
-      # CoreBridge looks for openrom-core next to the executable inside Contents/MacOS/
+      # ── Embed openrom-core inside .app bundle ──
       - name: Embed openrom-core in .app bundle
         run: |
           APP_MACOS="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app/Contents/MacOS"
-          cp dist/openrom-core "$APP_MACOS/openrom-core"
+          cp openrom-core "$APP_MACOS/openrom-core"
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
 
@@ -281,7 +271,7 @@ jobs:
         run: |
           mkdir release
           cp OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg release/
-          cp dist/openrom-core release/
+          cp openrom-core release/
           chmod +x release/openrom-core
           printf 'OpenROM - macOS\n======================================================\nRUN THIS: Open the .dmg and drag OpenROM to Applications.\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' > release/README.txt
           cd release
@@ -311,7 +301,7 @@ jobs:
           body: |
             ## OpenROM v${{ github.event.inputs.version }}
 
-            Universal ROM Compression Suite for retro gaming.
+            Universal ROM Conversion Suite for retro gaming.
 
             Each download includes:
             - **OpenROM** — Flutter desktop GUI
