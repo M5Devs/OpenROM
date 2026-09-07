@@ -91,5 +91,52 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cueGeneratorTitle": "CUE Generator",
+  "cueGeneratorBinFile": "BIN File",
+  "cueGeneratorDetectedMode": "Detected mode",
+  "cueGeneratorButton": "Generate CUE",
+  "cueGeneratorSuccess": "Created: {filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "binMergerTitle": "BIN Merger",
+  "binMergerCueFile": "CUE File (multi-track)",
+  "binMergerDetected": "Detected: {count} BIN files",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "binMergerButton": "Merge BINs",
+  "binMergerSuccess": "Merged: {filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverTitle": "Header Remover",
+  "headerRemoverSystem": "System",
+  "headerRemoverFound": "Header Found",
+  "headerRemoverNotFound": "No Header Found",
+  "headerRemoverConfidence": "Confidence",
+  "headerRemoverBackup": "Keep backup (.bak)",
+  "headerRemoverButton": "Remove Header",
+  "headerRemoverSuccess": "Clean ROM: {filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverNoHeader": "No copier header detected."
 }

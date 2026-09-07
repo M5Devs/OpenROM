@@ -236,4 +236,69 @@ class AppLocalizationsEs extends AppLocalizations {
   String m3uSuccess(String filename) {
     return 'Creado: $filename';
   }
+
+  @override
+  String get cueGeneratorTitle => 'Generador de CUE';
+
+  @override
+  String get cueGeneratorBinFile => 'Archivo BIN';
+
+  @override
+  String get cueGeneratorDetectedMode => 'Modo detectado';
+
+  @override
+  String get cueGeneratorButton => 'Generar CUE';
+
+  @override
+  String cueGeneratorSuccess(String filename) {
+    return 'Creado: $filename';
+  }
+
+  @override
+  String get binMergerTitle => 'Unificador de BIN';
+
+  @override
+  String get binMergerCueFile => 'Archivo CUE (multipista)';
+
+  @override
+  String binMergerDetected(int count) {
+    return 'Detectados: $count archivos BIN';
+  }
+
+  @override
+  String get binMergerButton => 'Unir BINs';
+
+  @override
+  String binMergerSuccess(String filename) {
+    return 'Unido: $filename';
+  }
+
+  @override
+  String get headerRemoverTitle => 'Eliminador de Cabecera';
+
+  @override
+  String get headerRemoverSystem => 'Sistema';
+
+  @override
+  String get headerRemoverFound => 'Cabecera encontrada';
+
+  @override
+  String get headerRemoverNotFound => 'Sin cabecera';
+
+  @override
+  String get headerRemoverConfidence => 'Confianza';
+
+  @override
+  String get headerRemoverBackup => 'Guardar copia de seguridad (.bak)';
+
+  @override
+  String get headerRemoverButton => 'Eliminar Cabecera';
+
+  @override
+  String headerRemoverSuccess(String filename) {
+    return 'ROM limpio: $filename';
+  }
+
+  @override
+  String get headerRemoverNoHeader => 'No se detectó cabecera de copiador.';
 }

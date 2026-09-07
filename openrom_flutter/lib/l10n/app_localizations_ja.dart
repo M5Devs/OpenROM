@@ -227,4 +227,69 @@ class AppLocalizationsJa extends AppLocalizations {
   String m3uSuccess(String filename) {
     return '作成完了: $filename';
   }
+
+  @override
+  String get cueGeneratorTitle => 'CUE 生成';
+
+  @override
+  String get cueGeneratorBinFile => 'BIN ファイル';
+
+  @override
+  String get cueGeneratorDetectedMode => '検出されたモード';
+
+  @override
+  String get cueGeneratorButton => 'CUE を生成';
+
+  @override
+  String cueGeneratorSuccess(String filename) {
+    return '作成完了: $filename';
+  }
+
+  @override
+  String get binMergerTitle => 'BIN 結合';
+
+  @override
+  String get binMergerCueFile => 'CUE ファイル (マルチトラック)';
+
+  @override
+  String binMergerDetected(int count) {
+    return '検出: $count 個の BIN ファイル';
+  }
+
+  @override
+  String get binMergerButton => 'BIN を結合';
+
+  @override
+  String binMergerSuccess(String filename) {
+    return '結合完了: $filename';
+  }
+
+  @override
+  String get headerRemoverTitle => 'ヘッダー削除';
+
+  @override
+  String get headerRemoverSystem => 'システム';
+
+  @override
+  String get headerRemoverFound => 'ヘッダー検出';
+
+  @override
+  String get headerRemoverNotFound => 'ヘッダーなし';
+
+  @override
+  String get headerRemoverConfidence => '信頼度';
+
+  @override
+  String get headerRemoverBackup => 'バックアップを保持 (.bak)';
+
+  @override
+  String get headerRemoverButton => 'ヘッダーを削除';
+
+  @override
+  String headerRemoverSuccess(String filename) {
+    return 'クリーン ROM: $filename';
+  }
+
+  @override
+  String get headerRemoverNoHeader => 'コピアヘッダーは検出されませんでした。';
 }

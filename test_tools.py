@@ -2,7 +2,7 @@
 # M5 Dev | GPL v3 + Commons Clause
 
 """
-Unit tests for OpenROM Compressor, M3U Generator, and CLI integration.
+Unit tests for OpenROM Compressor, M3U Generator, CUE Generator, BIN Merger, Header Remover, and CLI integration.
 """
 
 import os
@@ -13,6 +13,9 @@ import py7zr
 
 from core.compressor import Compressor, CompressionJob, EXCLUDED_EXTENSIONS
 from core.m3u_generator import generate_m3u, clean_disc_name
+from core.cue_generator import generate_cue, detect_bin_mode
+from core.bin_merger import merge_bins, parse_cue
+from core.header_remover import detect_header, remove_header
 from core.cli import build_parser, main
 
 
@@ -101,3 +104,80 @@ def test_clean_disc_name():
     assert clean_disc_name("Final Fantasy VII (Disc 1).chd") == "Final Fantasy VII"
     assert clean_disc_name("Metal Gear Solid (Disk 2)") == "Metal Gear Solid"
     assert clean_disc_name("Game CD 1.iso") == "Game"
+
+
+def test_cue_generator():
+    with tempfile.TemporaryDirectory() as td:
+        bin_path = os.path.join(td, "game.bin")
+        # 2352 bytes per sector with SYNC header and mode byte 0x02 (MODE2/2352)
+        sync_hdr = b'\x00' + b'\xff' * 10 + b'\x00' + b'\x00\x00\x00\x02'
+        sector_data = sync_hdr + b'\x00' * (2352 - len(sync_hdr))
+        with open(bin_path, "wb") as f:
+            f.write(sector_data * 10)
+
+        cue_path = generate_cue(bin_path)
+        assert os.path.exists(cue_path)
+        with open(cue_path, "r") as f:
+            lines = f.read().splitlines()
+        assert 'FILE "game.bin" BINARY' in lines[0]
+        assert 'TRACK 01 MODE2/2352' in lines[1]
+
+        # Test suffix when cue exists
+        cue_path_2 = generate_cue(bin_path)
+        assert cue_path_2.endswith("game_generated.cue")
+
+
+def test_bin_merger():
+    with tempfile.TemporaryDirectory() as td:
+        bin1 = os.path.join(td, "game (Track 1).bin")
+        bin2 = os.path.join(td, "game (Track 2).bin")
+        with open(bin1, "wb") as f:
+            f.write(b"A" * 2352 * 5)
+        with open(bin2, "wb") as f:
+            f.write(b"B" * 2352 * 5)
+
+        cue_path = os.path.join(td, "game.cue")
+        with open(cue_path, "w") as f:
+            f.write('FILE "game (Track 1).bin" BINARY\n')
+            f.write('  TRACK 01 MODE2/2352\n')
+            f.write('    INDEX 01 00:00:00\n')
+            f.write('FILE "game (Track 2).bin" BINARY\n')
+            f.write('  TRACK 02 AUDIO\n')
+            f.write('    INDEX 01 00:00:00\n')
+
+        merged_bin, merged_cue = merge_bins(cue_path)
+        assert os.path.exists(merged_bin)
+        assert os.path.exists(merged_cue)
+        assert os.path.getsize(merged_bin) == 2352 * 10
+
+        tracks = parse_cue(merged_cue)
+        assert len(tracks) == 2
+
+
+def test_header_remover():
+    with tempfile.TemporaryDirectory() as td:
+        # NES header test
+        nes_file = os.path.join(td, "mario.nes")
+        with open(nes_file, "wb") as f:
+            f.write(b"NES\x1a" + b"\x00" * 12 + b"ROMDATA")
+
+        info_nes = detect_header(nes_file)
+        assert info_nes["has_header"] is True
+        assert info_nes["header_size"] == 16
+
+        clean_nes = remove_header(nes_file, backup=True)
+        assert os.path.exists(nes_file + ".bak")
+        with open(clean_nes, "rb") as f:
+            assert f.read() == b"ROMDATA"
+
+        # SNES header test (512 bytes header + 1024 bytes ROM)
+        snes_file = os.path.join(td, "snes.smc")
+        with open(snes_file, "wb") as f:
+            f.write(b"H" * 512 + b"S" * 1024)
+
+        info_snes = detect_header(snes_file)
+        assert info_snes["has_header"] is True
+        assert info_snes["header_size"] == 512
+
+        clean_snes = remove_header(snes_file, backup=False)
+        assert os.path.getsize(clean_snes) == 1024

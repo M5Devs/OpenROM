@@ -233,4 +233,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String m3uSuccess(String filename) {
     return 'Created: $filename';
   }
+
+  @override
+  String get cueGeneratorTitle => 'CUE Generator';
+
+  @override
+  String get cueGeneratorBinFile => 'BIN File';
+
+  @override
+  String get cueGeneratorDetectedMode => 'Detected mode';
+
+  @override
+  String get cueGeneratorButton => 'Generate CUE';
+
+  @override
+  String cueGeneratorSuccess(String filename) {
+    return 'Created: $filename';
+  }
+
+  @override
+  String get binMergerTitle => 'BIN Merger';
+
+  @override
+  String get binMergerCueFile => 'CUE File (multi-track)';
+
+  @override
+  String binMergerDetected(int count) {
+    return 'Detected: $count BIN files';
+  }
+
+  @override
+  String get binMergerButton => 'Merge BINs';
+
+  @override
+  String binMergerSuccess(String filename) {
+    return 'Merged: $filename';
+  }
+
+  @override
+  String get headerRemoverTitle => 'Header Remover';
+
+  @override
+  String get headerRemoverSystem => 'System';
+
+  @override
+  String get headerRemoverFound => 'Header Found';
+
+  @override
+  String get headerRemoverNotFound => 'No Header Found';
+
+  @override
+  String get headerRemoverConfidence => 'Confidence';
+
+  @override
+  String get headerRemoverBackup => 'Keep backup (.bak)';
+
+  @override
+  String get headerRemoverButton => 'Remove Header';
+
+  @override
+  String headerRemoverSuccess(String filename) {
+    return 'Clean ROM: $filename';
+  }
+
+  @override
+  String get headerRemoverNoHeader => 'No copier header detected.';
 }

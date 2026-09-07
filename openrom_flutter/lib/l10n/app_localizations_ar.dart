@@ -229,4 +229,69 @@ class AppLocalizationsAr extends AppLocalizations {
   String m3uSuccess(String filename) {
     return 'تم الإنشاء: $filename';
   }
+
+  @override
+  String get cueGeneratorTitle => 'مولد CUE';
+
+  @override
+  String get cueGeneratorBinFile => 'ملف BIN';
+
+  @override
+  String get cueGeneratorDetectedMode => 'النمط المكتشف';
+
+  @override
+  String get cueGeneratorButton => 'إنشاء CUE';
+
+  @override
+  String cueGeneratorSuccess(String filename) {
+    return 'تم الإنشاء: $filename';
+  }
+
+  @override
+  String get binMergerTitle => 'دمج BIN';
+
+  @override
+  String get binMergerCueFile => 'ملف CUE (متعدد المسارات)';
+
+  @override
+  String binMergerDetected(int count) {
+    return 'تم اكتشاف: $count ملفات BIN';
+  }
+
+  @override
+  String get binMergerButton => 'دمج ملفات BIN';
+
+  @override
+  String binMergerSuccess(String filename) {
+    return 'تم الدمج: $filename';
+  }
+
+  @override
+  String get headerRemoverTitle => 'مزيل الترويسة';
+
+  @override
+  String get headerRemoverSystem => 'النظام';
+
+  @override
+  String get headerRemoverFound => 'تم العثور على ترويسة';
+
+  @override
+  String get headerRemoverNotFound => 'لم يتم العثور على ترويسة';
+
+  @override
+  String get headerRemoverConfidence => 'مستوى الثقة';
+
+  @override
+  String get headerRemoverBackup => 'الاحتفاظ بنسخة احتياطية (.bak)';
+
+  @override
+  String get headerRemoverButton => 'إزالة الترويسة';
+
+  @override
+  String headerRemoverSuccess(String filename) {
+    return 'ROM نظيف: $filename';
+  }
+
+  @override
+  String get headerRemoverNoHeader => 'لم يتم اكتشاف ترويسة ناسخة.';
 }
