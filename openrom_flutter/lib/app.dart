@@ -6,6 +6,7 @@ import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/patcher_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/theme_service.dart';
 import 'widgets/sidebar.dart';
@@ -123,9 +124,10 @@ class _OpenROMAppState extends State<OpenROMApp> {
                   ),
                   Expanded(
                     child: IndexedStack(
-                      index: _selectedIndex == 2 ? 1 : _selectedIndex,
+                      index: _selectedIndex == 4 ? 2 : _selectedIndex,
                       children: [
                         HomeScreen(key: _homeKey, theme: theme),
+                        PatcherScreen(theme: theme),
                         SettingsScreen(
                           theme: theme,
                           themeService: widget.themeService,

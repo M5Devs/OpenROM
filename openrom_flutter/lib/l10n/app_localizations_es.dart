@@ -96,14 +96,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorToolFailed =>
-      'La herramienta de conversión falló inesperadamente.';
+      'La herramienta de conversión (chdman/maxcso) falló inesperadamente.';
 
   @override
   String get errorConversionFailed =>
       'La conversión falló. El archivo ROM podría estar dañado.';
 
   @override
-  String get errorFileNotFound => 'El archivo de entrada se movió o eliminó.';
+  String get errorFileNotFound =>
+      'El archivo de entrada fue movido o eliminado.';
 
   @override
   String get errorOutputDirNotFound =>
@@ -118,7 +119,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'El archivo parece estar dañado o tiene 0 bytes.';
 
   @override
-  String get errorUnknown => 'Algo salió mal. Esto podría ser un error.';
+  String get errorUnknown => 'Ocurrió un error inesperado.';
 
   @override
   String get errorDetailsLabel => 'Detalles';
@@ -140,4 +141,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get openOutputFolder => 'Abrir Carpeta de Salida';
+
+  @override
+  String get patcherTitle => 'Parcheador de ROM';
+
+  @override
+  String get patcherRomFile => 'Archivo ROM';
+
+  @override
+  String get patcherPatchFile => 'Archivo de Parche';
+
+  @override
+  String get patcherOutputFile => 'Archivo de Salida';
+
+  @override
+  String get patcherSameFolder => 'Misma carpeta que el ROM';
+
+  @override
+  String get patcherIgnoreChecksum => 'Ignorar errores de suma de comprobación';
+
+  @override
+  String get patcherApplyButton => 'Aplicar Parche';
+
+  @override
+  String get patcherSuccess => '¡Parcheado con éxito!';
+
+  @override
+  String get patcherFormat => 'Formato';
+
+  @override
+  String get patcherChecksumPassed => 'aprobado';
+
+  @override
+  String get patcherChecksumSkipped => 'omitido';
+
+  @override
+  String get patcherDropHint =>
+      'Arrastra y suelta los archivos ROM y parche aquí';
 }

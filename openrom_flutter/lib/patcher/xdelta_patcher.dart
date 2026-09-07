@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
+import '../core/config.dart';
 import 'patcher.dart';
 
 /// xdelta3 / VCDIFF patcher — delegates to the xdelta3 binary via subprocess.
@@ -27,10 +28,7 @@ class XdeltaPatcher extends RomPatcher {
     }
 
     // Resolve xdelta3 binary next to the executable (same as chdman)
-    final exeDir = File(Platform.resolvedExecutable).parent.path;
-    final binary = Platform.isWindows
-        ? '$exeDir/xdelta3.exe'
-        : '$exeDir/xdelta3';
+    final binary = AppConfig.xdelta3Path;
 
     if (!await File(binary).exists()) {
       throw PatchException(

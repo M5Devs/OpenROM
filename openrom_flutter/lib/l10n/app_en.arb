@@ -47,5 +47,17 @@
   "reportBugButton": "Report Bug",
   "clearQueue": "Clear Queue",
   "removeFile": "Remove",
-  "openOutputFolder": "Open Output Folder"
+  "openOutputFolder": "Open Output Folder",
+  "patcherTitle": "ROM Patcher",
+  "patcherRomFile": "ROM File",
+  "patcherPatchFile": "Patch File",
+  "patcherOutputFile": "Output File",
+  "patcherSameFolder": "Same folder as ROM",
+  "patcherIgnoreChecksum": "Ignore checksum errors",
+  "patcherApplyButton": "Apply Patch",
+  "patcherSuccess": "Patched successfully!",
+  "patcherFormat": "Format",
+  "patcherChecksumPassed": "passed",
+  "patcherChecksumSkipped": "skipped",
+  "patcherDropHint": "Drop ROM + Patch files here"
 }

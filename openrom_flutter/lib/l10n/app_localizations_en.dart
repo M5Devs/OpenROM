@@ -99,8 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The conversion tool (chdman/maxcso) exited unexpectedly.';
 
   @override
-  String get errorConversionFailed =>
-      'Conversion stopped before completing.';
+  String get errorConversionFailed => 'Conversion stopped before completing.';
 
   @override
   String get errorFileNotFound => 'The input file was moved or deleted.';
@@ -140,4 +139,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openOutputFolder => 'Open Output Folder';
+
+  @override
+  String get patcherTitle => 'ROM Patcher';
+
+  @override
+  String get patcherRomFile => 'ROM File';
+
+  @override
+  String get patcherPatchFile => 'Patch File';
+
+  @override
+  String get patcherOutputFile => 'Output File';
+
+  @override
+  String get patcherSameFolder => 'Same folder as ROM';
+
+  @override
+  String get patcherIgnoreChecksum => 'Ignore checksum errors';
+
+  @override
+  String get patcherApplyButton => 'Apply Patch';
+
+  @override
+  String get patcherSuccess => 'Patched successfully!';
+
+  @override
+  String get patcherFormat => 'Format';
+
+  @override
+  String get patcherChecksumPassed => 'passed';
+
+  @override
+  String get patcherChecksumSkipped => 'skipped';
+
+  @override
+  String get patcherDropHint => 'Drop ROM + Patch files here';
 }
