@@ -351,6 +351,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Output Folder'**
   String get openOutputFolder;
+
+  /// No description provided for @patcherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ROM Patcher'**
+  String get patcherTitle;
+
+  /// No description provided for @patcherRomFile.
+  ///
+  /// In en, this message translates to:
+  /// **'ROM File'**
+  String get patcherRomFile;
+
+  /// No description provided for @patcherPatchFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Patch File'**
+  String get patcherPatchFile;
+
+  /// No description provided for @patcherOutputFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Output File'**
+  String get patcherOutputFile;
+
+  /// No description provided for @patcherSameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Same folder as ROM'**
+  String get patcherSameFolder;
+
+  /// No description provided for @patcherIgnoreChecksum.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore checksum errors'**
+  String get patcherIgnoreChecksum;
+
+  /// No description provided for @patcherApplyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Patch'**
+  String get patcherApplyButton;
+
+  /// No description provided for @patcherSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Patched successfully!'**
+  String get patcherSuccess;
+
+  /// No description provided for @patcherFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get patcherFormat;
+
+  /// No description provided for @patcherChecksumPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'passed'**
+  String get patcherChecksumPassed;
+
+  /// No description provided for @patcherChecksumSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'skipped'**
+  String get patcherChecksumSkipped;
+
+  /// No description provided for @patcherDropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop ROM + Patch files here'**
+  String get patcherDropHint;
 }
 
 class _AppLocalizationsDelegate

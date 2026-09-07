@@ -96,7 +96,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get errorToolFailed =>
-      'A ferramenta de conversão falhou inesperadamente.';
+      'A ferramenta de conversão (chdman/maxcso) fechou inesperadamente.';
 
   @override
   String get errorConversionFailed =>
@@ -104,7 +104,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get errorFileNotFound =>
-      'O arquivo de entrada foi movido ou excluído.';
+      'O arquivo de entrada foi movido ou removido.';
 
   @override
   String get errorOutputDirNotFound =>
@@ -112,14 +112,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get errorPermissionDenied =>
-      'OpenROM não pode gravar na pasta de saída.';
+      'O OpenROM não tem permissão para escrever na pasta de saída.';
 
   @override
   String get errorCorruptedFile =>
       'O arquivo parece estar corrompido ou tem 0 bytes.';
 
   @override
-  String get errorUnknown => 'Algo deu errado. Isso pode ser um erro.';
+  String get errorUnknown => 'Ocorreu um erro inesperado.';
 
   @override
   String get errorDetailsLabel => 'Detalhes';
@@ -141,4 +141,40 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get openOutputFolder => 'Abrir Pasta de Saída';
+
+  @override
+  String get patcherTitle => 'Aplicador de Patches';
+
+  @override
+  String get patcherRomFile => 'Arquivo ROM';
+
+  @override
+  String get patcherPatchFile => 'Arquivo de Patch';
+
+  @override
+  String get patcherOutputFile => 'Arquivo de Saída';
+
+  @override
+  String get patcherSameFolder => 'Mesma pasta do ROM';
+
+  @override
+  String get patcherIgnoreChecksum => 'Ignorar erros de checksum';
+
+  @override
+  String get patcherApplyButton => 'Aplicar Patch';
+
+  @override
+  String get patcherSuccess => 'Patch aplicado com sucesso!';
+
+  @override
+  String get patcherFormat => 'Formato';
+
+  @override
+  String get patcherChecksumPassed => 'passou';
+
+  @override
+  String get patcherChecksumSkipped => 'ignorado';
+
+  @override
+  String get patcherDropHint => 'Arraste e solte os arquivos ROM e Patch aqui';
 }

@@ -93,7 +93,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorDiskSpace => '変換に必要なディスク容量が不足しています。';
 
   @override
-  String get errorToolFailed => '変換ツールが予期せず終了しました。';
+  String get errorToolFailed => '変換ツール (chdman/maxcso) が予期せず終了しました。';
 
   @override
   String get errorConversionFailed => '変換に失敗しました。ROMファイルが破損している可能性があります。';
@@ -108,7 +108,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorPermissionDenied => '出力フォルダへの書き込み権限がありません。';
 
   @override
-  String get errorCorruptedFile => 'ファイルが破損しているか、0バイトです。';
+  String get errorCorruptedFile => 'ファイルが破損しているか0バイトです。';
 
   @override
   String get errorUnknown => '予期しないエラーが発生しました。';
@@ -133,4 +133,40 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get openOutputFolder => '出力フォルダを開く';
+
+  @override
+  String get patcherTitle => 'ROMパッチャー';
+
+  @override
+  String get patcherRomFile => 'ROMファイル';
+
+  @override
+  String get patcherPatchFile => 'パッチファイル';
+
+  @override
+  String get patcherOutputFile => '出力ファイル';
+
+  @override
+  String get patcherSameFolder => 'ROMと同じフォルダ';
+
+  @override
+  String get patcherIgnoreChecksum => 'チェックサムエラーを無視';
+
+  @override
+  String get patcherApplyButton => 'パッチを適用';
+
+  @override
+  String get patcherSuccess => 'パッチの適用に成功しました！';
+
+  @override
+  String get patcherFormat => 'フォーマット';
+
+  @override
+  String get patcherChecksumPassed => '合格';
+
+  @override
+  String get patcherChecksumSkipped => 'スキップ';
+
+  @override
+  String get patcherDropHint => 'ここにROMとパッチファイルをドロップ';
 }

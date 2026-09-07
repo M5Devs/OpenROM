@@ -100,19 +100,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorConversionFailed => 'فشل التحويل. قد يكون ملف ROM تالفًا.';
 
   @override
-  String get errorFileNotFound => 'تم نقل ملف الإدخال أو حذفه.';
+  String get errorFileNotFound => 'الملف المدخل تم نقله أو حذفه.';
 
   @override
-  String get errorOutputDirNotFound => 'مجلد الإخراج المحدد لم يعد موجودًا.';
+  String get errorOutputDirNotFound => 'مجلد الإخراج المحدد لم يعد موجوداً.';
 
   @override
-  String get errorPermissionDenied => 'لا يمكن لـ OpenROM الكتابة في مجلد الإخراج.';
+  String get errorPermissionDenied =>
+      'لا يملك OpenROM أذونات الكتابة في مجلد الإخراج.';
 
   @override
   String get errorCorruptedFile => 'يبدو أن الملف تالف أو بحجم 0 بايت.';
 
   @override
-  String get errorUnknown => 'حدث خطأ غير متوقع. قد يكون هذا خطأ برمجيا.';
+  String get errorUnknown => 'حدث خطأ غير متوقع.';
 
   @override
   String get errorDetailsLabel => 'التفاصيل';
@@ -134,4 +135,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get openOutputFolder => 'فتح مجلد الإخراج';
+
+  @override
+  String get patcherTitle => 'مطبق التصحيحات';
+
+  @override
+  String get patcherRomFile => 'ملف الـ ROM';
+
+  @override
+  String get patcherPatchFile => 'ملف التصحيح';
+
+  @override
+  String get patcherOutputFile => 'ملف الإخراج';
+
+  @override
+  String get patcherSameFolder => 'نفس مجلد الـ ROM';
+
+  @override
+  String get patcherIgnoreChecksum => 'تجاهل أخطاء المجموع الخانتين (Checksum)';
+
+  @override
+  String get patcherApplyButton => 'تطبيق التصحيح';
+
+  @override
+  String get patcherSuccess => 'تم تطبيق التصحيح بنجاح!';
+
+  @override
+  String get patcherFormat => 'الصيغة';
+
+  @override
+  String get patcherChecksumPassed => 'تم الاجتياز';
+
+  @override
+  String get patcherChecksumSkipped => 'تم التخطي';
+
+  @override
+  String get patcherDropHint => 'اسحب وأسقط ملفات الـ ROM والتصحيح هنا';
 }

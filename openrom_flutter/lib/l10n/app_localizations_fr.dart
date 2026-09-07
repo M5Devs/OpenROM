@@ -96,7 +96,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorToolFailed =>
-      'L\'outil de conversion a échoué de manière inattendue.';
+      'L\'outil de conversion (chdman/maxcso) a quitté de manière inattendue.';
 
   @override
   String get errorConversionFailed =>
@@ -116,10 +116,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorCorruptedFile =>
-      'Le fichier semble corrompu ou fait 0 octet.';
+      'Le fichier semble être corrompu ou fait 0 octet.';
 
   @override
-  String get errorUnknown => 'Un problème est survenu. Il s\'agit peut-être d\'un bug.';
+  String get errorUnknown => 'Une erreur inattendue est survenue.';
 
   @override
   String get errorDetailsLabel => 'Détails';
@@ -141,4 +141,41 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get openOutputFolder => 'Ouvrir le dossier de sortie';
+
+  @override
+  String get patcherTitle => 'Patcheur de ROM';
+
+  @override
+  String get patcherRomFile => 'Fichier ROM';
+
+  @override
+  String get patcherPatchFile => 'Fichier de Patch';
+
+  @override
+  String get patcherOutputFile => 'Fichier de Sortie';
+
+  @override
+  String get patcherSameFolder => 'Même dossier que le ROM';
+
+  @override
+  String get patcherIgnoreChecksum =>
+      'Ignorer les erreurs de somme de contrôle';
+
+  @override
+  String get patcherApplyButton => 'Appliquer le Patch';
+
+  @override
+  String get patcherSuccess => 'Patché avec succès !';
+
+  @override
+  String get patcherFormat => 'Format';
+
+  @override
+  String get patcherChecksumPassed => 'réussi';
+
+  @override
+  String get patcherChecksumSkipped => 'ignoré';
+
+  @override
+  String get patcherDropHint => 'Déposez les fichiers ROM et Patch ici';
 }

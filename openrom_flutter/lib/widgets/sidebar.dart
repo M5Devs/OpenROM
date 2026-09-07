@@ -22,9 +22,10 @@ class Sidebar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final items = [
       {'icon': Icons.queue_music, 'tooltip': l10n.appTitle},
+      {'icon': Icons.build_outlined, 'tooltip': l10n.patcherTitle},
       {'icon': Icons.settings, 'tooltip': l10n.settingsScreen},
-      {'icon': Icons.palette, 'tooltip': l10n.themeScreen},
       {'icon': Icons.info_outline, 'tooltip': l10n.aboutScreen},
+      {'icon': Icons.palette, 'tooltip': l10n.themeScreen},
     ];
 
     return Container(
