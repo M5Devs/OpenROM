@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(l10n.verifyAfterConversion, style: TextStyle(color: theme.textPrimary)),
             subtitle: Text('Runs chdman verify on newly created CHD files', style: TextStyle(color: theme.textSecondary)),
             value: _verifyAfterConversion,
-            activeThumbColor: theme.accent,
+            activeColor: theme.accent,
             onChanged: (val) {
               setState(() => _verifyAfterConversion = val);
               _saveSettings();
