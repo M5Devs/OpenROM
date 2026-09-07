@@ -1,0 +1,44 @@
+{
+  "@@locale": "en",
+  "appTitle": "OpenROM",
+  "appSubtitle": "Universal ROM Conversion Suite",
+  "convertButton": "Convert",
+  "convertButtonWithCount": "Convert ({count} Files)",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dropZoneHint": "Drag & Drop ROM files here",
+  "dropZoneSubHint": "or Click to browse",
+  "settingsTitle": "Conversion Settings",
+  "outputFormat": "Output Format",
+  "compressionLevel": "Compression Level",
+  "compressionNormal": "Normal",
+  "compressionHigh": "High",
+  "compressionMax": "Max",
+  "postProcessing": "Post-Processing",
+  "verifyAfterConversion": "Verify after conversion",
+  "outputDestination": "Output Destination",
+  "browse": "Browse",
+  "statusWaiting": "Waiting...",
+  "statusConverting": "Converting...",
+  "statusDone": "Done",
+  "statusFailed": "Failed",
+  "aboutTitle": "About OpenROM",
+  "settingsScreen": "Settings",
+  "aboutScreen": "About",
+  "themeScreen": "Themes",
+  "errorCoreNotFound": "openrom-core not found. Please re-download the full ZIP.",
+  "errorUnsupportedFormat": "This file format is not supported.",
+  "errorDiskSpace": "Not enough disk space for this conversion.",
+  "errorConversionFailed": "Conversion failed. The ROM file might be corrupted.",
+  "retryButton": "Retry",
+  "closeButton": "Close",
+  "reportBugButton": "Report Bug",
+  "clearQueue": "Clear Queue",
+  "removeFile": "Remove",
+  "openOutputFolder": "Open Output Folder"
+}

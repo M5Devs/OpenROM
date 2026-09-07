@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 class Sidebar extends StatelessWidget {
@@ -18,11 +19,12 @@ class Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final items = [
-      {'icon': Icons.queue_music, 'tooltip': 'Queue (Home)'},
-      {'icon': Icons.settings, 'tooltip': 'Settings'},
-      {'icon': Icons.palette, 'tooltip': 'Themes'},
-      {'icon': Icons.info_outline, 'tooltip': 'About'},
+      {'icon': Icons.queue_music, 'tooltip': l10n.appTitle},
+      {'icon': Icons.settings, 'tooltip': l10n.settingsScreen},
+      {'icon': Icons.palette, 'tooltip': l10n.themeScreen},
+      {'icon': Icons.info_outline, 'tooltip': l10n.aboutScreen},
     ];
 
     return Container(
@@ -35,7 +37,7 @@ class Sidebar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.accent.withOpacity(0.2),
+              color: theme.accent.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.hexagon, color: theme.accent, size: 28),
@@ -64,7 +66,7 @@ class Sidebar extends StatelessWidget {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: theme.accent.withOpacity(0.4),
+                                  color: theme.accent.withValues(alpha: 0.4),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                 )

@@ -4,18 +4,22 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
+import '../providers/locale_provider.dart';
 import '../services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ThemeConfig theme;
   final ThemeService themeService;
+  final LocaleProvider localeProvider;
   final Function(String format, String compression, bool verify, String outputDir, bool sameFolder) onSettingsChanged;
 
   const SettingsScreen({
     super.key,
     required this.theme,
     required this.themeService,
+    required this.localeProvider,
     required this.onSettingsChanged,
   });
 
@@ -82,9 +86,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  String _getCompressionLabel(AppLocalizations l10n, String level) {
+    switch (level) {
+      case 'High':
+        return l10n.compressionHigh;
+      case 'Max':
+        return l10n.compressionMax;
+      case 'Normal':
+      default:
+        return l10n.compressionNormal;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = widget.theme;
+    final l10n = AppLocalizations.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -92,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Settings',
+            l10n.settingsTitle,
             style: TextStyle(
               fontFamily: theme.fontFamily,
               color: theme.textPrimary,
@@ -102,8 +119,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
+          // Language Selector
+          _buildSectionTitle('Language'),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: theme.surface,
+              borderRadius: BorderRadius.circular(theme.borderRadius),
+              border: Border.all(color: theme.accent.withValues(alpha: 0.3)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<Locale>(
+                value: widget.localeProvider.locale,
+                dropdownColor: theme.surface,
+                icon: Icon(Icons.language, color: theme.accent),
+                isExpanded: true,
+                items: LocaleProvider.supportedLocales.map((locale) {
+                  return DropdownMenuItem<Locale>(
+                    value: locale,
+                    child: Text(
+                      LocaleProvider.getNativeName(locale.languageCode),
+                      style: TextStyle(color: theme.textPrimary),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (Locale? newLocale) {
+                  if (newLocale != null) {
+                    widget.localeProvider.setLocale(newLocale);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Output Format
-          _buildSectionTitle('Default Target Format'),
+          _buildSectionTitle(l10n.outputFormat),
           Wrap(
             spacing: 12,
             children: _formats.map((fmt) {
@@ -129,13 +180,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Compression Level
-          _buildSectionTitle('Compression Level'),
+          _buildSectionTitle(l10n.compressionLevel),
           Wrap(
             spacing: 12,
             children: _compressionLevels.map((level) {
               final isSelected = _selectedCompression == level;
               return ChoiceChip(
-                label: Text(level),
+                label: Text(_getCompressionLabel(l10n, level)),
                 selected: isSelected,
                 selectedColor: theme.accent,
                 backgroundColor: theme.surface,
@@ -155,12 +206,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Verification Switch
-          _buildSectionTitle('Integrity Options'),
+          _buildSectionTitle(l10n.postProcessing),
           SwitchListTile(
-            title: Text('Verify CHD integrity after conversion', style: TextStyle(color: theme.textPrimary)),
+            title: Text(l10n.verifyAfterConversion, style: TextStyle(color: theme.textPrimary)),
             subtitle: Text('Runs chdman verify on newly created CHD files', style: TextStyle(color: theme.textSecondary)),
             value: _verifyAfterConversion,
-            activeColor: theme.accent,
+            activeThumbColor: theme.accent,
             onChanged: (val) {
               setState(() => _verifyAfterConversion = val);
               _saveSettings();
@@ -169,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Output Folder
-          _buildSectionTitle('Output Destination'),
+          _buildSectionTitle(l10n.outputDestination),
           CheckboxListTile(
             title: Text('Same folder as source file', style: TextStyle(color: theme.textPrimary)),
             value: _sameFolderAsSource,
@@ -200,7 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ElevatedButton(
                   onPressed: _pickOutputDirectory,
                   style: ElevatedButton.styleFrom(backgroundColor: theme.accent),
-                  child: const Text('Browse', style: TextStyle(color: Colors.white)),
+                  child: Text(l10n.browse, style: const TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -208,7 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 32),
 
           // Themes Preview Section
-          _buildSectionTitle('Appearance & Themes'),
+          _buildSectionTitle(l10n.themeScreen),
           const SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,

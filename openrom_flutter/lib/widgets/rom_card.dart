@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3 + Commons Clause
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
 
@@ -56,8 +57,22 @@ class _RomCardState extends State<RomCard> {
     }
   }
 
+  String _getStatusText(AppLocalizations l10n) {
+    switch (widget.job.status) {
+      case JobStatus.queued:
+        return l10n.statusWaiting;
+      case JobStatus.converting:
+        return '${l10n.statusConverting} ${widget.job.progress.toStringAsFixed(1)}%';
+      case JobStatus.done:
+        return '✅ ${l10n.statusDone}';
+      case JobStatus.failed:
+        return '❌ ${l10n.statusFailed}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rom = widget.job.romFile;
     final badgeColor = _hexToColor(rom.badgeColor);
     final gradient = _getPlatformGradient(rom.platform);
@@ -131,7 +146,7 @@ class _RomCardState extends State<RomCard> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Status: ${widget.job.statusText}',
+                            _getStatusText(l10n),
                             style: TextStyle(
                               color: widget.job.status == JobStatus.failed
                                   ? Colors.redAccent
@@ -179,7 +194,7 @@ class _RomCardState extends State<RomCard> {
                       IconButton(
                         icon: const Icon(Icons.close, color: Colors.white70, size: 20),
                         onPressed: widget.onDelete,
-                        tooltip: 'Remove ROM',
+                        tooltip: l10n.removeFile,
                       )
                     else
                       const SizedBox(width: 32),

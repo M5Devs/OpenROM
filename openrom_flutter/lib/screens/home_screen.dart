@@ -3,6 +3,7 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
 import '../services/core_bridge.dart';
@@ -124,6 +125,8 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DropZone(
       theme: widget.theme,
       onFilesDropped: addFilesFromPaths,
@@ -138,7 +141,7 @@ class HomeScreenState extends State<HomeScreen> {
                         Icon(Icons.drive_folder_upload, size: 64, color: widget.theme.textSecondary),
                         const SizedBox(height: 16),
                         Text(
-                          'Drag & drop ROM files here, or click "Add ROMs"',
+                          '${l10n.dropZoneHint}, ${l10n.dropZoneSubHint.toLowerCase()}',
                           style: TextStyle(
                             fontFamily: widget.theme.fontFamily,
                             color: widget.theme.textSecondary,
