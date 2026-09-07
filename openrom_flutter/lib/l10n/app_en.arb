@@ -59,5 +59,37 @@
   "patcherFormat": "Format",
   "patcherChecksumPassed": "passed",
   "patcherChecksumSkipped": "skipped",
-  "patcherDropHint": "Drop ROM + Patch files here"
+  "patcherDropHint": "Drop ROM + Patch files here",
+  "toolsTitle": "Tools",
+  "compressorTitle": "ROM Compressor",
+  "compressorAddFiles": "Add Files",
+  "compressorAddFolder": "Add Folder",
+  "compressorOutputFormat": "Output Format",
+  "compressorLevel": "Compression Level",
+  "compressorLevelFast": "Fast",
+  "compressorLevelNormal": "Normal",
+  "compressorLevelUltra": "Ultra",
+  "compressorDeleteSource": "Delete source after done",
+  "compressorSameFolder": "Same folder as source",
+  "compressorButton": "Compress ({count} Files)",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "compressorSkipped": "Skipped (already compressed)",
+  "m3uTitle": "M3U Generator",
+  "m3uDropHint": "Drop disc files here",
+  "m3uOutputLabel": "Output folder",
+  "m3uButton": "Generate M3U",
+  "m3uSuccess": "Created: {filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  }
 }

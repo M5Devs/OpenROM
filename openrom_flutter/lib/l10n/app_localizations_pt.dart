@@ -177,4 +177,62 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get patcherDropHint => 'Arraste e solte os arquivos ROM e Patch aqui';
+
+  @override
+  String get toolsTitle => 'Ferramentas';
+
+  @override
+  String get compressorTitle => 'Compressor de ROM';
+
+  @override
+  String get compressorAddFiles => 'Adicionar arquivos';
+
+  @override
+  String get compressorAddFolder => 'Adicionar pasta';
+
+  @override
+  String get compressorOutputFormat => 'Formato de saída';
+
+  @override
+  String get compressorLevel => 'Nível de compressão';
+
+  @override
+  String get compressorLevelFast => 'Rápido';
+
+  @override
+  String get compressorLevelNormal => 'Normal';
+
+  @override
+  String get compressorLevelUltra => 'Ultra';
+
+  @override
+  String get compressorDeleteSource => 'Excluir origem ao concluir';
+
+  @override
+  String get compressorSameFolder => 'Mesma pasta de origem';
+
+  @override
+  String compressorButton(int count) {
+    return 'Comprimir ($count arquivos)';
+  }
+
+  @override
+  String get compressorSkipped => 'Ignorado (já comprimido)';
+
+  @override
+  String get m3uTitle => 'Gerador M3U';
+
+  @override
+  String get m3uDropHint => 'Solte os arquivos de disco aqui';
+
+  @override
+  String get m3uOutputLabel => 'Pasta de saída';
+
+  @override
+  String get m3uButton => 'Gerar M3U';
+
+  @override
+  String m3uSuccess(String filename) {
+    return 'Criado: $filename';
+  }
 }

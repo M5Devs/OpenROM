@@ -175,4 +175,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get patcherDropHint => 'Drop ROM + Patch files here';
+
+  @override
+  String get toolsTitle => 'Tools';
+
+  @override
+  String get compressorTitle => 'ROM Compressor';
+
+  @override
+  String get compressorAddFiles => 'Add Files';
+
+  @override
+  String get compressorAddFolder => 'Add Folder';
+
+  @override
+  String get compressorOutputFormat => 'Output Format';
+
+  @override
+  String get compressorLevel => 'Compression Level';
+
+  @override
+  String get compressorLevelFast => 'Fast';
+
+  @override
+  String get compressorLevelNormal => 'Normal';
+
+  @override
+  String get compressorLevelUltra => 'Ultra';
+
+  @override
+  String get compressorDeleteSource => 'Delete source after done';
+
+  @override
+  String get compressorSameFolder => 'Same folder as source';
+
+  @override
+  String compressorButton(int count) {
+    return 'Compress ($count Files)';
+  }
+
+  @override
+  String get compressorSkipped => 'Skipped (already compressed)';
+
+  @override
+  String get m3uTitle => 'M3U Generator';
+
+  @override
+  String get m3uDropHint => 'Drop disc files here';
+
+  @override
+  String get m3uOutputLabel => 'Output folder';
+
+  @override
+  String get m3uButton => 'Generate M3U';
+
+  @override
+  String m3uSuccess(String filename) {
+    return 'Created: $filename';
+  }
 }

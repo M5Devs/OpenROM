@@ -8,6 +8,10 @@ import '../core/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
 
+typedef ProgressCallback = void Function(double percent);
+typedef LogCallback = void Function(String log);
+typedef DoneCallback = void Function(bool success, String? error);
+
 class OpenROMException implements Exception {
   final OpenROMError error;
   final String? details;
@@ -104,9 +108,9 @@ class CoreBridge {
   static Future<void> runConversion({
     required ConversionJob job,
     required String outputDir,
-    required Function(double percent) onProgress,
-    required Function(String log) onLog,
-    required Function(bool success, String? error) onDone,
+    required ProgressCallback onProgress,
+    required LogCallback onLog,
+    required DoneCallback onDone,
   }) async {
     if (!await coreExists()) {
       onDone(false, 'openrom-core binary missing');
@@ -207,6 +211,250 @@ class CoreBridge {
     } catch (e) {
       if (e is OpenROMException) rethrow;
       onDone(false, e.toString());
+      throw OpenROMException(OpenROMError.unknownError, details: e.toString());
+    }
+  }
+
+  static Future<void> runCompress({
+    required List<String> files,
+    required String format,
+    required String level,
+    required bool deleteSource,
+    String? outputDir,
+    ProgressCallback? onProgress,
+    LogCallback? onLog,
+    DoneCallback? onDone,
+  }) async {
+    if (!await coreExists()) {
+      onDone?.call(false, 'openrom-core binary missing');
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+
+    try {
+      final corePath = await getCoreExecutablePath();
+      final List<String> args = [];
+
+      if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+        args.add('main.py');
+      }
+
+      args.addAll([
+        '--json',
+        '--compress', ...files,
+        '--format', format,
+        '--level', level,
+      ]);
+
+      if (deleteSource) {
+        args.add('--delete-source');
+      }
+
+      if (outputDir != null && outputDir.isNotEmpty) {
+        args.addAll(['--output', outputDir]);
+      }
+
+      final process = await Process.start(corePath, args);
+      final stderrLog = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+        if (line.trim().isEmpty) return;
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          final type = event['type'];
+          if (type == 'progress') {
+            final double pct = (event['percent'] as num).toDouble();
+            onProgress?.call(pct);
+          } else if (type == 'log') {
+            final String msg = event['message'] ?? '';
+            onLog?.call(msg);
+          } else if (type == 'done') {
+            final bool success = event['success'] ?? false;
+            final String? err = event['error'];
+            onDone?.call(success, err);
+          } else if (type == 'error') {
+            final String msg = event['message'] ?? 'Unknown error';
+            onLog?.call('[ERROR] $msg');
+            stderrLog.writeln(msg);
+          }
+        } catch (_) {
+          onLog?.call(line);
+        }
+      });
+
+      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+        if (line.trim().isNotEmpty) {
+          onLog?.call('[STDERR] $line');
+          stderrLog.writeln(line);
+        }
+      });
+
+      final exitCode = await process.exitCode;
+      if (exitCode != 0) {
+        final details = stderrLog.isNotEmpty
+            ? stderrLog.toString().trim()
+            : 'Process exited with code $exitCode';
+        onDone?.call(false, details);
+        throw OpenROMException(OpenROMError.conversionFailed, details: details);
+      }
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
+      onDone?.call(false, e.toString());
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      onDone?.call(false, e.toString());
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
+    } catch (e) {
+      if (e is OpenROMException) rethrow;
+      onDone?.call(false, e.toString());
+      throw OpenROMException(OpenROMError.unknownError, details: e.toString());
+    }
+  }
+
+  static Future<void> runExtract({
+    required List<String> files,
+    required bool deleteSource,
+    String? outputDir,
+    ProgressCallback? onProgress,
+    LogCallback? onLog,
+    DoneCallback? onDone,
+  }) async {
+    if (!await coreExists()) {
+      onDone?.call(false, 'openrom-core binary missing');
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+
+    try {
+      final corePath = await getCoreExecutablePath();
+      final List<String> args = [];
+
+      if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+        args.add('main.py');
+      }
+
+      args.addAll([
+        '--json',
+        '--extract', ...files,
+      ]);
+
+      if (deleteSource) {
+        args.add('--delete-source');
+      }
+
+      if (outputDir != null && outputDir.isNotEmpty) {
+        args.addAll(['--output', outputDir]);
+      }
+
+      final process = await Process.start(corePath, args);
+      final stderrLog = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+        if (line.trim().isEmpty) return;
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          final type = event['type'];
+          if (type == 'progress') {
+            final double pct = (event['percent'] as num).toDouble();
+            onProgress?.call(pct);
+          } else if (type == 'log') {
+            final String msg = event['message'] ?? '';
+            onLog?.call(msg);
+          } else if (type == 'done') {
+            final bool success = event['success'] ?? false;
+            final String? err = event['error'];
+            onDone?.call(success, err);
+          } else if (type == 'error') {
+            final String msg = event['message'] ?? 'Unknown error';
+            onLog?.call('[ERROR] $msg');
+            stderrLog.writeln(msg);
+          }
+        } catch (_) {
+          onLog?.call(line);
+        }
+      });
+
+      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+        if (line.trim().isNotEmpty) {
+          onLog?.call('[STDERR] $line');
+          stderrLog.writeln(line);
+        }
+      });
+
+      final exitCode = await process.exitCode;
+      if (exitCode != 0) {
+        final details = stderrLog.isNotEmpty
+            ? stderrLog.toString().trim()
+            : 'Process exited with code $exitCode';
+        onDone?.call(false, details);
+        throw OpenROMException(OpenROMError.conversionFailed, details: details);
+      }
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
+      onDone?.call(false, e.toString());
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      onDone?.call(false, e.toString());
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
+    } catch (e) {
+      if (e is OpenROMException) rethrow;
+      onDone?.call(false, e.toString());
+      throw OpenROMException(OpenROMError.unknownError, details: e.toString());
+    }
+  }
+
+  static Future<String> generateM3u({
+    required List<String> discFiles,
+    required String outputDir,
+    bool relative = true,
+  }) async {
+    if (!await coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+
+    try {
+      final corePath = await getCoreExecutablePath();
+      final List<String> args = [];
+
+      if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+        args.add('main.py');
+      }
+
+      args.addAll([
+        '--json',
+        '--m3u', ...discFiles,
+        '--output', outputDir,
+      ]);
+
+      if (!relative) {
+        args.add('--absolute');
+      }
+
+      final result = await Process.run(corePath, args);
+      if (result.exitCode == 0) {
+        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        for (final line in lines.reversed) {
+          try {
+            final Map<String, dynamic> event = jsonDecode(line);
+            if (event['type'] == 'done' && event['success'] == true) {
+              return event['output'] as String;
+            }
+          } catch (_) {}
+        }
+      }
+      final err = result.stderr.toString().trim();
+      throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'M3U generation failed');
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
+    } catch (e) {
+      if (e is OpenROMException) rethrow;
       throw OpenROMException(OpenROMError.unknownError, details: e.toString());
     }
   }

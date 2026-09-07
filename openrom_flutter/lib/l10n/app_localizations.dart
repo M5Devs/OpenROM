@@ -423,6 +423,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drop ROM + Patch files here'**
   String get patcherDropHint;
+
+  /// No description provided for @toolsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get toolsTitle;
+
+  /// No description provided for @compressorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ROM Compressor'**
+  String get compressorTitle;
+
+  /// No description provided for @compressorAddFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Files'**
+  String get compressorAddFiles;
+
+  /// No description provided for @compressorAddFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Folder'**
+  String get compressorAddFolder;
+
+  /// No description provided for @compressorOutputFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Format'**
+  String get compressorOutputFormat;
+
+  /// No description provided for @compressorLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Compression Level'**
+  String get compressorLevel;
+
+  /// No description provided for @compressorLevelFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast'**
+  String get compressorLevelFast;
+
+  /// No description provided for @compressorLevelNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get compressorLevelNormal;
+
+  /// No description provided for @compressorLevelUltra.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra'**
+  String get compressorLevelUltra;
+
+  /// No description provided for @compressorDeleteSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete source after done'**
+  String get compressorDeleteSource;
+
+  /// No description provided for @compressorSameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Same folder as source'**
+  String get compressorSameFolder;
+
+  /// No description provided for @compressorButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Compress ({count} Files)'**
+  String compressorButton(int count);
+
+  /// No description provided for @compressorSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped (already compressed)'**
+  String get compressorSkipped;
+
+  /// No description provided for @m3uTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'M3U Generator'**
+  String get m3uTitle;
+
+  /// No description provided for @m3uDropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop disc files here'**
+  String get m3uDropHint;
+
+  /// No description provided for @m3uOutputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Output folder'**
+  String get m3uOutputLabel;
+
+  /// No description provided for @m3uButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate M3U'**
+  String get m3uButton;
+
+  /// No description provided for @m3uSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {filename}'**
+  String m3uSuccess(String filename);
 }
 
 class _AppLocalizationsDelegate

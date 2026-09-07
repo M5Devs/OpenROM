@@ -171,4 +171,62 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get patcherDropHint => 'اسحب وأسقط ملفات الـ ROM والتصحيح هنا';
+
+  @override
+  String get toolsTitle => 'الأدوات';
+
+  @override
+  String get compressorTitle => 'ضاغط ROM';
+
+  @override
+  String get compressorAddFiles => 'إضافة ملفات';
+
+  @override
+  String get compressorAddFolder => 'إضافة مجلد';
+
+  @override
+  String get compressorOutputFormat => 'تنسيق الإخراج';
+
+  @override
+  String get compressorLevel => 'مستوى الضغط';
+
+  @override
+  String get compressorLevelFast => 'سريع';
+
+  @override
+  String get compressorLevelNormal => 'عادي';
+
+  @override
+  String get compressorLevelUltra => 'فائق';
+
+  @override
+  String get compressorDeleteSource => 'حذف المصدر بعد الانتهاء';
+
+  @override
+  String get compressorSameFolder => 'نفس مجلد المصدر';
+
+  @override
+  String compressorButton(int count) {
+    return 'ضغط ($count ملفات)';
+  }
+
+  @override
+  String get compressorSkipped => 'تم التخطي (مضغوط بالفعل)';
+
+  @override
+  String get m3uTitle => 'مولد قائمة M3U';
+
+  @override
+  String get m3uDropHint => 'أفلت ملفات الأقراص هنا';
+
+  @override
+  String get m3uOutputLabel => 'مجلد الإخراج';
+
+  @override
+  String get m3uButton => 'إنشاء M3U';
+
+  @override
+  String m3uSuccess(String filename) {
+    return 'تم الإنشاء: $filename';
+  }
 }

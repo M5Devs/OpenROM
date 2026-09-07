@@ -8,6 +8,7 @@ import 'screens/about_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/patcher_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/tools_screen.dart';
 import 'services/theme_service.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/top_bar.dart';
@@ -87,6 +88,20 @@ class _OpenROMAppState extends State<OpenROMApp> {
     final int fileCount = _homeKey.currentState?.fileCount ?? 0;
     final bool isConverting = _homeKey.currentState?.isConverting ?? false;
 
+    final settingsWidget = SettingsScreen(
+      theme: theme,
+      themeService: widget.themeService,
+      localeProvider: widget.localeProvider,
+      onSettingsChanged: (format, compression, verify, outputDir, sameFolder) {
+        setState(() {
+          _format = format;
+          _compression = compression;
+          _verify = verify;
+          _outputDir = outputDir;
+        });
+      },
+    );
+
     return MaterialApp(
       title: 'OpenROM',
       debugShowCheckedModeBanner: false,
@@ -124,24 +139,14 @@ class _OpenROMAppState extends State<OpenROMApp> {
                   ),
                   Expanded(
                     child: IndexedStack(
-                      index: _selectedIndex == 4 ? 2 : _selectedIndex,
+                      index: _selectedIndex,
                       children: [
                         HomeScreen(key: _homeKey, theme: theme),
                         PatcherScreen(theme: theme),
-                        SettingsScreen(
-                          theme: theme,
-                          themeService: widget.themeService,
-                          localeProvider: widget.localeProvider,
-                          onSettingsChanged: (format, compression, verify, outputDir, sameFolder) {
-                            setState(() {
-                              _format = format;
-                              _compression = compression;
-                              _verify = verify;
-                              _outputDir = outputDir;
-                            });
-                          },
-                        ),
+                        ToolsScreen(theme: theme),
+                        settingsWidget,
                         AboutScreen(theme: theme),
+                        settingsWidget,
                       ],
                     ),
                   ),

@@ -10,7 +10,9 @@ Usage examples:
   openrom --input game.chd --verify-only
   openrom --list-formats
   openrom --json --detect game.iso
-  openrom --json --convert game.iso --format CHD --compression Normal
+  openrom --compress game.smc --format 7z --level ultra
+  openrom --extract game.7z --output /roms/
+  openrom --m3u "Disc1.chd" "Disc2.chd" --output /roms/
 """
 
 import sys
@@ -25,6 +27,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.detector import detect_file, detect_folder, CONVERSION_MAP, get_valid_targets
 from core.converter import Converter, ConversionJob
 from core.validator import verify_chd
+from core.compressor import Compressor, CompressionJob
+from core.m3u_generator import generate_m3u
 
 # ── ANSI colors (disabled on Windows if no ANSI support) ─────────────────────
 def _ansi(code: str) -> str:
@@ -81,10 +85,13 @@ examples:
   openrom --input game.chd --verify-only
   openrom --list-formats
   openrom --json --detect game.iso
+  openrom --compress game.smc --format 7z --level ultra
+  openrom --extract game.7z --output /roms/
+  openrom --m3u "Disc1.chd" "Disc2.chd" --output /roms/
         """,
     )
 
-    # ── Input source (mutually exclusive) ────────────────────────────────────
+    # ── Input source / Actions ────────────────────────────────────────────────
     src = parser.add_mutually_exclusive_group()
     src.add_argument(
         "--input", "-i",
@@ -106,12 +113,30 @@ examples:
         metavar="FILE",
         help="single file to convert (alias for --input)",
     )
+    src.add_argument(
+        "--compress",
+        nargs="+",
+        metavar="FILE",
+        help="file(s) to compress into ZIP/7Z",
+    )
+    src.add_argument(
+        "--extract",
+        nargs="+",
+        metavar="FILE",
+        help="file(s) to extract from ZIP/7Z",
+    )
+    src.add_argument(
+        "--m3u",
+        nargs="+",
+        metavar="DISC_FILE",
+        help="disc file(s) to generate an M3U playlist for",
+    )
 
-    # ── Conversion target ────────────────────────────────────────────────────
+    # ── Conversion / Tools target ────────────────────────────────────────────
     parser.add_argument(
         "--format", "-F",
         metavar="FORMAT",
-        help="output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO",
+        help="output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z",
     )
 
     # ── Options ──────────────────────────────────────────────────────────────
@@ -123,14 +148,30 @@ examples:
     parser.add_argument(
         "--output", "-o",
         metavar="DIR",
-        help="output directory (default: same as source)",
+        help="output directory or file path",
     )
     parser.add_argument(
         "--compression", "-c",
         choices=["Normal", "High", "Max"],
         default="Normal",
         metavar="LEVEL",
-        help="compression level: Normal | High | Max  (default: Normal)",
+        help="compression level for conversion: Normal | High | Max",
+    )
+    parser.add_argument(
+        "--level",
+        choices=["fast", "normal", "ultra"],
+        default="normal",
+        help="compression level for ZIP/7Z tools: fast | normal | ultra",
+    )
+    parser.add_argument(
+        "--delete-source",
+        action="store_true",
+        help="delete source file(s) after successful compression or extraction",
+    )
+    parser.add_argument(
+        "--absolute",
+        action="store_true",
+        help="use absolute file paths in M3U playlist",
     )
     parser.add_argument(
         "--verify",
@@ -233,6 +274,141 @@ def cmd_verify_only(filepath: str, is_json: bool) -> int:
         else:
             print(f"\n{RED}❌ CHD verification failed.{RESET}\n")
         return 1
+
+# ── --compress ────────────────────────────────────────────────────────────────
+def cmd_compress(files: list[str], fmt: str, level: str, delete_source: bool, output_dir: str | None, is_json: bool) -> int:
+    fmt = (fmt or "zip").lower()
+    passed = 0
+    failed = 0
+
+    def on_log(msg: str):
+        if is_json:
+            _json_print({"type": "log", "message": msg})
+        else:
+            print(f"  {GRAY}{msg}{RESET}")
+
+    for filepath in files:
+        out_dir = output_dir or os.path.dirname(os.path.abspath(filepath)) or "."
+        job = CompressionJob(
+            filepath=filepath,
+            output_dir=out_dir,
+            format=fmt,
+            level=level,
+            delete_source=delete_source,
+        )
+
+        def on_progress(j: CompressionJob, pct: float):
+            if is_json:
+                _json_print({
+                    "type": "progress",
+                    "file": os.path.basename(j.filepath),
+                    "percent": pct
+                })
+            else:
+                _render_progress(os.path.basename(j.filepath), pct)
+
+        compressor = Compressor(on_log=on_log, on_progress=on_progress)
+
+        if not is_json:
+            print(f"{BOLD}Compressing:{RESET} {os.path.basename(filepath)} → {fmt.upper()}")
+
+        ok = compressor.compress(job)
+        if not is_json:
+            _clear_progress()
+
+        if ok:
+            passed += 1
+            if is_json:
+                _json_print({"type": "done", "success": True, "error": job.error})
+            else:
+                msg = f"Skipped ({job.error})" if job.error else "Done"
+                print(f"  {GREEN}✅ {msg}{RESET}\n")
+        else:
+            failed += 1
+            err = job.error or "compression failed"
+            if is_json:
+                _json_print({"type": "done", "success": False, "error": err})
+            else:
+                print(f"  {RED}❌ Failed — {err}{RESET}\n")
+
+    return 0 if failed == 0 else (2 if passed == 0 else 1)
+
+# ── --extract ─────────────────────────────────────────────────────────────────
+def cmd_extract(files: list[str], delete_source: bool, output_dir: str | None, is_json: bool) -> int:
+    passed = 0
+    failed = 0
+
+    def on_log(msg: str):
+        if is_json:
+            _json_print({"type": "log", "message": msg})
+        else:
+            print(f"  {GRAY}{msg}{RESET}")
+
+    for filepath in files:
+        out_dir = output_dir or os.path.dirname(os.path.abspath(filepath)) or "."
+        job = CompressionJob(
+            filepath=filepath,
+            output_dir=out_dir,
+            format="extract",
+            delete_source=delete_source,
+        )
+
+        def on_progress(j: CompressionJob, pct: float):
+            if is_json:
+                _json_print({
+                    "type": "progress",
+                    "file": os.path.basename(j.filepath),
+                    "percent": pct
+                })
+            else:
+                _render_progress(os.path.basename(j.filepath), pct)
+
+        compressor = Compressor(on_log=on_log, on_progress=on_progress)
+
+        if not is_json:
+            print(f"{BOLD}Extracting:{RESET} {os.path.basename(filepath)}")
+
+        ok = compressor.extract(job)
+        if not is_json:
+            _clear_progress()
+
+        if ok:
+            passed += 1
+            if is_json:
+                _json_print({"type": "done", "success": True})
+            else:
+                print(f"  {GREEN}✅ Extracted successfully{RESET}\n")
+        else:
+            failed += 1
+            err = job.error or "extraction failed"
+            if is_json:
+                _json_print({"type": "done", "success": False, "error": err})
+            else:
+                print(f"  {RED}❌ Failed — {err}{RESET}\n")
+
+    return 0 if failed == 0 else (2 if passed == 0 else 1)
+
+# ── --m3u ─────────────────────────────────────────────────────────────────────
+def cmd_m3u(disc_files: list[str], output_path: str | None, relative: bool, is_json: bool) -> int:
+    out_dir_or_file = output_path or os.path.dirname(os.path.abspath(disc_files[0])) or "."
+    try:
+        m3u_file = generate_m3u(
+            disc_files=disc_files,
+            output_path=out_dir_or_file,
+            relative=relative,
+        )
+        if is_json:
+            _json_print({"type": "done", "success": True, "output": m3u_file})
+        else:
+            print(f"  {GREEN}✅ Created M3U playlist: {m3u_file}{RESET}\n")
+        return 0
+    except Exception as e:
+        err_msg = str(e)
+        if is_json:
+            _json_print({"type": "done", "success": False, "error": err_msg})
+        else:
+            print(f"  {RED}❌ Failed to generate M3U — {err_msg}{RESET}\n")
+        return 2
 
 # ── Collect jobs from args ────────────────────────────────────────────────────
 def collect_jobs(args) -> list[ConversionJob]:
@@ -415,12 +591,38 @@ def main() -> int:
             return 2
         return cmd_verify_only(input_file, args.json)
 
+    if args.compress:
+        return cmd_compress(
+            files=args.compress,
+            fmt=args.format,
+            level=args.level,
+            delete_source=args.delete_source,
+            output_dir=args.output,
+            is_json=args.json,
+        )
+
+    if args.extract:
+        return cmd_extract(
+            files=args.extract,
+            delete_source=args.delete_source,
+            output_dir=args.output,
+            is_json=args.json,
+        )
+
+    if args.m3u:
+        return cmd_m3u(
+            disc_files=args.m3u,
+            output_path=args.output,
+            relative=not args.absolute,
+            is_json=args.json,
+        )
+
     input_file = args.input or args.convert
     if not input_file and not args.folder:
         if args.json:
-            _json_print({"type": "error", "message": "Provide --input, --convert FILE, or --folder DIR"})
+            _json_print({"type": "error", "message": "Provide --input, --convert FILE, --compress, --extract, --m3u, or --folder DIR"})
         else:
-            print(f"{RED}✗ Provide --input FILE or --folder DIR{RESET}")
+            print(f"{RED}✗ Provide --input FILE, --folder DIR, or tool command (--compress, --extract, --m3u){RESET}")
             parser.print_usage()
         return 2
 
