@@ -253,26 +253,68 @@ abstract class AppLocalizations {
   /// No description provided for @errorCoreNotFound.
   ///
   /// In en, this message translates to:
-  /// **'openrom-core not found. Please re-download the full ZIP.'**
+  /// **'openrom-core is missing from the app folder.'**
   String get errorCoreNotFound;
 
   /// No description provided for @errorUnsupportedFormat.
   ///
   /// In en, this message translates to:
-  /// **'This file format is not supported.'**
+  /// **'This file format cannot be converted with the selected output.'**
   String get errorUnsupportedFormat;
 
   /// No description provided for @errorDiskSpace.
   ///
   /// In en, this message translates to:
-  /// **'Not enough disk space for this conversion.'**
+  /// **'Not enough free space to complete this conversion.'**
   String get errorDiskSpace;
+
+  /// No description provided for @errorToolFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The conversion tool (chdman/maxcso) exited unexpectedly.'**
+  String get errorToolFailed;
 
   /// No description provided for @errorConversionFailed.
   ///
   /// In en, this message translates to:
-  /// **'Conversion failed. The ROM file might be corrupted.'**
+  /// **'Conversion stopped before completing.'**
   String get errorConversionFailed;
+
+  /// No description provided for @errorFileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The input file was moved or deleted.'**
+  String get errorFileNotFound;
+
+  /// No description provided for @errorOutputDirNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected output folder no longer exists.'**
+  String get errorOutputDirNotFound;
+
+  /// No description provided for @errorPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenROM can\'t write to the output folder.'**
+  String get errorPermissionDenied;
+
+  /// No description provided for @errorCorruptedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'The file appears to be corrupted or is 0 bytes.'**
+  String get errorCorruptedFile;
+
+  /// No description provided for @errorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. This might be a bug.'**
+  String get errorUnknown;
+
+  /// No description provided for @errorDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get errorDetailsLabel;
 
   /// No description provided for @retryButton.
   ///

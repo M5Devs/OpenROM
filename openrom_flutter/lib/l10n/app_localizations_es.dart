@@ -95,8 +95,33 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay suficiente espacio en disco para esta conversión.';
 
   @override
+  String get errorToolFailed =>
+      'La herramienta de conversión falló inesperadamente.';
+
+  @override
   String get errorConversionFailed =>
       'La conversión falló. El archivo ROM podría estar dañado.';
+
+  @override
+  String get errorFileNotFound => 'El archivo de entrada se movió o eliminó.';
+
+  @override
+  String get errorOutputDirNotFound =>
+      'La carpeta de salida seleccionada ya no existe.';
+
+  @override
+  String get errorPermissionDenied =>
+      'OpenROM no puede escribir en la carpeta de salida.';
+
+  @override
+  String get errorCorruptedFile =>
+      'El archivo parece estar dañado o tiene 0 bytes.';
+
+  @override
+  String get errorUnknown => 'Algo salió mal. Esto podría ser un error.';
+
+  @override
+  String get errorDetailsLabel => 'Detalles';
 
   @override
   String get retryButton => 'Reintentar';

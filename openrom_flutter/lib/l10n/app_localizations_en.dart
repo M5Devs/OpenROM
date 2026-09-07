@@ -84,17 +84,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorCoreNotFound =>
-      'openrom-core not found. Please re-download the full ZIP.';
+      'openrom-core is missing from the app folder.';
 
   @override
-  String get errorUnsupportedFormat => 'This file format is not supported.';
+  String get errorUnsupportedFormat =>
+      'This file format cannot be converted with the selected output.';
 
   @override
-  String get errorDiskSpace => 'Not enough disk space for this conversion.';
+  String get errorDiskSpace =>
+      'Not enough free space to complete this conversion.';
+
+  @override
+  String get errorToolFailed =>
+      'The conversion tool (chdman/maxcso) exited unexpectedly.';
 
   @override
   String get errorConversionFailed =>
-      'Conversion failed. The ROM file might be corrupted.';
+      'Conversion stopped before completing.';
+
+  @override
+  String get errorFileNotFound => 'The input file was moved or deleted.';
+
+  @override
+  String get errorOutputDirNotFound =>
+      'The selected output folder no longer exists.';
+
+  @override
+  String get errorPermissionDenied =>
+      'OpenROM can\'t write to the output folder.';
+
+  @override
+  String get errorCorruptedFile =>
+      'The file appears to be corrupted or is 0 bytes.';
+
+  @override
+  String get errorUnknown => 'Something went wrong. This might be a bug.';
+
+  @override
+  String get errorDetailsLabel => 'Details';
 
   @override
   String get retryButton => 'Retry';

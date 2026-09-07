@@ -95,8 +95,34 @@ class AppLocalizationsPt extends AppLocalizations {
       'Espaço em disco insuficiente para esta conversão.';
 
   @override
+  String get errorToolFailed =>
+      'A ferramenta de conversão falhou inesperadamente.';
+
+  @override
   String get errorConversionFailed =>
       'A conversão falhou. O arquivo ROM pode estar corrompido.';
+
+  @override
+  String get errorFileNotFound =>
+      'O arquivo de entrada foi movido ou excluído.';
+
+  @override
+  String get errorOutputDirNotFound =>
+      'A pasta de saída selecionada não existe mais.';
+
+  @override
+  String get errorPermissionDenied =>
+      'OpenROM não pode gravar na pasta de saída.';
+
+  @override
+  String get errorCorruptedFile =>
+      'O arquivo parece estar corrompido ou tem 0 bytes.';
+
+  @override
+  String get errorUnknown => 'Algo deu errado. Isso pode ser um erro.';
+
+  @override
+  String get errorDetailsLabel => 'Detalhes';
 
   @override
   String get retryButton => 'Tentar novamente';

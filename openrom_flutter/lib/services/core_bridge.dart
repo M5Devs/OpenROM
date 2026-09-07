@@ -4,8 +4,19 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../core/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
+
+class OpenROMException implements Exception {
+  final OpenROMError error;
+  final String? details;
+
+  OpenROMException(this.error, {this.details});
+
+  @override
+  String toString() => 'OpenROMException($error, details: $details)';
+}
 
 class CoreBridge {
   static String? _cachedCorePath;
@@ -24,15 +35,13 @@ class CoreBridge {
       return _cachedCorePath!;
     }
 
-    // Fallback: search relative to current working directory or system PATH
     if (File(binaryName).existsSync()) {
       _cachedCorePath = binaryName;
       return _cachedCorePath!;
     }
 
-    // Fallback to python script execution during dev / debug
     if (File('main.py').existsSync()) {
-      _cachedCorePath = 'python3';
+      _cachedCorePath = Platform.isWindows ? 'python' : 'python3';
       return _cachedCorePath!;
     }
 
@@ -40,7 +49,22 @@ class CoreBridge {
     return _cachedCorePath!;
   }
 
+  static Future<bool> coreExists() async {
+    final corePath = await getCoreExecutablePath();
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      return File('main.py').existsSync();
+    }
+    return File(corePath).existsSync();
+  }
+
   static Future<RomFile?> detectFile(String filepath) async {
+    if (!await coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    if (!File(filepath).existsSync()) {
+      throw OpenROMException(OpenROMError.fileNotFound, details: 'Input file not found: $filepath');
+    }
+
     try {
       final corePath = await getCoreExecutablePath();
       final List<String> args = [];
@@ -58,8 +82,20 @@ class CoreBridge {
           final Map<String, dynamic> jsonMap = jsonDecode(lines.last);
           return RomFile.fromJson(jsonMap);
         }
+      } else if (result.exitCode == 2) {
+        throw OpenROMException(OpenROMError.unsupportedFormat, details: result.stderr.toString());
+      } else {
+        throw OpenROMException(OpenROMError.conversionFailed, details: result.stderr.toString());
       }
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
     } catch (e) {
+      if (e is OpenROMException) rethrow;
       debugPrint('Error running detectFile: $e');
     }
     return null;
@@ -72,6 +108,21 @@ class CoreBridge {
     required Function(String log) onLog,
     required Function(bool success, String? error) onDone,
   }) async {
+    if (!await coreExists()) {
+      onDone(false, 'openrom-core binary missing');
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+
+    if (!File(job.romFile.filepath).existsSync()) {
+      onDone(false, 'Input file not found: ${job.romFile.filepath}');
+      throw OpenROMException(OpenROMError.fileNotFound, details: 'File not found: ${job.romFile.filepath}');
+    }
+
+    if (outputDir.isNotEmpty && !Directory(outputDir).existsSync()) {
+      onDone(false, 'Output directory does not exist: $outputDir');
+      throw OpenROMException(OpenROMError.outputDirNotFound, details: 'Output directory not found: $outputDir');
+    }
+
     try {
       final corePath = await getCoreExecutablePath();
       final List<String> args = [];
@@ -96,6 +147,7 @@ class CoreBridge {
       }
 
       final process = await Process.start(corePath, args);
+      final stderrLog = StringBuffer();
 
       process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
         if (line.trim().isEmpty) return;
@@ -115,9 +167,9 @@ class CoreBridge {
           } else if (type == 'error') {
             final String msg = event['message'] ?? 'Unknown error';
             onLog('[ERROR] $msg');
+            stderrLog.writeln(msg);
           }
         } catch (_) {
-          // Plain text log line fallback
           onLog(line);
         }
       });
@@ -125,20 +177,45 @@ class CoreBridge {
       process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
         if (line.trim().isNotEmpty) {
           onLog('[STDERR] $line');
+          stderrLog.writeln(line);
         }
       });
 
       final exitCode = await process.exitCode;
       if (exitCode != 0) {
-        onDone(false, 'Process exited with code $exitCode');
+        final details = stderrLog.isNotEmpty
+            ? stderrLog.toString().trim()
+            : 'Process exited with code $exitCode';
+        onDone(false, details);
+        if (exitCode == 1) {
+          throw OpenROMException(OpenROMError.conversionFailed, details: details);
+        } else if (exitCode == 2) {
+          throw OpenROMException(OpenROMError.unsupportedFormat, details: details);
+        } else {
+          throw OpenROMException(OpenROMError.unknownError, details: details);
+        }
       }
-    } catch (e) {
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
       onDone(false, e.toString());
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      onDone(false, e.toString());
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
+    } catch (e) {
+      if (e is OpenROMException) rethrow;
+      onDone(false, e.toString());
+      throw OpenROMException(OpenROMError.unknownError, details: e.toString());
     }
   }
 
   static Future<String> getVersion() async {
     try {
+      if (!await coreExists()) {
+        return 'OpenROM v2.2.0';
+      }
       final corePath = await getCoreExecutablePath();
       final List<String> args = [];
       if (corePath.endsWith('python3') || corePath.endsWith('python')) {
@@ -147,7 +224,8 @@ class CoreBridge {
         args.add('--version');
       }
       final result = await Process.run(corePath, args);
-      return result.stdout.toString().trim();
+      final out = result.stdout.toString().trim();
+      return out.isNotEmpty ? out : 'OpenROM v2.2.0';
     } catch (_) {
       return 'OpenROM v2.2.0';
     }

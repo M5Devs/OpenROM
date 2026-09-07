@@ -95,8 +95,34 @@ class AppLocalizationsFr extends AppLocalizations {
       'Espace disque insuffisant pour cette conversion.';
 
   @override
+  String get errorToolFailed =>
+      'L\'outil de conversion a échoué de manière inattendue.';
+
+  @override
   String get errorConversionFailed =>
       'La conversion a échoué. Le fichier ROM est peut-être corrompu.';
+
+  @override
+  String get errorFileNotFound =>
+      'Le fichier d\'entrée a été déplacé ou supprimé.';
+
+  @override
+  String get errorOutputDirNotFound =>
+      'Le dossier de sortie sélectionné n\'existe plus.';
+
+  @override
+  String get errorPermissionDenied =>
+      'OpenROM ne peut pas écrire dans le dossier de sortie.';
+
+  @override
+  String get errorCorruptedFile =>
+      'Le fichier semble corrompu ou fait 0 octet.';
+
+  @override
+  String get errorUnknown => 'Un problème est survenu. Il s\'agit peut-être d\'un bug.';
+
+  @override
+  String get errorDetailsLabel => 'Détails';
 
   @override
   String get retryButton => 'Réessayer';
