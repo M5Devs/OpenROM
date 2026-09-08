@@ -25,6 +25,9 @@ void main() {
 
       expect(find.text('ROM Compressor'), findsNWidgets(2));
       expect(find.text('M3U Generator'), findsOneWidget);
+      expect(find.text('CUE Generator'), findsOneWidget);
+      expect(find.text('BIN Merger'), findsOneWidget);
+      expect(find.text('Header Remover'), findsOneWidget);
       expect(find.text('Add Files'), findsOneWidget);
       expect(find.text('Add Folder'), findsOneWidget);
       expect(find.text('Output Format'), findsOneWidget);
@@ -33,18 +36,45 @@ void main() {
       expect(find.text('Extract'), findsOneWidget);
     });
 
-    testWidgets('Switches sub-tabs between ROM Compressor and M3U Generator', (WidgetTester tester) async {
+    testWidgets('Switches sub-tabs between tools', (WidgetTester tester) async {
       await tester.pumpWidget(createToolsScreen());
       await tester.pumpAndSettle();
 
+      // M3U Tab
       final m3uTabFinder = find.widgetWithText(Tab, 'M3U Generator');
       expect(m3uTabFinder, findsOneWidget);
-
       await tester.tap(m3uTabFinder);
       await tester.pumpAndSettle();
 
       expect(find.text('Generate M3U'), findsOneWidget);
       expect(find.text('Output folder'), findsOneWidget);
+
+      // CUE Generator Tab
+      final cueTabFinder = find.widgetWithText(Tab, 'CUE Generator');
+      expect(cueTabFinder, findsOneWidget);
+      await tester.tap(cueTabFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Generate CUE'), findsOneWidget);
+      expect(find.text('BIN File'), findsOneWidget);
+
+      // BIN Merger Tab
+      final binMergerTabFinder = find.widgetWithText(Tab, 'BIN Merger');
+      expect(binMergerTabFinder, findsOneWidget);
+      await tester.tap(binMergerTabFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Merge BINs'), findsOneWidget);
+      expect(find.text('CUE File (multi-track)'), findsOneWidget);
+
+      // Header Remover Tab
+      final headerRemoverTabFinder = find.widgetWithText(Tab, 'Header Remover');
+      expect(headerRemoverTabFinder, findsOneWidget);
+      await tester.tap(headerRemoverTabFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Remove Header'), findsOneWidget);
+      expect(find.text('Keep backup (.bak)'), findsOneWidget);
     });
   });
 }

@@ -236,4 +236,69 @@ class AppLocalizationsFr extends AppLocalizations {
   String m3uSuccess(String filename) {
     return 'Créé : $filename';
   }
+
+  @override
+  String get cueGeneratorTitle => 'Générateur CUE';
+
+  @override
+  String get cueGeneratorBinFile => 'Fichier BIN';
+
+  @override
+  String get cueGeneratorDetectedMode => 'Mode détecté';
+
+  @override
+  String get cueGeneratorButton => 'Générer CUE';
+
+  @override
+  String cueGeneratorSuccess(String filename) {
+    return 'Créé : $filename';
+  }
+
+  @override
+  String get binMergerTitle => 'Fusionneur de BIN';
+
+  @override
+  String get binMergerCueFile => 'Fichier CUE (multi-pistes)';
+
+  @override
+  String binMergerDetected(int count) {
+    return 'Détectés : $count fichiers BIN';
+  }
+
+  @override
+  String get binMergerButton => 'Fusionner les BIN';
+
+  @override
+  String binMergerSuccess(String filename) {
+    return 'Fusionné : $filename';
+  }
+
+  @override
+  String get headerRemoverTitle => 'Suppresseur d\'En-tête';
+
+  @override
+  String get headerRemoverSystem => 'Système';
+
+  @override
+  String get headerRemoverFound => 'En-tête trouvé';
+
+  @override
+  String get headerRemoverNotFound => 'Aucun en-tête trouvé';
+
+  @override
+  String get headerRemoverConfidence => 'Confiance';
+
+  @override
+  String get headerRemoverBackup => 'Conserver la sauvegarde (.bak)';
+
+  @override
+  String get headerRemoverButton => 'Supprimer l\'En-tête';
+
+  @override
+  String headerRemoverSuccess(String filename) {
+    return 'ROM propre : $filename';
+  }
+
+  @override
+  String get headerRemoverNoHeader => 'Aucun en-tête de copieur détecté.';
 }

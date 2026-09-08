@@ -531,6 +531,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Created: {filename}'**
   String m3uSuccess(String filename);
+
+  /// No description provided for @cueGeneratorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CUE Generator'**
+  String get cueGeneratorTitle;
+
+  /// No description provided for @cueGeneratorBinFile.
+  ///
+  /// In en, this message translates to:
+  /// **'BIN File'**
+  String get cueGeneratorBinFile;
+
+  /// No description provided for @cueGeneratorDetectedMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected mode'**
+  String get cueGeneratorDetectedMode;
+
+  /// No description provided for @cueGeneratorButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate CUE'**
+  String get cueGeneratorButton;
+
+  /// No description provided for @cueGeneratorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {filename}'**
+  String cueGeneratorSuccess(String filename);
+
+  /// No description provided for @binMergerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'BIN Merger'**
+  String get binMergerTitle;
+
+  /// No description provided for @binMergerCueFile.
+  ///
+  /// In en, this message translates to:
+  /// **'CUE File (multi-track)'**
+  String get binMergerCueFile;
+
+  /// No description provided for @binMergerDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected: {count} BIN files'**
+  String binMergerDetected(int count);
+
+  /// No description provided for @binMergerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge BINs'**
+  String get binMergerButton;
+
+  /// No description provided for @binMergerSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged: {filename}'**
+  String binMergerSuccess(String filename);
+
+  /// No description provided for @headerRemoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Header Remover'**
+  String get headerRemoverTitle;
+
+  /// No description provided for @headerRemoverSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get headerRemoverSystem;
+
+  /// No description provided for @headerRemoverFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Header Found'**
+  String get headerRemoverFound;
+
+  /// No description provided for @headerRemoverNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Header Found'**
+  String get headerRemoverNotFound;
+
+  /// No description provided for @headerRemoverConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get headerRemoverConfidence;
+
+  /// No description provided for @headerRemoverBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep backup (.bak)'**
+  String get headerRemoverBackup;
+
+  /// No description provided for @headerRemoverButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Header'**
+  String get headerRemoverButton;
+
+  /// No description provided for @headerRemoverSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean ROM: {filename}'**
+  String headerRemoverSuccess(String filename);
+
+  /// No description provided for @headerRemoverNoHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'No copier header detected.'**
+  String get headerRemoverNoHeader;
 }
 
 class _AppLocalizationsDelegate

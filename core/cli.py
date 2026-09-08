@@ -13,6 +13,10 @@ Usage examples:
   openrom --compress game.smc --format 7z --level ultra
   openrom --extract game.7z --output /roms/
   openrom --m3u "Disc1.chd" "Disc2.chd" --output /roms/
+  openrom --generate-cue game.bin
+  openrom --merge-bins game.cue --output /roms/
+  openrom --detect-header game.smc
+  openrom --remove-header game.smc --no-backup
 """
 
 import sys
@@ -29,6 +33,9 @@ from core.converter import Converter, ConversionJob
 from core.validator import verify_chd
 from core.compressor import Compressor, CompressionJob
 from core.m3u_generator import generate_m3u
+from core.cue_generator import generate_cue, detect_bin_mode
+from core.bin_merger import merge_bins, parse_cue
+from core.header_remover import detect_header, remove_header
 
 # ── ANSI colors (disabled on Windows if no ANSI support) ─────────────────────
 def _ansi(code: str) -> str:
@@ -88,6 +95,10 @@ examples:
   openrom --compress game.smc --format 7z --level ultra
   openrom --extract game.7z --output /roms/
   openrom --m3u "Disc1.chd" "Disc2.chd" --output /roms/
+  openrom --generate-cue game.bin
+  openrom --merge-bins game.cue --output /roms/
+  openrom --detect-header game.smc
+  openrom --remove-header game.smc --no-backup
         """,
     )
 
@@ -131,6 +142,26 @@ examples:
         metavar="DISC_FILE",
         help="disc file(s) to generate an M3U playlist for",
     )
+    src.add_argument(
+        "--generate-cue",
+        metavar="FILE",
+        help="generate CUE file for a BIN file",
+    )
+    src.add_argument(
+        "--merge-bins",
+        metavar="CUE_FILE",
+        help="merge multi-track BIN files referenced by CUE",
+    )
+    src.add_argument(
+        "--detect-header",
+        metavar="FILE",
+        help="detect copier header on ROM file",
+    )
+    src.add_argument(
+        "--remove-header",
+        metavar="FILE",
+        help="remove copier header from ROM file",
+    )
 
     # ── Conversion / Tools target ────────────────────────────────────────────
     parser.add_argument(
@@ -167,6 +198,11 @@ examples:
         "--delete-source",
         action="store_true",
         help="delete source file(s) after successful compression or extraction",
+    )
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        help="do not keep a .bak backup file when removing header",
     )
     parser.add_argument(
         "--absolute",
@@ -410,6 +446,129 @@ def cmd_m3u(disc_files: list[str], output_path: str | None, relative: bool, is_j
             print(f"  {RED}❌ Failed to generate M3U — {err_msg}{RESET}\n")
         return 2
 
+# ── --generate-cue ────────────────────────────────────────────────────────────
+def cmd_generate_cue(bin_file: str, output_dir: str | None, is_json: bool) -> int:
+    try:
+        mode = detect_bin_mode(bin_file)
+        cue_file = generate_cue(bin_file, output_dir=output_dir)
+        if is_json:
+            _json_print({
+                "type": "done",
+                "success": True,
+                "output": cue_file,
+                "detected_mode": mode,
+            })
+        else:
+            print(f"  Detected mode: {CYAN}{mode}{RESET}")
+            print(f"  {GREEN}✅ Created CUE: {cue_file}{RESET}\n")
+        return 0
+    except Exception as e:
+        err_msg = str(e)
+        if is_json:
+            _json_print({"type": "done", "success": False, "error": err_msg})
+        else:
+            print(f"  {RED}❌ Failed to generate CUE — {err_msg}{RESET}\n")
+        return 2
+
+# ── --merge-bins ──────────────────────────────────────────────────────────────
+def cmd_merge_bins(cue_file: str, output_dir: str | None, is_json: bool) -> int:
+    try:
+        tracks = parse_cue(cue_file)
+
+        def on_progress(pct: float):
+            if is_json:
+                _json_print({
+                    "type": "progress",
+                    "file": os.path.basename(cue_file),
+                    "percent": pct
+                })
+            else:
+                _render_progress(os.path.basename(cue_file), pct)
+
+        merged_bin, merged_cue = merge_bins(
+            cue_path=cue_file,
+            output_dir=output_dir,
+            on_progress=on_progress,
+        )
+        if not is_json:
+            _clear_progress()
+
+        if is_json:
+            _json_print({
+                "type": "done",
+                "success": True,
+                "merged_bin": merged_bin,
+                "merged_cue": merged_cue,
+                "tracks_count": len(tracks),
+            })
+        else:
+            print(f"  {GREEN}✅ Merged: {merged_bin}{RESET}\n")
+        return 0
+    except Exception as e:
+        if not is_json:
+            _clear_progress()
+        err_msg = str(e)
+        if is_json:
+            _json_print({"type": "done", "success": False, "error": err_msg})
+        else:
+            print(f"  {RED}❌ Failed to merge BINs — {err_msg}{RESET}\n")
+        return 2
+
+# ── --detect-header ───────────────────────────────────────────────────────────
+def cmd_detect_header(rom_file: str, is_json: bool) -> int:
+    res = detect_header(rom_file)
+    if res is None:
+        if is_json:
+            _json_print({
+                "type": "done",
+                "success": False,
+                "error": "No header detected or unsupported format",
+            })
+        else:
+            print(f"  {YELLOW}No copier header detected or file format unsupported.{RESET}\n")
+        return 1
+
+    if is_json:
+        _json_print({
+            "type": "done",
+            "success": True,
+            "system": res["system"],
+            "header_size": res["header_size"],
+            "has_header": res["has_header"],
+            "confidence": res["confidence"],
+        })
+    else:
+        print(f"  System: {CYAN}{res['system']}{RESET}")
+        print(f"  Header Found: {GREEN if res['has_header'] else YELLOW}{res['has_header']} ({res['header_size']} bytes){RESET}")
+        print(f"  Confidence: {res['confidence']}")
+
+    return 0
+
+# ── --remove-header ───────────────────────────────────────────────────────────
+def cmd_remove_header(rom_file: str, output_dir: str | None, no_backup: bool, is_json: bool) -> int:
+    try:
+        clean_rom = remove_header(
+            filepath=rom_file,
+            output_dir=output_dir,
+            backup=not no_backup,
+        )
+        if is_json:
+            _json_print({
+                "type": "done",
+                "success": True,
+                "output": clean_rom,
+            })
+        else:
+            print(f"  {GREEN}✅ Clean ROM: {clean_rom}{RESET}\n")
+        return 0
+    except Exception as e:
+        err_msg = str(e)
+        if is_json:
+            _json_print({"type": "done", "success": False, "error": err_msg})
+        else:
+            print(f"  {RED}❌ Failed to remove header — {err_msg}{RESET}\n")
+        return 2
+
 # ── Collect jobs from args ────────────────────────────────────────────────────
 def collect_jobs(args) -> list[ConversionJob]:
     jobs = []
@@ -617,12 +776,40 @@ def main() -> int:
             is_json=args.json,
         )
 
+    if args.generate_cue:
+        return cmd_generate_cue(
+            bin_file=args.generate_cue,
+            output_dir=args.output,
+            is_json=args.json,
+        )
+
+    if args.merge_bins:
+        return cmd_merge_bins(
+            cue_file=args.merge_bins,
+            output_dir=args.output,
+            is_json=args.json,
+        )
+
+    if args.detect_header:
+        return cmd_detect_header(
+            rom_file=args.detect_header,
+            is_json=args.json,
+        )
+
+    if args.remove_header:
+        return cmd_remove_header(
+            rom_file=args.remove_header,
+            output_dir=args.output,
+            no_backup=args.no_backup,
+            is_json=args.json,
+        )
+
     input_file = args.input or args.convert
     if not input_file and not args.folder:
         if args.json:
             _json_print({"type": "error", "message": "Provide --input, --convert FILE, --compress, --extract, --m3u, or --folder DIR"})
         else:
-            print(f"{RED}✗ Provide --input FILE, --folder DIR, or tool command (--compress, --extract, --m3u){RESET}")
+            print(f"{RED}✗ Provide --input FILE, --folder DIR, or tool command (--compress, --extract, --m3u, etc.){RESET}")
             parser.print_usage()
         return 2
 
