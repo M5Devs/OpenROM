@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://m5devs.github.io/OpenROM/sitemap.xml
