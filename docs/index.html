@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="OpenROM — Free, open-source universal ROM conversion suite. Convert ISO, CHD, CSO, RVZ and more. Windows, Linux, macOS."/>
+  <title>OpenROM — Universal ROM Conversion Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #13131f;
+      --surface2:  #1c1c2e;
+      --accent:    #e94560;
+      --cyan:      #00d4ff;
+      --purple:    #9b59ff;
+      --text:      #f0f0f8;
+      --muted:     #8888a4;
+      --border:    rgba(255,255,255,0.07);
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 600 !important;
+    }
+
+    .nav-cta:hover { background: #c73350 !important; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,69,96,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent);
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(233,69,96,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .romeo-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 32px;
+    }
+
+    .romeo-img {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 24px rgba(0,212,255,0.5)) drop-shadow(0 0 48px rgba(155,89,255,0.3));
+      animation: romeo-float 3s ease-in-out infinite;
+    }
+
+    @keyframes romeo-float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    .romeo-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(233,69,96,0.1);
+      border: 1px solid rgba(233,69,96,0.25);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      font-family: var(--font-mono);
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: var(--font-head);
+      font-size: clamp(42px, 7vw, 80px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+      max-width: 800px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-primary:hover { background: #c73350; transform: translateY(-1px); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      text-decoration: none;
+      font-family: var(--font-head);
+      font-weight: 500;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, transform 0.15s;
+    }
+
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-number {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 96px 24px; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      max-width: 520px;
+      font-size: 17px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ── FEATURES ── */
+    #features { background: var(--surface); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .feature-item {
+      background: var(--surface);
+      padding: 32px;
+      transition: background 0.2s;
+    }
+
+    .feature-item:hover { background: var(--surface2); }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .feature-title {
+      font-family: var(--font-head);
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── FORMATS ── */
+    #formats { background: var(--bg); }
+
+    .format-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .format-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-weight: 500;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .format-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .format-table tr:last-child td { border-bottom: none; }
+    .format-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .fmt-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .fmt-iso  { background: rgba(233,69,96,0.15);  color: #e94560; }
+    .fmt-chd  { background: rgba(0,212,255,0.12);  color: #00d4ff; }
+    .fmt-cso  { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .fmt-rvz  { background: rgba(155,89,255,0.12); color: #9b59ff; }
+    .fmt-ecm  { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .fmt-xiso { background: rgba(249,115,22,0.12); color: #f97316; }
+    .fmt-bin  { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .fmt-gdi  { background: rgba(155,89,255,0.12); color: #9b59ff; }
+
+    .platform-tag {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── DOWNLOAD ── */
+    #download { background: var(--surface); }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .download-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .download-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .dl-os {
+      font-size: 28px;
+    }
+
+    .dl-name {
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .dl-arch {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    .dl-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .download-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .download-note a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── CLI ── */
+    #cli { background: var(--bg); }
+
+    .cli-block {
+      background: #07070f;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .cli-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cli-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .cli-dot:nth-child(1) { background: #ff5f57; }
+    .cli-dot:nth-child(2) { background: #febc2e; }
+    .cli-dot:nth-child(3) { background: #28c840; }
+
+    .cli-title {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .cli-body {
+      padding: 28px 28px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .cli-comment { color: #3d3d5c; }
+    .cli-prompt  { color: var(--accent); }
+    .cli-cmd     { color: var(--cyan); }
+    .cli-arg     { color: #4ade80; }
+    .cli-flag    { color: #fbbf24; }
+    .cli-out     { color: var(--muted); }
+
+    /* ── ROADMAP ── */
+    #roadmap { background: var(--surface); }
+
+    .roadmap-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .roadmap-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+    }
+
+    .roadmap-item:last-child { border-bottom: none; }
+
+    .roadmap-item:hover { background: rgba(255,255,255,0.02); }
+
+    .ri-status {
+      font-size: 18px;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    .ri-text { flex: 1; }
+    .ri-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      margin-left: auto;
+    }
+
+    .label-done    { color: #4ade80; }
+    .label-soon    { color: var(--cyan); }
+    .label-planned { color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer-tagline {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 13px;
+      color: #3d3d5c;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      section { padding: 64px 20px; }
+      .hero-stats { gap: 24px; }
+      .cli-body { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Open<span>ROM</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#formats">Formats</a></li>
+    <li><a href="#cli">CLI</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="https://github.com/M5Devs/OpenROM" target="_blank" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="romeo-wrap">
+    <img src="assets/romeo.png" alt="ROMeo mascot" class="romeo-img" onerror="this.style.display='none'"/>
+    <span class="romeo-label">ROMeo ♥</span>
+  </div>
+
+  <div class="hero-badge">v2.6.0 — now with Patcher & Tools</div>
+
+  <h1>One tool for<br/><em>every ROM</em></h1>
+
+  <p class="hero-sub">
+    Convert, patch, compress and verify your retro game collection.
+    No install. No telemetry. No cloud. Just drop and convert.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://github.com/M5Devs/OpenROM/releases/latest" class="btn-primary">
+      ↓ Download free
+    </a>
+    <a href="https://github.com/M5Devs/OpenROM" class="btn-ghost">
+      ★ GitHub
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-number">20+</span>
+      <div class="stat-label">conversion paths</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">4</span>
+      <div class="stat-label">platforms</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">100%</span>
+      <div class="stat-label">offline</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">WHAT IT DOES</div>
+    <h2>Everything your ROM library needs</h2>
+    <p class="section-desc">Built around real preservation workflows — not a port of someone else's tool.</p>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">🔄</span>
+        <div class="feature-title">Smart Conversion</div>
+        <p class="feature-desc">Magic byte detection picks the right conversion path automatically — no manual format selection.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🩹</span>
+        <div class="feature-title">ROM Patcher</div>
+        <p class="feature-desc">Apply IPS, BPS, UPS, xdelta, PPF, and APS patches directly — no separate tool needed.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🗜️</span>
+        <div class="feature-title">ROM Compressor</div>
+        <p class="feature-desc">ZIP and 7Z compression for cartridge games, plus M3U playlist generation for multi-disc sets.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">✅</span>
+        <div class="feature-title">CHD Verification</div>
+        <p class="feature-desc">Post-conversion integrity check via chdman verify — know your CHD is good before you delete the source.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🎨</span>
+        <div class="feature-title">Themeable UI</div>
+        <p class="feature-desc">Gaming Dashboard, Cyberpunk, Terminal, Minimal — or build your own theme with a JSON file.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Headless CLI</div>
+        <p class="feature-desc">openrom-core for shell scripts, automation pipelines, and batch jobs on headless servers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section id="formats">
+  <div class="container">
+    <div class="section-label">CONVERSION MATRIX</div>
+    <h2>Every path, covered</h2>
+    <p class="section-desc">20+ conversion routes across the major retro platforms.</p>
+
+    <table class="format-table">
+      <thead>
+        <tr>
+          <th>INPUT</th>
+          <th>OUTPUT</th>
+          <th>PLATFORM</th>
+          <th>TOOL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="fmt-badge fmt-iso">ISO</span></td>
+          <td><span class="fmt-badge fmt-chd">CHD</span><span class="fmt-badge fmt-cso">CSO</span><span class="fmt-badge fmt-ecm">ECM</span><span class="fmt-badge fmt-rvz">RVZ</span></td>
+          <td><span class="platform-tag">PS1 / PS2 / PSP / GC / Wii</span></td>
+          <td>chdman / maxcso / nodtool</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-bin">BIN/CUE</span></td>
+          <td><span class="fmt-badge fmt-chd">CHD</span><span class="fmt-badge fmt-ecm">ECM</span></td>
+          <td><span class="platform-tag">PS1 / Sega CD / Saturn</span></td>
+          <td>chdman / ecm</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-chd">CHD</span></td>
+          <td><span class="fmt-badge fmt-iso">ISO</span><span class="fmt-badge fmt-bin">BIN/CUE</span></td>
+          <td><span class="platform-tag">All CD-based systems</span></td>
+          <td>chdman</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-gdi">GDI</span></td>
+          <td><span class="fmt-badge fmt-chd">CHD</span></td>
+          <td><span class="platform-tag">Dreamcast</span></td>
+          <td>chdman</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-xiso">XISO</span></td>
+          <td><span class="fmt-badge fmt-iso">Files</span></td>
+          <td><span class="platform-tag">Original Xbox</span></td>
+          <td>extract-xiso</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-rvz">RVZ / WIA / WBFS / GCZ</span></td>
+          <td><span class="fmt-badge fmt-iso">ISO</span></td>
+          <td><span class="platform-tag">GameCube / Wii</span></td>
+          <td>nodtool</td>
+        </tr>
+        <tr>
+          <td><span class="fmt-badge fmt-cso">CSO / ZSO</span></td>
+          <td><span class="fmt-badge fmt-iso">ISO</span></td>
+          <td><span class="platform-tag">PSP</span></td>
+          <td>maxcso</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CLI -->
+<section id="cli">
+  <div class="container">
+    <div class="section-label">HEADLESS CLI</div>
+    <h2>Scriptable, pipeable, automatable</h2>
+    <p class="section-desc">openrom-core ships alongside the GUI in every release.</p>
+
+    <div class="cli-block">
+      <div class="cli-header">
+        <div class="cli-dot"></div>
+        <div class="cli-dot"></div>
+        <div class="cli-dot"></div>
+        <span class="cli-title">openrom-core</span>
+      </div>
+      <div class="cli-body">
+        <div><span class="cli-comment"># detect format and platform</span></div>
+        <div><span class="cli-prompt">$</span> <span class="cli-cmd">openrom-core</span> <span class="cli-flag">--detect</span> <span class="cli-arg">game.iso</span></div>
+        <div><span class="cli-out">  format: ISO  platform: PS2  size: 4.3 GB</span></div>
+        <br/>
+        <div><span class="cli-comment"># convert to CHD</span></div>
+        <div><span class="cli-prompt">$</span> <span class="cli-cmd">openrom-core</span> <span class="cli-flag">--input</span> <span class="cli-arg">game.iso</span> <span class="cli-flag">--format</span> <span class="cli-arg">CHD</span></div>
+        <br/>
+        <div><span class="cli-comment"># batch convert entire folder</span></div>
+        <div><span class="cli-prompt">$</span> <span class="cli-cmd">openrom-core</span> <span class="cli-flag">--folder</span> <span class="cli-arg">/roms/ps2/</span> <span class="cli-flag">--format</span> <span class="cli-arg">CHD</span> <span class="cli-flag">--compression</span> <span class="cli-arg">Max</span></div>
+        <br/>
+        <div><span class="cli-comment"># JSON output for scripting</span></div>
+        <div><span class="cli-prompt">$</span> <span class="cli-cmd">openrom-core</span> <span class="cli-flag">--json</span> <span class="cli-flag">--detect</span> <span class="cli-arg">game.iso</span></div>
+        <div><span class="cli-out">  {"format":"ISO","platform":"PS2","size_bytes":4617089024}</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="container">
+    <div class="section-label">DOWNLOAD</div>
+    <h2>Free. No account. No install.</h2>
+    <p class="section-desc">Unzip and run. Every release includes the GUI and the headless CLI.</p>
+
+    <div class="download-grid">
+      <a href="https://github.com/M5Devs/OpenROM/releases/latest" class="download-card">
+        <div class="dl-os">🪟</div>
+        <div class="dl-name">Windows</div>
+        <div class="dl-arch">x86_64 portable ZIP</div>
+        <div class="dl-note">No install required</div>
+      </a>
+      <a href="https://github.com/M5Devs/OpenROM/releases/latest" class="download-card">
+        <div class="dl-os">🐧</div>
+        <div class="dl-name">Linux</div>
+        <div class="dl-arch">x86_64 AppImage</div>
+        <div class="dl-note">Runs on any distro</div>
+      </a>
+      <a href="https://github.com/M5Devs/OpenROM/releases/latest" class="download-card">
+        <div class="dl-os">🍎</div>
+        <div class="dl-name">macOS Apple Silicon</div>
+        <div class="dl-arch">arm64 DMG</div>
+        <div class="dl-note">M1 / M2 / M3 / M4</div>
+      </a>
+      <a href="https://github.com/M5Devs/OpenROM/releases/latest" class="download-card">
+        <div class="dl-os">🍎</div>
+        <div class="dl-name">macOS Intel</div>
+        <div class="dl-arch">x86_64 DMG</div>
+        <div class="dl-note">Rosetta compatible</div>
+      </a>
+    </div>
+
+    <p class="download-note">
+      Also available on <a href="https://sourceforge.net/projects/openrom/" target="_blank">SourceForge</a> as a mirror.
+      Licensed under <a href="https://github.com/M5Devs/OpenROM/blob/main/LICENSE" target="_blank">GPL v3 + Commons Clause</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="container">
+    <div class="section-label">ROADMAP</div>
+    <h2>What's coming</h2>
+    <p class="section-desc">Built in public. Every feature tracked on GitHub.</p>
+
+    <ul class="roadmap-list">
+      <li class="roadmap-item">
+        <span class="ri-status">✅</span>
+        <span class="ri-text">Flutter desktop UI (Gaming Dashboard theme)</span>
+        <span class="ri-label label-done">v2.5.0</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">✅</span>
+        <span class="ri-text">ROM Patcher — IPS, BPS, UPS, xdelta, PPF, APS</span>
+        <span class="ri-label label-done">v2.6.0</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">✅</span>
+        <span class="ri-text">Tools tab — Compressor, M3U Generator, CUE Generator</span>
+        <span class="ri-label label-done">v2.6.0</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">✅</span>
+        <span class="ri-text">Internationalization — 6 languages</span>
+        <span class="ri-label label-done">v2.6.0</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">🔵</span>
+        <span class="ri-text">ROM Checker — No-Intro DAT + RetroAchievements hash lookup</span>
+        <span class="ri-label label-soon">next</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">🔵</span>
+        <span class="ri-text">Android support via Termux</span>
+        <span class="ri-label label-soon">next</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">○</span>
+        <span class="ri-text">chdman-simd — optional performance mode (−71% compression time)</span>
+        <span class="ri-label label-planned">planned</span>
+      </li>
+      <li class="roadmap-item">
+        <span class="ri-status">○</span>
+        <span class="ri-text">Linux ARM64 builds — Raspberry Pi, ODROID</span>
+        <span class="ri-label label-planned">planned</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Open<span>ROM</span></div>
+  <p class="footer-tagline">Your ROM companion — ROMeo ♥</p>
+
+  <ul class="footer-links">
+    <li><a href="https://github.com/M5Devs/OpenROM" target="_blank">GitHub</a></li>
+    <li><a href="https://github.com/M5Devs/OpenROM/releases" target="_blank">Releases</a></li>
+    <li><a href="https://github.com/M5Devs/OpenROM/wiki" target="_blank">Wiki</a></li>
+    <li><a href="https://github.com/M5Devs/OpenROM/issues" target="_blank">Issues</a></li>
+    <li><a href="https://sourceforge.net/projects/openrom/" target="_blank">SourceForge</a></li>
+  </ul>
+
+  <p class="footer-copy">GPL v3 + Commons Clause · Built by M5 Dev · Free forever</p>
+</footer>
+
+</body>
+</html>
