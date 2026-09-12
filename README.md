@@ -6,7 +6,7 @@
 <p align="center"><b>Universal ROM Conversion Suite</b> — by M5 Dev</p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3%20%2B%20Commons%20Clause-red.svg"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"/></a>
   <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dt/openrom.svg?color=2ea043&logo=sourceforge"/></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android%20soon-cyan"/>
   <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/v/release/M5Devs/OpenROM"/></a>
@@ -195,13 +195,13 @@ Contributions are welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) for guideline
 
 ## 📄 License
 
-OpenROM is licensed under **GPL v3 + Commons Clause**.
+OpenROM is licensed under the **GNU General Public License v3.0 (GPL v3)** — a free, copyleft license approved by the Open Source Initiative.
 
 | | |
 |---|---|
-| ✅ | Free to use personally |
-| ✅ | Free to study, modify, and contribute |
-| ✅ | Forks must remain open source |
-| ❌ | Cannot be sold or bundled commercially without permission |
+| ✅ | Free to use personally and commercially |
+| ✅ | Free to study, modify, and distribute |
+| ✅ | Forks must remain open source under GPL v3 |
+| ✅ | Listed on Flathub, Linux distros, and OSI-compliant repos |
 
-Commercial licensing: open a discussion on GitHub or reach out on [Twitter/X @M5Devs](https://x.com/M5Devs)
+See [LICENSE](LICENSE) for the full license text.
