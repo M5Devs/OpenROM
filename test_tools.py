@@ -181,3 +181,24 @@ def test_header_remover():
 
         clean_snes = remove_header(snes_file, backup=False)
         assert os.path.getsize(clean_snes) == 1024
+
+
+def test_iso_to_chd_command_selection():
+    from core.converter import Converter, ConversionJob
+    class TestConverter(Converter):
+        def _run(self, cmd, job):
+            self.last_cmd = cmd
+            return True
+
+    c = TestConverter()
+    job = ConversionJob('ps1_game.iso', '/tmp', 'CHD')
+    c._to_chd(job, 'ps1_game.iso', 'ISO', {'platform': 'PS1'})
+    assert c.last_cmd[1] == 'createcd'
+
+    job = ConversionJob('dc_game.iso', '/tmp', 'CHD')
+    c._to_chd(job, 'dc_game.iso', 'ISO', {'platform': 'Dreamcast'})
+    assert c.last_cmd[1] == 'createcd'
+
+    job = ConversionJob('ps2_game.iso', '/tmp', 'CHD')
+    c._to_chd(job, 'ps2_game.iso', 'ISO', {'platform': 'PS2'})
+    assert c.last_cmd[1] == 'createdvd'

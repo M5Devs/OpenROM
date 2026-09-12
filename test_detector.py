@@ -40,5 +40,27 @@ class TestDetector(unittest.TestCase):
                 self.assertEqual(res["format"], expected_fmt, f"Failed format check for {filename}")
                 self.assertEqual(res["valid_targets"], expected_targets, f"Failed targets check for {filename}")
 
+    def test_xbox_magic_detection(self):
+        xbox_magic = b"MICROSOFT*XBOX*MEDIA"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Fast path (offset 0x10000)
+            fast_path = os.path.join(tmpdir, "xbox_fast.iso")
+            with open(fast_path, "wb") as f:
+                f.write(b"\x00" * 0x10000)
+                f.write(xbox_magic)
+                f.write(b"\x00" * 1024)
+
+            res_fast = detect_file(fast_path)
+            self.assertEqual(res_fast["platform"], "Xbox")
+
+            # Slow path (offset 0x2090000)
+            slow_path = os.path.join(tmpdir, "xbox_slow.iso")
+            with open(slow_path, "wb") as f:
+                f.seek(0x2090000)
+                f.write(xbox_magic)
+
+            res_slow = detect_file(slow_path)
+            self.assertEqual(res_slow["platform"], "Xbox")
+
 if __name__ == "__main__":
     unittest.main()
