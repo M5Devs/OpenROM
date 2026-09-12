@@ -2,9 +2,21 @@
 
 Thank you for helping make OpenROM accessible to gamers and preservationists around the world!
 
-## Contributing Translations
+## 🌐 Translate via Weblate
 
-OpenROM uses Flutter's standard Application Resource Bundle (`.arb`) format for localizations.
+The easiest way to contribute a translation is through our Weblate project — no Git knowledge needed:
+
+**👉 https://hosted.weblate.org/engage/openrom/**
+
+[![Translation status](https://hosted.weblate.org/widget/openrom/multi-auto.svg)](https://hosted.weblate.org/engage/openrom/)
+
+Just pick your language, start translating, and Weblate will open a Pull Request automatically. Native speakers of any language are welcome!
+
+---
+
+## Contributing Translations via Git
+
+Prefer working directly with files? OpenROM uses Flutter's standard Application Resource Bundle (`.arb`) format.
 All translation files are located in `openrom_flutter/lib/l10n/`.
 
 ### How to Add a New Language
@@ -39,9 +51,13 @@ All translation files are located in `openrom_flutter/lib/l10n/`.
 
 Special thanks to the community members contributing localizations:
 
-- **English (`en`)**: OpenROM Team
-- **Arabic (`ar`)**: OpenROM Team
-- **Spanish (`es`)**: OpenROM Team
-- **French (`fr`)**: OpenROM Team
-- **Japanese (`ja`)**: OpenROM Team
-- **Portuguese (Brazilian) (`pt`)**: OpenROM Team
+| Language | Code | Status | Maintainer |
+|----------|------|--------|------------|
+| English | `en` | ✅ Complete | OpenROM Team |
+| Arabic | `ar` | ✅ Complete | [@clausvalcatd](https://github.com/clausvalcatd) |
+| French | `fr` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
+| Spanish | `es` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
+| Japanese | `ja` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
+| Portuguese (BR) | `pt` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
+
+> **Want to maintain a language?** Translate via Weblate or open a PR and your name will be listed here! 🎉
