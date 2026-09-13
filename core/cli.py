@@ -169,6 +169,16 @@ examples:
         metavar="FORMAT",
         help="output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z",
     )
+    parser.add_argument(
+        "--force-platform",
+        metavar="PLATFORM",
+        help=(
+            "override automatic platform detection. "
+            "Use when converting modded or patched ISOs whose headers were altered. "
+            "Valid values: PS1, PS2, PSP, GameCube, Wii, Xbox, Dreamcast, Saturn, "
+            "Sega CD, PC-Engine CD, Neo Geo CD"
+        ),
+    )
 
     # ── Options ──────────────────────────────────────────────────────────────
     parser.add_argument(
@@ -232,7 +242,7 @@ examples:
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version="OpenROM v2.2.0",
+        version="OpenROM v2.7.0",
     )
 
     return parser
@@ -582,6 +592,7 @@ def collect_jobs(args) -> list[ConversionJob]:
             target_format="CHD",        # placeholder; resolved below
             compression=args.compression,
             verify=args.verify,
+            force_platform=args.force_platform,
         )
         info = job.get_file_info()
 
