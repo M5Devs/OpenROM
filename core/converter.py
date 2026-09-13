@@ -20,12 +20,14 @@ CHD_COMPRESSION = {
 
 class ConversionJob:
     def __init__(self, filepath: str, output_dir: str,
-                 target_format: str, compression: str = "Normal", verify: bool = False):
+                 target_format: str, compression: str = "Normal", verify: bool = False,
+                 force_platform: str = None):
         self.filepath      = filepath
         self.output_dir    = output_dir
         self.target_format = target_format   # "CHD","CSO","XISO","ECM","ISO","BIN","BIN/CUE","Files"
         self.compression   = compression     # "Normal","High","Max"
         self.verify        = verify
+        self.force_platform = force_platform
         self.status        = "Queued"        # Queued|Converting|Done|Failed
         self.progress      = 0.0
         self.log_lines     = []
@@ -38,6 +40,9 @@ class ConversionJob:
         if self._file_info is None:
             from core.detector import detect_file
             self._file_info = detect_file(self.filepath)
+            # Override platform if user forced it
+            if self.force_platform:
+                self._file_info["platform"] = self.force_platform.strip()
         return self._file_info
 
 
@@ -89,6 +94,12 @@ class Converter:
     def _dispatch(self, job: ConversionJob) -> bool:
         info = job.get_file_info()
         src  = job.filepath
+
+        if job.force_platform:
+            self._log(
+                f"[INFO] Platform override: using '{job.force_platform}' "
+                f"(auto-detected: {info.get('platform', 'UNKNOWN')})"
+            )
 
         if "error" in info:
             self._log(f"[ERROR] {info['error']}")
