@@ -7,16 +7,18 @@ echo ========================================
 :: Install dependencies
 echo [1/4] Installing dependencies...
 pip install -r requirements.txt
-pip install pyinstaller>=6.0.0
+pip install nuitka zstandard ordered-set
 
 :: Build Python core executable
 echo [2/4] Building openrom-core executable...
-pyinstaller ^
-  --noconfirm ^
+python -m nuitka ^
   --onefile ^
-  --name "openrom-core" ^
-  --add-data "assets;assets" ^
-  --icon "assets/icon.ico" ^
+  --output-filename=openrom-core ^
+  --output-dir=dist ^
+  --include-data-dir=assets=assets ^
+  --windows-icon-from-ico=assets/icon.ico ^
+  --assume-yes-for-downloads ^
+  --quiet ^
   core/cli.py
 
 :: Build Flutter desktop executable
