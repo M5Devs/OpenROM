@@ -33,12 +33,27 @@ flutter build macos --release
 cd ..
 
 # Package release files
-echo "[4/4] Packaging release..."
+echo "[4/4] Packaging and signing release..."
 mkdir -p dist/release
 cp -r openrom_flutter/build/macos/Build/Products/Release/*.app dist/release/
 APP_BUNDLE=$(ls -d dist/release/*.app | head -n 1)
 if [ -n "$APP_BUNDLE" ]; then
   cp dist/openrom-core "$APP_BUNDLE/Contents/MacOS/"
+
+  # Fix: make openrom-core executable inside the bundle
+  chmod +x "$APP_BUNDLE/Contents/MacOS/openrom-core"
+
+  # Fix: remove quarantine flags macOS puts on downloaded files
+  xattr -cr "$APP_BUNDLE"
+
+  # Fix: ad-hoc sign the entire bundle with entitlements
+  # (no Apple Developer account needed — "-" means ad-hoc identity)
+  codesign --deep --force \
+    --entitlements macos_entitlements.plist \
+    --sign - \
+    "$APP_BUNDLE"
+
+  echo "✅ App bundle signed with ad-hoc identity"
 fi
 cp dist/openrom-core dist/release/
 if [ -d "themes" ]; then cp -r themes dist/release/; fi
