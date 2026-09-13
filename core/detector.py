@@ -124,8 +124,9 @@ _WII_MAGIC  = 0x5D1C9EA3
 _CD_SYNC    = b'\x00' + b'\xff' * 10 + b'\x00'
 
 # Xbox XDVDFS magic
-_XBOX_MAGIC         = b"MICROSOFT*XBOX*MEDIA"
-_XBOX_OFFSETS       = [0x10000, 0x2090000]
+_XBOX_MAGIC    = b"MICROSOFT*XBOX*MEDIA"
+_XBOX_OFFSET_1 = 0x10000
+_XBOX_OFFSET_2 = 0x2090000
 
 
 # ── Public helpers ───────────────────────────────────────────────────────────
@@ -258,9 +259,12 @@ def _guess_platform(filepath: str, fmt: str, size: int, header: bytes) -> str:
         return "Xbox"
 
     if fmt in ("ISO", "BIN", "IMG", "CUE"):
-        # Xbox: XDVDFS magic at fixed sector offsets (only readable for ISO/IMG)
-        if fmt in ("ISO", "IMG") and _header_has_xbox_magic(header):
-            return "Xbox"
+        # Xbox check — try fast path first, then slow seek
+        if fmt in ("ISO", "IMG"):
+            if _header_has_xbox_magic(header):
+                return "Xbox"
+            if _file_has_xbox_magic_slow(filepath):
+                return "Xbox"
 
         # PSP: UMD_DATA / PSP_GAME marker in first 64 KB
         if fmt in ("ISO", "IMG") and _header_has_psp_magic(header):
@@ -295,11 +299,18 @@ def _guess_platform(filepath: str, fmt: str, size: int, header: bytes) -> str:
 
 
 def _header_has_xbox_magic(header: bytes) -> bool:
-    """Check XDVDFS magic at offset 0x10000. Offset 0x2090000 requires a seek — skipped here."""
-    offset = 0x10000
-    if len(header) >= offset + 20:
-        return header[offset:offset + 20] == _XBOX_MAGIC
-    return False
+    """Fast path — checks offset 0x10000 from preloaded header."""
+    return header[_XBOX_OFFSET_1:_XBOX_OFFSET_1 + len(_XBOX_MAGIC)] == _XBOX_MAGIC
+
+
+def _file_has_xbox_magic_slow(filepath: str) -> bool:
+    """Slow path — seeks to offset 0x2090000 for Xbox 360 / alt layout ISOs."""
+    try:
+        with open(filepath, "rb") as f:
+            f.seek(_XBOX_OFFSET_2)
+            return f.read(len(_XBOX_MAGIC)) == _XBOX_MAGIC
+    except Exception:
+        return False
 
 
 def _header_has_psp_magic(header: bytes) -> bool:

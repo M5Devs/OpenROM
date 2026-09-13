@@ -150,7 +150,7 @@ class Converter:
             sub_cmd = "createcd"
         elif fmt in ("ISO", "IMG"):
             platform = info.get("platform", "")
-            sub_cmd = "createcd" if "PS1" in platform else "createdvd"
+            sub_cmd = "createcd" if platform in ("PS1", "Dreamcast") else "createdvd"
         else:
             sub_cmd = "createcd"
 
