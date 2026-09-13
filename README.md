@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">⬡ OpenROM</h1>
-<p align="center"><b>Universal ROM Conversion Suite</b> — by M5 Dev</p>
+<p align="center"><b>Universal Retro Gaming Toolkit</b> — by M5 Dev</p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"/></a>
@@ -19,7 +19,7 @@
 
 > 🎮 Meet **ROMeo** — OpenROM's official mascot. Your friendly pixel-art cartridge companion for all things ROM.
 
-OpenROM is a free, open-source Universal ROM Conversion Suite built to replace every proprietary and fragmented ROM tool out there. Powered by a modern **Flutter desktop UI** with a gaming dashboard aesthetic, real-time terminal logging, batch processing, smart platform detection, and a full headless CLI for automation — all running **100% offline**.
+OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to replace every fragmented ROM tool out there. Convert, patch, compress, clean, and manage your ROM collection with a modern **Flutter desktop UI**, real-time terminal logging, smart platform detection, and a full headless CLI for automation — all running **100% offline**.
 
 ---
 
@@ -41,14 +41,38 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 ## 🎮 Features
 
-- **Gaming Dashboard UI** — Flutter-powered dark interface inspired by PS5/Xbox aesthetics, with ROM cards, platform badges, and real-time progress.
-- **Themeable** — Swap between built-in themes (Gaming Dashboard, Cyberpunk, Terminal, Minimal) or create your own via JSON.
-- **Complete Conversion Matrix** — 20+ conversion paths: ISO, BIN, CUE, GDI, IMG, ECM, CHD, CSO, ZSO, XISO, RVZ, WIA, WBFS, GCZ.
+### 🔁 ROM Conversion
+- **20+ conversion paths** — ISO, BIN, CUE, GDI, IMG, ECM, CHD, CSO, ZSO, XISO, RVZ, WIA, WBFS, GCZ and more.
 - **Smart Platform Detection** — Magic byte detection for PS1, PS2, PSP, Xbox, GameCube, Wii, Dreamcast — not size guessing.
 - **Real CHD Header Parsing** — Reads actual CHD v4/v5 headers to determine CD vs DVD type accurately.
 - **Auto CUE Generation** — Generates CUE sheets for standalone BIN files with correct track mode (MODE1/MODE2/AUDIO).
 - **Integrity Verification** — Post-conversion CHD integrity check via `chdman verify`.
-- **Batch Processing** — Drop a whole folder, convert everything at once.
+
+### 🩹 ROM Patching
+- **9 patch formats** — IPS, IPS32, UPS, BPS, PPF, APS, EBP, DPS, xdelta3.
+- **Auto format detection** — Drop a patch file and OpenROM detects the format automatically.
+- **Checksum verification** — CRC32 integrity checks before and after patching with a detailed report.
+- **Ignore checksum mode** — Force-apply patches even on modified ROMs.
+
+### 🗜️ Compression & Extraction
+- **ZIP and 7Z support** — Compress ROMs or entire folders with fast / normal / ultra presets.
+- **Smart skip** — Already-compressed formats (CHD, CSO, RVZ, 7Z…) are automatically skipped.
+- **Batch extraction** — Extract ZIP and 7Z archives with progress tracking.
+- **Delete source option** — Auto-clean source files after successful compression.
+
+### 🧹 ROM Header Removal
+- **Copier header detection and removal** for NES (iNES), SNES (SMC), Game Boy / GBC — with confidence rating (certain / likely).
+- **Auto backup** — Original ROM backed up as `.bak` before any modification.
+- **Non-destructive** — Output written to a separate file; source untouched by default.
+
+### 🗂️ Collection Utilities
+- **M3U Playlist Generator** — Auto-generate M3U playlists for multi-disc games (PS1, Saturn, etc.).
+- **BIN Merger** — Merge multi-track BIN files into a single BIN + CUE.
+- **Batch Processing** — Drop a whole folder, process everything at once.
+
+### 🖥️ UI & Workflow
+- **Gaming Dashboard UI** — Flutter-powered dark interface inspired by PS5/Xbox aesthetics, with ROM cards, platform badges, and real-time progress.
+- **Themeable** — Swap between built-in themes (Gaming Dashboard, Cyberpunk, Terminal, Minimal) or create your own via JSON.
 - **Real-time Terminal Log** — Live process output with timestamps, slides up during conversion.
 - **Drag & Drop** — Native drag and drop for files and folders.
 - **Full Headless CLI** — `openrom-core` for scripting, automation, and Flutter IPC.
@@ -60,7 +84,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 | Input | Output | Tool | Notes |
 |-------|--------|------|-------|
-| ISO | CHD | chdman | `createcd` for PS1, `createdvd` for PS2/GC |
+| ISO | CHD | chdman | `createcd` for PS1/Dreamcast, `createdvd` for PS2/GC |
 | ISO | CSO | maxcso | PSP / PS2 |
 | ISO | ECM | ecm | |
 | ISO | XISO | extract-xiso | Xbox |
@@ -83,6 +107,22 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 ---
 
+## 🩹 Supported Patch Formats
+
+| Format | Systems |
+|--------|---------|
+| IPS / IPS32 | NES, SNES, GBA, and most retro systems |
+| UPS | Universal — any ROM |
+| BPS | Universal — any ROM |
+| PPF | PS1 / PS2 disc patches |
+| APS (GBA) | Game Boy Advance |
+| APS (N64) | Nintendo 64 |
+| EBP | EarthBound / SNES |
+| DPS | DOS / PC |
+| xdelta3 / VCDIFF | Large ROMs, disc images, PS2, PSP |
+
+---
+
 ## 💻 CLI Usage
 
 ```bash
@@ -98,11 +138,20 @@ openrom-core --folder /roms/ --format CHD --compression Max
 # Convert with verification
 openrom-core --input game.iso --format CHD --verify
 
+# Apply a patch
+openrom-core --patch game.sfc --patch-file hack.ips
+
+# Compress to 7Z
+openrom-core --compress game.iso --format 7z --level ultra
+
+# Remove ROM header
+openrom-core --remove-header game.smc
+
+# Generate M3U for multi-disc game
+openrom-core --m3u /roms/Metal\ Gear\ Solid/
+
 # Verify a CHD
 openrom-core --input game.chd --verify-only
-
-# List supported formats
-openrom-core --list-formats
 
 # JSON output (for scripting / Flutter IPC)
 openrom-core --json --detect game.iso
@@ -130,12 +179,13 @@ Create your own theme by copying any JSON file and editing the color values.
 All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA256 checksums.
 
 | Tool | Purpose | License |
-|------|---------|---------|
+|------|---------|---------| 
 | **chdman** | CHD conversion (MAME) | GPL v2 |
 | **maxcso** | CSO/ZSO compression | ISC |
 | **ecm / unecm** | ECM compression | GPL v2 |
 | **extract-xiso** | Xbox ISO extraction | GPL v2 |
 | **nodtool** | GameCube / Wii formats | MIT |
+| **xdelta3** | xdelta/VCDIFF patching | Apache 2.0 |
 
 ---
 
@@ -181,6 +231,11 @@ build_windows.bat
 - [x] Magic byte platform detection
 - [x] CHD header parsing
 - [x] Theme system
+- [x] ROM Patcher (IPS, BPS, UPS, xdelta3, PPF and more)
+- [x] ZIP / 7Z compression & extraction
+- [x] ROM header removal (NES, SNES, GB/GBC)
+- [x] M3U playlist generator
+- [ ] Wii U support (WUD / WUX)
 - [ ] Android support via Termux 🤖
 - [ ] ROM Checker — No-Intro DAT + RetroAchievements hash verification
 - [ ] ARM builds (Linux ARM64)
