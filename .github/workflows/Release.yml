@@ -29,6 +29,16 @@ jobs:
             --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" `
             -y --no-progress
 
+      - name: Set version
+        run: echo "${{ github.event.inputs.version }}" | Out-File -FilePath VERSION -Encoding utf8 -NoNewline
+
+      - name: Patch pubspec version
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          (Get-Content openrom_flutter/pubspec.yaml) `
+            -replace '^version: .*', "version: $version+1" |
+            Set-Content openrom_flutter/pubspec.yaml
+
       # ── Python / Nuitka → openrom-core.exe ──
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -102,6 +112,14 @@ jobs:
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libglib2.0-dev libgdk-pixbuf2.0-dev \
             patchelf ccache
+
+      - name: Set version
+        run: echo "${{ github.event.inputs.version }}" > VERSION
+
+      - name: Patch pubspec version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
       # ── Python / Nuitka → openrom-core ──
       - name: Set up Python
@@ -208,6 +226,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set version
+        run: echo "${{ github.event.inputs.version }}" > VERSION
+
+      - name: Patch pubspec version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
       # ── Python / Nuitka → openrom-core ──
       - name: Set up Python

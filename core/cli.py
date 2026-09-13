@@ -79,9 +79,17 @@ def _json_print(obj: dict):
 
 # ── Argument parser ───────────────────────────────────────────────────────────
 def build_parser() -> argparse.ArgumentParser:
+    # Read version from VERSION file (injected at build time) or fallback
+    _version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "VERSION")
+    try:
+        with open(_version_file) as _vf:
+            _app_version = _vf.read().strip()
+    except FileNotFoundError:
+        _app_version = "dev"
+
     parser = argparse.ArgumentParser(
         prog="openrom",
-        description=f"{BOLD}OpenROM v2.2{RESET} — Universal ROM Compression Suite",
+        description=f"{BOLD}OpenROM v{_app_version}{RESET} — Universal Retro Gaming Toolkit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 examples:
@@ -242,7 +250,7 @@ examples:
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version="OpenROM v2.7.0",
+        version=f"OpenROM v{_app_version}",
     )
 
     return parser
