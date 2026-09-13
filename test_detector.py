@@ -1,7 +1,7 @@
 import os
 import tempfile
 import unittest
-from core.detector import get_extension, get_output_name, detect_file
+from core.detector import get_extension, get_output_name, detect_file, _header_has_saturn_magic, _header_has_segacd_magic, _header_has_pcecd_magic, _header_has_neogeocd_magic
 
 class TestDetector(unittest.TestCase):
     def test_get_extension(self):
@@ -62,5 +62,26 @@ class TestDetector(unittest.TestCase):
             res_slow = detect_file(slow_path)
             self.assertEqual(res_slow["platform"], "Xbox")
 
+    def test_saturn_detection(self):
+        header = bytearray(0x210000)
+        header[0x10:0x10+15] = b"SEGA SEGASATURN"
+        self.assertTrue(_header_has_saturn_magic(bytes(header)))
+
+    def test_segacd_detection(self):
+        header = bytearray(0x210000)
+        header[0x10:0x10+14] = b"SEGADISCSYSTEM"
+        self.assertTrue(_header_has_segacd_magic(bytes(header)))
+
+    def test_pcecd_detection(self):
+        header = bytearray(0x210000)
+        header[0:len(b"PC Engine CD-ROM SYSTEM")] = b"PC Engine CD-ROM SYSTEM"
+        self.assertTrue(_header_has_pcecd_magic(bytes(header)))
+
+    def test_neogeocd_detection(self):
+        header = bytearray(0x210000)
+        header[0:len(b"NEO-GEO CD")] = b"NEO-GEO CD"
+        self.assertTrue(_header_has_neogeocd_magic(bytes(header)))
+
 if __name__ == "__main__":
+
     unittest.main()

@@ -1,6 +1,6 @@
 """
 OpenROM CLI — Universal ROM Compression Suite
-M5 Dev | GPL v3 + Commons Clause
+M5 Dev | GPL v3
 
 Usage examples:
   openrom --input game.iso --format CHD
