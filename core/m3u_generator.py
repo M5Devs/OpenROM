@@ -1,6 +1,6 @@
 """
 OpenROM M3U Generator — Playlist Creation Utility
-M5 Dev | GPL v3 + Commons Clause
+M5 Dev | GPL v3
 """
 
 import os

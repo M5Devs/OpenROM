@@ -33,6 +33,10 @@ PLATFORM_MAP = {
     "WIA":  "GameCube / Wii",
     "WBFS": "Wii",
     "GCZ":  "GameCube / Wii",
+    "Saturn":       "Sega Saturn",
+    "Sega CD":      "Sega CD / Mega-CD",
+    "PC-Engine CD": "PC-Engine CD / TurboGrafx-CD",
+    "Neo Geo CD":   "Neo Geo CD",
 }
 
 FORMAT_COLORS = {
@@ -51,6 +55,10 @@ FORMAT_COLORS = {
     "WBFS":    "#7986cb",
     "GCZ":     "#9fa8da",
     "UNKNOWN": "#7a8a9a",
+    "Saturn":       "#1565c0",
+    "Sega CD":      "#4a148c",
+    "PC-Engine CD": "#bf360c",
+    "Neo Geo CD":   "#b71c1c",
 }
 
 # ── Complete Conversion Map ──────────────────────────────────────────────────
@@ -122,6 +130,18 @@ _WII_MAGIC  = 0x5D1C9EA3
 
 # SYNC header for BIN sector sniffing
 _CD_SYNC    = b'\x00' + b'\xff' * 10 + b'\x00'
+
+# Sega
+_SATURN_MAGIC_1  = b"SEGA SEGASATURN"   # @ offset 0x10
+_SATURN_MAGIC_2  = b"SEGA SATURN "      # @ offset 0x00
+_SEGACD_MAGIC_1  = b"SEGADISCSYSTEM"    # @ offset 0x10
+_SEGACD_MAGIC_2  = b"SEGA_CD"           # @ offset 0x00
+
+# NEC
+_PCECD_MAGIC     = b"PC Engine CD-ROM SYSTEM"  # in first 2048 bytes
+
+# SNK
+_NEOGEOCD_MAGIC  = b"NEO-GEO CD"        # in first 0x800 bytes
 
 # Xbox XDVDFS magic
 _XBOX_MAGIC    = b"MICROSOFT*XBOX*MEDIA"
@@ -278,6 +298,22 @@ def _guess_platform(filepath: str, fmt: str, size: int, header: bytes) -> str:
         if fmt in ("ISO", "IMG") and _header_has_wii_magic(header):
             return "Wii"
 
+        # Sega Saturn
+        if _header_has_saturn_magic(header):
+            return "Saturn"
+
+        # Sega CD / Mega-CD
+        if _header_has_segacd_magic(header):
+            return "Sega CD"
+
+        # PC-Engine CD / TurboGrafx-CD
+        if _header_has_pcecd_magic(header):
+            return "PC-Engine CD"
+
+        # Neo Geo CD
+        if _header_has_neogeocd_magic(header):
+            return "Neo Geo CD"
+
         # PS2: "PLAYSTATION" in the ISO 9660 Primary Volume Descriptor (0x8000–0x8800)
         if _header_has_ps2_magic(header):
             return "PS2"
@@ -342,6 +378,24 @@ def _header_has_ps2_magic(header: bytes) -> bool:
 def _header_has_ps1_magic(header: bytes) -> bool:
     """PS1 identifier somewhere in the first 64 KB."""
     return _PS1_MAGIC in header[:65536]
+
+
+def _header_has_saturn_magic(header: bytes) -> bool:
+    return (header[0x10:0x10 + len(_SATURN_MAGIC_1)] == _SATURN_MAGIC_1 or
+            header[0x00:0x00 + len(_SATURN_MAGIC_2)] == _SATURN_MAGIC_2)
+
+
+def _header_has_segacd_magic(header: bytes) -> bool:
+    return (header[0x10:0x10 + len(_SEGACD_MAGIC_1)] == _SEGACD_MAGIC_1 or
+            header[0x00:0x00 + len(_SEGACD_MAGIC_2)] == _SEGACD_MAGIC_2)
+
+
+def _header_has_pcecd_magic(header: bytes) -> bool:
+    return _PCECD_MAGIC in header[:2048]
+
+
+def _header_has_neogeocd_magic(header: bytes) -> bool:
+    return _NEOGEOCD_MAGIC in header[:0x800]
 
 
 def _read_chd_type(filepath: str) -> str:

@@ -1,6 +1,6 @@
 """
 OpenROM Compressor — ZIP/7Z Compression & Extraction Utility
-M5 Dev | GPL v3 + Commons Clause
+M5 Dev | GPL v3
 """
 
 import os
