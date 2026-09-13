@@ -13,6 +13,10 @@
   <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/downloads/M5Devs/OpenROM/total"/></a>
   <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dm/openrom.svg?color=1f6feb&logo=sourceforge"/></a>
   <a href="https://hosted.weblate.org/engage/openrom/"><img src="https://hosted.weblate.org/widget/openrom/svg-badge.svg" alt="Translation status"></a>
+<a href="SECURITY.md">
+  <img src="https://img.shields.io/badge/Security-Policy-green.svg" alt="Security Policy">
+</a>
+
 </p>
 
 ---
