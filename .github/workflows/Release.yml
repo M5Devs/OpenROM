@@ -182,7 +182,7 @@ jobs:
           Icon=openrom
           Type=Application
           Categories=Utility;
-          Comment=Universal ROM Compression Suite
+          Comment=Universal Retro Gaming Toolkit
           EOF
 
           cat > AppDir/AppRun << 'EOF'
@@ -233,7 +233,7 @@ jobs:
       - name: Patch pubspec version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+          sed -i "" "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
       # ── Python / Nuitka → openrom-core ──
       - name: Set up Python
@@ -279,6 +279,16 @@ jobs:
           cp openrom-core "$APP_MACOS/openrom-core"
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
+
+      # ── Ad-hoc sign the bundle ──
+      - name: Sign app bundle (ad-hoc)
+        run: |
+          APP="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app"
+          xattr -cr "$APP"
+          codesign --deep --force \
+            --entitlements macos_entitlements.plist \
+            --sign - \
+            "$APP"
 
       # ── DMG ──
       - name: Create DMG
@@ -327,7 +337,7 @@ jobs:
           body: |
             ## OpenROM v${{ github.event.inputs.version }}
 
-            Universal ROM Conversion Suite for retro gaming.
+            Universal Retro Gaming Toolkit for retro gaming.
 
             Each download includes:
             - **OpenROM** — Flutter desktop GUI
@@ -342,11 +352,10 @@ jobs:
             ```
 
             ### Supported Formats
-            - PS1: BIN/CUE → CHD, ECM
-            - PS2: ISO → CHD, CSO
-            - GameCube/Wii: ISO → RVZ
-            - Xbox: ISO → XISO
+            - PS1/Dreamcast/Saturn/Sega CD: BIN/CUE → CHD (createcd)
+            - PS2/GameCube/Wii/Xbox: ISO → CHD (createdvd), CSO, RVZ, XISO
             - PSP: ISO → CSO
+            - Universal: ZIP/7Z compression, IPS/BPS/xdelta3 patching
 
             ### Downloads
             | Platform | File |
