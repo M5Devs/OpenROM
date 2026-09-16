@@ -75,16 +75,23 @@ jobs:
         working-directory: openrom_flutter
         run: flutter build windows --release
 
-      # ── Package ZIP ──
+      - name: Prepare release files
+        run: |
+          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          cp openrom-core.exe "$releaseDir/"
+          cp -r themes/ "$releaseDir/themes/"
+          $version = "${{ github.event.inputs.version }}"
+          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
+          Set-Content -Path "$releaseDir/README.txt" -Value $readme
+          New-Item -ItemType Directory -Path dist\release -Force
+          Copy-Item -Recurse "$releaseDir/*" dist\release/
+          Write-Host "dist\release contents:"
+          Get-ChildItem dist\release\ | Select-Object Name
+
       - name: Package ZIP
         run: |
-          $out = "openrom_flutter/build/windows/x64/runner/Release"
-          cp openrom-core.exe "$out/"
-          cp -r themes/ "$out/themes/"
-          $version = "${{ github.event.inputs.version }}"
-          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe   <-- this is the app!`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
-          Set-Content -Path "$out/README.txt" -Value $readme
-          Compress-Archive -Path "$out/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          Compress-Archive -Path "$releaseDir/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
       - name: Install NSIS and dependencies
         run: |
