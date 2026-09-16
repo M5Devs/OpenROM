@@ -4,22 +4,24 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (e.g., 2.2.0)'
+        description: 'Version (e.g., 2.7.3)'
         required: true
-        default: '2.2.0'
+        default: '2.7.3'
 
 permissions:
   contents: write
 
 jobs:
 
-  # ── Windows — Flutter GUI + Nuitka CLI ──────────────────────────────────────
+  # ══════════════════════════════════════════════════════════════════════════
+  # Windows — Flutter GUI + Nuitka CLI + NSIS Installer
+  # ══════════════════════════════════════════════════════════════════════════
   build-windows:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
 
-      # ── Visual Studio Build Tools (required by Flutter + Nuitka) ──
+      # ── Visual Studio Build Tools ──
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
@@ -29,6 +31,7 @@ jobs:
             --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" `
             -y --no-progress
 
+      # ── Version ──
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" | Out-File -FilePath VERSION -Encoding utf8 -NoNewline
 
@@ -50,7 +53,7 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core.exe (Nuitka — lower AV false positives)
+      - name: Build openrom-core.exe (Nuitka)
         run: |
           python -m nuitka `
             --onefile `
@@ -75,18 +78,43 @@ jobs:
         working-directory: openrom_flutter
         run: flutter build windows --release
 
-      # ── Package ZIP (MUST be before NSIS — creates dist\release\) ──
+      # ── Prepare release directory ──
+      - name: Prepare release files
+        run: |
+          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          
+          # Copy core and themes into Flutter release
+          cp openrom-core.exe "$releaseDir/"
+          cp -r themes/ "$releaseDir/themes/"
+          
+          # Create README
+          $version = "${{ github.event.inputs.version }}"
+          $readme = @"
+OpenROM v$version - Windows
+======================================================
+RUN THIS: openrom_flutter.exe   <-- this is the app!
+
+openrom-core.exe is the backend engine, do NOT run it directly.
+
+Docs: https://github.com/M5Devs/OpenROM
+"@
+          Set-Content -Path "$releaseDir/README.txt" -Value $readme
+          
+          # ✅ Create dist\release for NSIS
+          New-Item -ItemType Directory -Path dist\release -Force
+          Copy-Item -Recurse "$releaseDir/*" dist\release/
+          
+          # Verify
+          Write-Host "Contents of dist\release:"
+          Get-ChildItem dist\release\ | Select-Object Name, Length
+
+      # ── Package ZIP ──
       - name: Package ZIP
         run: |
-          $out = "openrom_flutter/build/windows/x64/runner/Release"
-          cp openrom-core.exe "$out/"
-          cp -r themes/ "$out/themes/"
-          $version = "${{ github.event.inputs.version }}"
-          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe   <-- this is the app!`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
-          Set-Content -Path "$out/README.txt" -Value $readme
-          Compress-Archive -Path "$out/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          Compress-Archive -Path "$releaseDir/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
-      # ── NSIS installer (AFTER Package ZIP so dist\release\ exists) ──
+      # ── NSIS Installer ──
       - name: Install NSIS and dependencies
         run: |
           choco install nsis -y --no-progress
@@ -100,12 +128,11 @@ jobs:
           Copy-Item -Path "EnVar\Plugins\x86-unicode\EnVar.dll" `
             -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
 
-      - name: Convert SECURITY.md to txt for installer license page
+      - name: Convert SECURITY.md to txt for installer
         run: |
           Get-Content SECURITY.md | Out-File -FilePath SECURITY.txt -Encoding utf8
 
-      # FIX: Add -type TrueColor -depth 24 for NSIS 24-bit BMP requirement
-      - name: Generate installer images
+      - name: Generate installer images (24-bit BMP for NSIS)
         run: |
           magick assets/icons/icon.png `
             -resize 164x314 -background "#090910" -gravity center `
@@ -121,7 +148,7 @@ jobs:
           makensis /DAPP_VERSION=$version openrom.nsi
 
       # ── Upload artifacts ──
-      - name: Upload artifact
+      - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: OpenROM_Windows
@@ -133,13 +160,14 @@ jobs:
           name: OpenROM_Windows_Installer
           path: OpenROM-v${{ github.event.inputs.version }}-Setup.exe
 
-  # ── Linux — Flutter AppImage + Nuitka CLI ───────────────────────────────────
+  # ══════════════════════════════════════════════════════════════════════════
+  # Linux — Flutter AppImage + Nuitka CLI
+  # ══════════════════════════════════════════════════════════════════════════
   build-linux:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      # ── System deps ──
       - name: Install system dependencies
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome*.list \
@@ -162,7 +190,7 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
-      # ── Python / Nuitka → openrom-core ──
+      # ── Python / Nuitka ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -173,7 +201,7 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core (Nuitka — lower AV false positives)
+      - name: Build openrom-core (Nuitka)
         run: |
           python -m nuitka \
             --onefile \
@@ -183,7 +211,7 @@ jobs:
             core/cli.py
           chmod +x openrom-core
 
-      # ── Flutter → OpenROM binary ──
+      # ── Flutter ──
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -217,21 +245,21 @@ jobs:
           cp assets/icons/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/openrom.png
 
           cat > AppDir/OpenROM.desktop << EOF
-          [Desktop Entry]
-          Name=OpenROM
-          Exec=openrom_flutter
-          Icon=openrom
-          Type=Application
-          Categories=Utility;
-          Comment=Universal Retro Gaming Toolkit
-          EOF
+[Desktop Entry]
+Name=OpenROM
+Exec=openrom_flutter
+Icon=openrom
+Type=Application
+Categories=Utility;
+Comment=Universal Retro Gaming Toolkit
+EOF
 
           cat > AppDir/AppRun << 'EOF'
-          #!/bin/bash
-          HERE="$(dirname "$(readlink -f "${0}")")"
-          export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
-          exec "$HERE/usr/bin/openrom_flutter" "$@"
-          EOF
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "${0}")")"
+export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
+exec "$HERE/usr/bin/openrom_flutter" "$@"
+EOF
           chmod +x AppDir/AppRun
 
       - name: Build AppImage
@@ -255,7 +283,9 @@ jobs:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
-  # ── macOS — Flutter .app DMG + Nuitka CLI ───────────────────────────────────
+  # ══════════════════════════════════════════════════════════════════════════
+  # macOS — Flutter .app DMG + Nuitka CLI
+  # ══════════════════════════════════════════════════════════════════════════
   build-macos:
     strategy:
       matrix:
@@ -276,7 +306,7 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "" "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
-      # ── Python / Nuitka → openrom-core ──
+      # ── Python / Nuitka ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -287,7 +317,7 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka ordered-set zstandard
 
-      - name: Build openrom-core (Nuitka — lower AV false positives)
+      - name: Build openrom-core (Nuitka)
         run: |
           python -m nuitka \
             --onefile \
@@ -298,7 +328,7 @@ jobs:
             core/cli.py
           chmod +x openrom-core
 
-      # ── Flutter → OpenROM.app ──
+      # ── Flutter ──
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -321,7 +351,7 @@ jobs:
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
 
-      # ── Ad-hoc sign the bundle ──
+      # ── Ad-hoc sign ──
       - name: Sign app bundle (ad-hoc)
         run: |
           APP="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app"
@@ -360,7 +390,9 @@ jobs:
           name: OpenROM_macOS_${{ matrix.arch }}
           path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip
 
-  # ── GitHub Release ───────────────────────────────────────────────────────────
+  # ══════════════════════════════════════════════════════════════════════════
+  # GitHub Release
+  # ══════════════════════════════════════════════════════════════════════════
   release:
     needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
@@ -369,6 +401,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
+
+      - name: List downloaded files
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts/ -type f -name "*.zip" -o -name "*.exe" | sort
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -401,7 +438,8 @@ jobs:
             ### Downloads
             | Platform | File |
             |----------|------|
-            | Windows | `OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip` |
+            | Windows (Portable) | `OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip` |
+            | Windows (Installer) | `OpenROM-v${{ github.event.inputs.version }}-Setup.exe` |
             | Linux | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
             | macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip` |
             | macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip` |
