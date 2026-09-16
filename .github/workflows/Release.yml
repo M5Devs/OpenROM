@@ -75,7 +75,7 @@ jobs:
         working-directory: openrom_flutter
         run: flutter build windows --release
 
-      # ── Package ZIP ──
+      # ── Package ZIP (MUST be before NSIS — creates dist\release\) ──
       - name: Package ZIP
         run: |
           $out = "openrom_flutter/build/windows/x64/runner/Release"
@@ -86,11 +86,52 @@ jobs:
           Set-Content -Path "$out/README.txt" -Value $readme
           Compress-Archive -Path "$out/*" -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
+      # ── NSIS installer (AFTER Package ZIP so dist\release\ exists) ──
+      - name: Install NSIS and dependencies
+        run: |
+          choco install nsis -y --no-progress
+          choco install imagemagick -y --no-progress
+
+      - name: Download NSIS EnVar plugin
+        run: |
+          $url = "https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip"
+          Invoke-WebRequest -Uri $url -OutFile EnVar.zip
+          Expand-Archive -Path EnVar.zip -DestinationPath EnVar
+          Copy-Item -Path "EnVar\Plugins\x86-unicode\EnVar.dll" `
+            -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
+
+      - name: Convert SECURITY.md to txt for installer license page
+        run: |
+          Get-Content SECURITY.md | Out-File -FilePath SECURITY.txt -Encoding utf8
+
+      # FIX: Add -type TrueColor -depth 24 for NSIS 24-bit BMP requirement
+      - name: Generate installer images
+        run: |
+          magick assets/icons/icon.png `
+            -resize 164x314 -background "#090910" -gravity center `
+            -extent 164x314 -type TrueColor -depth 24 `
+            assets/icons/installer-sidebar.bmp
+          magick assets/icons/OpenROM-Banner.jpeg `
+            -resize 150x57 -type TrueColor -depth 24 `
+            assets/icons/installer-header.bmp
+
+      - name: Build Windows installer
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          makensis /DAPP_VERSION=$version openrom.nsi
+
+      # ── Upload artifacts ──
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: OpenROM_Windows
           path: OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenROM_Windows_Installer
+          path: OpenROM-v${{ github.event.inputs.version }}-Setup.exe
 
   # ── Linux — Flutter AppImage + Nuitka CLI ───────────────────────────────────
   build-linux:
@@ -367,6 +408,7 @@ jobs:
 
           files: |
             artifacts/OpenROM_Windows/OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+            artifacts/OpenROM_Windows_Installer/OpenROM-v${{ github.event.inputs.version }}-Setup.exe
             artifacts/OpenROM_Linux/OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
             artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip
             artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip
