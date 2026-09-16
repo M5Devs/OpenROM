@@ -12,6 +12,7 @@ import zipfile
 import py7zr
 
 from core.compressor import Compressor, CompressionJob, EXCLUDED_EXTENSIONS
+from core.converter import CHD_CD_COMPRESSION, CHD_DVD_COMPRESSION
 from core.m3u_generator import generate_m3u, clean_disc_name
 from core.cue_generator import generate_cue, detect_bin_mode
 from core.bin_merger import merge_bins, parse_cue
@@ -243,3 +244,48 @@ def test_force_platform_none_preserves_detection():
         target_format="CHD",
     )
     assert job.force_platform is None
+
+
+def test_ps2_normal_compression_is_not_cdlz():
+    """PS2 uses createdvd — cdlz is a CD-only codec and must never appear."""
+    codec = CHD_DVD_COMPRESSION.get("Normal")
+    assert codec == "zlib"
+    assert "cdlz" not in codec
+    assert "cdzs" not in codec
+
+
+def test_ps2_high_compression_is_valid():
+    """PS2 High compression must use DVD-compatible codecs."""
+    codec = CHD_DVD_COMPRESSION.get("High")
+    assert "cdlz" not in codec
+    assert "cdzs" not in codec
+
+
+def test_ps2_max_compression_is_valid():
+    """PS2 Max compression must use DVD-compatible codecs."""
+    codec = CHD_DVD_COMPRESSION.get("Max")
+    assert "cdlz" not in codec
+
+
+def test_ps1_normal_compression_is_cdlz():
+    """PS1 uses createcd — cdlz is correct here."""
+    codec = CHD_CD_COMPRESSION.get("Normal")
+    assert codec == "cdlz"
+
+
+def test_dreamcast_normal_compression_is_cdlz():
+    """Dreamcast uses createcd — cdlz is correct."""
+    codec = CHD_CD_COMPRESSION.get("Normal")
+    assert codec == "cdlz"
+
+
+def test_gamecube_normal_compression_is_not_cdlz():
+    """GameCube uses createdvd — must not use CD codecs."""
+    codec = CHD_DVD_COMPRESSION.get("Normal")
+    assert "cdlz" not in codec
+
+
+def test_xbox_normal_compression_is_not_cdlz():
+    """Xbox uses createdvd — must not use CD codecs."""
+    codec = CHD_DVD_COMPRESSION.get("Normal")
+    assert "cdlz" not in codec
