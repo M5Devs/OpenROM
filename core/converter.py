@@ -11,10 +11,18 @@ from core.detector import (
 from core.logger import log as global_log
 from core.validator import verify_chd
 
-CHD_COMPRESSION = {
-    "Normal": "cdlz",               # max compatibility (AetherSX2/NetherSX2 friendly)
-    "High":   "zstd,zlib,huff",     # slower, better ratio
-    "Max":    "zstd,zlib,huff,flac", # best ratio
+# CD-based platforms: PS1, Dreamcast, Saturn, Sega CD, PC-Engine CD, Neo Geo CD
+CHD_CD_COMPRESSION = {
+    "Normal": "cdlz",
+    "High":   "cdzs,cdlz",
+    "Max":    "cdlz,cdzs,flac",
+}
+
+# DVD-based platforms: PS2, GameCube, Wii, Xbox, and Unknown
+CHD_DVD_COMPRESSION = {
+    "Normal": "zlib",
+    "High":   "zstd,zlib,huff",
+    "Max":    "zstd,zlib,huff,flac",
 }
 
 
@@ -165,8 +173,10 @@ class Converter:
         else:
             sub_cmd = "createcd"
 
+        compression_map = CHD_CD_COMPRESSION if sub_cmd == "createcd" else CHD_DVD_COMPRESSION
+        default_codec = "cdlz" if sub_cmd == "createcd" else "zlib"
         cmd = [chdman, sub_cmd, "-i", src, "-o", out,
-               "--compression", CHD_COMPRESSION.get(job.compression, "cdlz")]
+               "--compression", compression_map.get(job.compression, default_codec)]
 
         # BIN without CUE → auto-generate CUE then register for cleanup
         if fmt == "BIN":
