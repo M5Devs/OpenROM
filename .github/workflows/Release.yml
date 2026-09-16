@@ -92,6 +92,20 @@ jobs:
           name: OpenROM_Windows
           path: OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
+      - name: Install NSIS
+        run: choco install nsis -y --no-progress
+
+      - name: Build Windows installer
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          makensis /DAPP_VERSION=$version openrom.nsi
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenROM_Windows_Installer
+          path: OpenROM-v${{ github.event.inputs.version }}-Setup.exe
+
   # ── Linux — Flutter AppImage + Nuitka CLI ───────────────────────────────────
   build-linux:
     runs-on: ubuntu-22.04
@@ -367,6 +381,7 @@ jobs:
 
           files: |
             artifacts/OpenROM_Windows/OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+            artifacts/OpenROM_Windows_Installer/OpenROM-v${{ github.event.inputs.version }}-Setup.exe
             artifacts/OpenROM_Linux/OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
             artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip
             artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip
