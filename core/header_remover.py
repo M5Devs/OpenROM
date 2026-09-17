@@ -100,12 +100,12 @@ def detect_header(filepath: str) -> dict | None:
                 "confidence": "certain"
             }
         else:
-            has_hdr = (file_size > 512 and rem == 512)
+            # File size is not aligned to 512 or 1024 — unusual, cannot determine header
             return {
                 "system": "SNES",
-                "header_size": 512 if has_hdr else 0,
-                "has_header": has_hdr,
-                "confidence": "likely"
+                "header_size": 0,
+                "has_header": False,
+                "confidence": "unlikely"
             }
 
     elif system in ("GB/GBC", "GB"):
@@ -167,8 +167,10 @@ def remove_header(
     # If backup is requested and outputting in place or same filename
     if backup and os.path.abspath(clean_path) == os.path.abspath(filepath):
         bak_path = filepath + ".bak"
-        if not os.path.exists(bak_path):
-            shutil.copy2(filepath, bak_path)
+        # Always overwrite the backup to reflect the current state of the source.
+        # If the source no longer has a header (second run), the backup is still
+        # a faithful copy of what is being processed.
+        shutil.copy2(filepath, bak_path)
 
     if not info or not info.get("has_header") or info.get("header_size", 0) <= 0:
         # No header to remove — copy or keep as is

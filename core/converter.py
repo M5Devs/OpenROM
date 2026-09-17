@@ -10,6 +10,7 @@ from core.detector import (
 )
 from core.logger import log as global_log
 from core.validator import verify_chd
+from core.cue_generator import detect_bin_mode as _detect_bin_mode
 
 # CD-based platforms: PS1, Dreamcast, Saturn, Sega CD, PC-Engine CD, Neo Geo CD
 CHD_CD_COMPRESSION = {
@@ -58,14 +59,14 @@ class Converter:
     def __init__(self, on_log: Callable = None, on_progress: Callable = None):
         self.on_log_cb   = on_log
         self.on_progress = on_progress or (lambda job, pct: None)
-        self._stop_flag  = False
+        self._stop_event = threading.Event()
         self._lock       = threading.Lock()
 
     def stop(self):
-        self._stop_flag = True
+        self._stop_event.set()
 
     def convert(self, job: ConversionJob) -> bool:
-        self._stop_flag = False
+        self._stop_event.clear()
         job.status = "Converting"
         try:
             ok = self._dispatch(job)
@@ -91,7 +92,7 @@ class Converter:
         with self._lock:
             jobs_copy = list(jobs)
         for job in jobs_copy:
-            if self._stop_flag:
+            if self._stop_event.is_set():
                 break
             ok = self.convert(job)
             if on_job_done:
@@ -334,7 +335,7 @@ class Converter:
                     if pct is not None:
                         job.progress = pct
                         self.on_progress(job, pct)
-                if self._stop_flag:
+                if self._stop_event.is_set():
                     proc.terminate()
                     return False
             proc.wait()
@@ -376,9 +377,10 @@ class Converter:
 
     def _auto_cue(self, bin_path: str, output_dir: str) -> str | None:
         base      = os.path.basename(bin_path).rsplit('.', 1)[0]
-        cue_path  = os.path.join(output_dir, base + "_auto.cue")
+        bin_dir   = os.path.dirname(os.path.abspath(bin_path))
+        cue_path  = os.path.join(bin_dir, base + "_auto.cue")
         bin_name  = os.path.basename(bin_path)
-        track_mode = self._detect_bin_mode(bin_path)
+        track_mode = _detect_bin_mode(bin_path)
         self._log(f"[AUTO-CUE] Detected BIN mode: {track_mode}")
         try:
             with open(cue_path, "w", encoding="utf-8") as f:
@@ -392,41 +394,7 @@ class Converter:
             self._log(f"[WARN] Could not write auto CUE: {e}")
             return None
 
-    def _detect_bin_mode(self, bin_path: str) -> str:
-        """
-        Sniff the first sector of a BIN file to determine its track mode.
-          MODE1/2048 : 2048-byte sectors (data only, no sync header)
-          MODE1/2352 : 2352-byte sectors with sync header + mode byte 01
-          MODE2/2352 : 2352-byte sectors with sync header + mode byte 02
-          AUDIO      : 2352-byte sectors, no recognisable sync header
-        Falls back to MODE2/2352 when the file is too small or unreadable.
-        """
-        SYNC = b'\x00' + b'\xff' * 10 + b'\x00'
-        try:
-            size = os.path.getsize(bin_path)
-            with open(bin_path, "rb") as f:
-                header = f.read(16)
 
-            if len(header) < 16:
-                return "MODE2/2352"
-
-            if header[:12] == SYNC:
-                mode_byte = header[15]
-                if mode_byte == 0x01:
-                    return "MODE1/2352"
-                elif mode_byte == 0x02:
-                    return "MODE2/2352"
-                else:
-                    return "AUDIO"
-
-            if size % 2048 == 0:
-                return "MODE1/2048"
-            if size % 2352 == 0:
-                return "AUDIO"
-
-            return "MODE2/2352"
-        except Exception:
-            return "MODE2/2352"
 
 
 # ── Progress line parser ──────────────────────────────────────────────────────
