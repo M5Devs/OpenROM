@@ -54,12 +54,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.event.inputs.version }}
-          name: OpenROM v${{ github.event.inputs.version }}
           files: OpenROM-v${{ github.event.inputs.version }}.flatpak
-          body: |
-            ### Linux Flatpak
-            ```bash
-            flatpak install OpenROM-v${{ github.event.inputs.version }}.flatpak
-            ```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
