@@ -289,3 +289,27 @@ def test_xbox_normal_compression_is_not_cdlz():
     """Xbox uses createdvd — must not use CD codecs."""
     codec = CHD_DVD_COMPRESSION.get("Normal")
     assert "cdlz" not in codec
+
+
+def test_get_default_bundled_path_linux():
+    from unittest.mock import patch
+    from core.config import get_default_bundled_path
+
+    # Test Linux x86_64
+    with patch('platform.system', return_value='Linux'), patch('platform.machine', return_value='x86_64'):
+        path = get_default_bundled_path('chdman')
+        assert 'assets/linux/x86_64/chdman' in path
+
+    # Test Linux aarch64
+    with patch('platform.system', return_value='Linux'), patch('platform.machine', return_value='aarch64'):
+        path = get_default_bundled_path('ecm')
+        assert 'assets/linux/arm64/ecm' in path
+
+    # Test Linux fallback to flat directory when arch folder missing
+    def fake_isfile(p):
+        return p.endswith('assets/linux/chdman')
+
+    with patch('platform.system', return_value='Linux'), patch('platform.machine', return_value='aarch64'):
+        with patch('os.path.isfile', side_effect=fake_isfile):
+            path = get_default_bundled_path('chdman')
+            assert path.endswith('assets/linux/chdman')

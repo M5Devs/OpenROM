@@ -32,7 +32,8 @@ def get_default_bundled_path(tool: str) -> str:
     Returns the bundled binary path for the given tool.
     Windows : assets/windows/<tool>.exe
     macOS   : assets/macos/<arch>/<tool>  (arm64 or x86_64)
-    Linux   : assets/linux/<tool>
+    Linux   : assets/linux/<arch>/<tool>  (x86_64 or arm64)
+              Falls back to assets/linux/<tool> if arch subfolder is missing.
     """
     system = platform.system()
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -73,9 +74,14 @@ def get_default_bundled_path(tool: str) -> str:
             bundled = os.path.join(base, "assets", "macos", fname)
 
     else:  # Linux
-        fname   = unix_names.get(tool, tool)
-        folder  = "linux"
-        bundled = os.path.join(base, "assets", folder, fname)
+        fname        = unix_names.get(tool, tool)
+        machine      = platform.machine()                        # "x86_64" or "aarch64"
+        arch_folder  = "arm64" if machine == "aarch64" else "x86_64"
+        bundled      = os.path.join(base, "assets", "linux", arch_folder, fname)
+        # Fallback: if arch-specific binary doesn't exist, try the flat linux/ folder
+        # (supports older installs or partial bundles)
+        if not os.path.isfile(bundled):
+            bundled = os.path.join(base, "assets", "linux", fname)
 
     if os.path.isfile(bundled):
         return bundled
