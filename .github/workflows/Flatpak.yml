@@ -12,15 +12,16 @@ permissions:
   contents: write
 
 jobs:
-  build-flatpak:
-    name: Build Flatpak
+
+  # ── Job 1: Build Flutter + Nuitka outside the Flatpak container ─────────────
+  build-app:
+    name: Build App (Flutter + Nuitka)
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout OpenROM
         uses: actions/checkout@v7
 
-      # ── System deps ──
       - name: Install system dependencies
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome*.list \
@@ -32,7 +33,7 @@ jobs:
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libglib2.0-dev libgdk-pixbuf2.0-dev \
-            patchelf ccache flatpak flatpak-builder
+            patchelf ccache
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION
@@ -42,7 +43,6 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
-      # ── Build openrom-core ──
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -63,7 +63,6 @@ jobs:
             core/cli.py
           chmod +x openrom-core
 
-      # ── Build Flutter Linux ──
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -77,21 +76,42 @@ jobs:
         working-directory: openrom_flutter
         run: flutter build linux --release
 
-      # ── Prepare flatpak-build folder for the manifest ──
-      - name: Prepare flatpak-build
+      - name: Prepare flatpak-build folder
         run: |
           mkdir -p flatpak-build/bundle
           cp -r openrom_flutter/build/linux/x64/release/bundle/. flatpak-build/bundle/
           cp openrom-core flatpak-build/openrom-core
           chmod +x flatpak-build/openrom-core
 
-      # ── Add flathub system remote (required by flatpak-builder action) ──
-      - name: Add flathub remote
-        run: |
-          sudo flatpak remote-add --system --if-not-exists flathub \
-            https://flathub.org/repo/flathub.flatpakrepo
+      - name: Upload flatpak-build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-build
+          path: flatpak-build/
+          retention-days: 1
 
-      # ── Build Flatpak bundle ──
+  # ── Job 2: Build Flatpak inside privileged container ────────────────────────
+  package-flatpak:
+    name: Package Flatpak
+    needs: build-app
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+
+    steps:
+      - name: Checkout OpenROM
+        uses: actions/checkout@v7
+
+      - name: Download flatpak-build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: flatpak-build
+          path: flatpak-build/
+
+      - name: Fix permissions on binaries
+        run: chmod +x flatpak-build/openrom-core flatpak-build/bundle/openrom_flutter
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
@@ -99,7 +119,6 @@ jobs:
           manifest-path: flatpak/io.github.M5Devs.OpenROM.yml
           cache-key: flatpak-builder-${{ github.sha }}
 
-      # ── Upload to GitHub Release ──
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
