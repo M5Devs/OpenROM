@@ -12,27 +12,28 @@ permissions:
   contents: write
 
 jobs:
-  build-flatpak:
-    name: Build Flatpak
+
+  # ── Job 1: Build Flutter + Nuitka on standard runner ────────────────────────
+  build-app:
+    name: Build App (Flutter + Nuitka)
     runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
 
     steps:
       - name: Checkout OpenROM
         uses: actions/checkout@v7
 
-      # ── Install build tools inside the container ──
-      - name: Install build dependencies
+      - name: Install system dependencies
         run: |
-          dnf update -y -q
-          dnf install -y \
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list \
+                     /etc/apt/sources.list.d/microsoft-*.list \
+                     /etc/apt/sources.list.d/azure-cli.list \
+                     /etc/apt/sources.list.d/github-cli.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -q \
             clang cmake ninja-build pkg-config \
-            gtk3-devel xz-devel libstdc++-devel \
-            glib2-devel gdk-pixbuf2-devel \
-            patchelf ccache python3 python3-pip \
-            curl git unzip xz-utils zip
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libglib2.0-dev libgdk-pixbuf2.0-dev \
+            patchelf ccache
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION
@@ -43,14 +44,19 @@ jobs:
           sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
 
       # ── Build openrom-core ──
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Python dependencies
         run: |
-          pip3 install --break-system-packages -r requirements.txt
-          pip3 install --break-system-packages nuitka ordered-set zstandard
+          pip install -r requirements.txt
+          pip install nuitka ordered-set zstandard
 
       - name: Build openrom-core (Nuitka)
         run: |
-          python3 -m nuitka \
+          python -m nuitka \
             --onefile \
             --assume-yes-for-downloads \
             --output-filename=openrom-core \
@@ -58,22 +64,19 @@ jobs:
             core/cli.py
           chmod +x openrom-core
 
-      # ── Install Flutter inside the container ──
+      # ── Build Flutter ──
       - name: Set up Flutter
-        run: |
-          git clone https://github.com/flutter/flutter.git \
-            --depth 1 --branch stable \
-            /opt/flutter
-          echo "/opt/flutter/bin" >> $GITHUB_PATH
-          /opt/flutter/bin/flutter precache --linux
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
 
       - name: Flutter dependencies
         working-directory: openrom_flutter
-        run: /opt/flutter/bin/flutter pub get
+        run: flutter pub get
 
       - name: Build Flutter Linux
         working-directory: openrom_flutter
-        run: /opt/flutter/bin/flutter build linux --release
+        run: flutter build linux --release
 
       # ── Prepare flatpak-build folder ──
       - name: Prepare flatpak-build
@@ -83,7 +86,36 @@ jobs:
           cp openrom-core flatpak-build/openrom-core
           chmod +x flatpak-build/openrom-core flatpak-build/bundle/openrom_flutter
 
-      # ── Build Flatpak bundle ──
+      # ── Push to temp branch ──
+      - name: Push flatpak-build to temp branch
+        run: |
+          git config user.email "ci@github.com"
+          git config user.name "GitHub CI"
+          git checkout -b flatpak-tmp-${{ github.run_id }}
+          git add -f flatpak-build/
+          git commit -m "ci: temp flatpak build artifacts [skip ci]"
+          git push origin flatpak-tmp-${{ github.run_id }}
+
+  # ── Job 2: Build Flatpak inside privileged container ────────────────────────
+  package-flatpak:
+    name: Package Flatpak
+    needs: build-app
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+
+    steps:
+      - name: Checkout temp branch (with flatpak-build/)
+        uses: actions/checkout@v7
+        with:
+          ref: flatpak-tmp-${{ github.run_id }}
+
+      - name: Fix binary permissions
+        run: |
+          chmod +x flatpak-build/openrom-core
+          chmod +x flatpak-build/bundle/openrom_flutter
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
@@ -91,7 +123,6 @@ jobs:
           manifest-path: flatpak/io.github.M5Devs.OpenROM.yml
           cache-key: flatpak-builder-${{ github.sha }}
 
-      # ── Upload to GitHub Release ──
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -99,3 +130,18 @@ jobs:
           files: OpenROM-v${{ github.event.inputs.version }}.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Job 3: Cleanup temp branch ───────────────────────────────────────────────
+  cleanup:
+    name: Cleanup Temp Branch
+    needs: [build-app, package-flatpak]
+    runs-on: ubuntu-22.04
+    if: always()
+
+    steps:
+      - name: Checkout OpenROM
+        uses: actions/checkout@v7
+
+      - name: Delete temp branch
+        run: |
+          git push origin --delete flatpak-tmp-${{ github.run_id }} || true
