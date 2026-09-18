@@ -64,7 +64,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.47.1'
           channel: 'stable'
 
       - name: Flutter dependencies
@@ -193,7 +193,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.47.1'
           channel: 'stable'
 
       - name: Flutter dependencies
@@ -261,6 +261,100 @@ jobs:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
+  # ── Linux ARM64 — Flutter + Nuitka CLI (light tools only) ───────────────────
+  build-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -q \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libglib2.0-dev libgdk-pixbuf2.0-dev \
+            gcc make git xdelta3 \
+            patchelf ccache
+
+      - name: Set version
+        run: echo "${{ github.event.inputs.version }}" > VERSION
+
+      - name: Patch pubspec version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+
+      - name: Build ecm / unecm from source
+        run: |
+          git clone https://github.com/kidoz/ecm ecm_src
+          echo '#define ECM_VERSION "2.0.0"' > ecm_src/include/version.h
+          gcc -O2 -x c -Dnullptr=NULL -Wno-incompatible-pointer-types \
+              -o ecm ecm_src/src/ecm.c ecm_src/src/eccedc.c \
+              -I ecm_src/include -lm
+          gcc -O2 -x c -Dnullptr=NULL -Wno-incompatible-pointer-types \
+              -o unecm ecm_src/src/unecm.c ecm_src/src/eccedc.c \
+              -I ecm_src/include -lm
+
+      - name: Collect ARM64 binaries
+        run: |
+          mkdir -p assets/linux/arm64
+          cp $(which xdelta3) assets/linux/arm64/xdelta3
+          cp ./ecm            assets/linux/arm64/ecm
+          cp ./unecm          assets/linux/arm64/unecm
+          chmod +x assets/linux/arm64/*
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install nuitka ordered-set zstandard
+
+      - name: Build openrom-core (Nuitka)
+        run: |
+          python -m nuitka \
+            --onefile \
+            --assume-yes-for-downloads \
+            --output-filename=openrom-core \
+            --include-data-dir=assets=assets \
+            core/cli.py
+          chmod +x openrom-core
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.1'
+          channel: 'stable'
+
+      - name: Flutter dependencies
+        working-directory: openrom_flutter
+        run: flutter pub get
+
+      - name: Build Flutter Linux ARM64
+        working-directory: openrom_flutter
+        run: flutter build linux --release
+
+      - name: Package ZIP
+        run: |
+          mkdir release
+          cp -r openrom_flutter/build/linux/arm64/release/bundle/. release/
+          cp openrom-core release/
+          chmod +x release/openrom-core
+          printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./openrom_flutter\n\nNOTE: This build supports light tools only (patching, header removal,\nM3U/CUE generation). Heavy conversions (CHD, CSO, RVZ) are not\navailable on ARM64 — use the x86_64 build for those.\n\nDocs: https://github.com/M5Devs/OpenROM\n' > release/README.txt
+          cd release
+          zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenROM_Linux_arm64
+          path: OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
+
+
   # ── macOS — Flutter .app DMG + Nuitka CLI ───────────────────────────────────
   build-macos:
     strategy:
@@ -308,7 +402,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.47.1'
           channel: 'stable'
 
       - name: Flutter dependencies
@@ -368,7 +462,7 @@ jobs:
 
   # ── GitHub Release ───────────────────────────────────────────────────────────
   release:
-    needs: [build-windows, build-linux, build-macos]
+    needs: [build-windows, build-linux, build-linux-arm64, build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -410,6 +504,7 @@ jobs:
             | 🪟 Windows (Portable) | `OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip` |
             | 🪟 Windows (Installer) | `OpenROM-v${{ github.event.inputs.version }}-Setup.exe` |
             | 🐧 Linux | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
+            | 🐧 Linux ARM64 | `OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip` |
             | macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip` |
             | macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip` |
 
@@ -417,6 +512,7 @@ jobs:
             artifacts/OpenROM_Windows/OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
             artifacts/OpenROM_Windows_Installer/OpenROM-v${{ github.event.inputs.version }}-Setup.exe
             artifacts/OpenROM_Linux/OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
+            artifacts/OpenROM_Linux_arm64/OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
             artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip
             artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip
           draft: false
