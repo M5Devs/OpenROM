@@ -3,5 +3,5 @@ py7zr>=0.20.0
 
 # Build
 nuitka>=2.0.0
-zstandard>=0.22.0
+zstandard>=0.25.0
 ordered-set>=4.1.0
