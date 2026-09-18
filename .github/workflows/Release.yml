@@ -322,10 +322,16 @@ jobs:
             core/cli.py
           chmod +x openrom-core
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
+      # ── Flutter manual install (subosito/flutter-action doesn't support ARM64 Linux) ──
+      - name: Set up Flutter (manual install for ARM64)
+        run: |
+          git clone https://github.com/flutter/flutter.git \
+            --depth 1 --branch stable \
+            $HOME/flutter
+          echo "$HOME/flutter/bin" >> $GITHUB_PATH
+
+      - name: Flutter precache Linux
+        run: flutter precache --linux
 
       - name: Flutter dependencies
         working-directory: openrom_flutter
