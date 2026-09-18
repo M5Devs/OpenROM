@@ -38,6 +38,5 @@ modules:
           /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
 
     sources:
-      - type: git
-        url: https://github.com/M5Devs/OpenROM.git
-        branch: main
+      - type: dir
+        path: .
