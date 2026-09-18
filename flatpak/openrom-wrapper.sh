@@ -1,6 +1,5 @@
 #!/bin/bash
 # OpenROM Flatpak launcher
-export PYTHONPATH="/app/lib/openrom:$PYTHONPATH"
+# openrom-core is on PATH via /app/bin — Flutter app calls it directly
 export PATH="/app/bin:$PATH"
-cd /app/lib/openrom
-exec python3 main.py "$@"
+exec /app/openrom_flutter "$@"
