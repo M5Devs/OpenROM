@@ -85,14 +85,11 @@ jobs:
           cp openrom-core flatpak-build/openrom-core
           chmod +x flatpak-build/openrom-core
 
-      # ── Install Flatpak runtime ──
-      - name: Install Flatpak runtime and SDK
+      # ── Add flathub system remote (required by flatpak-builder action) ──
+      - name: Add flathub remote
         run: |
-          flatpak remote-add --user --if-not-exists flathub \
+          sudo flatpak remote-add --system --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user -y flathub \
-            org.freedesktop.Platform//24.08 \
-            org.freedesktop.Sdk//24.08
 
       # ── Build Flatpak bundle ──
       - name: Build Flatpak
