@@ -17,7 +17,7 @@ jobs:
   build-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ── Visual Studio Build Tools (required by Flutter + Nuitka) ──
       - name: Setup MSBuild
@@ -143,7 +143,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ── System deps ──
       - name: Install system dependencies
@@ -272,7 +272,7 @@ jobs:
             arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION

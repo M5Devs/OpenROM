@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Checkout OpenROM
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout flatpak-builder-tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: flatpak/flatpak-builder-tools
           path: flatpak-builder-tools
