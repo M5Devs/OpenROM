@@ -25,6 +25,8 @@ def get_config_dir() -> str:
 
 CONFIG_FILE = os.path.join(get_config_dir(), "config.json")
 
+_config_cache: dict | None = None
+
 def get_default_bundled_path(tool: str) -> str:
     """
     Returns the bundled binary path for the given tool.
@@ -62,8 +64,9 @@ def get_default_bundled_path(tool: str) -> str:
     elif system == "Darwin":
         fname = unix_names.get(tool, tool)
         # macOS: try arch-specific folder first (arm64 / x86_64)
-        import struct
-        arch = "arm64" if struct.calcsize("P") * 8 == 64 and platform.machine() == "arm64" else "x86_64"
+        arch = platform.machine()  # "arm64" on Apple Silicon, "x86_64" on Intel
+        if arch not in ("arm64", "x86_64"):
+            arch = "x86_64"  # safe fallback for unknown architectures
         bundled = os.path.join(base, "assets", "macos", arch, fname)
         # fallback to flat macos/ folder (non-arch-split tools)
         if not os.path.isfile(bundled):
@@ -92,6 +95,9 @@ DEFAULT_CONFIG = {
 }
 
 def load_config() -> dict:
+    global _config_cache
+    if _config_cache is not None:
+        return _config_cache
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -99,15 +105,19 @@ def load_config() -> dict:
             for k in DEFAULT_CONFIG:
                 if k not in config:
                     config[k] = ""
-            return config
+            _config_cache = config
+            return _config_cache
         except Exception:
             pass
-    return DEFAULT_CONFIG.copy()
+    _config_cache = DEFAULT_CONFIG.copy()
+    return _config_cache
 
 def save_config(config: dict):
+    global _config_cache
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4)
+        _config_cache = None  # invalidate cache after save
     except Exception:
         pass
 
