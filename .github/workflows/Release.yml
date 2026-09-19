@@ -19,6 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Fetch binaries from OpenROM-bins
+        run: |
+          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          New-Item -ItemType Directory -Force -Path assets\windows
+          Copy-Item -Path "bins\windows\x86_64\*" -Destination "assets\windows\" -Recurse
+
       # ── Visual Studio Build Tools (required by Flutter + Nuitka) ──
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -144,6 +150,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Fetch binaries from OpenROM-bins
+        run: |
+          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          mkdir -p assets/linux/x86_64
+          cp -r bins/linux/x86_64/. assets/linux/x86_64/
+          chmod +x assets/linux/x86_64/*
+
       # ── System deps ──
       - name: Install system dependencies
         run: |
@@ -265,6 +278,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Fetch binaries from OpenROM-bins
+        run: |
+          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          mkdir -p assets/linux/arm64
+          cp -r bins/linux/arm64/. assets/linux/arm64/
+          chmod +x assets/linux/arm64/*
+
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
@@ -370,6 +390,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Fetch binaries from OpenROM-bins
+        run: |
+          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          mkdir -p assets/macos/arm64 assets/macos/x86_64
+          cp -r bins/macos/arm64/. assets/macos/arm64/
+          cp -r bins/macos/x86_64/. assets/macos/x86_64/
+          chmod +x assets/macos/arm64/* assets/macos/x86_64/*
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION
