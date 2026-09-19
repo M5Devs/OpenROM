@@ -27,3 +27,8 @@ desktop.ini
 
 # PyInstaller
 *.spec
+
+# Third-party binaries (fetched from OpenROM-bins at build time)
+assets/linux/
+assets/macos/
+assets/windows/

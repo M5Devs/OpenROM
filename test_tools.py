@@ -297,13 +297,15 @@ def test_get_default_bundled_path_linux():
 
     # Test Linux x86_64
     with patch('platform.system', return_value='Linux'), patch('platform.machine', return_value='x86_64'):
-        path = get_default_bundled_path('chdman')
-        assert 'assets/linux/x86_64/chdman' in path
+        with patch('os.path.isfile', return_value=True):
+            path = get_default_bundled_path('chdman')
+            assert 'assets/linux/x86_64/chdman' in path
 
     # Test Linux aarch64
     with patch('platform.system', return_value='Linux'), patch('platform.machine', return_value='aarch64'):
-        path = get_default_bundled_path('ecm')
-        assert 'assets/linux/arm64/ecm' in path
+        with patch('os.path.isfile', return_value=True):
+            path = get_default_bundled_path('ecm')
+            assert 'assets/linux/arm64/ecm' in path
 
     # Test Linux fallback to flat directory when arch folder missing
     def fake_isfile(p):
