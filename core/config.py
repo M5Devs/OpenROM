@@ -50,24 +50,26 @@ def get_default_bundled_path(tool: str) -> str:
             return os.path.join(base, "assets", "linux", arch_folder, "nkit", "nkit")
 
     win_names = {
-        "chdman":       "chdman.exe",
-        "ecm":          "ecm.exe",
-        "unecm":        "unecm.exe",
-        "maxcso":       "maxcso.exe",
-        "extract-xiso": "extract-xiso.exe",
-        "nodtool":      "nodtool.exe",
-        "xdelta3":      "xdelta3.exe",      # ← جديد
-        "nkit":         "nkit.exe",
+        "chdman":         "chdman.exe",
+        "ecm":            "ecm.exe",
+        "unecm":          "unecm.exe",
+        "maxcso":         "maxcso.exe",
+        "extract-xiso":   "extract-xiso.exe",
+        "nodtool":        "nodtool.exe",
+        "xdelta3":        "xdelta3.exe",      # ← جديد
+        "nkit":           "nkit.exe",
+        "saturn-patcher": "saturn-patcher.exe",
     }
     unix_names = {
-        "chdman":       "chdman",
-        "ecm":          "ecm",
-        "unecm":        "unecm",
-        "maxcso":       "maxcso",
-        "extract-xiso": "extract-xiso",
-        "nodtool":      "nodtool",
-        "xdelta3":      "xdelta3",          # ← جديد
-        "nkit":         "nkit",
+        "chdman":         "chdman",
+        "ecm":            "ecm",
+        "unecm":          "unecm",
+        "maxcso":         "maxcso",
+        "extract-xiso":   "extract-xiso",
+        "nodtool":        "nodtool",
+        "xdelta3":        "xdelta3",          # ← جديد
+        "nkit":           "nkit",
+        "saturn-patcher": "saturn-patcher",
     }
 
     if system == "Windows":
@@ -104,14 +106,15 @@ def get_default_bundled_path(tool: str) -> str:
 
 
 DEFAULT_CONFIG = {
-    "chdman":       "",
-    "maxcso":       "",
-    "ecm":          "",
-    "unecm":        "",
-    "extract-xiso": "",
-    "nodtool":      "",
-    "xdelta3":      "",   # ← جديد
-    "nkit":         "",
+    "chdman":         "",
+    "maxcso":         "",
+    "ecm":            "",
+    "unecm":          "",
+    "extract-xiso":   "",
+    "nodtool":        "",
+    "xdelta3":        "",   # ← جديد
+    "nkit":           "",
+    "saturn-patcher": "",
 }
 
 def load_config() -> dict:

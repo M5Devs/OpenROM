@@ -43,6 +43,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
 
   PatchReport? _report;
 
+  bool get _isSspPatch => _patchPath.isNotEmpty && PatcherFactory.isSspPatch(_patchPath);
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +52,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
   }
 
   void _updateOutputPath() {
+    if (_isSspPatch) return; // SSP patches in-place, no output file
     if (_sameFolder && _romPath.isNotEmpty) {
       final dir = p.dirname(_romPath);
       final ext = p.extension(_romPath);
@@ -61,7 +64,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
   }
 
   Future<void> _pickRomFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    final result = await FilePicker.platform.pickFiles(
+      type: _isSspPatch ? FileType.custom : FileType.any,
+      allowedExtensions: _isSspPatch ? ['bin'] : null,
+    );
     if (result != null && result.files.single.path != null) {
       setState(() {
         _romPath = result.files.single.path!;
@@ -81,6 +87,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
         _patchPath = result.files.single.path!;
         _report = null;
       });
+      _updateOutputPath();
     }
   }
 
@@ -141,7 +148,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
   }
 
   Future<void> _applyPatch() async {
-    if (_romPath.isEmpty || _patchPath.isEmpty || _outputPath.isEmpty) return;
+    if (_romPath.isEmpty || _patchPath.isEmpty) return;
+    if (!_isSspPatch && _outputPath.isEmpty) return;
 
     setState(() {
       _isPatching = true;
@@ -149,6 +157,22 @@ class _PatcherScreenState extends State<PatcherScreen> {
     });
 
     try {
+      if (_isSspPatch) {
+        final output = await _patcherService.applySspPatch(
+          sspPath: _patchPath,
+          binPath: _romPath,
+        );
+        if (mounted) {
+          setState(() {
+            _report = PatchReport(
+              format: 'SSP',
+            );
+            _isPatching = false;
+          });
+        }
+        return;
+      }
+
       final report = await _patcherService.applyPatch(
         romPath: _romPath,
         patchPath: _patchPath,
@@ -180,7 +204,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final formatBadge = PatcherFactory.formatName(_patchPath);
-    final canApply = !_isPatching && _romPath.isNotEmpty && _patchPath.isNotEmpty && _outputPath.isNotEmpty;
+    final canApply = !_isPatching &&
+        _romPath.isNotEmpty &&
+        _patchPath.isNotEmpty &&
+        (_isSspPatch || _outputPath.isNotEmpty);
 
     return DropTarget(
       onDragEntered: (_) => setState(() => _isDragging = true),
@@ -269,56 +296,82 @@ class _PatcherScreenState extends State<PatcherScreen> {
                           ],
                         ),
                       ],
+                      if (_isSspPatch) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.orange),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'SSP patches modify the BIN file directly. Make a backup copy before patching!',
+                                  style: TextStyle(color: Colors.orange.shade200, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
 
-                      // Output File Picker
-                      _buildFileSection(
-                        label: l10n.patcherOutputFile,
-                        path: _outputPath,
-                        onBrowse: _pickOutputFile,
-                        theme: theme,
-                        browseTooltip: l10n.browse,
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Same folder as ROM checkbox
-                      CheckboxListTile(
-                        value: _sameFolder,
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        activeColor: theme.accent,
-                        title: Text(
-                          l10n.patcherSameFolder,
-                          style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                      if (!_isSspPatch) ...[
+                        // Output File Picker
+                        _buildFileSection(
+                          label: l10n.patcherOutputFile,
+                          path: _outputPath,
+                          onBrowse: _pickOutputFile,
+                          theme: theme,
+                          browseTooltip: l10n.browse,
                         ),
-                        onChanged: (val) {
-                          setState(() {
-                            _sameFolder = val ?? true;
-                          });
-                          _updateOutputPath();
-                        },
-                      ),
-                      const SizedBox(height: 4),
+                        const SizedBox(height: 6),
 
-                      // Ignore checksum errors checkbox
-                      CheckboxListTile(
-                        value: _ignoreChecksum,
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        activeColor: theme.accent,
-                        title: Text(
-                          l10n.patcherIgnoreChecksum,
-                          style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                        // Same folder as ROM checkbox
+                        CheckboxListTile(
+                          value: _sameFolder,
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: theme.accent,
+                          title: Text(
+                            l10n.patcherSameFolder,
+                            style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              _sameFolder = val ?? true;
+                            });
+                            _updateOutputPath();
+                          },
                         ),
-                        onChanged: (val) {
-                          setState(() {
-                            _ignoreChecksum = val ?? false;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 4),
+
+                        // Ignore checksum errors checkbox
+                        CheckboxListTile(
+                          value: _ignoreChecksum,
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: theme.accent,
+                          title: Text(
+                            l10n.patcherIgnoreChecksum,
+                            style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              _ignoreChecksum = val ?? false;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Apply Patch Button
                       SizedBox(

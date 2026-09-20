@@ -459,6 +459,35 @@ class CoreBridge {
     }
   }
 
+  static Future<String?> getToolPath(String tool) async {
+    try {
+      if (await coreExists()) {
+        final corePath = await getCoreExecutablePath();
+        final List<String> args = [];
+        if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+          args.addAll(['main.py', '--json', '--tool-path', tool]);
+        } else {
+          args.addAll(['--json', '--tool-path', tool]);
+        }
+        final result = await Process.run(corePath, args);
+        if (result.exitCode == 0) {
+          final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+          if (lines.isNotEmpty) {
+            final Map<String, dynamic> jsonMap = jsonDecode(lines.last);
+            final p = jsonMap['path'] as String?;
+            if (p != null && p.isNotEmpty) return p;
+          }
+        }
+      }
+    } catch (_) {}
+
+    final binaryName = Platform.isWindows ? '$tool.exe' : tool;
+    final exeDir = File(Platform.resolvedExecutable).parent.path;
+    final localPath = '$exeDir${Platform.pathSeparator}$binaryName';
+    if (File(localPath).existsSync()) return localPath;
+    return binaryName;
+  }
+
   static Future<String> getVersion() async {
     try {
       if (!await coreExists()) {
