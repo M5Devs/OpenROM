@@ -157,6 +157,9 @@ class Converter:
         if tgt == "XISO":
             return self._to_xiso(job, src)
 
+        if (fmt in ("WUD", "WUX", "NKIT") and tgt == "ISO") or (fmt == "ISO" and tgt == "NKIT"):
+            return self._nkit_convert(job, src, tgt)
+
         self._log(f"[ERROR] Unhandled conversion route: {fmt} → {tgt}")
         return False
 
@@ -312,6 +315,17 @@ class Converter:
         fmt     = os.path.splitext(src)[1].upper().lstrip(".")
         cmd     = [nodtool, "convert", src, out]
         self._log(f"[{fmt}→ISO] {os.path.basename(src)} → {os.path.basename(out)}")
+        return self._run(cmd, job)
+
+    # ── NKit conversion ───────────────────────────────────────────
+
+    def _nkit_convert(self, job: ConversionJob, src: str, tgt: str) -> bool:
+        """WUD / WUX / NKIT -> ISO or ISO -> NKIT via nkit convert"""
+        nkit = get_tool_path("nkit")
+        ext  = "nkit.iso" if tgt == "NKIT" else tgt.lower()
+        out  = self._out_path(job, src, ext)
+        cmd  = [nkit, "convert", "-i", src, "-o", out]
+        self._log(f"[NKIT] {os.path.basename(src)} → {os.path.basename(out)}")
         return self._run(cmd, job)
 
     # ── Core runner ───────────────────────────────────────────────────────────
