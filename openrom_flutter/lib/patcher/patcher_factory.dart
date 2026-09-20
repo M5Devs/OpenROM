@@ -34,7 +34,14 @@ class PatcherFactory {
     'xdelta3',
     'xd',
     'vcdiff',
+    'ssp',
   };
+
+  /// Returns true if [path] is an SSP patch (requires external binary).
+  static bool isSspPatch(String path) {
+    final ext = p.extension(path).toLowerCase().replaceFirst('.', '');
+    return ext == 'ssp';
+  }
 
   /// Returns true if [path] has a recognised patch extension.
   static bool isSupportedPatch(String path) {
@@ -70,6 +77,8 @@ class PatcherFactory {
       case 'xd':
       case 'vcdiff':
         return 'xdelta';
+      case 'ssp':
+        return 'SSP (Saturn)';
       default:
         return null;
     }

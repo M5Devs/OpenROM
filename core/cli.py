@@ -36,6 +36,7 @@ from core.m3u_generator import generate_m3u
 from core.cue_generator import generate_cue, detect_bin_mode
 from core.bin_merger import merge_bins, parse_cue
 from core.header_remover import detect_header, remove_header
+from core.config import get_tool_path
 
 # ── ANSI colors (disabled on Windows if no ANSI support) ─────────────────────
 def _ansi(code: str) -> str:
@@ -164,6 +165,11 @@ examples:
         "--detect-header",
         metavar="FILE",
         help="detect copier header on ROM file",
+    )
+    src.add_argument(
+        "--tool-path",
+        metavar="TOOL",
+        help="get resolved path for a tool",
     )
     src.add_argument(
         "--remove-header",
@@ -752,6 +758,14 @@ def main() -> int:
     args = parser.parse_args()
 
     # ── Dispatch ──────────────────────────────────────────────────────────────
+    if args.tool_path:
+        p = get_tool_path(args.tool_path)
+        if args.json:
+            _json_print({"path": p})
+        else:
+            print(p)
+        return 0
+
     if args.detect:
         return cmd_detect(args.detect, args.json)
 
