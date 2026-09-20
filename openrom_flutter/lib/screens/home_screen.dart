@@ -107,6 +107,11 @@ class HomeScreenState extends State<HomeScreen> {
       }
       job.compression = compression;
       job.verify = verify;
+      job.estimatedOutputSize = ConversionJob.estimateSize(
+        job.romFile.fileSizeBytes ?? 0,
+        job.targetFormat,
+        job.compression,
+      );
 
       setState(() {
         job.status = JobStatus.converting;
@@ -175,6 +180,23 @@ class HomeScreenState extends State<HomeScreen> {
       onFilesDropped: addFilesFromPaths,
       child: Column(
         children: [
+          if (_jobs.any((j) => j.status == JobStatus.done || j.status == JobStatus.failed))
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => setState(() {
+                      _jobs.removeWhere((j) =>
+                        j.status == JobStatus.done || j.status == JobStatus.failed);
+                    }),
+                    icon: const Icon(Icons.cleaning_services_outlined, size: 16),
+                    label: const Text('Clear completed'),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: _jobs.isEmpty
                 ? Center(
@@ -194,13 +216,22 @@ class HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   )
-                : ListView.builder(
+                : ReorderableListView.builder(
                     itemCount: _jobs.length,
+                    onReorder: (oldIndex, newIndex) {
+                      setState(() {
+                        if (newIndex > oldIndex) newIndex--;
+                        final job = _jobs.removeAt(oldIndex);
+                        _jobs.insert(newIndex, job);
+                      });
+                    },
                     itemBuilder: (context, index) {
+                      final job = _jobs[index];
                       return RomCard(
-                        job: _jobs[index],
+                        key: ValueKey(job.id),
+                        job: job,
                         theme: widget.theme,
-                        onDelete: () => removeJob(index),
+                        onDelete: () => setState(() => _jobs.removeAt(index)),
                       );
                     },
                   ),

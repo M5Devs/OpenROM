@@ -34,7 +34,7 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -80,6 +80,10 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
                   icon: const Icon(Icons.content_cut_outlined),
                   text: l10n.headerRemoverTitle,
                 ),
+                Tab(
+                  icon: const Icon(Icons.edit_document),
+                  text: 'CUE Editor',
+                ),
               ],
             ),
           ),
@@ -92,6 +96,7 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
                 _CueGeneratorTab(theme: widget.theme),
                 _BinMergerTab(theme: widget.theme),
                 _HeaderRemoverTab(theme: widget.theme),
+                _CueEditorTab(theme: widget.theme),
               ],
             ),
           ),
@@ -1678,6 +1683,120 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+// ── Tab 6: CUE Editor ─────────────────────────────────────────────────────────
+
+class _CueEditorTab extends StatefulWidget {
+  final ThemeConfig theme;
+  const _CueEditorTab({required this.theme});
+
+  @override
+  State<_CueEditorTab> createState() => _CueEditorTabState();
+}
+
+class _CueEditorTabState extends State<_CueEditorTab> {
+  String? _cuePath;
+  final TextEditingController _controller = TextEditingController();
+  bool _hasChanges = false;
+  bool _isSaving = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickCueFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['cue'],
+    );
+    if (result != null && result.files.single.path != null) {
+      final path = result.files.single.path!;
+      final content = await File(path).readAsString();
+      setState(() {
+        _cuePath = path;
+        _controller.text = content;
+        _hasChanges = false;
+      });
+    }
+  }
+
+  Future<void> _saveCueFile() async {
+    if (_cuePath == null) return;
+    setState(() => _isSaving = true);
+    try {
+      await File(_cuePath!).writeAsString(_controller.text);
+      setState(() => _hasChanges = false);
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: _pickCueFile,
+                icon: const Icon(Icons.folder_open, size: 16),
+                label: const Text('Open .cue'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: _hasChanges && !_isSaving ? _saveCueFile : null,
+                icon: _isSaving
+                    ? const SizedBox(width: 14, height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.save, size: 16),
+                label: const Text('Save'),
+              ),
+              if (_cuePath != null) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _cuePath!,
+                    style: TextStyle(fontSize: 12, color: widget.theme.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: widget.theme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: widget.theme.border),
+              ),
+              child: TextField(
+                controller: _controller,
+                onChanged: (_) => setState(() => _hasChanges = true),
+                maxLines: null,
+                expands: true,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(12),
+                  border: InputBorder.none,
+                  hintText: _cuePath == null ? 'Open a .cue file to edit...' : null,
+                  hintStyle: TextStyle(color: widget.theme.textSecondary),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
