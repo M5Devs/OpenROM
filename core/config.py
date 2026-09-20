@@ -38,6 +38,17 @@ def get_default_bundled_path(tool: str) -> str:
     system = platform.system()
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    # Special case: nkit lives in its own subfolder
+    if tool == "nkit":
+        machine     = platform.machine()
+        arch_folder = "arm64" if machine == "aarch64" else ("arm64" if machine == "arm64" else "x86_64")
+        if system == "Windows":
+            return os.path.join(base, "assets", "windows", "nkit", "nkit.exe")
+        elif system == "Darwin":
+            return os.path.join(base, "assets", "macos", arch_folder, "nkit", "nkit")
+        else:
+            return os.path.join(base, "assets", "linux", arch_folder, "nkit", "nkit")
+
     win_names = {
         "chdman":       "chdman.exe",
         "ecm":          "ecm.exe",
@@ -46,6 +57,7 @@ def get_default_bundled_path(tool: str) -> str:
         "extract-xiso": "extract-xiso.exe",
         "nodtool":      "nodtool.exe",
         "xdelta3":      "xdelta3.exe",      # ← جديد
+        "nkit":         "nkit.exe",
     }
     unix_names = {
         "chdman":       "chdman",
@@ -55,6 +67,7 @@ def get_default_bundled_path(tool: str) -> str:
         "extract-xiso": "extract-xiso",
         "nodtool":      "nodtool",
         "xdelta3":      "xdelta3",          # ← جديد
+        "nkit":         "nkit",
     }
 
     if system == "Windows":
@@ -98,6 +111,7 @@ DEFAULT_CONFIG = {
     "extract-xiso": "",
     "nodtool":      "",
     "xdelta3":      "",   # ← جديد
+    "nkit":         "",
 }
 
 def load_config() -> dict:

@@ -15,6 +15,9 @@ SUPPORTED_INPUT = {
     ".rvz":  "RVZ",
     ".wia":  "WIA",
     ".wbfs": "WBFS",
+    ".wud":      "WUD",
+    ".wux":      "WUX",
+    ".nkit.iso": "NKIT",
     ".gcz":  "GCZ",
 }
 
@@ -33,6 +36,9 @@ PLATFORM_MAP = {
     "WIA":  "GameCube / Wii",
     "WBFS": "Wii",
     "GCZ":  "GameCube / Wii",
+    "WUD":  "Wii U",
+    "WUX":  "Wii U",
+    "NKIT": "GameCube / Wii",
     "Saturn":       "Sega Saturn",
     "Sega CD":      "Sega CD / Mega-CD",
     "PC-Engine CD": "PC-Engine CD / TurboGrafx-CD",
@@ -54,6 +60,9 @@ FORMAT_COLORS = {
     "WIA":     "#5c6bc0",
     "WBFS":    "#7986cb",
     "GCZ":     "#9fa8da",
+    "WUD":     "#e65100",
+    "WUX":     "#ef6c00",
+    "NKIT":    "#1a237e",
     "UNKNOWN": "#7a8a9a",
     "Saturn":       "#1565c0",
     "Sega CD":      "#4a148c",
@@ -63,7 +72,7 @@ FORMAT_COLORS = {
 
 # ── Complete Conversion Map ──────────────────────────────────────────────────
 CONVERSION_MAP = {
-    "ISO":  ["CHD", "CSO", "ECM", "XISO", "RVZ"],
+    "ISO":  ["CHD", "CSO", "ECM", "XISO", "RVZ", "NKIT"],
     "BIN":  ["CHD", "ECM"],
     "CUE":  ["CHD"],
     "GDI":  ["CHD"],
@@ -77,6 +86,9 @@ CONVERSION_MAP = {
     "WIA":  ["ISO"],
     "WBFS": ["ISO"],
     "GCZ":  ["ISO"],
+    "WUD":  ["ISO"],
+    "WUX":  ["ISO"],
+    "NKIT": ["ISO"],
 }
 
 COMMAND_TEMPLATES = {
@@ -102,6 +114,10 @@ COMMAND_TEMPLATES = {
     ("WIA",  "ISO"):     "nodtool convert \"{in}\" \"{out}\"",
     ("WBFS", "ISO"):     "nodtool convert \"{in}\" \"{out}\"",
     ("GCZ",  "ISO"):     "nodtool convert \"{in}\" \"{out}\"",
+    ("WUD",  "ISO"):     "nkit convert -i \"{in}\" -o \"{out}\"",
+    ("WUX",  "ISO"):     "nkit convert -i \"{in}\" -o \"{out}\"",
+    ("NKIT", "ISO"):     "nkit convert -i \"{in}\" -o \"{out}\"",
+    ("ISO",  "NKIT"):    "nkit convert -i \"{in}\" -o \"{out}\"",
 }
 
 # ── Magic byte constants ─────────────────────────────────────────────────────
@@ -152,12 +168,18 @@ _XBOX_OFFSET_2 = 0x2090000
 # ── Public helpers ───────────────────────────────────────────────────────────
 
 def get_extension(filename: str) -> str:
-    return filename.lower().rsplit('.', 1)[-1]
+    name_lower = filename.lower()
+    if name_lower.endswith('.nkit.iso'):
+        return 'nkit.iso'
+    return name_lower.rsplit('.', 1)[-1]
 
 
 def get_output_name(input_file: str, new_ext: str) -> str:
     clean_ext = new_ext.lstrip('.')
-    base = input_file.rsplit('.', 1)[0]
+    if input_file.lower().endswith('.nkit.iso'):
+        base = input_file[:-9]
+    else:
+        base = input_file.rsplit('.', 1)[0]
     if base.lower().endswith(f".{clean_ext.lower()}"):
         return base
     return f"{base}.{clean_ext}"
@@ -189,9 +211,13 @@ def detect_file(filepath: str) -> dict:
     if not os.path.isfile(filepath):
         return {"error": f"File not found: {filepath}"}
 
-    name    = os.path.basename(filepath)
-    ext_str = get_extension(name)
-    ext     = f".{ext_str}"
+    name = os.path.basename(filepath)
+    name_lower = name.lower()
+    # Handle double extension .nkit.iso
+    if name_lower.endswith(".nkit.iso"):
+        ext = ".nkit.iso"
+    else:
+        ext = os.path.splitext(name_lower)[1]
     size    = os.path.getsize(filepath)
 
     fmt      = SUPPORTED_INPUT.get(ext, "UNKNOWN")
