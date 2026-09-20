@@ -14,6 +14,7 @@ class RomFile {
   final String? pairedCue;
   final String? pairedBin;
   final String? chdType;
+  final int? fileSizeBytes;
 
   RomFile({
     required this.filepath,
@@ -28,6 +29,7 @@ class RomFile {
     this.pairedCue,
     this.pairedBin,
     this.chdType,
+    this.fileSizeBytes,
   });
 
   factory RomFile.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class RomFile {
       pairedCue: json['paired_cue'],
       pairedBin: json['paired_bin'],
       chdType: json['chd_type'],
+      fileSizeBytes: json['size_bytes'],
     );
   }
 }

@@ -201,6 +201,19 @@ class _RomCardState extends State<RomCard> {
                               fontSize: 12,
                             ),
                           ),
+                          if (widget.job.estimatedOutputSize != null &&
+                              widget.job.estimatedOutputSize!.isNotEmpty &&
+                              widget.job.status == JobStatus.queued) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Est. output: ${widget.job.estimatedOutputSize}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: widget.theme.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(width: 8),
