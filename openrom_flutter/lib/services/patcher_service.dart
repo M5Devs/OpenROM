@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../core/errors.dart';
 import '../patcher/patcher.dart';
 import '../patcher/patcher_factory.dart';
+import '../patcher/dcp_patcher.dart';
 import 'core_bridge.dart';
 
 /// Top-level function executed inside [compute] isolate.
@@ -88,5 +89,21 @@ class PatcherService {
       if (e is OpenROMException) rethrow;
       throw OpenROMException(OpenROMError.unknownError, details: e.toString());
     }
+  }
+
+  /// Apply a Dreamcast DCP patch via openrom-core subprocess.
+  Future<DcpPatchResult> applyDcpPatch({
+    required String dcpPath,
+    required String discDir,
+    required String outputDir,
+    bool ignoreChecksum = false,
+  }) async {
+    final patcher = DcpPatcher(
+      dcpPath: dcpPath,
+      discDir: discDir,
+      outputDir: outputDir,
+      ignoreChecksum: ignoreChecksum,
+    );
+    return await patcher.apply();
   }
 }

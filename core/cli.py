@@ -196,6 +196,34 @@ examples:
         help="rename ROMs in a folder to canonical DAT names",
     )
 
+    # ── Dreamcast DCP patch ───────────────────────────────────────────────────────
+    parser.add_argument(
+        '--dcp',
+        metavar='FILE',
+        help='apply a Dreamcast DCP patch (.dcp) to an extracted disc directory',
+    )
+    parser.add_argument(
+        '--disc-dir',
+        metavar='DIR',
+        help='extracted Dreamcast disc directory (used with --dcp)',
+    )
+
+    # ── IP.BIN editor ─────────────────────────────────────────────────────────────
+    parser.add_argument(
+        '--read-ipbin',
+        metavar='FILE',
+        help='read and display IP.BIN fields from a standalone IP.BIN or GDI',
+    )
+    parser.add_argument(
+        '--write-ipbin',
+        metavar='FILE',
+        help='IP.BIN file to modify (used with --set-* flags below)',
+    )
+    parser.add_argument('--set-title',    metavar='TITLE',  help='set game title in IP.BIN')
+    parser.add_argument('--set-region',   metavar='REGION', help='set region code (e.g. JUE)')
+    parser.add_argument('--set-vga',      action='store_true', help='enable VGA in IP.BIN')
+    parser.add_argument('--region-free',  action='store_true', help='enable all regions in IP.BIN')
+
     # ── Conversion / Tools target ────────────────────────────────────────────
     parser.add_argument(
         "--format", "-F",
@@ -935,6 +963,66 @@ def main() -> int:
     args = parser.parse_args()
 
     # ── Dispatch ──────────────────────────────────────────────────────────────
+    # DCP patch handler
+    if args.dcp:
+        from core.dcp_patcher import DcpPatcher
+        if not args.disc_dir:
+            print(f'{RED}[ERROR]{RESET} --disc-dir is required with --dcp', file=sys.stderr)
+            return 1
+        patcher = DcpPatcher(on_log=print)
+        result = patcher.apply(
+            dcp_path=args.dcp,
+            disc_dir=args.disc_dir,
+            output_dir=args.output or os.path.join(args.disc_dir, 'patched'),
+            ignore_checksum=getattr(args, 'ignore_checksum', False),
+        )
+        if result['success']:
+            print(f'{GREEN}✅ DCP applied.{RESET} Files patched: {result["files_patched"]}, '
+                  f'IP.BIN replaced: {result["ipbin_replaced"]}')
+            return 0
+        else:
+            print(f'{RED}❌ DCP failed:{RESET} {result["error"]}', file=sys.stderr)
+            return 1
+
+    # IP.BIN read handler
+    if args.read_ipbin:
+        from core.ipbin_editor import read_ipbin
+        from core.gdi_reader import extract_ipbin_from_gdi
+        import tempfile
+        path = args.read_ipbin
+        if path.lower().endswith('.gdi'):
+            with tempfile.NamedTemporaryFile(suffix='.bin', delete=False) as tmp:
+                tmp.write(extract_ipbin_from_gdi(path))
+                tmp_path = tmp.name
+            fields = read_ipbin(tmp_path)
+            os.unlink(tmp_path)
+        else:
+            fields = read_ipbin(path)
+        for offset, length, name in __import__('core.ipbin_editor', fromlist=['IPBIN_FIELDS']).IPBIN_FIELDS:
+            print(f'  {name:20s}: {fields.get(name, "")}')
+        print(f'  {"regions":20s}: {", ".join(fields.get("regions", []))}')
+        return 0
+
+    # IP.BIN write handler
+    if args.write_ipbin:
+        from core.ipbin_editor import read_ipbin, write_ipbin, set_region_free, set_vga_enabled
+        fields = read_ipbin(args.write_ipbin)
+        if args.set_title:
+            fields['product_name'] = args.set_title[:16]
+            fields['product_name_2'] = args.set_title[16:32] if len(args.set_title) > 16 else ''
+        if args.set_region:
+            fields['region_code'] = args.set_region.upper().ljust(8)
+            fields['regions'] = [{'J': 'Japan', 'U': 'USA', 'E': 'Europe'}[c]
+                                 for c in 'JUE' if c in args.set_region.upper()]
+        if args.region_free:
+            fields = set_region_free(fields)
+        if args.set_vga:
+            fields = set_vga_enabled(fields)
+        out = args.output or args.write_ipbin
+        write_ipbin(fields, out)
+        print(f'{GREEN}✅ IP.BIN written to:{RESET} {out}')
+        return 0
+
     if args.tool_path:
         p = get_tool_path(args.tool_path)
         if args.json:
