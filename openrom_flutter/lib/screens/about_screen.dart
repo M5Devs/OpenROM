@@ -1,5 +1,5 @@
 // OpenROM — Universal ROM Compression Suite
-// M5 Dev | GPL v3 + Commons Clause
+// M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
@@ -84,7 +84,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     const Divider(color: Colors.white12),
                     const SizedBox(height: 12),
                     Text(
-                      'License: GPL v3 + Commons Clause',
+                      'License: GPL v3',
                       style: TextStyle(color: theme.textSecondary, fontSize: 12),
                     ),
                   ],

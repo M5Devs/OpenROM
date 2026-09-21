@@ -1,5 +1,5 @@
 // OpenROM — Universal ROM Compression Suite
-// M5 Dev | GPL v3 + Commons Clause
+// M5 Dev | GPL v3
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';

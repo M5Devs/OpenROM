@@ -1,5 +1,5 @@
 // OpenROM — Universal ROM Compression Suite
-// M5 Dev | GPL v3 + Commons Clause
+// M5 Dev | GPL v3
 
 import '../core/errors.dart';
 import 'rom_file.dart';
