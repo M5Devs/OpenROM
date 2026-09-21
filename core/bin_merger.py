@@ -15,6 +15,12 @@ def _sectors_to_msf(sectors: int) -> str:
     return f"{mm:02d}:{ss:02d}:{ff:02d}"
 
 
+def _msf_to_sectors(msf: str) -> int:
+    """Convert MSF string (MM:SS:FF) to sector count."""
+    parts = list(map(int, msf.split(":")))
+    return parts[0] * 60 * 75 + parts[1] * 75 + parts[2]
+
+
 def _get_sector_size(mode: str) -> int:
     """Return sector size in bytes based on track mode."""
     mode_upper = mode.upper()
@@ -27,14 +33,15 @@ def _get_sector_size(mode: str) -> int:
 
 def parse_cue(cue_path: str) -> List[Dict]:
     """
-    Parse a CUE file to extract tracks and referenced BIN files.
+    Parse a CUE file to extract tracks, indexes, and referenced BIN files.
     Returns list of track dicts:
       [
         {
           "track_number": int,
           "mode": str,
           "file": str (absolute path),
-          "rel_file": str (filename in cue)
+          "rel_file": str (filename in cue),
+          "indexes": [{"number": int, "msf": str}, ...]
         }, ...
       ]
     """
@@ -44,6 +51,7 @@ def parse_cue(cue_path: str) -> List[Dict]:
     current_file = None
     file_regex = re.compile(r'FILE\s+["\']?([^"\']+)["\']?\s+BINARY', re.IGNORECASE)
     track_regex = re.compile(r'TRACK\s+(\d+)\s+([^\s]+)', re.IGNORECASE)
+    index_regex = re.compile(r'INDEX\s+(\d+)\s+(\d{2}:\d{2}:\d{2})', re.IGNORECASE)
 
     with open(cue_path, "r", encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -63,6 +71,17 @@ def parse_cue(cue_path: str) -> List[Dict]:
                     "mode": mode,
                     "file": current_file,
                     "rel_file": os.path.basename(current_file) if current_file else "",
+                    "indexes": [],
+                })
+                continue
+
+            im = index_regex.search(line_str)
+            if im and tracks:
+                idx_num = int(im.group(1))
+                idx_msf = im.group(2)
+                tracks[-1]["indexes"].append({
+                    "number": idx_num,
+                    "msf": idx_msf,
                 })
 
     return tracks
@@ -103,7 +122,6 @@ def merge_bins(
     merged_bin_path = os.path.join(target_dir, merged_bin_name)
     merged_cue_path = os.path.join(target_dir, merged_cue_name)
 
-    total_files = len(tracks)
     total_bytes = sum(os.path.getsize(t["file"]) for t in tracks)
     bytes_written = 0
 
@@ -120,11 +138,32 @@ def merge_bins(
             file_size = os.path.getsize(bin_path)
             sectors_in_file = file_size // sec_size
 
-            msf_time = _sectors_to_msf(accumulated_sectors)
+            parsed_indexes = t.get("indexes", [])
+
+            if parsed_indexes:
+                # Find INDEX 01 offset within this track file
+                idx01_entry = next((i for i in parsed_indexes if i["number"] == 1), None)
+                idx01_offset = _msf_to_sectors(idx01_entry["msf"]) if idx01_entry else 0
+
+                computed_indexes = []
+                for idx_item in parsed_indexes:
+                    idx_offset = _msf_to_sectors(idx_item["msf"])
+                    # Convert track-relative index offset into merged timeline
+                    idx_sectors = accumulated_sectors + (idx_offset - idx01_offset)
+                    computed_indexes.append({
+                        "number": idx_item["number"],
+                        "msf": _sectors_to_msf(idx_sectors),
+                    })
+            else:
+                computed_indexes = [{
+                    "number": 1,
+                    "msf": _sectors_to_msf(accumulated_sectors),
+                }]
+
             new_cue_tracks.append({
                 "track_number": t["track_number"],
                 "mode": mode,
-                "index_01": msf_time,
+                "indexes": computed_indexes,
             })
 
             accumulated_sectors += sectors_in_file
@@ -150,6 +189,7 @@ def merge_bins(
         f.write(f'FILE "{merged_bin_name}" BINARY\n')
         for ct in new_cue_tracks:
             f.write(f'  TRACK {ct["track_number"]:02d} {ct["mode"]}\n')
-            f.write(f'    INDEX 01 {ct["index_01"]}\n')
+            for idx_item in ct["indexes"]:
+                f.write(f'    INDEX {idx_item["number"]:02d} {idx_item["msf"]}\n')
 
     return (merged_bin_path, merged_cue_path)

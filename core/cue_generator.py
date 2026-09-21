@@ -6,18 +6,22 @@ import os
 
 def detect_bin_mode(bin_path: str) -> str:
     """
-    Sniff the first sector of a BIN file to determine its track mode.
+    Sniff the first sector and first 32 sectors of a BIN file to determine its track mode.
       MODE1/2048 : 2048-byte sectors (data only, no sync header)
       MODE1/2352 : 2352-byte sectors with sync header + mode byte 01
       MODE2/2352 : 2352-byte sectors with sync header + mode byte 02
-      AUDIO      : 2352-byte sectors, no recognisable sync header
+      AUDIO      : 2352-byte sectors, no recognisable sync header or ISO/CD-ROM data signatures
     Falls back to MODE2/2352 when the file is too small or unreadable.
     """
     SYNC = b'\x00' + b'\xff' * 10 + b'\x00'
+    DATA_SIGNATURES = [b"CD001", b"PLAYSTATION", b"SEGA", b"3DO", b"BOOT", b"PCE-CD"]
+
     try:
         size = os.path.getsize(bin_path)
         with open(bin_path, "rb") as f:
             header = f.read(16)
+            f.seek(0)
+            first_32_kb = f.read(32 * 2352)
 
         if len(header) < 16:
             return "MODE2/2352"
@@ -33,8 +37,17 @@ def detect_bin_mode(bin_path: str) -> str:
 
         if size % 2048 == 0:
             return "MODE1/2048"
+
+        # Check for CD-ROM / ISO-9660 signatures in the first 32 sectors
+        has_data_sig = any(sig in first_32_kb for sig in DATA_SIGNATURES)
+
         if size % 2352 == 0:
+            if has_data_sig:
+                return "MODE1/2352"
             return "AUDIO"
+
+        if has_data_sig:
+            return "MODE1/2352"
 
         return "MODE2/2352"
     except Exception:

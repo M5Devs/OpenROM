@@ -2,7 +2,7 @@
 core/ipbin_editor.py — Dreamcast IP.BIN reader and editor
 M5 Dev | GPL v3
 
-IP.BIN is the Dreamcast boot sector: 2048 bytes, fixed ASCII fields.
+IP.BIN is the Dreamcast boot sector: 2048 bytes, fixed ASCII/Shift-JIS fields.
 Can be read from a standalone IP.BIN file or extracted from a GDI/CHD.
 """
 
@@ -51,7 +51,17 @@ def read_ipbin(path: str) -> dict:
     result = {'_raw': data, '_path': path}
     for offset, length, name in IPBIN_FIELDS:
         raw = data[offset: offset + length]
-        result[name] = raw.decode('ascii', errors='replace').rstrip()
+        if name in ('product_name', 'product_name_2'):
+            try:
+                decoded = raw.decode('shift_jis')
+            except UnicodeDecodeError:
+                try:
+                    decoded = raw.decode('cp932')
+                except UnicodeDecodeError:
+                    decoded = raw.decode('ascii', errors='replace')
+        else:
+            decoded = raw.decode('ascii', errors='replace')
+        result[name] = decoded.rstrip()
 
     # Parse region flags
     region_raw = result.get('region_code', '')
@@ -72,7 +82,14 @@ def write_ipbin(fields: dict, output_path: str):
         if name not in fields or name.startswith('_'):
             continue
         val = fields[name]
-        encoded = val.encode('ascii', errors='replace')
+        try:
+            encoded = val.encode('ascii')
+        except UnicodeEncodeError:
+            try:
+                encoded = val.encode('shift_jis')
+            except UnicodeEncodeError:
+                encoded = val.encode('ascii', errors='replace')
+
         # Pad with spaces to field length, truncate if too long
         padded = encoded[:length].ljust(length, b' ')
         data[offset: offset + length] = padded

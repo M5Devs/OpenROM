@@ -81,6 +81,11 @@ class DcpPatcher:
                     pct = 10.0 + (i / total) * 80.0
                     self.on_progress(pct)
 
+                    dest_path = os.path.abspath(os.path.join(output_dir, name))
+                    base_path = os.path.abspath(output_dir)
+                    if not dest_path.startswith(base_path + os.sep) and dest_path != base_path:
+                        raise ValueError(f'Malicious archive entry detected (Path Traversal): {name}')
+
                     # bootsector/IP.BIN → replace IP.BIN in output
                     if name.lower() == 'bootsector/ip.bin':
                         ipbin_data = dcp.read(name)
@@ -100,7 +105,7 @@ class DcpPatcher:
                         continue
 
                     # Regular file replacement
-                    target = os.path.join(output_dir, name)
+                    target = dest_path
                     os.makedirs(os.path.dirname(target), exist_ok=True)
                     with dcp.open(name) as src, open(target, 'wb') as dst:
                         shutil.copyfileobj(src, dst)
@@ -152,8 +157,13 @@ class DcpPatcher:
                 else:
                     target_name = basename
 
+                dest_path = os.path.abspath(os.path.join(output_dir, target_name))
+                base_path = os.path.abspath(output_dir)
+                if not dest_path.startswith(base_path + os.sep) and dest_path != base_path:
+                    raise ValueError(f'Malicious archive entry detected (Path Traversal): {entry}')
+
                 patch_tmp = os.path.join(tmp, basename)
-                source_path = os.path.join(output_dir, target_name)
+                source_path = dest_path
                 output_path = os.path.join(output_dir, target_name + '.patched')
 
                 if not os.path.isfile(source_path):
