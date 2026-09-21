@@ -1,3 +1,4 @@
+import threading
 """
 OpenROM Compressor — ZIP/7Z Compression & Extraction Utility
 M5 Dev | GPL v3
@@ -42,10 +43,10 @@ class Compressor:
     ):
         self.on_log = on_log
         self.on_progress = on_progress or (lambda job, pct: None)
-        self._stop_flag = False
+        self._stop_event = threading.Event()
 
     def stop(self):
-        self._stop_flag = True
+        self._stop_event.set()
 
     def _log(self, msg: str):
         if self.on_log:
@@ -66,7 +67,7 @@ class Compressor:
         return ext in EXCLUDED_EXTENSIONS
 
     def compress(self, job: CompressionJob) -> bool:
-        self._stop_flag = False
+        self._stop_event.clear()
         if job.format == "extract":
             return self.extract(job)
 
@@ -111,7 +112,7 @@ class Compressor:
             return False
 
     def extract(self, job: CompressionJob) -> bool:
-        self._stop_flag = False
+        self._stop_event.clear()
         if not os.path.isfile(job.filepath):
             job.status = "Failed"
             job.error = f"Archive file not found: {job.filepath}"
@@ -152,7 +153,7 @@ class Compressor:
 
     def compress_batch(self, jobs: list[CompressionJob]) -> None:
         for job in jobs:
-            if self._stop_flag:
+            if self._stop_event.is_set():
                 break
             if job.format == "extract":
                 self.extract(job)
@@ -173,7 +174,7 @@ class Compressor:
             with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
                 with open(job.filepath, "rb") as src_f, zf.open(os.path.basename(job.filepath), "w") as dest_f:
                     while True:
-                        if self._stop_flag:
+                        if self._stop_event.is_set():
                             return False
                         chunk = src_f.read(chunk_size)
                         if not chunk:
@@ -191,7 +192,7 @@ class Compressor:
             total_files = len(all_files) or 1
             with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
                 for idx, src_file in enumerate(all_files):
-                    if self._stop_flag:
+                    if self._stop_event.is_set():
                         return False
                     rel_path = os.path.relpath(src_file, start=os.path.dirname(job.filepath))
                     zf.write(src_file, rel_path)
@@ -231,7 +232,7 @@ class Compressor:
             members = zf.infolist()
             total = len(members) or 1
             for idx, member in enumerate(members):
-                if self._stop_flag:
+                if self._stop_event.is_set():
                     return False
                 zf.extract(member, path=job.output_dir)
                 pct = ((idx + 1) / total) * 100.0

@@ -5,7 +5,7 @@ import platform
 APP_NAME = "OpenROM"
 
 def get_config_dir() -> str:
-    """
+    r"""
     Returns the correct OS-specific config directory:
       Windows : %APPDATA%\OpenROM
       macOS   : ~/Library/Application Support/OpenROM
@@ -135,14 +135,18 @@ def load_config() -> dict:
     _config_cache = DEFAULT_CONFIG.copy()
     return _config_cache
 
-def save_config(config: dict):
+def save_config(config: dict) -> bool:
+    """Save config to disk. Returns True on success, False on failure."""
     global _config_cache
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4)
         _config_cache = None  # invalidate cache after save
-    except Exception:
-        pass
+        return True
+    except Exception as e:
+        import sys
+        print(f"[OpenROM] Warning: Could not save config: {e}", file=sys.stderr)
+        return False
 
 def get_tool_path(tool: str) -> str:
     config = load_config()

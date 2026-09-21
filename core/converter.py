@@ -12,6 +12,11 @@ from core.logger import log as global_log
 from core.validator import verify_chd
 from core.cue_generator import detect_bin_mode as _detect_bin_mode
 
+# CD-based platforms that require chdman createcd (not createdvd)
+_CD_PLATFORM_KEYWORDS = (
+    "PS1", "Dreamcast", "Saturn", "Sega CD", "PC-Engine CD", "Neo Geo CD"
+)
+
 # CD-based platforms: PS1, Dreamcast, Saturn, Sega CD, PC-Engine CD, Neo Geo CD
 CHD_CD_COMPRESSION = {
     "Normal": "cdlz",
@@ -66,7 +71,10 @@ class Converter:
         self._stop_event.set()
 
     def convert(self, job: ConversionJob) -> bool:
-        self._stop_event.clear()
+        # Removed: self._stop_event.clear()
+        # Reason: clearing here races with stop() called between batch jobs.
+        # convert_batch() is responsible for clearing before a new batch starts.
+        # Callers using convert() directly must call _stop_event.clear() themselves.
         job.status = "Converting"
         try:
             ok = self._dispatch(job)
@@ -89,6 +97,7 @@ class Converter:
             self._cleanup(job)
 
     def convert_batch(self, jobs: list, on_job_done: Callable = None):
+        self._stop_event.clear()
         with self._lock:
             jobs_copy = list(jobs)
         for job in jobs_copy:
@@ -173,7 +182,7 @@ class Converter:
             sub_cmd = "createcd"
         elif fmt in ("ISO", "IMG"):
             platform = info.get("platform", "")
-            sub_cmd = "createcd" if platform in ("PS1", "Dreamcast") else "createdvd"
+            sub_cmd = "createcd" if any(kw in platform for kw in _CD_PLATFORM_KEYWORDS) else "createdvd"
         else:
             sub_cmd = "createcd"
 
@@ -186,7 +195,7 @@ class Converter:
         if fmt == "BIN":
             cue_input = info.get("paired_cue")
             if not cue_input:
-                cue_input = self._auto_cue(src, job.output_dir)
+                cue_input = self._auto_cue(src)
                 if cue_input:
                     # FIX #4 — always register the generated CUE for cleanup
                     job._temp_files.append(cue_input)
@@ -389,7 +398,12 @@ class Converter:
             except Exception as e:
                 global_log(f"[CLEANUP WARN] Could not remove {f}: {e}")
 
-    def _auto_cue(self, bin_path: str, output_dir: str) -> str | None:
+    def _auto_cue(self, bin_path: str) -> str | None:
+        """
+        Generate a temporary CUE file next to the source BIN.
+        NOTE: The CUE is intentionally written beside the BIN (not in output_dir)
+        because chdman resolves BIN track paths relative to the CUE file's location.
+        """
         base      = os.path.basename(bin_path).rsplit('.', 1)[0]
         bin_dir   = os.path.dirname(os.path.abspath(bin_path))
         cue_path  = os.path.join(bin_dir, base + "_auto.cue")

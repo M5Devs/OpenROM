@@ -204,13 +204,19 @@ def scan_folder(
 
     # Load all DAT indexes
     dat_indexes: list[tuple[dict, str, str]] = []  # (index, dat_name, source)
+    skipped_dats: list[tuple[str, str]] = []
+
     for dp in dat_paths:
         try:
             header = _read_dat_header(dp)
             index  = load_dat_index(dp)
             dat_indexes.append((index, header["name"], header["source"]))
         except Exception as e:
-            pass  # skip broken DATs silently
+            skipped_dats.append((os.path.basename(dp), str(e)))
+
+    for dat_name, reason in skipped_dats:
+        if on_progress:
+            on_progress(f"[WARN] Skipped unreadable DAT: {dat_name} ({reason})", 0.0)
 
     # Collect ROM files
     extensions = {
