@@ -1,0 +1,208 @@
+name: Daily Multi-Language Code Review
+
+on:
+  schedule:
+    # Runs everyday at 06:00 UTC (8:00 AM Egypt Time)
+    - cron: '0 6 * * *'
+  # Allows manual triggers from GitHub Actions UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  daily-health-check:
+    name: Codebase Static Analysis & Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # ── 1. Setup Python Environment ──
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      # ── 2. Setup Flutter Environment ──
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # ── 3. Install Diagnostic & Quality Tools ──
+      - name: Install Tooling Dependencies
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y cppcheck
+          pip install --upgrade pip
+          pip install ruff bandit pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # ── 4. Execute Multi-Language Review Engine ──
+      - name: Run Full Diagnostic Pipeline
+        id: diagnostics
+        run: |
+          mkdir -p .review_reports
+          DATE_STR=$(date +'%Y-%m-%d')
+          
+          # Initialize variables for status dashboard
+          DART_ANALYZE_STATUS="🟢 PASSED"
+          DART_FORMAT_STATUS="🟢 PASSED"
+          DART_TESTS_STATUS="🟢 PASSED"
+          PY_LINT_STATUS="🟢 PASSED"
+          PY_SECURITY_STATUS="🟢 PASSED"
+          PY_TESTS_STATUS="🟢 PASSED"
+          CPP_STATUS="🟢 PASSED"
+
+          # ──────── 1. Dart & Flutter (65%) ────────
+          if [ -d "openrom_flutter" ]; then
+            cd openrom_flutter
+            flutter pub get > /dev/null 2>&1
+
+            # Dart Format Check
+            if ! dart format --output=none --set-exit-if-changed . > ../.review_reports/dart_format.log 2>&1; then
+              DART_FORMAT_STATUS="🟡 WARNING"
+            fi
+
+            # Flutter Analyze
+            if ! flutter analyze > ../.review_reports/flutter_analyze.log 2>&1; then
+              DART_ANALYZE_STATUS="🔴 ISSUES DETECTED"
+            fi
+
+            # Flutter Tests
+            if ! flutter test > ../.review_reports/flutter_test.log 2>&1; then
+              DART_TESTS_STATUS="🔴 FAILED"
+            fi
+            cd ..
+          else
+            echo "openrom_flutter directory not found." > .review_reports/flutter_analyze.log
+            DART_ANALYZE_STATUS="⚪ SKIPPED"
+            DART_FORMAT_STATUS="⚪ SKIPPED"
+            DART_TESTS_STATUS="⚪ SKIPPED"
+          fi
+
+          # ──────── 2. Python Core (25.2%) ────────
+          # Ruff Linting
+          if ! ruff check core/ > .review_reports/ruff.log 2>&1; then
+            PY_LINT_STATUS="🔴 ISSUES DETECTED"
+          fi
+
+          # Bandit Security AST
+          if ! bandit -r core/ -lll > .review_reports/bandit.log 2>&1; then
+            PY_SECURITY_STATUS="🚨 VULNERABILITY FOUND"
+          fi
+
+          # Pytest Unit Tests
+          if ! pytest tests/ -q > .review_reports/pytest.log 2>&1; then
+            PY_TESTS_STATUS="🔴 FAILED"
+          fi
+
+          # ──────── 3. Native C++ (4.1%) ────────
+          if ! cppcheck --enable=warning,performance,portability --inline-suppr \
+               --suppress=missingIncludeSystem openrom_flutter/windows/ openrom_flutter/linux/ \
+               > .review_reports/cppcheck.log 2>&1; then
+            CPP_STATUS="🟡 WARNING"
+          fi
+
+          # ──────── Compile Final Markdown Report ────────
+          cat <<EOF > daily_summary.md
+          ## 🩺 OpenROM Automated Daily Health Report ($DATE_STR)
+
+          This automated audit covers all repository layers (**Flutter/Dart**, **Python Core**, and **Native C++**) without API tokens or external rate limits.
+
+          ### 📌 Executive Health Summary
+
+          | Component | Scan Type | Target | Status |
+          | :--- | :--- | :--- | :--- |
+          | **Flutter / Dart** | Linting & Logic (`flutter analyze`) | \`openrom_flutter/\` | $DART_ANALYZE_STATUS |
+          | **Flutter / Dart** | Code Formatting (\`dart format\`) | \`openrom_flutter/\` | $DART_FORMAT_STATUS |
+          | **Flutter / Dart** | Unit & Widget Tests (\`flutter test\`) | \`openrom_flutter/test/\` | $DART_TESTS_STATUS |
+          | **Python** | Quality & Standards (\`ruff\`) | \`core/\` | $PY_LINT_STATUS |
+          | **Python** | Security & Vulnerabilities (\`bandit\`) | \`core/\` | $PY_SECURITY_STATUS |
+          | **Python** | Unit Tests (\`pytest\`) | \`tests/\` | $PY_TESTS_STATUS |
+          | **C++ Native** | Static Analysis (\`cppcheck\`) | \`openrom_flutter/*/runner/\` | $CPP_STATUS |
+
+          ---
+
+          ### 📑 Detailed Diagnostic Logs
+
+          <details>
+          <summary><b>1. Flutter Analyze Output</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/flutter_analyze.log 2>/dev/null || echo "No logs available")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>2. Dart Formatting Check</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/dart_format.log 2>/dev/null || echo "All files properly formatted.")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>3. Flutter Unit Tests</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/flutter_test.log 2>/dev/null || echo "No tests executed.")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>4. Python Linting (Ruff)</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/ruff.log 2>/dev/null || echo "No issues found.")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>5. Python Security Audit (Bandit)</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/bandit.log 2>/dev/null || echo "No security issues found.")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>6. Python Core Tests (Pytest)</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/pytest.log 2>/dev/null || echo "No tests executed.")
+          \`\`\`
+          </details>
+
+          <details>
+          <summary><b>7. C++ Native Runners (Cppcheck)</b></summary>
+
+          \`\`\`text
+          $(cat .review_reports/cppcheck.log 2>/dev/null || echo "Clean C++ codebase.")
+          \`\`\`
+          </details>
+
+          EOF
+
+      # ── 5. Create Daily GitHub Issue ──
+      - name: Publish Health Report to GitHub Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reportBody = fs.readFileSync('daily_summary.md', 'utf8');
+            const today = new Date().toISOString().split('T')[0];
+            const issueTitle = `[Daily Health Report] Automated Code Review - ${today}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: reportBody,
+              labels: ['daily-review', 'automated', 'quality-assurance']
+            });
