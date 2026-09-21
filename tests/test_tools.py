@@ -9,7 +9,12 @@ import os
 import tempfile
 import pytest
 import zipfile
-import py7zr
+try:
+    import py7zr
+    PY7ZR_AVAILABLE = True
+except ImportError:
+    py7zr = None
+    PY7ZR_AVAILABLE = False
 
 from core.compressor import Compressor, CompressionJob, EXCLUDED_EXTENSIONS
 from core.converter import CHD_CD_COMPRESSION, CHD_DVD_COMPRESSION
@@ -49,6 +54,7 @@ def test_compressor_zip_and_extract():
         assert os.path.exists(os.path.join(ext_dir, "game.smc"))
 
 
+@pytest.mark.skipif(not PY7ZR_AVAILABLE, reason="py7zr not installed")
 def test_compressor_7z_and_skipped():
     with tempfile.TemporaryDirectory() as td:
         sample_file = os.path.join(td, "game.sfc")
