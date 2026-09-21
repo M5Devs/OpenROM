@@ -186,11 +186,6 @@ examples:
         help="import a No-Intro or Redump DAT file into OpenROM",
     )
     src.add_argument(
-        "--list-dats",
-        action="store_true",
-        help="list all imported DAT files",
-    )
-    src.add_argument(
         "--scan-roms",
         metavar="DIR",
         help="scan a ROM folder against imported DATs and show matches",
@@ -218,6 +213,11 @@ examples:
         ),
     )
 
+    parser.add_argument(
+        "--list-dats",
+        action="store_true",
+        help="list all imported DAT files",
+    )
     # ── Options ──────────────────────────────────────────────────────────────
     parser.add_argument(
         "--dry-run",
