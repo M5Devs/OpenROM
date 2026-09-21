@@ -34,6 +34,7 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 |----------|---------------|-------------------|
 | 🪟 Windows | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🐧 Linux | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🐧 Linux ARM64 | [OpenROM_Linux_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | — |
 | 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Intel | [OpenROM_macOS_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🤖 Android | 🚧 Coming soon via Termux | — |
@@ -54,7 +55,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **Integrity Verification** — Post-conversion CHD integrity check via `chdman verify`.
 
 ### 🩹 ROM Patching
-- **9 patch formats** — IPS, IPS32, UPS, BPS, PPF, APS, EBP, DPS, xdelta3.
+- **10 patch formats** — IPS, IPS32, UPS, BPS, PPF, APS, EBP, DPS, xdelta3, **SSP (Sega Saturn)**.
 - **Auto format detection** — Drop a patch file and OpenROM detects the format automatically.
 - **Checksum verification** — CRC32 integrity checks before and after patching with a detailed report.
 - **Ignore checksum mode** — Force-apply patches even on modified ROMs.
@@ -74,6 +75,23 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **M3U Playlist Generator** — Auto-generate M3U playlists for multi-disc games (PS1, Saturn, etc.).
 - **BIN Merger** — Merge multi-track BIN files into a single BIN + CUE.
 - **Batch Processing** — Drop a whole folder, process everything at once.
+
+### 🏷️ ROM Renamer
+- **No-Intro + Redump DAT support** — Import any DAT file from datomatic.no-intro.org or redump.org.
+- **CRC32 matching** — Identifies ROMs by hash, not filename.
+- **Dry run mode** — Preview renames before applying.
+- **DAT library** — Import multiple DATs and OpenROM stores them locally for reuse.
+- **100% offline** — No network requests, no API keys.
+
+### ✏️ CUE Sheet Editor
+- Open, edit, and save `.cue` files directly inside OpenROM with a built-in text editor.
+
+### 📊 Compression Level Preview
+- See the **estimated output size** before converting — based on format and compression level.
+
+### 🗃️ Queue Manager
+- **Drag to reorder** conversion jobs before running.
+- **Clear completed** — Remove finished or failed jobs with one click.
 
 ### 🖥️ UI & Workflow
 - **Gaming Dashboard UI** — Flutter-powered dark interface inspired by PS5/Xbox aesthetics, with ROM cards, platform badges, and real-time progress.
@@ -109,6 +127,10 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 | WIA | ISO | nodtool | GameCube / Wii |
 | WBFS | ISO | nodtool | Wii |
 | GCZ | ISO | nodtool | GameCube / Wii |
+| NKit | ISO | nkit | GameCube / Wii |
+| WUD | ISO | nkit | Wii U |
+| WUX | ISO | nkit | Wii U (compressed) |
+| ISO | NKit | nkit | GameCube / Wii |
 
 ---
 
@@ -125,6 +147,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 | EBP | EarthBound / SNES |
 | DPS | DOS / PC |
 | xdelta3 / VCDIFF | Large ROMs, disc images, PS2, PSP |
+| SSP (Sega Saturn Patcher) | Sega Saturn disc patches |
 
 ---
 
@@ -191,6 +214,8 @@ All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA
 | **extract-xiso** | Xbox ISO extraction | GPL v2 |
 | **nodtool** | GameCube / Wii formats | MIT |
 | **xdelta3** | xdelta/VCDIFF patching | Apache 2.0 |
+| **nkit / nkds** | NKit GameCube/Wii/WiiU conversion | MIT |
+| **saturn-patcher** | Sega Saturn SSP patch applier | GPL v3 |
 
 ---
 
@@ -198,8 +223,8 @@ All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA
 
 ### Requirements
 - Python 3.10+
-- Flutter 3.27+
-- PyInstaller 6.0+
+- Flutter (latest stable)
+- Nuitka 4.0+
 
 ### Run Flutter UI from source
 ```bash
@@ -208,7 +233,8 @@ cd OpenROM
 
 # Build headless Python core
 pip install -r requirements.txt
-pyinstaller --onefile --name openrom-core core/cli.py
+pip install nuitka ordered-set zstandard
+python -m nuitka --onefile --output-filename=openrom-core --include-data-dir=assets=assets core/cli.py
 
 # Run Flutter UI
 cd openrom_flutter
@@ -236,14 +262,19 @@ build_windows.bat
 - [x] Magic byte platform detection
 - [x] CHD header parsing
 - [x] Theme system
-- [x] ROM Patcher (IPS, BPS, UPS, xdelta3, PPF and more)
+- [x] ROM Patcher (IPS, BPS, UPS, xdelta3, PPF, SSP and more)
 - [x] ZIP / 7Z compression & extraction
 - [x] ROM header removal (NES, SNES, GB/GBC)
 - [x] M3U playlist generator
-- [ ] Wii U support (WUD / WUX)
+- [x] NKit / WUD / WUX support (v2.8.0)
+- [x] SSP Sega Saturn Patcher (v2.8.0)
+- [x] ROM Renamer — No-Intro + Redump DAT support (v3.0.0)
+- [x] CUE Sheet Editor (v2.9.0)
+- [x] Queue Manager + Compression Preview (v2.9.0)
+- [x] Linux ARM64 builds (v2.8.0)
 - [ ] Android support via Termux 🤖
-- [ ] ROM Checker — No-Intro DAT + RetroAchievements hash verification
-- [ ] ARM builds (Linux ARM64)
+- [ ] maxcso ARM64 build
+- [ ] RetroAchievements hash verification
 
 ---
 
