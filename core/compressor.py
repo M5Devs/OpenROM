@@ -8,7 +8,12 @@ import os
 import shutil
 import zipfile
 from typing import Callable, Optional
-import py7zr
+try:
+    import py7zr as _py7zr
+    _PY7ZR_AVAILABLE = True
+except ImportError:
+    _py7zr = None
+    _PY7ZR_AVAILABLE = False
 
 EXCLUDED_EXTENSIONS = {".chd", ".cso", ".rvz", ".7z", ".zip", ".gz", ".zst", ".csz", ".zso"}
 
@@ -125,7 +130,7 @@ class Compressor:
 
         ext = os.path.splitext(job.filepath)[1].lower()
         try:
-            if ext == ".7z" or py7zr.is_7zfile(job.filepath):
+            if ext == ".7z" or (_PY7ZR_AVAILABLE and _py7zr.is_7zfile(job.filepath)):
                 success = self._extract_7z(job)
             elif ext == ".zip" or zipfile.is_zipfile(job.filepath):
                 success = self._extract_zip(job)
@@ -202,6 +207,11 @@ class Compressor:
         return True
 
     def _compress_7z(self, job: CompressionJob) -> bool:
+        if not _PY7ZR_AVAILABLE:
+            job.error = "7z compression requires py7zr. Install it with: pip install py7zr"
+            self._log(f"[ERROR] {job.error}")
+            return False
+
         base_name = os.path.splitext(os.path.basename(job.filepath))[0]
         out_path = os.path.join(job.output_dir, f"{base_name}.7z")
         self._log(f"[7Z] Compressing ({job.level}) {os.path.basename(job.filepath)} → {os.path.basename(out_path)}")
@@ -212,10 +222,10 @@ class Compressor:
             "ultra": 9,
         }
         preset = level_map.get(job.level, 5)
-        filters = [{"id": py7zr.FILTER_LZMA2, "preset": preset}]
+        filters = [{"id": _py7zr.FILTER_LZMA2, "preset": preset}]
 
         self._update_progress(job, 10.0)
-        with py7zr.SevenZipFile(out_path, "w", filters=filters) as archive:
+        with _py7zr.SevenZipFile(out_path, "w", filters=filters) as archive:
             if os.path.isfile(job.filepath):
                 archive.write(job.filepath, os.path.basename(job.filepath))
             elif os.path.isdir(job.filepath):
@@ -240,9 +250,14 @@ class Compressor:
         return True
 
     def _extract_7z(self, job: CompressionJob) -> bool:
+        if not _PY7ZR_AVAILABLE:
+            job.error = "7z extraction requires py7zr. Install it with: pip install py7zr"
+            self._log(f"[ERROR] {job.error}")
+            return False
+
         self._log(f"[UN7Z] Extracting {os.path.basename(job.filepath)} → {job.output_dir}")
         self._update_progress(job, 20.0)
-        with py7zr.SevenZipFile(job.filepath, "r") as archive:
+        with _py7zr.SevenZipFile(job.filepath, "r") as archive:
             archive.extractall(path=job.output_dir)
         self._update_progress(job, 90.0)
         return True
