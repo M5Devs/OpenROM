@@ -28,7 +28,10 @@ class CompressorService {
       );
     } catch (e) {
       if (e is OpenROMException) rethrow;
-      throw OpenROMException(OpenROMError.conversionFailed, details: e.toString());
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: e.toString(),
+      );
     }
   }
 
@@ -51,7 +54,10 @@ class CompressorService {
       );
     } catch (e) {
       if (e is OpenROMException) rethrow;
-      throw OpenROMException(OpenROMError.conversionFailed, details: e.toString());
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: e.toString(),
+      );
     }
   }
 }

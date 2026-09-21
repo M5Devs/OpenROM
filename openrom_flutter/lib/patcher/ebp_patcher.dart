@@ -4,6 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'ips_patcher.dart';
 

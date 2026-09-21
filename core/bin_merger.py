@@ -3,7 +3,7 @@
 
 import os
 import re
-from typing import Callable, Tuple, List, Dict
+from collections.abc import Callable
 
 
 def _sectors_to_msf(sectors: int) -> str:
@@ -25,7 +25,7 @@ def _get_sector_size(mode: str) -> int:
     return 2352
 
 
-def parse_cue(cue_path: str) -> List[Dict]:
+def parse_cue(cue_path: str) -> list[dict]:
     """
     Parse a CUE file to extract tracks and referenced BIN files.
     Returns list of track dicts:
@@ -72,7 +72,7 @@ def merge_bins(
     cue_path: str,
     output_dir: str = None,
     on_progress: Callable[[float], None] = None
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Merge multiple BIN files (from a multi-file BIN/CUE set) into a single BIN + updated CUE.
 

@@ -3,7 +3,9 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+
 import '../core/errors.dart';
 import '../patcher/patcher.dart';
 import '../patcher/patcher_factory.dart';
@@ -65,10 +67,16 @@ class PatcherService {
     }
 
     if (!File(sspPath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'SSP file not found: $sspPath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'SSP file not found: $sspPath',
+      );
     }
     if (!File(binPath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'BIN file not found: $binPath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'BIN file not found: $binPath',
+      );
     }
 
     try {
@@ -81,7 +89,9 @@ class PatcherService {
       final err = result.stderr.toString().trim();
       throw OpenROMException(
         OpenROMError.conversionFailed,
-        details: err.isNotEmpty ? err : 'saturn-patcher exited with code ${result.exitCode}',
+        details: err.isNotEmpty
+            ? err
+            : 'saturn-patcher exited with code ${result.exitCode}',
       );
     } on ProcessException catch (e) {
       throw OpenROMException(OpenROMError.toolFailed, details: e.toString());

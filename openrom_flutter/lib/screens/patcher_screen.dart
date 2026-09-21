@@ -19,11 +19,7 @@ class PatcherScreen extends StatefulWidget {
   final ThemeConfig theme;
   final PatcherService? patcherService;
 
-  const PatcherScreen({
-    super.key,
-    required this.theme,
-    this.patcherService,
-  });
+  const PatcherScreen({super.key, required this.theme, this.patcherService});
 
   @override
   State<PatcherScreen> createState() => _PatcherScreenState();
@@ -43,7 +39,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
 
   PatchReport? _report;
 
-  bool get _isSspPatch => _patchPath.isNotEmpty && PatcherFactory.isSspPatch(_patchPath);
+  bool get _isSspPatch =>
+      _patchPath.isNotEmpty && PatcherFactory.isSspPatch(_patchPath);
 
   @override
   void initState() {
@@ -164,9 +161,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
         );
         if (mounted) {
           setState(() {
-            _report = PatchReport(
-              format: 'SSP',
-            );
+            _report = PatchReport(format: 'SSP');
             _isPatching = false;
           });
         }
@@ -194,7 +189,11 @@ class _PatcherScreenState extends State<PatcherScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isPatching = false);
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     }
   }
@@ -204,7 +203,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final formatBadge = PatcherFactory.formatName(_patchPath);
-    final canApply = !_isPatching &&
+    final canApply =
+        !_isPatching &&
         _romPath.isNotEmpty &&
         _patchPath.isNotEmpty &&
         (_isSspPatch || _outputPath.isNotEmpty);
@@ -231,10 +231,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
                       // Header
                       Row(
                         children: [
-                          const Text(
-                            '🩹',
-                            style: TextStyle(fontSize: 28),
-                          ),
+                          const Text('🩹', style: TextStyle(fontSize: 28)),
                           const SizedBox(width: 12),
                           Text(
                             l10n.patcherTitle,
@@ -271,7 +268,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: theme.accent,
                                 borderRadius: BorderRadius.circular(12),
@@ -308,12 +308,19 @@ class _PatcherScreenState extends State<PatcherScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.orange,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'SSP patches modify the BIN file directly. Make a backup copy before patching!',
-                                  style: TextStyle(color: Colors.orange.shade200, fontSize: 13),
+                                  style: TextStyle(
+                                    color: Colors.orange.shade200,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -342,7 +349,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
                           activeColor: theme.accent,
                           title: Text(
                             l10n.patcherSameFolder,
-                            style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                            style: TextStyle(
+                              color: theme.textPrimary,
+                              fontSize: 14,
+                            ),
                           ),
                           onChanged: (val) {
                             setState(() {
@@ -362,7 +372,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
                           activeColor: theme.accent,
                           title: Text(
                             l10n.patcherIgnoreChecksum,
-                            style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                            style: TextStyle(
+                              color: theme.textPrimary,
+                              fontSize: 14,
+                            ),
                           ),
                           onChanged: (val) {
                             setState(() {
@@ -380,10 +393,14 @@ class _PatcherScreenState extends State<PatcherScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.accent,
-                            disabledBackgroundColor: theme.accent.withValues(alpha: 0.4),
+                            disabledBackgroundColor: theme.accent.withValues(
+                              alpha: 0.4,
+                            ),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(theme.borderRadius),
+                              borderRadius: BorderRadius.circular(
+                                theme.borderRadius,
+                              ),
                             ),
                           ),
                           onPressed: canApply ? _applyPatch : null,
@@ -416,15 +433,23 @@ class _PatcherScreenState extends State<PatcherScreen> {
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: theme.surface,
-                            borderRadius: BorderRadius.circular(theme.borderRadius),
-                            border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
+                            borderRadius: BorderRadius.circular(
+                              theme.borderRadius,
+                            ),
+                            border: Border.all(
+                              color: Colors.green.withValues(alpha: 0.5),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.check_circle, color: Colors.greenAccent, size: 24),
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.greenAccent,
+                                    size: 24,
+                                  ),
                                   const SizedBox(width: 10),
                                   Text(
                                     l10n.patcherSuccess,
@@ -448,7 +473,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
                               if (_report!.checks.isNotEmpty) ...[
                                 const SizedBox(height: 10),
                                 ..._report!.checks.map((check) {
-                                  final isPassed = check.outcome == CheckOutcome.passed;
+                                  final isPassed =
+                                      check.outcome == CheckOutcome.passed;
                                   final outcomeText = isPassed
                                       ? l10n.patcherChecksumPassed
                                       : l10n.patcherChecksumSkipped;
@@ -458,7 +484,9 @@ class _PatcherScreenState extends State<PatcherScreen> {
                                       children: [
                                         Icon(
                                           isPassed ? Icons.check : Icons.remove,
-                                          color: isPassed ? Colors.greenAccent : Colors.amberAccent,
+                                          color: isPassed
+                                              ? Colors.greenAccent
+                                              : Colors.amberAccent,
                                           size: 18,
                                         ),
                                         const SizedBox(width: 8),
@@ -535,7 +563,10 @@ class _PatcherScreenState extends State<PatcherScreen> {
           children: [
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: theme.surface,
                   borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -544,7 +575,9 @@ class _PatcherScreenState extends State<PatcherScreen> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color: path.isEmpty ? theme.textSecondary : theme.textPrimary,
+                    color: path.isEmpty
+                        ? theme.textSecondary
+                        : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,

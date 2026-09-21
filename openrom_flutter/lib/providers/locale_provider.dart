@@ -36,7 +36,9 @@ class LocaleProvider extends ChangeNotifier {
   }
 
   Future<void> setLocale(Locale newLocale) async {
-    if (!supportedLocales.any((l) => l.languageCode == newLocale.languageCode)) {
+    if (!supportedLocales.any(
+      (l) => l.languageCode == newLocale.languageCode,
+    )) {
       return;
     }
     if (_locale == newLocale) return;

@@ -4,6 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'patch_io.dart';
 
@@ -86,10 +87,15 @@ class DpsPatcher extends RomPatcher {
       await output?.close();
     }
 
-    return PatchReport(format: "DPS", checks: [
-      PatchCheck("ROM size",
-          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed),
-    ]);
+    return PatchReport(
+      format: "DPS",
+      checks: [
+        PatchCheck(
+          "ROM size",
+          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed,
+        ),
+      ],
+    );
   }
 
   int _getUint(List<int> bytes, int offset) {

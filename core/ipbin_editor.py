@@ -7,7 +7,6 @@ Can be read from a standalone IP.BIN file or extracted from a GDI/CHD.
 """
 
 import os
-import struct
 
 IPBIN_SIZE = 2048
 

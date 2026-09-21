@@ -46,7 +46,10 @@ void main() {
     });
 
     test('OpenROMException formats correctly', () {
-      final ex = OpenROMException(OpenROMError.coreNotFound, details: 'Missing executable');
+      final ex = OpenROMException(
+        OpenROMError.coreNotFound,
+        details: 'Missing executable',
+      );
       expect(ex.error, OpenROMError.coreNotFound);
       expect(ex.details, 'Missing executable');
       expect(ex.toString(), contains('OpenROMException'));

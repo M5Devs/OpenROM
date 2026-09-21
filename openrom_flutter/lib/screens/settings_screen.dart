@@ -4,6 +4,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../providers/locale_provider.dart';
@@ -13,7 +14,14 @@ class SettingsScreen extends StatefulWidget {
   final ThemeConfig theme;
   final ThemeService themeService;
   final LocaleProvider localeProvider;
-  final Function(String format, String compression, bool verify, String outputDir, bool sameFolder) onSettingsChanged;
+  final Function(
+    String format,
+    String compression,
+    bool verify,
+    String outputDir,
+    bool sameFolder,
+  )
+  onSettingsChanged;
 
   const SettingsScreen({
     super.key,
@@ -76,7 +84,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _pickOutputDirectory() async {
-    final String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    final String? selectedDirectory = await FilePicker.platform
+        .getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDestination = selectedDirectory;
@@ -208,8 +217,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Verification Switch
           _buildSectionTitle(l10n.postProcessing),
           SwitchListTile(
-            title: Text(l10n.verifyAfterConversion, style: TextStyle(color: theme.textPrimary)),
-            subtitle: Text('Runs chdman verify on newly created CHD files', style: TextStyle(color: theme.textSecondary)),
+            title: Text(
+              l10n.verifyAfterConversion,
+              style: TextStyle(color: theme.textPrimary),
+            ),
+            subtitle: Text(
+              'Runs chdman verify on newly created CHD files',
+              style: TextStyle(color: theme.textSecondary),
+            ),
             value: _verifyAfterConversion,
             activeColor: theme.accent,
             onChanged: (val) {
@@ -222,7 +237,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Output Folder
           _buildSectionTitle(l10n.outputDestination),
           CheckboxListTile(
-            title: Text('Same folder as source file', style: TextStyle(color: theme.textPrimary)),
+            title: Text(
+              'Same folder as source file',
+              style: TextStyle(color: theme.textPrimary),
+            ),
             value: _sameFolderAsSource,
             activeColor: theme.accent,
             onChanged: (val) {
@@ -236,13 +254,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.surface,
                       borderRadius: BorderRadius.circular(theme.borderRadius),
                     ),
                     child: Text(
-                      _outputDestination.isEmpty ? 'Select directory...' : _outputDestination,
+                      _outputDestination.isEmpty
+                          ? 'Select directory...'
+                          : _outputDestination,
                       style: TextStyle(color: theme.textPrimary),
                     ),
                   ),
@@ -250,8 +273,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(width: 12),
                 ElevatedButton(
                   onPressed: _pickOutputDirectory,
-                  style: ElevatedButton.styleFrom(backgroundColor: theme.accent),
-                  child: Text(l10n.browse, style: const TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.accent,
+                  ),
+                  child: Text(
+                    l10n.browse,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -292,7 +320,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         t.name,
-                        style: TextStyle(color: t.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
+                        style: TextStyle(
+                          color: t.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -303,7 +335,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(width: 6),
                           _colorDot(t.terminalText),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),

@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
@@ -69,7 +70,9 @@ class TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           ElevatedButton(
-            onPressed: (fileCount > 0 && !isConverting) ? onConvertPressed : null,
+            onPressed: (fileCount > 0 && !isConverting)
+                ? onConvertPressed
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.accent,
               foregroundColor: Colors.white,

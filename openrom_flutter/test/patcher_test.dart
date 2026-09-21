@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,12 +20,14 @@ class MockPatcherService extends PatcherService {
     required String patchPath,
     required String outputPath,
     bool ignoreChecksum,
-  })? onApplyPatch;
+  })?
+  onApplyPatch;
 
   final Future<String> Function({
     required String sspPath,
     required String binPath,
-  })? onApplySspPatch;
+  })?
+  onApplySspPatch;
 
   MockPatcherService({this.onApplyPatch, this.onApplySspPatch});
 
@@ -43,10 +46,13 @@ class MockPatcherService extends PatcherService {
         ignoreChecksum: ignoreChecksum,
       );
     }
-    return const PatchReport(format: 'bps', checks: [
-      PatchCheck('Source CRC32', CheckOutcome.passed),
-      PatchCheck('Target CRC32', CheckOutcome.passed),
-    ]);
+    return const PatchReport(
+      format: 'bps',
+      checks: [
+        PatchCheck('Source CRC32', CheckOutcome.passed),
+        PatchCheck('Target CRC32', CheckOutcome.passed),
+      ],
+    );
   }
 
   @override
@@ -107,10 +113,7 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: PatcherScreen(
-            theme: theme,
-            patcherService: service,
-          ),
+          body: PatcherScreen(theme: theme, patcherService: service),
         ),
       );
     }
@@ -128,7 +131,9 @@ void main() {
       expect(find.text('Apply Patch'), findsOneWidget);
     });
 
-    testWidgets('Apply Patch button is disabled when fields are empty', (WidgetTester tester) async {
+    testWidgets('Apply Patch button is disabled when fields are empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createPatcherScreen());
       await tester.pumpAndSettle();
 
@@ -138,16 +143,20 @@ void main() {
       expect(elevatedButton.onPressed, isNull);
     });
 
-    testWidgets('SSP patch hides output file section and shows warning', (WidgetTester tester) async {
+    testWidgets('SSP patch hides output file section and shows warning', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createPatcherScreen());
       await tester.pumpAndSettle();
 
       final dropTarget = tester.widget<DropTarget>(find.byType(DropTarget));
-      dropTarget.onDragDone!(DropDoneDetails(
-        files: [XFile('/path/to/game.ssp')],
-        localPosition: Offset.zero,
-        globalPosition: Offset.zero,
-      ));
+      dropTarget.onDragDone!(
+        DropDoneDetails(
+          files: [XFile('/path/to/game.ssp')],
+          localPosition: Offset.zero,
+          globalPosition: Offset.zero,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Output File section should be hidden
@@ -156,7 +165,9 @@ void main() {
 
       // Warning text should be displayed
       expect(
-        find.text('SSP patches modify the BIN file directly. Make a backup copy before patching!'),
+        find.text(
+          'SSP patches modify the BIN file directly. Make a backup copy before patching!',
+        ),
         findsOneWidget,
       );
       expect(find.text('SSP (Saturn)'), findsOneWidget);

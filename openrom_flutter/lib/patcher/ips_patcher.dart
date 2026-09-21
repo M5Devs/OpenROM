@@ -4,7 +4,9 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:openrom_flutter/patcher/io_tuning.dart';
+
 import 'patcher.dart';
 
 class IpsPatcher extends RomPatcher {
@@ -85,7 +87,8 @@ class IpsPatcher extends RomPatcher {
         if (b1 == -1 || b2 == -1) break;
         int size = (b1 << 8) + b2;
 
-        if (size == 0) { // RLE
+        if (size == 0) {
+          // RLE
           b1 = await patch.readByte();
           b2 = await patch.readByte();
           size = (b1 << 8) + b2;
@@ -116,11 +119,21 @@ class IpsPatcher extends RomPatcher {
     return PatchReport(format: format);
   }
 
-  bool _isIps(Uint8List magic) => 
-      magic.length == 5 && magic[0]==0x50 && magic[1]==0x41 && magic[2]==0x54 && magic[3]==0x43 && magic[4]==0x48; // "PATCH"
+  bool _isIps(Uint8List magic) =>
+      magic.length == 5 &&
+      magic[0] == 0x50 &&
+      magic[1] == 0x41 &&
+      magic[2] == 0x54 &&
+      magic[3] == 0x43 &&
+      magic[4] == 0x48; // "PATCH"
 
-  bool _isIps32(Uint8List magic) => 
-      magic.length == 5 && magic[0]==0x49 && magic[1]==0x50 && magic[2]==0x53 && magic[3]==0x33 && magic[4]==0x32; // "IPS32"
+  bool _isIps32(Uint8List magic) =>
+      magic.length == 5 &&
+      magic[0] == 0x49 &&
+      magic[1] == 0x50 &&
+      magic[2] == 0x53 &&
+      magic[3] == 0x33 &&
+      magic[4] == 0x32; // "IPS32"
 
   bool _isEOF(int offset, bool isIps32) {
     if (isIps32) return offset == 0x45454f46; // EEOF
@@ -138,7 +151,11 @@ class IpsPatcher extends RomPatcher {
     return offset;
   }
 
-  Future<void> _copy(RandomAccessFile from, RandomAccessFile to, int size) async {
+  Future<void> _copy(
+    RandomAccessFile from,
+    RandomAccessFile to,
+    int size,
+  ) async {
     int remaining = size;
     const bufferSize = patchCopyBufferSize;
     while (remaining > 0) {

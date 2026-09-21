@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'screens/dreamcast_screen.dart';

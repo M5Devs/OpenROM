@@ -49,15 +49,36 @@ class ThemeConfig {
 
     return ThemeConfig(
       name: json['name'] ?? 'Custom Theme',
-      background: hexToColor(json['background'] ?? '#0d0d0d', const Color(0xff0d0d0d)),
-      surface: hexToColor(json['surface'] ?? '#1a1a1a', const Color(0xff1a1a1a)),
+      background: hexToColor(
+        json['background'] ?? '#0d0d0d',
+        const Color(0xff0d0d0d),
+      ),
+      surface: hexToColor(
+        json['surface'] ?? '#1a1a1a',
+        const Color(0xff1a1a1a),
+      ),
       accent: hexToColor(json['accent'] ?? '#e94560', const Color(0xffe94560)),
-      textPrimary: hexToColor(json['text_primary'] ?? '#ffffff', const Color(0xffffffff)),
-      textSecondary: hexToColor(json['text_secondary'] ?? '#a0a0b0', const Color(0xffa0a0b0)),
-      sidebarBg: hexToColor(json['sidebar_bg'] ?? '#111111', const Color(0xff111111)),
+      textPrimary: hexToColor(
+        json['text_primary'] ?? '#ffffff',
+        const Color(0xffffffff),
+      ),
+      textSecondary: hexToColor(
+        json['text_secondary'] ?? '#a0a0b0',
+        const Color(0xffa0a0b0),
+      ),
+      sidebarBg: hexToColor(
+        json['sidebar_bg'] ?? '#111111',
+        const Color(0xff111111),
+      ),
       cardBg: hexToColor(json['card_bg'] ?? '#1e1e1e', const Color(0xff1e1e1e)),
-      terminalBg: hexToColor(json['terminal_bg'] ?? '#0a0a0a', const Color(0xff0a0a0a)),
-      terminalText: hexToColor(json['terminal_text'] ?? '#00e676', const Color(0xff00e676)),
+      terminalBg: hexToColor(
+        json['terminal_bg'] ?? '#0a0a0a',
+        const Color(0xff0a0a0a),
+      ),
+      terminalText: hexToColor(
+        json['terminal_text'] ?? '#00e676',
+        const Color(0xff00e676),
+      ),
       fontFamily: json['font_family'] ?? 'Sans-Serif',
       borderRadius: (json['border_radius'] as num?)?.toDouble() ?? 12.0,
       layout: json['layout'] ?? 'sidebar_left',

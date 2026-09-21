@@ -18,7 +18,10 @@ class M3UService {
       );
     } catch (e) {
       if (e is OpenROMException) rethrow;
-      throw OpenROMException(OpenROMError.conversionFailed, details: e.toString());
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: e.toString(),
+      );
     }
   }
 }

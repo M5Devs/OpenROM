@@ -24,9 +24,12 @@ class DcpPatcher {
 
   Future<DcpPatchResult> apply() async {
     final args = [
-      '--dcp', dcpPath,
-      '--disc-dir', discDir,
-      '--output', outputDir,
+      '--dcp',
+      dcpPath,
+      '--disc-dir',
+      discDir,
+      '--output',
+      outputDir,
       '--json',
     ];
     if (ignoreChecksum) args.add('--ignore-checksum');

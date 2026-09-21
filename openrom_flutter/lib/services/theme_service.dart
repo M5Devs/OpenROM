@@ -2,9 +2,11 @@
 // M5 Dev | GPL v3
 
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/theme_config.dart';
 
 class ThemeService extends ChangeNotifier {
@@ -50,7 +52,8 @@ class ThemeService extends ChangeNotifier {
       _availableThemes.add(ThemeConfig.defaultTheme());
     }
 
-    if (_availableThemes.isNotEmpty && _currentTheme.name == 'Gaming Dashboard') {
+    if (_availableThemes.isNotEmpty &&
+        _currentTheme.name == 'Gaming Dashboard') {
       _currentTheme = _availableThemes.first;
     }
     notifyListeners();

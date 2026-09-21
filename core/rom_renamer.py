@@ -5,11 +5,10 @@ M5 Dev | GPL v3
 """
 
 import os
-import json
 import shutil
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
 
 # ── DAT storage ───────────────────────────────────────────────────────────────
 

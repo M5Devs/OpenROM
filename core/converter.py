@@ -1,16 +1,20 @@
 import os
 import re
+import shutil
 import subprocess
 import threading
-import shutil
-from typing import Callable
+from collections.abc import Callable
+
+from core.cue_generator import detect_bin_mode as _detect_bin_mode
 from core.detector import (
-    get_chdman_path, get_tool_path, detect_file, get_valid_targets,
-    get_extension, get_output_name
+    get_chdman_path,
+    get_extension,
+    get_output_name,
+    get_tool_path,
+    get_valid_targets,
 )
 from core.logger import log as global_log
 from core.validator import verify_chd
-from core.cue_generator import detect_bin_mode as _detect_bin_mode
 
 # CD-based platforms that require chdman createcd (not createdvd)
 _CD_PLATFORM_KEYWORDS = (
@@ -302,7 +306,7 @@ class Converter:
         os.makedirs(out_dir, exist_ok=True)
         cmd = [xiso, "-x", src, "-d", out_dir]
         self._log(f"[XISO→FILES] Extracting {os.path.basename(src)} → {out_dir}/")
-        self._log(f"[XISO→FILES] Output is a folder of extracted files, not a single ISO.")
+        self._log("[XISO→FILES] Output is a folder of extracted files, not a single ISO.")
         return self._run(cmd, job)
 
     # ── RVZ / Wii / GC conversions ────────────────────────────────────────────

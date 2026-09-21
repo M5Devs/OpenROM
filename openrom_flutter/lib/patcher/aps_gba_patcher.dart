@@ -4,6 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'checksums.dart';
 import 'patch_io.dart';
@@ -103,10 +104,15 @@ class ApsGbaPatcher extends RomPatcher {
       await output?.close();
     }
 
-    return PatchReport(format: "APS", checks: [
-      PatchCheck("ROM (CRC16)",
-          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed),
-    ]);
+    return PatchReport(
+      format: "APS",
+      checks: [
+        PatchCheck(
+          "ROM (CRC16)",
+          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed,
+        ),
+      ],
+    );
   }
 
   Future<int> _readLEUint32(RandomAccessFile raf) async {

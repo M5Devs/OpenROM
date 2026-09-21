@@ -3,6 +3,7 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
 import '../core/error_dialog.dart';
 import '../core/errors.dart';
 import '../l10n/app_localizations.dart';
@@ -57,13 +58,17 @@ class HomeScreenState extends State<HomeScreen> {
       final roms = await FileDetector.detectPaths(paths);
       for (final rom in roms) {
         if (!_jobs.any((j) => j.romFile.filepath == rom.filepath)) {
-          final defaultTarget = rom.validTargets.isNotEmpty ? rom.validTargets.first : 'CHD';
+          final defaultTarget = rom.validTargets.isNotEmpty
+              ? rom.validTargets.first
+              : 'CHD';
           setState(() {
-            _jobs.add(ConversionJob(
-              id: DateTime.now().microsecondsSinceEpoch.toString(),
-              romFile: rom,
-              targetFormat: defaultTarget,
-            ));
+            _jobs.add(
+              ConversionJob(
+                id: DateTime.now().microsecondsSinceEpoch.toString(),
+                romFile: rom,
+                targetFormat: defaultTarget,
+              ),
+            );
           });
         }
       }
@@ -101,7 +106,8 @@ class HomeScreenState extends State<HomeScreen> {
 
     for (final job in _jobs) {
       if (globalFormat != null && globalFormat.isNotEmpty) {
-        if (job.romFile.validTargets.contains(globalFormat) || globalFormat == 'BIN/CUE') {
+        if (job.romFile.validTargets.contains(globalFormat) ||
+            globalFormat == 'BIN/CUE') {
           job.targetFormat = globalFormat;
         }
       }
@@ -150,7 +156,9 @@ class HomeScreenState extends State<HomeScreen> {
           job.status = JobStatus.failed;
           job.error = e.error;
           job.errorMessage = e.details ?? e.error.message;
-          _logs.add('[ERROR] ${e.error.title}: ${e.details ?? e.error.message}');
+          _logs.add(
+            '[ERROR] ${e.error.title}: ${e.details ?? e.error.message}',
+          );
         });
         if (mounted) {
           showOpenROMError(context, e.error, details: e.details);
@@ -180,7 +188,9 @@ class HomeScreenState extends State<HomeScreen> {
       onFilesDropped: addFilesFromPaths,
       child: Column(
         children: [
-          if (_jobs.any((j) => j.status == JobStatus.done || j.status == JobStatus.failed))
+          if (_jobs.any(
+            (j) => j.status == JobStatus.done || j.status == JobStatus.failed,
+          ))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
@@ -188,10 +198,16 @@ class HomeScreenState extends State<HomeScreen> {
                 children: [
                   TextButton.icon(
                     onPressed: () => setState(() {
-                      _jobs.removeWhere((j) =>
-                        j.status == JobStatus.done || j.status == JobStatus.failed);
+                      _jobs.removeWhere(
+                        (j) =>
+                            j.status == JobStatus.done ||
+                            j.status == JobStatus.failed,
+                      );
                     }),
-                    icon: const Icon(Icons.cleaning_services_outlined, size: 16),
+                    icon: const Icon(
+                      Icons.cleaning_services_outlined,
+                      size: 16,
+                    ),
                     label: const Text('Clear completed'),
                   ),
                 ],
@@ -203,7 +219,11 @@ class HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.drive_folder_upload, size: 64, color: widget.theme.textSecondary),
+                        Icon(
+                          Icons.drive_folder_upload,
+                          size: 64,
+                          color: widget.theme.textSecondary,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           '${l10n.dropZoneHint}, ${l10n.dropZoneSubHint.toLowerCase()}',

@@ -19,7 +19,9 @@ void main() {
       );
     }
 
-    testWidgets('Renders Tools tabs and compressor UI', (WidgetTester tester) async {
+    testWidgets('Renders Tools tabs and compressor UI', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(createToolsScreen());
       await tester.pumpAndSettle();
 

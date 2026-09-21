@@ -10,11 +10,11 @@ DCP format (Universal Dreamcast Patcher compatible):
 """
 
 import os
-import zipfile
 import shutil
 import subprocess
 import tempfile
-from typing import Callable
+import zipfile
+from collections.abc import Callable
 
 from core.config import get_tool_path
 from core.logger import log as global_log

@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import '../core/errors.dart';
 import 'core_bridge.dart';
 
@@ -34,10 +35,7 @@ class CueResult {
   final String cuePath;
   final String detectedMode;
 
-  CueResult({
-    required this.cuePath,
-    required this.detectedMode,
-  });
+  CueResult({required this.cuePath, required this.detectedMode});
 }
 
 class BinMergeResult {
@@ -61,7 +59,10 @@ class ToolsService {
       throw OpenROMException(OpenROMError.coreNotFound);
     }
     if (!File(binPath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'BIN file not found: $binPath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'BIN file not found: $binPath',
+      );
     }
 
     try {
@@ -72,10 +73,7 @@ class ToolsService {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--generate-cue', binPath,
-      ]);
+      args.addAll(['--json', '--generate-cue', binPath]);
 
       if (outputDir != null && outputDir.isNotEmpty) {
         args.addAll(['--output', outputDir]);
@@ -83,7 +81,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -97,9 +97,14 @@ class ToolsService {
         }
       }
       final err = result.stderr.toString().trim();
-      throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'CUE generation failed');
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: err.isNotEmpty ? err : 'CUE generation failed',
+      );
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -120,7 +125,10 @@ class ToolsService {
       throw OpenROMException(OpenROMError.coreNotFound);
     }
     if (!File(cuePath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'CUE file not found: $cuePath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'CUE file not found: $cuePath',
+      );
     }
 
     try {
@@ -131,10 +139,7 @@ class ToolsService {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--merge-bins', cuePath,
-      ]);
+      args.addAll(['--json', '--merge-bins', cuePath]);
 
       if (outputDir != null && outputDir.isNotEmpty) {
         args.addAll(['--output', outputDir]);
@@ -144,31 +149,37 @@ class ToolsService {
       final stderrLog = StringBuffer();
       BinMergeResult? mergeResult;
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isEmpty) return;
-        try {
-          final Map<String, dynamic> event = jsonDecode(line);
-          final type = event['type'];
-          if (type == 'progress') {
-            final double pct = (event['percent'] as num).toDouble();
-            onProgress?.call(pct);
-          } else if (type == 'done' && event['success'] == true) {
-            mergeResult = BinMergeResult(
-              mergedBinPath: event['merged_bin'] as String,
-              mergedCuePath: event['merged_cue'] as String,
-              tracksCount: (event['tracks_count'] as num?)?.toInt() ?? 0,
-            );
-          } else if (type == 'error') {
-            stderrLog.writeln(event['message'] ?? '');
-          }
-        } catch (_) {}
-      });
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isEmpty) return;
+            try {
+              final Map<String, dynamic> event = jsonDecode(line);
+              final type = event['type'];
+              if (type == 'progress') {
+                final double pct = (event['percent'] as num).toDouble();
+                onProgress?.call(pct);
+              } else if (type == 'done' && event['success'] == true) {
+                mergeResult = BinMergeResult(
+                  mergedBinPath: event['merged_bin'] as String,
+                  mergedCuePath: event['merged_cue'] as String,
+                  tracksCount: (event['tracks_count'] as num?)?.toInt() ?? 0,
+                );
+              } else if (type == 'error') {
+                stderrLog.writeln(event['message'] ?? '');
+              }
+            } catch (_) {}
+          });
 
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isNotEmpty) {
-          stderrLog.writeln(line);
-        }
-      });
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isNotEmpty) {
+              stderrLog.writeln(line);
+            }
+          });
 
       final exitCode = await process.exitCode;
       if (exitCode == 0 && mergeResult != null) {
@@ -180,7 +191,9 @@ class ToolsService {
           : 'Process exited with code $exitCode';
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -197,7 +210,10 @@ class ToolsService {
       throw OpenROMException(OpenROMError.coreNotFound);
     }
     if (!File(romPath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'ROM file not found: $romPath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'ROM file not found: $romPath',
+      );
     }
 
     try {
@@ -208,14 +224,13 @@ class ToolsService {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--detect-header', romPath,
-      ]);
+      args.addAll(['--json', '--detect-header', romPath]);
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -227,7 +242,9 @@ class ToolsService {
       }
       return null;
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -248,7 +265,10 @@ class ToolsService {
       throw OpenROMException(OpenROMError.coreNotFound);
     }
     if (!File(romPath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'ROM file not found: $romPath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'ROM file not found: $romPath',
+      );
     }
 
     try {
@@ -259,10 +279,7 @@ class ToolsService {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--remove-header', romPath,
-      ]);
+      args.addAll(['--json', '--remove-header', romPath]);
 
       if (!backup) {
         args.add('--no-backup');
@@ -274,7 +291,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -285,9 +304,14 @@ class ToolsService {
         }
       }
       final err = result.stderr.toString().trim();
-      throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'Header removal failed');
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: err.isNotEmpty ? err : 'Header removal failed',
+      );
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -313,7 +337,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+      final lines = LineSplitter.split(result.stdout.toString())
+          .where((l) => l.trim().isNotEmpty)
+          .toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -321,7 +347,10 @@ class ToolsService {
             if (event['success'] == true) {
               return event;
             } else {
-              throw OpenROMException(OpenROMError.conversionFailed, details: event['error']?.toString());
+              throw OpenROMException(
+                OpenROMError.conversionFailed,
+                details: event['error']?.toString(),
+              );
             }
           }
         } catch (_) {
@@ -330,7 +359,10 @@ class ToolsService {
       }
     }
     final err = result.stderr.toString().trim();
-    throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'DAT import failed');
+    throw OpenROMException(
+      OpenROMError.conversionFailed,
+      details: err.isNotEmpty ? err : 'DAT import failed',
+    );
   }
 
   /// List all imported DAT files.
@@ -347,7 +379,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+      final lines = LineSplitter.split(result.stdout.toString())
+          .where((l) => l.trim().isNotEmpty)
+          .toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -388,32 +422,40 @@ class ToolsService {
     final process = await Process.start(corePath, args);
     final stderrLog = StringBuffer();
 
-    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-      if (line.trim().isEmpty) return;
-      try {
-        final Map<String, dynamic> event = jsonDecode(line);
-        if (event['type'] == 'result') {
-          results.add(Map<String, dynamic>.from(event));
-        } else if (event['type'] == 'progress' && onProgress != null) {
-          onProgress(
-            event['file'] as String? ?? '',
-            (event['percent'] as num?)?.toDouble() ?? 0,
-          );
-        } else if (event['type'] == 'error') {
-          stderrLog.writeln(event['message'] ?? '');
-        }
-      } catch (_) {}
-    });
+    process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+          if (line.trim().isEmpty) return;
+          try {
+            final Map<String, dynamic> event = jsonDecode(line);
+            if (event['type'] == 'result') {
+              results.add(Map<String, dynamic>.from(event));
+            } else if (event['type'] == 'progress' && onProgress != null) {
+              onProgress(
+                event['file'] as String? ?? '',
+                (event['percent'] as num?)?.toDouble() ?? 0,
+              );
+            } else if (event['type'] == 'error') {
+              stderrLog.writeln(event['message'] ?? '');
+            }
+          } catch (_) {}
+        });
 
-    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-      if (line.trim().isNotEmpty) {
-        stderrLog.writeln(line);
-      }
-    });
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+          if (line.trim().isNotEmpty) {
+            stderrLog.writeln(line);
+          }
+        });
 
     final exitCode = await process.exitCode;
     if (exitCode != 0 && results.isEmpty) {
-      final details = stderrLog.isNotEmpty ? stderrLog.toString().trim() : 'Scan failed with code $exitCode';
+      final details = stderrLog.isNotEmpty
+          ? stderrLog.toString().trim()
+          : 'Scan failed with code $exitCode';
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     }
     return results;
@@ -441,27 +483,35 @@ class ToolsService {
     final process = await Process.start(corePath, args);
     final stderrLog = StringBuffer();
 
-    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-      if (line.trim().isEmpty) return;
-      try {
-        final Map<String, dynamic> event = jsonDecode(line);
-        if (event['type'] == 'rename') {
-          results.add(Map<String, dynamic>.from(event));
-        } else if (event['type'] == 'error') {
-          stderrLog.writeln(event['message'] ?? '');
-        }
-      } catch (_) {}
-    });
+    process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+          if (line.trim().isEmpty) return;
+          try {
+            final Map<String, dynamic> event = jsonDecode(line);
+            if (event['type'] == 'rename') {
+              results.add(Map<String, dynamic>.from(event));
+            } else if (event['type'] == 'error') {
+              stderrLog.writeln(event['message'] ?? '');
+            }
+          } catch (_) {}
+        });
 
-    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-      if (line.trim().isNotEmpty) {
-        stderrLog.writeln(line);
-      }
-    });
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+          if (line.trim().isNotEmpty) {
+            stderrLog.writeln(line);
+          }
+        });
 
     final exitCode = await process.exitCode;
     if (exitCode != 0 && results.isEmpty) {
-      final details = stderrLog.isNotEmpty ? stderrLog.toString().trim() : 'Rename failed with code $exitCode';
+      final details = stderrLog.isNotEmpty
+          ? stderrLog.toString().trim()
+          : 'Rename failed with code $exitCode';
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     }
     return results;

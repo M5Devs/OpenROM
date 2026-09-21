@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
+
 import '../core/config.dart';
 import 'patcher.dart';
 
@@ -17,8 +18,12 @@ class XdeltaPatcher extends RomPatcher {
   });
 
   static const List<String> _xdelta1Magics = [
-    '%XDELTA%', '%XDZ000%', '%XDZ001%',
-    '%XDZ002%', '%XDZ003%', '%XDZ004%',
+    '%XDELTA%',
+    '%XDZ000%',
+    '%XDZ001%',
+    '%XDZ002%',
+    '%XDZ003%',
+    '%XDZ004%',
   ];
 
   @override
@@ -32,12 +37,13 @@ class XdeltaPatcher extends RomPatcher {
 
     if (!await File(binary).exists()) {
       throw PatchException(
-          'xdelta3 binary not found. Please re-download the full ZIP.');
+        'xdelta3 binary not found. Please re-download the full ZIP.',
+      );
     }
 
     final args = [
-      '-d',                          // decode (apply patch)
-      if (ignoreChecksum) '-n',      // no checksum verification
+      '-d', // decode (apply patch)
+      if (ignoreChecksum) '-n', // no checksum verification
       '-s', romFile.path,
       patchFile.path,
       outputFile.path,
@@ -53,10 +59,15 @@ class XdeltaPatcher extends RomPatcher {
       throw PatchException('xdelta3 failed: $err');
     }
 
-    return PatchReport(format: 'xdelta', checks: [
-      PatchCheck('VCDIFF integrity',
-          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed),
-    ]);
+    return PatchReport(
+      format: 'xdelta',
+      checks: [
+        PatchCheck(
+          'VCDIFF integrity',
+          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed,
+        ),
+      ],
+    );
   }
 
   Future<bool> _isXdelta1() async {

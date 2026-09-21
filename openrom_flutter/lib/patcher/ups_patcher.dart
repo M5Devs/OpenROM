@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'checksums.dart';
 
@@ -102,7 +103,9 @@ class UpsPatcher extends RomPatcher {
       final copyLen = offset - outPos;
       if (copyLen > 0) {
         final available = romLen - romCursor;
-        final n = copyLen <= available ? copyLen : (available > 0 ? available : 0);
+        final n = copyLen <= available
+            ? copyLen
+            : (available > 0 ? available : 0);
         if (n > 0) {
           out.setRange(outPos, outPos + n, rom, romCursor);
           romCursor += n;
@@ -146,13 +149,15 @@ class UpsPatcher extends RomPatcher {
       }
     }
 
-    final outcome =
-        ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
-    return PatchReport(format: "UPS", checks: [
-      PatchCheck("Patch (CRC32)", outcome),
-      PatchCheck("Source ROM (CRC32)", outcome),
-      PatchCheck("Output (CRC32)", outcome),
-    ]);
+    final outcome = ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
+    return PatchReport(
+      format: "UPS",
+      checks: [
+        PatchCheck("Patch (CRC32)", outcome),
+        PatchCheck("Source ROM (CRC32)", outcome),
+        PatchCheck("Output (CRC32)", outcome),
+      ],
+    );
   }
 
   int _readUint32LE(Uint8List bytes, int offset) {

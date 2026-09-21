@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
@@ -62,7 +63,9 @@ class Sidebar extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: isSelected ? theme.accent : Colors.transparent,
+                            color: isSelected
+                                ? theme.accent
+                                : Colors.transparent,
                             width: 3,
                           ),
                         ),
@@ -72,7 +75,7 @@ class Sidebar extends StatelessWidget {
                                   color: theme.accent.withValues(alpha: 0.4),
                                   blurRadius: 8,
                                   spreadRadius: 1,
-                                )
+                                ),
                               ]
                             : [],
                       ),

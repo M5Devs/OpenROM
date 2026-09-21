@@ -1,4 +1,5 @@
 import threading
+
 """
 OpenROM Compressor — ZIP/7Z Compression & Extraction Utility
 M5 Dev | GPL v3
@@ -7,7 +8,8 @@ M5 Dev | GPL v3
 import os
 import shutil
 import zipfile
-from typing import Callable, Optional
+from collections.abc import Callable
+
 try:
     import py7zr as _py7zr
     _PY7ZR_AVAILABLE = True
@@ -28,7 +30,7 @@ class CompressionJob:
         delete_source: bool = False,
         status: str = "Queued",       # Queued|Compressing|Extracting|Done|Failed
         progress: float = 0.0,
-        error: Optional[str] = None,
+        error: str | None = None,
     ):
         self.filepath = filepath
         self.output_dir = output_dir
@@ -43,8 +45,8 @@ class CompressionJob:
 class Compressor:
     def __init__(
         self,
-        on_log: Optional[Callable[[str], None]] = None,
-        on_progress: Optional[Callable[[CompressionJob, float], None]] = None,
+        on_log: Callable[[str], None] | None = None,
+        on_progress: Callable[[CompressionJob, float], None] | None = None,
     ):
         self.on_log = on_log
         self.on_progress = on_progress or (lambda job, pct: None)

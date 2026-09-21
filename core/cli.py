@@ -19,28 +19,31 @@ Usage examples:
   openrom --remove-header game.smc --no-backup
 """
 
-import sys
-import os
 import argparse
-import threading
 import json
+import os
+import sys
+import threading
 
 # Allow imports from project root
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core.detector import detect_file, detect_folder, CONVERSION_MAP, get_valid_targets
-from core.converter import Converter, ConversionJob
-from core.validator import verify_chd
-from core.compressor import Compressor, CompressionJob
-from core.m3u_generator import generate_m3u
-from core.cue_generator import generate_cue, detect_bin_mode
 from core.bin_merger import merge_bins, parse_cue
-from core.header_remover import detect_header, remove_header
+from core.compressor import CompressionJob, Compressor
 from core.config import get_tool_path
+from core.converter import ConversionJob, Converter
+from core.cue_generator import detect_bin_mode, generate_cue
+from core.detector import CONVERSION_MAP, detect_file, detect_folder
+from core.header_remover import detect_header, remove_header
+from core.m3u_generator import generate_m3u
 from core.rom_renamer import (
-    import_dat, list_dats, remove_dat,
-    scan_folder, rename_roms,
+    import_dat,
+    list_dats,
+    rename_roms,
+    scan_folder,
 )
+from core.validator import verify_chd
+
 
 # ── ANSI colors (disabled on Windows if no ANSI support) ─────────────────────
 def _ansi(code: str) -> str:
@@ -994,9 +997,10 @@ def main() -> int:
 
     # IP.BIN read handler
     if args.read_ipbin:
-        from core.ipbin_editor import read_ipbin
-        from core.gdi_reader import extract_ipbin_from_gdi
         import tempfile
+
+        from core.gdi_reader import extract_ipbin_from_gdi
+        from core.ipbin_editor import read_ipbin
         path = args.read_ipbin
         if path.lower().endswith('.gdi'):
             with tempfile.NamedTemporaryFile(suffix='.bin', delete=False) as tmp:
@@ -1030,7 +1034,12 @@ def main() -> int:
 
     # IP.BIN write handler
     if args.write_ipbin:
-        from core.ipbin_editor import read_ipbin, write_ipbin, set_region_free, set_vga_enabled
+        from core.ipbin_editor import (
+            read_ipbin,
+            set_region_free,
+            set_vga_enabled,
+            write_ipbin,
+        )
         fields = read_ipbin(args.write_ipbin)
         if args.set_title:
             fields['product_name'] = args.set_title[:16]

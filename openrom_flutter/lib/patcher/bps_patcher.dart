@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'checksums.dart';
 
@@ -123,13 +124,15 @@ class BpsPatcher extends RomPatcher {
       }
     }
 
-    final outcome =
-        ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
-    return PatchReport(format: "BPS", checks: [
-      PatchCheck("Patch (CRC32)", outcome),
-      PatchCheck("Source ROM (CRC32)", outcome),
-      PatchCheck("Output (CRC32)", outcome),
-    ]);
+    final outcome = ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
+    return PatchReport(
+      format: "BPS",
+      checks: [
+        PatchCheck("Patch (CRC32)", outcome),
+        PatchCheck("Source ROM (CRC32)", outcome),
+        PatchCheck("Output (CRC32)", outcome),
+      ],
+    );
   }
 
   int _readUint32LE(Uint8List bytes, int offset) {

@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
+
 import 'patcher.dart';
 import 'aps_gba_patcher.dart';
 import 'aps_n64_patcher.dart';
@@ -24,9 +25,15 @@ class ApsPatcher extends RomPatcher {
   Future<PatchReport> apply({bool ignoreChecksum = false}) async {
     final RomPatcher delegate = switch (await _detectType()) {
       _ApsType.n64 => ApsN64Patcher(
-          patchFile: patchFile, romFile: romFile, outputFile: outputFile),
+        patchFile: patchFile,
+        romFile: romFile,
+        outputFile: outputFile,
+      ),
       _ApsType.gba => ApsGbaPatcher(
-          patchFile: patchFile, romFile: romFile, outputFile: outputFile),
+        patchFile: patchFile,
+        romFile: romFile,
+        outputFile: outputFile,
+      ),
       _ApsType.unknown => throw PatchException("Not a valid APS patch."),
     };
     return delegate.apply(ignoreChecksum: ignoreChecksum);

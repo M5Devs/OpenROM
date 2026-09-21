@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
@@ -28,7 +29,10 @@ class TerminalPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.terminalBg,
         border: Border(
-          top: BorderSide(color: theme.accent.withValues(alpha: 0.5), width: 1.5),
+          top: BorderSide(
+            color: theme.accent.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
         ),
       ),
       child: Column(

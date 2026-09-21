@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,16 +20,14 @@ import '../services/tools_service.dart';
 class ToolsScreen extends StatefulWidget {
   final ThemeConfig theme;
 
-  const ToolsScreen({
-    super.key,
-    required this.theme,
-  });
+  const ToolsScreen({super.key, required this.theme});
 
   @override
   State<ToolsScreen> createState() => _ToolsScreenState();
 }
 
-class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStateMixin {
+class _ToolsScreenState extends State<ToolsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -80,10 +79,7 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
                   icon: const Icon(Icons.content_cut_outlined),
                   text: l10n.headerRemoverTitle,
                 ),
-                Tab(
-                  icon: const Icon(Icons.edit_document),
-                  text: 'CUE Editor',
-                ),
+                Tab(icon: const Icon(Icons.edit_document), text: 'CUE Editor'),
                 Tab(
                   icon: const Icon(Icons.drive_file_rename_outline),
                   text: 'ROM Renamer',
@@ -115,7 +111,8 @@ class _ToolsScreenState extends State<ToolsScreen> with SingleTickerProviderStat
 
 class _CompressorQueueItem {
   final String filepath;
-  String status; // "Queued", "Compressing", "Extracting", "Done", "Failed", "Skipped"
+  String
+  status; // "Queued", "Compressing", "Extracting", "Done", "Failed", "Skipped"
   double progress;
   String? error;
 
@@ -149,7 +146,15 @@ class _CompressorTabState extends State<_CompressorTab> {
   bool _isDragging = false;
 
   static const Set<String> _excludedExtensions = {
-    '.chd', '.cso', '.rvz', '.7z', '.zip', '.gz', '.zst', '.csz', '.zso'
+    '.chd',
+    '.cso',
+    '.rvz',
+    '.7z',
+    '.zip',
+    '.gz',
+    '.zst',
+    '.csz',
+    '.zso',
   };
 
   bool _isAlreadyCompressed(String filepath) {
@@ -161,13 +166,16 @@ class _CompressorTabState extends State<_CompressorTab> {
     setState(() {
       for (final path in paths) {
         if (!_queue.any((item) => item.filepath == path)) {
-          final isSkipped = (_format != 'Extract') && _isAlreadyCompressed(path);
-          _queue.add(_CompressorQueueItem(
-            filepath: path,
-            status: isSkipped ? 'Skipped' : 'Queued',
-            progress: isSkipped ? 100.0 : 0.0,
-            error: isSkipped ? 'Skipped (already compressed)' : null,
-          ));
+          final isSkipped =
+              (_format != 'Extract') && _isAlreadyCompressed(path);
+          _queue.add(
+            _CompressorQueueItem(
+              filepath: path,
+              status: isSkipped ? 'Skipped' : 'Queued',
+              progress: isSkipped ? 100.0 : 0.0,
+              error: isSkipped ? 'Skipped (already compressed)' : null,
+            ),
+          );
         }
       }
     });
@@ -187,7 +195,10 @@ class _CompressorTabState extends State<_CompressorTab> {
       final dir = Directory(folderPath);
       if (dir.existsSync()) {
         final List<String> filePaths = [];
-        await for (final entity in dir.list(recursive: true, followLinks: false)) {
+        await for (final entity in dir.list(
+          recursive: true,
+          followLinks: false,
+        )) {
           if (entity is File) {
             filePaths.add(entity.path);
           }
@@ -284,7 +295,11 @@ class _CompressorTabState extends State<_CompressorTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -313,7 +328,9 @@ class _CompressorTabState extends State<_CompressorTab> {
         _addFiles(paths);
       },
       child: Container(
-        color: _isDragging ? theme.accent.withValues(alpha: 0.1) : theme.background,
+        color: _isDragging
+            ? theme.accent.withValues(alpha: 0.1)
+            : theme.background,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +375,11 @@ class _CompressorTabState extends State<_CompressorTab> {
             // Format Selection Row
             Text(
               l10n.compressorOutputFormat,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -373,17 +394,24 @@ class _CompressorTabState extends State<_CompressorTab> {
                     backgroundColor: theme.surface,
                     labelStyle: TextStyle(
                       color: selected ? Colors.black : theme.textPrimary,
-                      fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: selected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                     onSelected: (_) {
                       setState(() {
                         _format = fmt;
                         for (final item in _queue) {
-                          if (item.status == 'Skipped' || item.status == 'Queued') {
-                            final isSkipped = (_format != 'Extract') && _isAlreadyCompressed(item.filepath);
+                          if (item.status == 'Skipped' ||
+                              item.status == 'Queued') {
+                            final isSkipped =
+                                (_format != 'Extract') &&
+                                _isAlreadyCompressed(item.filepath);
                             item.status = isSkipped ? 'Skipped' : 'Queued';
                             item.progress = isSkipped ? 100.0 : 0.0;
-                            item.error = isSkipped ? l10n.compressorSkipped : null;
+                            item.error = isSkipped
+                                ? l10n.compressorSkipped
+                                : null;
                           }
                         }
                       });
@@ -398,33 +426,40 @@ class _CompressorTabState extends State<_CompressorTab> {
             if (_format == '7Z') ...[
               Text(
                 l10n.compressorLevel,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textSecondary,
+                ),
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  MapEntry('Fast', l10n.compressorLevelFast),
-                  MapEntry('Normal', l10n.compressorLevelNormal),
-                  MapEntry('Ultra', l10n.compressorLevelUltra),
-                ].map((entry) {
-                  final key = entry.key;
-                  final label = entry.value;
-                  final selected = _level == key;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ChoiceChip(
-                      label: Text(label),
-                      selected: selected,
-                      selectedColor: theme.accent,
-                      backgroundColor: theme.surface,
-                      labelStyle: TextStyle(
-                        color: selected ? Colors.black : theme.textPrimary,
-                        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      onSelected: (_) => setState(() => _level = key),
-                    ),
-                  );
-                }).toList(),
+                children:
+                    [
+                      MapEntry('Fast', l10n.compressorLevelFast),
+                      MapEntry('Normal', l10n.compressorLevelNormal),
+                      MapEntry('Ultra', l10n.compressorLevelUltra),
+                    ].map((entry) {
+                      final key = entry.key;
+                      final label = entry.value;
+                      final selected = _level == key;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ChoiceChip(
+                          label: Text(label),
+                          selected: selected,
+                          selectedColor: theme.accent,
+                          backgroundColor: theme.surface,
+                          labelStyle: TextStyle(
+                            color: selected ? Colors.black : theme.textPrimary,
+                            fontWeight: selected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          onSelected: (_) => setState(() => _level = key),
+                        ),
+                      );
+                    }).toList(),
               ),
               const SizedBox(height: 16),
             ],
@@ -435,16 +470,23 @@ class _CompressorTabState extends State<_CompressorTab> {
                 Checkbox(
                   value: _deleteSource,
                   activeColor: theme.accent,
-                  onChanged: (val) => setState(() => _deleteSource = val ?? false),
+                  onChanged: (val) =>
+                      setState(() => _deleteSource = val ?? false),
                 ),
-                Text(l10n.compressorDeleteSource, style: TextStyle(color: theme.textPrimary)),
+                Text(
+                  l10n.compressorDeleteSource,
+                  style: TextStyle(color: theme.textPrimary),
+                ),
                 const SizedBox(width: 20),
                 Checkbox(
                   value: _sameFolder,
                   activeColor: theme.accent,
                   onChanged: (val) => setState(() => _sameFolder = val ?? true),
                 ),
-                Text(l10n.compressorSameFolder, style: TextStyle(color: theme.textPrimary)),
+                Text(
+                  l10n.compressorSameFolder,
+                  style: TextStyle(color: theme.textPrimary),
+                ),
               ],
             ),
 
@@ -460,7 +502,9 @@ class _CompressorTabState extends State<_CompressorTab> {
                         hintText: l10n.m3uOutputLabel,
                         filled: true,
                         fillColor: theme.surface,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
@@ -479,15 +523,32 @@ class _CompressorTabState extends State<_CompressorTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed: (_queue.isNotEmpty && !_isProcessing) ? _startProcess : null,
+                onPressed: (_queue.isNotEmpty && !_isProcessing)
+                    ? _startProcess
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: _isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(actionText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        actionText,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 20),
@@ -495,12 +556,23 @@ class _CompressorTabState extends State<_CompressorTab> {
             // Queue List Header & Items
             Row(
               children: [
-                Text('Queue (${_queue.length})', style: TextStyle(fontWeight: FontWeight.bold, color: theme.textPrimary)),
+                Text(
+                  'Queue (${_queue.length})',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
+                ),
                 const Spacer(),
                 if (_queue.isNotEmpty)
                   TextButton(
-                    onPressed: _isProcessing ? null : () => setState(() => _queue.clear()),
-                    child: Text(l10n.clearQueue, style: const TextStyle(color: Colors.redAccent)),
+                    onPressed: _isProcessing
+                        ? null
+                        : () => setState(() => _queue.clear()),
+                    child: Text(
+                      l10n.clearQueue,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
                   ),
               ],
             ),
@@ -527,7 +599,11 @@ class _CompressorTabState extends State<_CompressorTab> {
     );
   }
 
-  Widget _buildQueueCard(_CompressorQueueItem item, AppLocalizations l10n, ThemeConfig theme) {
+  Widget _buildQueueCard(
+    _CompressorQueueItem item,
+    AppLocalizations l10n,
+    ThemeConfig theme,
+  ) {
     IconData statusIcon = Icons.hourglass_empty;
     Color statusColor = theme.textSecondary;
 
@@ -563,14 +639,21 @@ class _CompressorTabState extends State<_CompressorTab> {
               Expanded(
                 child: Text(
                   p.basename(item.filepath),
-                  style: TextStyle(color: theme.textPrimary, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: theme.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
                 item.status == 'Skipped' ? l10n.compressorSkipped : item.status,
-                style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               if (!_isProcessing)
                 IconButton(
@@ -590,7 +673,10 @@ class _CompressorTabState extends State<_CompressorTab> {
           ],
           if (item.error != null && item.status == 'Failed') ...[
             const SizedBox(height: 4),
-            Text(item.error!, style: const TextStyle(color: Colors.redAccent, fontSize: 11)),
+            Text(
+              item.error!,
+              style: const TextStyle(color: Colors.redAccent, fontSize: 11),
+            ),
           ],
         ],
       ),
@@ -620,7 +706,13 @@ class _M3uTabState extends State<_M3uTab> {
   bool _isDragging = false;
 
   static const Set<String> _supportedExtensions = {
-    '.chd', '.bin', '.cue', '.iso', '.gdi', '.img', '.cdi'
+    '.chd',
+    '.bin',
+    '.cue',
+    '.iso',
+    '.gdi',
+    '.img',
+    '.cdi',
   };
 
   void _addDiscFiles(List<String> paths) {
@@ -639,7 +731,10 @@ class _M3uTabState extends State<_M3uTab> {
 
   void _autoSortDiscs() {
     int getDiscNumber(String filepath) {
-      final match = RegExp(r'(?:disc|disk|cd)[\s\-_]*(\d+)', caseSensitive: false).firstMatch(p.basename(filepath));
+      final match = RegExp(
+        r'(?:disc|disk|cd)[\s\-_]*(\d+)',
+        caseSensitive: false,
+      ).firstMatch(p.basename(filepath));
       if (match != null) {
         return int.tryParse(match.group(1) ?? '') ?? 999;
       }
@@ -652,10 +747,15 @@ class _M3uTabState extends State<_M3uTab> {
   void _updateAutoFilename() {
     if (_discFiles.isNotEmpty) {
       final first = p.basenameWithoutExtension(_discFiles.first);
-      final cleaned = first.replaceAll(
-        RegExp(r'[\s\-_]*[\(\[\{]?(?:Disc|Disk|CD)[\s\-_]*\d+[\)\]\}]?', caseSensitive: false),
-        '',
-      ).trim();
+      final cleaned = first
+          .replaceAll(
+            RegExp(
+              r'[\s\-_]*[\(\[\{]?(?:Disc|Disk|CD)[\s\-_]*\d+[\)\]\}]?',
+              caseSensitive: false,
+            ),
+            '',
+          )
+          .trim();
       _m3uFilename = '${cleaned.isNotEmpty ? cleaned : first}.m3u';
       if (_outputDir.isEmpty) {
         _outputDir = p.dirname(_discFiles.first);
@@ -711,7 +811,11 @@ class _M3uTabState extends State<_M3uTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -736,7 +840,9 @@ class _M3uTabState extends State<_M3uTab> {
         _addDiscFiles(paths);
       },
       child: Container(
-        color: _isDragging ? theme.accent.withValues(alpha: 0.1) : theme.background,
+        color: _isDragging
+            ? theme.accent.withValues(alpha: 0.1)
+            : theme.background,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,7 +854,11 @@ class _M3uTabState extends State<_M3uTab> {
                 const SizedBox(width: 10),
                 Text(
                   l10n.m3uTitle,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
                 ),
                 const Spacer(),
                 ElevatedButton.icon(
@@ -805,15 +915,23 @@ class _M3uTabState extends State<_M3uTab> {
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: theme.accent.withValues(alpha: 0.2),
+                                backgroundColor: theme.accent.withValues(
+                                  alpha: 0.2,
+                                ),
                                 child: Text(
                                   '${index + 1}',
-                                  style: TextStyle(color: theme.accent, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    color: theme.accent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               title: Text(
                                 'Disc ${index + 1}: ${p.basename(filepath)}',
-                                style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                                style: TextStyle(
+                                  color: theme.textPrimary,
+                                  fontSize: 14,
+                                ),
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -828,7 +946,10 @@ class _M3uTabState extends State<_M3uTab> {
                                       });
                                     },
                                   ),
-                                  const Icon(Icons.drag_handle, color: Colors.grey),
+                                  const Icon(
+                                    Icons.drag_handle,
+                                    color: Colors.grey,
+                                  ),
                                 ],
                               ),
                             ),
@@ -842,7 +963,10 @@ class _M3uTabState extends State<_M3uTab> {
             // Output Settings
             Text(
               'Output: $_m3uFilename',
-              style: TextStyle(fontWeight: FontWeight.bold, color: theme.textPrimary),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -855,7 +979,9 @@ class _M3uTabState extends State<_M3uTab> {
                       labelText: l10n.m3uOutputLabel,
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -873,15 +999,32 @@ class _M3uTabState extends State<_M3uTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed: (_discFiles.isNotEmpty && !_isGenerating) ? _generateM3u : null,
+                onPressed: (_discFiles.isNotEmpty && !_isGenerating)
+                    ? _generateM3u
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: _isGenerating
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(l10n.m3uButton, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        l10n.m3uButton,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
 
@@ -897,7 +1040,10 @@ class _M3uTabState extends State<_M3uTab> {
                 ),
                 child: Text(
                   '✅ $_successMessage',
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -944,7 +1090,9 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
       type: FileType.custom,
       allowedExtensions: ['bin'],
     );
-    if (result != null && result.paths.isNotEmpty && result.paths.first != null) {
+    if (result != null &&
+        result.paths.isNotEmpty &&
+        result.paths.first != null) {
       _selectBinFile(result.paths.first!);
     }
   }
@@ -984,7 +1132,11 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -1005,13 +1157,17 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
       onDragExited: (_) => setState(() => _isDragging = false),
       onDragDone: (detail) {
         setState(() => _isDragging = false);
-        final binFiles = detail.files.where((f) => p.extension(f.path).toLowerCase() == '.bin').toList();
+        final binFiles = detail.files
+            .where((f) => p.extension(f.path).toLowerCase() == '.bin')
+            .toList();
         if (binFiles.isNotEmpty) {
           _selectBinFile(binFiles.first.path);
         }
       },
       child: Container(
-        color: _isDragging ? theme.accent.withValues(alpha: 0.1) : theme.background,
+        color: _isDragging
+            ? theme.accent.withValues(alpha: 0.1)
+            : theme.background,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1023,7 +1179,11 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
                 const SizedBox(width: 10),
                 Text(
                   l10n.cueGeneratorTitle,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
                 ),
               ],
             ),
@@ -1032,7 +1192,11 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
             // BIN File Section
             Text(
               l10n.cueGeneratorBinFile,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1045,7 +1209,9 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
                       hintText: '/path/to/game.bin (drag & drop supported)',
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -1061,7 +1227,11 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
             // Output Folder Section
             Text(
               l10n.m3uOutputLabel,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1069,11 +1239,15 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
                 Expanded(
                   child: TextField(
                     readOnly: true,
-                    controller: TextEditingController(text: _outputDir.isNotEmpty ? _outputDir : 'same as BIN'),
+                    controller: TextEditingController(
+                      text: _outputDir.isNotEmpty ? _outputDir : 'same as BIN',
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -1089,7 +1263,10 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
             if (_detectedMode != null) ...[
               Text(
                 '${l10n.cueGeneratorDetectedMode}: $_detectedMode',
-                style: TextStyle(color: theme.accent, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: theme.accent,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
             ],
@@ -1099,15 +1276,32 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed: (_binPath.isNotEmpty && !_isProcessing) ? _generateCue : null,
+                onPressed: (_binPath.isNotEmpty && !_isProcessing)
+                    ? _generateCue
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: _isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(l10n.cueGeneratorButton, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        l10n.cueGeneratorButton,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
 
@@ -1123,7 +1317,10 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
                 ),
                 child: Text(
                   '✅ $_successMessage',
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -1177,7 +1374,16 @@ class _BinMergerTabState extends State<_BinMergerTab> {
       final cueDir = p.dirname(cueFilePath);
       final List<String> bins = [];
 
-      final fileRegex = RegExp(r'FILE\s+["' "'" r']?([^"' "'" r']+)["' "'" r']?\s+BINARY', caseSensitive: false);
+      final fileRegex = RegExp(
+        r'FILE\s+["'
+        "'"
+        r']?([^"'
+        "'"
+        r']+)["'
+        "'"
+        r']?\s+BINARY',
+        caseSensitive: false,
+      );
 
       for (final line in lines) {
         final match = fileRegex.firstMatch(line.trim());
@@ -1204,7 +1410,9 @@ class _BinMergerTabState extends State<_BinMergerTab> {
       type: FileType.custom,
       allowedExtensions: ['cue'],
     );
-    if (result != null && result.paths.isNotEmpty && result.paths.first != null) {
+    if (result != null &&
+        result.paths.isNotEmpty &&
+        result.paths.first != null) {
       _selectCueFile(result.paths.first!);
     }
   }
@@ -1249,7 +1457,11 @@ class _BinMergerTabState extends State<_BinMergerTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -1270,13 +1482,17 @@ class _BinMergerTabState extends State<_BinMergerTab> {
       onDragExited: (_) => setState(() => _isDragging = false),
       onDragDone: (detail) {
         setState(() => _isDragging = false);
-        final cueFiles = detail.files.where((f) => p.extension(f.path).toLowerCase() == '.cue').toList();
+        final cueFiles = detail.files
+            .where((f) => p.extension(f.path).toLowerCase() == '.cue')
+            .toList();
         if (cueFiles.isNotEmpty) {
           _selectCueFile(cueFiles.first.path);
         }
       },
       child: Container(
-        color: _isDragging ? theme.accent.withValues(alpha: 0.1) : theme.background,
+        color: _isDragging
+            ? theme.accent.withValues(alpha: 0.1)
+            : theme.background,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1288,7 +1504,11 @@ class _BinMergerTabState extends State<_BinMergerTab> {
                 const SizedBox(width: 10),
                 Text(
                   l10n.binMergerTitle,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
                 ),
               ],
             ),
@@ -1297,7 +1517,11 @@ class _BinMergerTabState extends State<_BinMergerTab> {
             // CUE File Section
             Text(
               l10n.binMergerCueFile,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1310,7 +1534,9 @@ class _BinMergerTabState extends State<_BinMergerTab> {
                       hintText: '/path/to/game.cue (drag & drop supported)',
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -1326,7 +1552,10 @@ class _BinMergerTabState extends State<_BinMergerTab> {
             if (_detectedBinFiles.isNotEmpty) ...[
               Text(
                 l10n.binMergerDetected(_detectedBinFiles.length),
-                style: TextStyle(color: theme.textPrimary, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: theme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 6),
               ...List.generate(_detectedBinFiles.length, (idx) {
@@ -1345,7 +1574,11 @@ class _BinMergerTabState extends State<_BinMergerTab> {
             // Output Folder Section
             Text(
               l10n.m3uOutputLabel,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1353,11 +1586,15 @@ class _BinMergerTabState extends State<_BinMergerTab> {
                 Expanded(
                   child: TextField(
                     readOnly: true,
-                    controller: TextEditingController(text: _outputDir.isNotEmpty ? _outputDir : 'same as CUE'),
+                    controller: TextEditingController(
+                      text: _outputDir.isNotEmpty ? _outputDir : 'same as CUE',
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -1375,15 +1612,32 @@ class _BinMergerTabState extends State<_BinMergerTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed: (_cuePath.isNotEmpty && !_isProcessing) ? _mergeBins : null,
+                onPressed: (_cuePath.isNotEmpty && !_isProcessing)
+                    ? _mergeBins
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: _isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(l10n.binMergerButton, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        l10n.binMergerButton,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
 
@@ -1416,7 +1670,10 @@ class _BinMergerTabState extends State<_BinMergerTab> {
                 ),
                 child: Text(
                   '✅ $_successMessage',
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -1450,7 +1707,14 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
   bool _isDragging = false;
 
   static const Set<String> _supportedExtensions = {
-    '.nes', '.smc', '.sfc', '.fig', '.swc', '.gb', '.gbc', '.gba'
+    '.nes',
+    '.smc',
+    '.sfc',
+    '.fig',
+    '.swc',
+    '.gb',
+    '.gbc',
+    '.gba',
   };
 
   void _selectRomFile(String path) {
@@ -1494,9 +1758,20 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
   Future<void> _pickRomFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['nes', 'smc', 'sfc', 'fig', 'swc', 'gb', 'gbc', 'gba'],
+      allowedExtensions: [
+        'nes',
+        'smc',
+        'sfc',
+        'fig',
+        'swc',
+        'gb',
+        'gbc',
+        'gba',
+      ],
     );
-    if (result != null && result.paths.isNotEmpty && result.paths.first != null) {
+    if (result != null &&
+        result.paths.isNotEmpty &&
+        result.paths.first != null) {
       _selectRomFile(result.paths.first!);
     }
   }
@@ -1526,7 +1801,11 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed, details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -1547,13 +1826,21 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
       onDragExited: (_) => setState(() => _isDragging = false),
       onDragDone: (detail) {
         setState(() => _isDragging = false);
-        final romFiles = detail.files.where((f) => _supportedExtensions.contains(p.extension(f.path).toLowerCase())).toList();
+        final romFiles = detail.files
+            .where(
+              (f) => _supportedExtensions.contains(
+                p.extension(f.path).toLowerCase(),
+              ),
+            )
+            .toList();
         if (romFiles.isNotEmpty) {
           _selectRomFile(romFiles.first.path);
         }
       },
       child: Container(
-        color: _isDragging ? theme.accent.withValues(alpha: 0.1) : theme.background,
+        color: _isDragging
+            ? theme.accent.withValues(alpha: 0.1)
+            : theme.background,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1565,7 +1852,11 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
                 const SizedBox(width: 10),
                 Text(
                   l10n.headerRemoverTitle,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
                 ),
               ],
             ),
@@ -1574,7 +1865,11 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
             // ROM File Section
             Text(
               l10n.patcherRomFile,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textSecondary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1587,7 +1882,9 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
                       hintText: '/path/to/game.smc (drag & drop supported)',
                       filled: true,
                       fillColor: theme.surface,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -1617,17 +1914,30 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
                   children: [
                     Text(
                       'Detection Result:',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: theme.textPrimary),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 6),
-                    Text('${l10n.headerRemoverSystem}: ${_headerInfo!.system}', style: TextStyle(color: theme.textSecondary)),
+                    Text(
+                      '${l10n.headerRemoverSystem}: ${_headerInfo!.system}',
+                      style: TextStyle(color: theme.textSecondary),
+                    ),
                     Text(
                       _headerInfo!.hasHeader
                           ? 'Header: ✅ ${l10n.headerRemoverFound} (${_headerInfo!.headerSize} bytes)'
                           : 'Header: ❌ ${l10n.headerRemoverNotFound}',
-                      style: TextStyle(color: _headerInfo!.hasHeader ? Colors.greenAccent : theme.textSecondary),
+                      style: TextStyle(
+                        color: _headerInfo!.hasHeader
+                            ? Colors.greenAccent
+                            : theme.textSecondary,
+                      ),
                     ),
-                    Text('${l10n.headerRemoverConfidence}: ${_headerInfo!.confidence}', style: TextStyle(color: theme.textSecondary)),
+                    Text(
+                      '${l10n.headerRemoverConfidence}: ${_headerInfo!.confidence}',
+                      style: TextStyle(color: theme.textSecondary),
+                    ),
                   ],
                 ),
               ),
@@ -1648,7 +1958,10 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
                   activeColor: theme.accent,
                   onChanged: (val) => setState(() => _backup = val ?? true),
                 ),
-                Text(l10n.headerRemoverBackup, style: TextStyle(color: theme.textPrimary)),
+                Text(
+                  l10n.headerRemoverBackup,
+                  style: TextStyle(color: theme.textPrimary),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -1658,15 +1971,32 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed: (_romPath.isNotEmpty && !_isProcessing) ? _removeHeader : null,
+                onPressed: (_romPath.isNotEmpty && !_isProcessing)
+                    ? _removeHeader
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: _isProcessing
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                    : Text(l10n.headerRemoverButton, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Text(
+                        l10n.headerRemoverButton,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
 
@@ -1682,7 +2012,10 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
                 ),
                 child: Text(
                   '✅ $_successMessage',
-                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -1692,7 +2025,6 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
     );
   }
 }
-
 
 // ── Tab 6: CUE Editor ─────────────────────────────────────────────────────────
 
@@ -1761,8 +2093,11 @@ class _CueEditorTabState extends State<_CueEditorTab> {
               ElevatedButton.icon(
                 onPressed: _hasChanges && !_isSaving ? _saveCueFile : null,
                 icon: _isSaving
-                    ? const SizedBox(width: 14, height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.save, size: 16),
                 label: const Text('Save'),
               ),
@@ -1771,7 +2106,10 @@ class _CueEditorTabState extends State<_CueEditorTab> {
                 Expanded(
                   child: Text(
                     _cuePath!,
-                    style: TextStyle(fontSize: 12, color: widget.theme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: widget.theme.textSecondary,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -1795,7 +2133,9 @@ class _CueEditorTabState extends State<_CueEditorTab> {
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(12),
                   border: InputBorder.none,
-                  hintText: _cuePath == null ? 'Open a .cue file to edit...' : null,
+                  hintText: _cuePath == null
+                      ? 'Open a .cue file to edit...'
+                      : null,
                   hintStyle: TextStyle(color: widget.theme.textSecondary),
                 ),
               ),
@@ -1818,14 +2158,14 @@ class _RomRenamerTab extends StatefulWidget {
 }
 
 class _RomRenamerTabState extends State<_RomRenamerTab> {
-  final _service    = ToolsService();
-  List<Map<String, dynamic>> _dats      = [];
+  final _service = ToolsService();
+  List<Map<String, dynamic>> _dats = [];
   List<Map<String, dynamic>> _scanResults = [];
-  String?  _romFolder;
-  bool     _isScanning  = false;
-  bool     _isRenaming  = false;
-  bool     _dryRun      = true;
-  String   _statusMsg   = '';
+  String? _romFolder;
+  bool _isScanning = false;
+  bool _isRenaming = false;
+  bool _dryRun = true;
+  String _statusMsg = '';
 
   @override
   void initState() {
@@ -1865,10 +2205,17 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
 
   Future<void> _scan() async {
     if (_romFolder == null || _dats.isEmpty) return;
-    setState(() { _isScanning = true; _scanResults = []; _statusMsg = 'Scanning...'; });
+    setState(() {
+      _isScanning = true;
+      _scanResults = [];
+      _statusMsg = 'Scanning...';
+    });
     try {
       final results = await _service.scanRoms(_romFolder!);
-      setState(() { _scanResults = results; _statusMsg = ''; });
+      setState(() {
+        _scanResults = results;
+        _statusMsg = '';
+      });
     } catch (e) {
       setState(() => _statusMsg = 'Scan failed: $e');
     } finally {
@@ -1878,13 +2225,18 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
 
   Future<void> _rename() async {
     if (_romFolder == null) return;
-    setState(() { _isRenaming = true; _statusMsg = _dryRun ? 'Simulating...' : 'Renaming...'; });
+    setState(() {
+      _isRenaming = true;
+      _statusMsg = _dryRun ? 'Simulating...' : 'Renaming...';
+    });
     try {
       final results = await _service.renameRoms(_romFolder!, dryRun: _dryRun);
-      final count   = results.where((r) => r['success'] == true).length;
-      setState(() => _statusMsg = _dryRun
-          ? '$count files would be renamed (dry run)'
-          : '$count files renamed successfully');
+      final count = results.where((r) => r['success'] == true).length;
+      setState(
+        () => _statusMsg = _dryRun
+            ? '$count files would be renamed (dry run)'
+            : '$count files renamed successfully',
+      );
       if (!_dryRun) await _scan();
     } catch (e) {
       setState(() => _statusMsg = 'Rename failed: $e');
@@ -1895,7 +2247,7 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
 
   @override
   Widget build(BuildContext context) {
-    final matched   = _scanResults.where((r) => r['matched'] == true).length;
+    final matched = _scanResults.where((r) => r['matched'] == true).length;
     final unmatched = _scanResults.length - matched;
 
     return Padding(
@@ -1903,12 +2255,15 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           // ── DAT Library ──────────────────────────────────────────────
-          Text('DAT Library', style: TextStyle(
-            fontSize: 14, fontWeight: FontWeight.bold,
-            color: widget.theme.textPrimary,
-          )),
+          Text(
+            'DAT Library',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: widget.theme.textPrimary,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -1921,31 +2276,51 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
           ),
           const SizedBox(height: 8),
           if (_dats.isEmpty)
-            Text('No DATs imported yet. Import a No-Intro or Redump DAT file.',
-              style: TextStyle(color: widget.theme.textSecondary, fontSize: 12))
+            Text(
+              'No DATs imported yet. Import a No-Intro or Redump DAT file.',
+              style: TextStyle(color: widget.theme.textSecondary, fontSize: 12),
+            )
           else
             Column(
-              children: _dats.map((dat) => ListTile(
-                dense: true,
-                title: Text(dat['name'] ?? '', style: TextStyle(
-                  fontSize: 13, color: widget.theme.textPrimary)),
-                subtitle: Text('${dat['source']} · ${dat['game_count']} games',
-                  style: TextStyle(fontSize: 11, color: widget.theme.textSecondary)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 16),
-                  onPressed: () => _removeDat(dat['stored_path']),
-                  color: Colors.red,
-                ),
-              )).toList(),
+              children: _dats
+                  .map(
+                    (dat) => ListTile(
+                      dense: true,
+                      title: Text(
+                        dat['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: widget.theme.textPrimary,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${dat['source']} · ${dat['game_count']} games',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: widget.theme.textSecondary,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 16),
+                        onPressed: () => _removeDat(dat['stored_path']),
+                        color: Colors.red,
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
 
           const Divider(height: 24),
 
           // ── ROM Folder ───────────────────────────────────────────────
-          Text('ROM Folder', style: TextStyle(
-            fontSize: 14, fontWeight: FontWeight.bold,
-            color: widget.theme.textPrimary,
-          )),
+          Text(
+            'ROM Folder',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: widget.theme.textPrimary,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -1956,8 +2331,16 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
               ),
               const SizedBox(width: 12),
               if (_romFolder != null)
-                Expanded(child: Text(_romFolder!, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: widget.theme.textSecondary))),
+                Expanded(
+                  child: Text(
+                    _romFolder!,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: widget.theme.textSecondary,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -1965,10 +2348,14 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
             children: [
               ElevatedButton.icon(
                 onPressed: (_isScanning || _dats.isEmpty || _romFolder == null)
-                    ? null : _scan,
+                    ? null
+                    : _scan,
                 icon: _isScanning
-                    ? const SizedBox(width: 14, height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.search, size: 16),
                 label: const Text('Scan'),
               ),
@@ -1984,11 +2371,16 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
               ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
-                onPressed: (_isRenaming || _scanResults.isEmpty || _romFolder == null)
-                    ? null : _rename,
+                onPressed:
+                    (_isRenaming || _scanResults.isEmpty || _romFolder == null)
+                    ? null
+                    : _rename,
                 icon: _isRenaming
-                    ? const SizedBox(width: 14, height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.drive_file_rename_outline, size: 16),
                 label: Text(_dryRun ? 'Preview Rename' : 'Rename'),
               ),
@@ -1997,16 +2389,23 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
 
           if (_statusMsg.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(_statusMsg, style: TextStyle(
-              fontSize: 12, color: widget.theme.textSecondary,
-              fontStyle: FontStyle.italic)),
+            Text(
+              _statusMsg,
+              style: TextStyle(
+                fontSize: 12,
+                color: widget.theme.textSecondary,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ],
 
           // ── Scan Results ─────────────────────────────────────────────
           if (_scanResults.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text('Results: $matched matched · $unmatched unmatched',
-              style: TextStyle(fontSize: 12, color: widget.theme.textSecondary)),
+            Text(
+              'Results: $matched matched · $unmatched unmatched',
+              style: TextStyle(fontSize: 12, color: widget.theme.textSecondary),
+            ),
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
@@ -2014,22 +2413,32 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
                 itemBuilder: (context, i) {
                   final r = _scanResults[i];
                   final isMatched = r['matched'] == true;
-                  final needsRename = isMatched &&
-                      r['suggested_filename'] != r['file'];
+                  final needsRename =
+                      isMatched && r['suggested_filename'] != r['file'];
                   return ListTile(
                     dense: true,
                     leading: Icon(
-                      isMatched ? Icons.check_circle_outline : Icons.help_outline,
+                      isMatched
+                          ? Icons.check_circle_outline
+                          : Icons.help_outline,
                       size: 16,
                       color: isMatched ? Colors.green : Colors.grey,
                     ),
-                    title: Text(r['file'] ?? '',
-                      style: TextStyle(fontSize: 12,
-                        color: widget.theme.textPrimary)),
+                    title: Text(
+                      r['file'] ?? '',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: widget.theme.textPrimary,
+                      ),
+                    ),
                     subtitle: isMatched && needsRename
-                        ? Text('→ ${r['suggested_filename']}',
-                            style: TextStyle(fontSize: 11,
-                              color: Colors.orange.shade300))
+                        ? Text(
+                            '→ ${r['suggested_filename']}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.orange.shade300,
+                            ),
+                          )
                         : null,
                   );
                 },

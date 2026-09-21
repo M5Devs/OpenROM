@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../core/error_dialog.dart';
 import '../core/errors.dart';
 import '../l10n/app_localizations.dart';
@@ -30,22 +31,31 @@ class _RomCardState extends State<RomCard> {
   LinearGradient _getPlatformGradient(String platform) {
     final p = platform.toUpperCase();
     if (p.contains('PS1')) {
-      return const LinearGradient(colors: [Color(0xff2d3748), Color(0xff1a202c)]);
+      return const LinearGradient(
+        colors: [Color(0xff2d3748), Color(0xff1a202c)],
+      );
     } else if (p.contains('PS2')) {
-      return const LinearGradient(colors: [Color(0xff1e3a8a), Color(0xff3b0764)]);
+      return const LinearGradient(
+        colors: [Color(0xff1e3a8a), Color(0xff3b0764)],
+      );
     } else if (p.contains('GAMECUBE') || p.contains('GC')) {
-      return const LinearGradient(colors: [Color(0xff4c1d95), Color(0xff1e1b4b)]);
+      return const LinearGradient(
+        colors: [Color(0xff4c1d95), Color(0xff1e1b4b)],
+      );
     } else if (p.contains('XBOX')) {
-      return const LinearGradient(colors: [Color(0xff14532d), Color(0xff052e16)]);
+      return const LinearGradient(
+        colors: [Color(0xff14532d), Color(0xff052e16)],
+      );
     } else if (p.contains('PSP')) {
-      return const LinearGradient(colors: [Color(0xff0891b2), Color(0xff164e63)]);
+      return const LinearGradient(
+        colors: [Color(0xff0891b2), Color(0xff164e63)],
+      );
     } else if (p.contains('DREAMCAST')) {
-      return const LinearGradient(colors: [Color(0xffc2410c), Color(0xff431407)]);
+      return const LinearGradient(
+        colors: [Color(0xffc2410c), Color(0xff431407)],
+      );
     }
-    return LinearGradient(colors: [
-      widget.theme.cardBg,
-      widget.theme.surface,
-    ]);
+    return LinearGradient(colors: [widget.theme.cardBg, widget.theme.surface]);
   }
 
   Color _hexToColor(String hex) {
@@ -74,7 +84,8 @@ class _RomCardState extends State<RomCard> {
 
   void _showJobError() {
     final err = widget.job.error ?? OpenROMError.conversionFailed;
-    final details = (widget.job.errorMessage != null && widget.job.errorMessage!.isNotEmpty)
+    final details =
+        (widget.job.errorMessage != null && widget.job.errorMessage!.isNotEmpty)
         ? widget.job.errorMessage
         : widget.job.logs.join('\n');
     showOpenROMError(context, err, details: details);
@@ -123,14 +134,21 @@ class _RomCardState extends State<RomCard> {
                     children: [
                       // Platform badge
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.sports_esports, color: widget.theme.textPrimary, size: 16),
+                            Icon(
+                              Icons.sports_esports,
+                              color: widget.theme.textPrimary,
+                              size: 16,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               rom.platform,
@@ -166,8 +184,8 @@ class _RomCardState extends State<RomCard> {
                                 color: isFailed
                                     ? Colors.redAccent
                                     : (widget.job.status == JobStatus.done
-                                        ? Colors.greenAccent
-                                        : widget.theme.textSecondary),
+                                          ? Colors.greenAccent
+                                          : widget.theme.textSecondary),
                                 fontSize: 13,
                               ),
                             ),
@@ -179,7 +197,10 @@ class _RomCardState extends State<RomCard> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: badgeColor,
                               borderRadius: BorderRadius.circular(12),
@@ -220,7 +241,11 @@ class _RomCardState extends State<RomCard> {
                       // Delete button on hover
                       if (_isHovered)
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white70,
+                            size: 20,
+                          ),
                           onPressed: widget.onDelete,
                           tooltip: l10n.removeFile,
                         )
@@ -245,7 +270,11 @@ class _RomCardState extends State<RomCard> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 16,
+                        ),
                       ],
                     ),
                   ),

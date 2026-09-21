@@ -4,6 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'patch_io.dart';
 
@@ -67,7 +68,8 @@ class ApsN64Patcher extends RomPatcher {
         validatesRomHeader = true;
         final endianness = await patch.readByte();
         final cardId =
-            ((await patch.readByte() & 0xff) << 8) + (await patch.readByte() & 0xff);
+            ((await patch.readByte() & 0xff) << 8) +
+            (await patch.readByte() & 0xff);
         final country = await patch.readByte();
         final crc = await patch.read(8);
         if (!ignoreChecksum) {
@@ -152,29 +154,40 @@ class ApsN64Patcher extends RomPatcher {
       format: "APS",
       checks: validatesRomHeader
           ? [
-              PatchCheck("ROM header",
-                  ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed),
+              PatchCheck(
+                "ROM header",
+                ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed,
+              ),
             ]
           : const [],
     );
   }
 
   Future<bool> _validateRom(
-      int endianness, int cartId, int country, List<int> crc) async {
+    int endianness,
+    int cartId,
+    int country,
+    List<int> crc,
+  ) async {
     final rom = await romFile.open(mode: FileMode.read);
     try {
       // Check endianness marker.
       int val = await rom.readByte();
-      if ((endianness == 1 && val != 0x80) || (endianness == 0 && val != 0x37)) {
+      if ((endianness == 1 && val != 0x80) ||
+          (endianness == 0 && val != 0x37)) {
         return false;
       }
 
       // Check cartridge ID.
       await rom.setPosition(0x3c);
       if (endianness == 1) {
-        val = ((await rom.readByte() & 0xff) << 8) + (await rom.readByte() & 0xff);
+        val =
+            ((await rom.readByte() & 0xff) << 8) +
+            (await rom.readByte() & 0xff);
       } else {
-        val = (await rom.readByte() & 0xff) + ((await rom.readByte() & 0xff) << 8);
+        val =
+            (await rom.readByte() & 0xff) +
+            ((await rom.readByte() & 0xff) << 8);
       }
       if (cartId != val) return false;
 

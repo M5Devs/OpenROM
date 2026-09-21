@@ -12,7 +12,11 @@ const int patchBufferSize = patchCopyBufferSize;
 
 /// Copies [size] bytes from [from] to [to], starting at each file's current
 /// position and writing sequentially. Stops early if the source runs out.
-Future<void> copyBytes(RandomAccessFile from, RandomAccessFile to, int size) async {
+Future<void> copyBytes(
+  RandomAccessFile from,
+  RandomAccessFile to,
+  int size,
+) async {
   int remaining = size;
   while (remaining > 0) {
     final toRead = remaining > patchBufferSize ? patchBufferSize : remaining;
@@ -26,7 +30,8 @@ Future<void> copyBytes(RandomAccessFile from, RandomAccessFile to, int size) asy
 /// Writes [size] copies of [value] to [to] at its current position.
 Future<void> fillBytes(RandomAccessFile to, int size, int value) async {
   int remaining = size;
-  final chunk = Uint8List(patchBufferSize)..fillRange(0, patchBufferSize, value);
+  final chunk = Uint8List(patchBufferSize)
+    ..fillRange(0, patchBufferSize, value);
   while (remaining > 0) {
     final toWrite = remaining > patchBufferSize ? patchBufferSize : remaining;
     await to.writeFrom(chunk, 0, toWrite);
@@ -41,7 +46,10 @@ Future<void> fillBytes(RandomAccessFile to, int size, int value) async {
 /// We copy through a write-mode output handle rather than `File.copy` so the
 /// same handle can then be seeked and overwritten at arbitrary offsets without
 /// reopening the file.
-Future<void> copyWholeFile(RandomAccessFile rom, RandomAccessFile output) async {
+Future<void> copyWholeFile(
+  RandomAccessFile rom,
+  RandomAccessFile output,
+) async {
   await rom.setPosition(0);
   while (true) {
     final bytes = await rom.read(patchBufferSize);

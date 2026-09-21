@@ -33,14 +33,22 @@ class ConversionJob {
     this.error,
   }) : logs = logs ?? [];
 
-  static String estimateSize(int fileSizeBytes, String targetFormat, String compression) {
+  static String estimateSize(
+    int fileSizeBytes,
+    String targetFormat,
+    String compression,
+  ) {
     double ratio;
     switch (targetFormat.toUpperCase()) {
       case 'CHD':
         ratio = 0.60;
         break;
       case 'CSO':
-        ratio = compression == 'Max' ? 0.60 : compression == 'Fast' ? 0.80 : 0.70;
+        ratio = compression == 'Max'
+            ? 0.60
+            : compression == 'Fast'
+            ? 0.80
+            : 0.70;
         break;
       case 'RVZ':
         ratio = compression == 'Max' ? 0.50 : 0.55;
@@ -64,7 +72,9 @@ class ConversionJob {
     } else if (estimated < 1024 * 1024 * 1024) {
       return '~' + (estimated / (1024 * 1024)).toStringAsFixed(1) + ' MB';
     } else {
-      return '~' + (estimated / (1024 * 1024 * 1024)).toStringAsFixed(2) + ' GB';
+      return '~' +
+          (estimated / (1024 * 1024 * 1024)).toStringAsFixed(2) +
+          ' GB';
     }
   }
 

@@ -3,6 +3,7 @@
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 import 'patcher.dart';
@@ -99,31 +100,55 @@ class PatcherFactory {
       case 'ips':
       case 'ips32':
         return IpsPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'ups':
         return UpsPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'bps':
         return BpsPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'ppf':
         return PpfPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'aps':
         return ApsPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'ebp':
         return EbpPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'dps':
         return DpsPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       case 'xdelta':
       case 'xdelta3':
       case 'xd':
       case 'vcdiff':
         return XdeltaPatcher(
-            patchFile: patchFile, romFile: romFile, outputFile: outputFile);
+          patchFile: patchFile,
+          romFile: romFile,
+          outputFile: outputFile,
+        );
       default:
         throw PatchException("Unknown patch format: .$ext");
     }

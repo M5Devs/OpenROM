@@ -1,6 +1,5 @@
 import os
 import struct
-import platform
 
 SUPPORTED_INPUT = {
     ".iso":  "ISO",
@@ -269,6 +268,7 @@ def detect_folder(folder: str) -> list:
 
 
 from core.config import get_tool_path as _get_tool_path
+
 
 def get_chdman_path() -> str:
     return _get_tool_path("chdman")

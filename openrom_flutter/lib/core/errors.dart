@@ -4,16 +4,16 @@
 import 'package:flutter/material.dart';
 
 enum OpenROMError {
-  coreNotFound,        // openrom-core binary missing
-  unsupportedFormat,   // file format not in CONVERSION_MAP
-  diskSpaceLow,        // not enough space for output
-  toolFailed,          // chdman/maxcso/etc crashed
-  conversionFailed,    // conversion exited with non-zero code
-  fileNotFound,        // input file missing or moved
-  outputDirNotFound,   // output directory doesn't exist
-  permissionDenied,    // can't write to output directory
-  corruptedFile,       // file is unreadable or 0 bytes
-  unknownError,        // fallback for anything else
+  coreNotFound, // openrom-core binary missing
+  unsupportedFormat, // file format not in CONVERSION_MAP
+  diskSpaceLow, // not enough space for output
+  toolFailed, // chdman/maxcso/etc crashed
+  conversionFailed, // conversion exited with non-zero code
+  fileNotFound, // input file missing or moved
+  outputDirNotFound, // output directory doesn't exist
+  permissionDenied, // can't write to output directory
+  corruptedFile, // file is unreadable or 0 bytes
+  unknownError, // fallback for anything else
 }
 
 extension OpenROMErrorX on OpenROMError {

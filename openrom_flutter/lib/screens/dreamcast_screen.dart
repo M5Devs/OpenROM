@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -177,8 +178,11 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed,
-            details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -194,8 +198,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
 
-    final canApply =
-        !_isApplying && _dcpPath.isNotEmpty && _discDir.isNotEmpty;
+    final canApply = !_isApplying && _dcpPath.isNotEmpty && _discDir.isNotEmpty;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -220,7 +223,9 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -245,8 +250,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                       backgroundColor: theme.surface,
                       foregroundColor: theme.textPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(theme.borderRadius),
+                        borderRadius: BorderRadius.circular(theme.borderRadius),
                         side: BorderSide(color: theme.border),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -274,7 +278,9 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -299,8 +305,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                       backgroundColor: theme.surface,
                       foregroundColor: theme.textPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(theme.borderRadius),
+                        borderRadius: BorderRadius.circular(theme.borderRadius),
                         side: BorderSide(color: theme.border),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -329,11 +334,14 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.surface,
-                          borderRadius:
-                              BorderRadius.circular(theme.borderRadius),
+                          borderRadius: BorderRadius.circular(
+                            theme.borderRadius,
+                          ),
                           border: Border.all(color: theme.border),
                         ),
                         child: Text(
@@ -355,8 +363,9 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                         backgroundColor: theme.surface,
                         foregroundColor: theme.textPrimary,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(theme.borderRadius),
+                          borderRadius: BorderRadius.circular(
+                            theme.borderRadius,
+                          ),
                           side: BorderSide(color: theme.border),
                         ),
                         padding: const EdgeInsets.all(12),
@@ -418,7 +427,9 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.accent,
-                    disabledBackgroundColor: theme.accent.withValues(alpha: 0.4),
+                    disabledBackgroundColor: theme.accent.withValues(
+                      alpha: 0.4,
+                    ),
                     foregroundColor: theme.textPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -540,7 +551,11 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
     });
 
     try {
-      final res = await CoreBridge.runCore(['--read-ipbin', _ipbinPath, '--json']);
+      final res = await CoreBridge.runCore([
+        '--read-ipbin',
+        _ipbinPath,
+        '--json',
+      ]);
 
       if (res.exitCode == 0) {
         final lines = LineSplitter.split(res.stdout.toString())
@@ -559,13 +574,18 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
         }
 
         if (jsonMap != null) {
-          final fields = (jsonMap['fields'] as Map<String, dynamic>?) ?? jsonMap;
+          final fields =
+              (jsonMap['fields'] as Map<String, dynamic>?) ?? jsonMap;
           final pName1 = (fields['product_name'] ?? '').toString();
           final pName2 = (fields['product_name_2'] ?? '').toString();
           final fullTitle = '$pName1 $pName2'.trim();
 
-          final regions = (fields['regions'] as List?)?.map((e) => e.toString()).toList() ?? [];
-          final peripheralsStr = (fields['peripherals'] ?? '').toString().trim();
+          final regions =
+              (fields['regions'] as List?)?.map((e) => e.toString()).toList() ??
+              [];
+          final peripheralsStr = (fields['peripherals'] ?? '')
+              .toString()
+              .trim();
           int peripFlags = 0;
           try {
             peripFlags = int.parse(peripheralsStr, radix: 16);
@@ -573,9 +593,12 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
 
           setState(() {
             _titleController.text = fullTitle;
-            _productNumberController.text = (fields['product_number'] ?? '').toString();
-            _versionController.text = (fields['product_version'] ?? '').toString();
-            _releaseDateController.text = (fields['release_date'] ?? '').toString();
+            _productNumberController.text = (fields['product_number'] ?? '')
+                .toString();
+            _versionController.text = (fields['product_version'] ?? '')
+                .toString();
+            _releaseDateController.text = (fields['release_date'] ?? '')
+                .toString();
 
             _japan = regions.contains('Japan');
             _usa = regions.contains('USA');
@@ -596,8 +619,11 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed,
-            details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -656,8 +682,11 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed,
-            details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -696,7 +725,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -721,8 +752,7 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                       backgroundColor: theme.surface,
                       foregroundColor: theme.textPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(theme.borderRadius),
+                        borderRadius: BorderRadius.circular(theme.borderRadius),
                         side: BorderSide(color: theme.border),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -740,7 +770,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                         borderRadius: BorderRadius.circular(theme.borderRadius),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                     ),
                     onPressed: (_ipbinPath.isNotEmpty && !_isLoading)
                         ? _loadIpBin
@@ -754,8 +786,10 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                               strokeWidth: 2,
                             ),
                           )
-                        : Text(l10n.dreamcastIpbinLoad,
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(
+                            l10n.dreamcastIpbinLoad,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ],
               ),
@@ -811,8 +845,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                               filled: true,
                               fillColor: theme.surface,
                               border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(theme.borderRadius),
+                                borderRadius: BorderRadius.circular(
+                                  theme.borderRadius,
+                                ),
                                 borderSide: BorderSide(color: theme.border),
                               ),
                             ),
@@ -842,8 +877,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                               filled: true,
                               fillColor: theme.surface,
                               border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(theme.borderRadius),
+                                borderRadius: BorderRadius.circular(
+                                  theme.borderRadius,
+                                ),
                                 borderSide: BorderSide(color: theme.border),
                               ),
                             ),
@@ -873,8 +909,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                               filled: true,
                               fillColor: theme.surface,
                               border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(theme.borderRadius),
+                                borderRadius: BorderRadius.circular(
+                                  theme.borderRadius,
+                                ),
                                 borderSide: BorderSide(color: theme.border),
                               ),
                             ),
@@ -898,8 +935,10 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                 const SizedBox(height: 8),
                 CheckboxListTile(
                   value: _japan,
-                  title: Text(l10n.dreamcastIpbinRegionJapan,
-                      style: TextStyle(color: theme.textPrimary)),
+                  title: Text(
+                    l10n.dreamcastIpbinRegionJapan,
+                    style: TextStyle(color: theme.textPrimary),
+                  ),
                   activeColor: theme.accent,
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -908,8 +947,10 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                 ),
                 CheckboxListTile(
                   value: _usa,
-                  title: Text(l10n.dreamcastIpbinRegionUSA,
-                      style: TextStyle(color: theme.textPrimary)),
+                  title: Text(
+                    l10n.dreamcastIpbinRegionUSA,
+                    style: TextStyle(color: theme.textPrimary),
+                  ),
                   activeColor: theme.accent,
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -918,8 +959,10 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                 ),
                 CheckboxListTile(
                   value: _europe,
-                  title: Text(l10n.dreamcastIpbinRegionEurope,
-                      style: TextStyle(color: theme.textPrimary)),
+                  title: Text(
+                    l10n.dreamcastIpbinRegionEurope,
+                    style: TextStyle(color: theme.textPrimary),
+                  ),
                   activeColor: theme.accent,
                   dense: true,
                   contentPadding: EdgeInsets.zero,
@@ -931,10 +974,13 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
                 // VGA Switch
                 SwitchListTile(
                   value: _vga,
-                  title: Text(l10n.dreamcastIpbinVga,
-                      style: TextStyle(
-                          color: theme.textPrimary,
-                          fontWeight: FontWeight.bold)),
+                  title: Text(
+                    l10n.dreamcastIpbinVga,
+                    style: TextStyle(
+                      color: theme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   activeThumbColor: theme.accent,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (v) => setState(() => _vga = v),
@@ -1052,8 +1098,11 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
       }
     } catch (e) {
       if (mounted) {
-        showOpenROMError(context, OpenROMError.conversionFailed,
-            details: e.toString());
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
       }
     } finally {
       if (mounted) {
@@ -1092,7 +1141,9 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(theme.borderRadius),
@@ -1117,8 +1168,7 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                       backgroundColor: theme.surface,
                       foregroundColor: theme.textPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(theme.borderRadius),
+                        borderRadius: BorderRadius.circular(theme.borderRadius),
                         side: BorderSide(color: theme.border),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -1136,7 +1186,9 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                         borderRadius: BorderRadius.circular(theme.borderRadius),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                     ),
                     onPressed: (_gdiPath.isNotEmpty && !_isLoading)
                         ? _loadGdi
@@ -1150,8 +1202,10 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                               strokeWidth: 2,
                             ),
                           )
-                        : Text(l10n.dreamcastGdiLoad,
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(
+                            l10n.dreamcastGdiLoad,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ],
               ),
@@ -1178,34 +1232,49 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                     child: DataTable(
                       columns: [
                         DataColumn(
-                          label: Text(l10n.dreamcastGdiTrackNum,
-                              style: TextStyle(
-                                  color: theme.accent,
-                                  fontWeight: FontWeight.bold)),
+                          label: Text(
+                            l10n.dreamcastGdiTrackNum,
+                            style: TextStyle(
+                              color: theme.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(l10n.dreamcastGdiTrackLba,
-                              style: TextStyle(
-                                  color: theme.accent,
-                                  fontWeight: FontWeight.bold)),
+                          label: Text(
+                            l10n.dreamcastGdiTrackLba,
+                            style: TextStyle(
+                              color: theme.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(l10n.dreamcastGdiTrackType,
-                              style: TextStyle(
-                                  color: theme.accent,
-                                  fontWeight: FontWeight.bold)),
+                          label: Text(
+                            l10n.dreamcastGdiTrackType,
+                            style: TextStyle(
+                              color: theme.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(l10n.dreamcastGdiTrackSize,
-                              style: TextStyle(
-                                  color: theme.accent,
-                                  fontWeight: FontWeight.bold)),
+                          label: Text(
+                            l10n.dreamcastGdiTrackSize,
+                            style: TextStyle(
+                              color: theme.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         DataColumn(
-                          label: Text(l10n.dreamcastGdiTrackFile,
-                              style: TextStyle(
-                                  color: theme.accent,
-                                  fontWeight: FontWeight.bold)),
+                          label: Text(
+                            l10n.dreamcastGdiTrackFile,
+                            style: TextStyle(
+                              color: theme.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                       rows: _tracks.map((t) {
@@ -1214,16 +1283,36 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                             : l10n.dreamcastGdiData;
                         return DataRow(
                           cells: [
-                            DataCell(Text('${t['number']}',
-                                style: TextStyle(color: theme.textPrimary))),
-                            DataCell(Text('${t['lba']}',
-                                style: TextStyle(color: theme.textPrimary))),
-                            DataCell(Text(trackTypeStr,
-                                style: TextStyle(color: theme.textPrimary))),
-                            DataCell(Text('${t['sector_size']}',
-                                style: TextStyle(color: theme.textPrimary))),
-                            DataCell(Text('${t['filename']}',
-                                style: TextStyle(color: theme.textPrimary))),
+                            DataCell(
+                              Text(
+                                '${t['number']}',
+                                style: TextStyle(color: theme.textPrimary),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                '${t['lba']}',
+                                style: TextStyle(color: theme.textPrimary),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                trackTypeStr,
+                                style: TextStyle(color: theme.textPrimary),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                '${t['sector_size']}',
+                                style: TextStyle(color: theme.textPrimary),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                '${t['filename']}',
+                                style: TextStyle(color: theme.textPrimary),
+                              ),
+                            ),
                           ],
                         );
                       }).toList(),

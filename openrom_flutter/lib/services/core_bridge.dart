@@ -3,7 +3,9 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+
 import '../core/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
@@ -31,7 +33,9 @@ class CoreBridge {
     }
 
     final String exeDir = File(Platform.resolvedExecutable).parent.path;
-    final String binaryName = Platform.isWindows ? 'openrom-core.exe' : 'openrom-core';
+    final String binaryName = Platform.isWindows
+        ? 'openrom-core.exe'
+        : 'openrom-core';
     final String sameDirBinary = '$exeDir${Platform.pathSeparator}$binaryName';
 
     if (File(sameDirBinary).existsSync()) {
@@ -66,7 +70,10 @@ class CoreBridge {
       throw OpenROMException(OpenROMError.coreNotFound);
     }
     if (!File(filepath).existsSync()) {
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'Input file not found: $filepath');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'Input file not found: $filepath',
+      );
     }
 
     try {
@@ -81,18 +88,28 @@ class CoreBridge {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         if (lines.isNotEmpty) {
           final Map<String, dynamic> jsonMap = jsonDecode(lines.last);
           return RomFile.fromJson(jsonMap);
         }
       } else if (result.exitCode == 2) {
-        throw OpenROMException(OpenROMError.unsupportedFormat, details: result.stderr.toString());
+        throw OpenROMException(
+          OpenROMError.unsupportedFormat,
+          details: result.stderr.toString(),
+        );
       } else {
-        throw OpenROMException(OpenROMError.conversionFailed, details: result.stderr.toString());
+        throw OpenROMException(
+          OpenROMError.conversionFailed,
+          details: result.stderr.toString(),
+        );
       }
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -119,12 +136,18 @@ class CoreBridge {
 
     if (!File(job.romFile.filepath).existsSync()) {
       onDone(false, 'Input file not found: ${job.romFile.filepath}');
-      throw OpenROMException(OpenROMError.fileNotFound, details: 'File not found: ${job.romFile.filepath}');
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'File not found: ${job.romFile.filepath}',
+      );
     }
 
     if (outputDir.isNotEmpty && !Directory(outputDir).existsSync()) {
       onDone(false, 'Output directory does not exist: $outputDir');
-      throw OpenROMException(OpenROMError.outputDirNotFound, details: 'Output directory not found: $outputDir');
+      throw OpenROMException(
+        OpenROMError.outputDirNotFound,
+        details: 'Output directory not found: $outputDir',
+      );
     }
 
     try {
@@ -137,9 +160,12 @@ class CoreBridge {
 
       args.addAll([
         '--json',
-        '--convert', job.romFile.filepath,
-        '--format', job.targetFormat,
-        '--compression', job.compression,
+        '--convert',
+        job.romFile.filepath,
+        '--format',
+        job.targetFormat,
+        '--compression',
+        job.compression,
       ]);
 
       if (job.verify) {
@@ -153,37 +179,43 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isEmpty) return;
-        try {
-          final Map<String, dynamic> event = jsonDecode(line);
-          final type = event['type'];
-          if (type == 'progress') {
-            final double pct = (event['percent'] as num).toDouble();
-            onProgress(pct);
-          } else if (type == 'log') {
-            final String msg = event['message'] ?? '';
-            onLog(msg);
-          } else if (type == 'done') {
-            final bool success = event['success'] ?? false;
-            final String? err = event['error'];
-            onDone(success, err);
-          } else if (type == 'error') {
-            final String msg = event['message'] ?? 'Unknown error';
-            onLog('[ERROR] $msg');
-            stderrLog.writeln(msg);
-          }
-        } catch (_) {
-          onLog(line);
-        }
-      });
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isEmpty) return;
+            try {
+              final Map<String, dynamic> event = jsonDecode(line);
+              final type = event['type'];
+              if (type == 'progress') {
+                final double pct = (event['percent'] as num).toDouble();
+                onProgress(pct);
+              } else if (type == 'log') {
+                final String msg = event['message'] ?? '';
+                onLog(msg);
+              } else if (type == 'done') {
+                final bool success = event['success'] ?? false;
+                final String? err = event['error'];
+                onDone(success, err);
+              } else if (type == 'error') {
+                final String msg = event['message'] ?? 'Unknown error';
+                onLog('[ERROR] $msg');
+                stderrLog.writeln(msg);
+              }
+            } catch (_) {
+              onLog(line);
+            }
+          });
 
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isNotEmpty) {
-          onLog('[STDERR] $line');
-          stderrLog.writeln(line);
-        }
-      });
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isNotEmpty) {
+              onLog('[STDERR] $line');
+              stderrLog.writeln(line);
+            }
+          });
 
       final exitCode = await process.exitCode;
       if (exitCode != 0) {
@@ -192,15 +224,23 @@ class CoreBridge {
             : 'Process exited with code $exitCode';
         onDone(false, details);
         if (exitCode == 1) {
-          throw OpenROMException(OpenROMError.conversionFailed, details: details);
+          throw OpenROMException(
+            OpenROMError.conversionFailed,
+            details: details,
+          );
         } else if (exitCode == 2) {
-          throw OpenROMException(OpenROMError.unsupportedFormat, details: details);
+          throw OpenROMException(
+            OpenROMError.unsupportedFormat,
+            details: details,
+          );
         } else {
           throw OpenROMException(OpenROMError.unknownError, details: details);
         }
       }
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       onDone(false, e.toString());
@@ -240,9 +280,12 @@ class CoreBridge {
 
       args.addAll([
         '--json',
-        '--compress', ...files,
-        '--format', format,
-        '--level', level,
+        '--compress',
+        ...files,
+        '--format',
+        format,
+        '--level',
+        level,
       ]);
 
       if (deleteSource) {
@@ -256,37 +299,43 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isEmpty) return;
-        try {
-          final Map<String, dynamic> event = jsonDecode(line);
-          final type = event['type'];
-          if (type == 'progress') {
-            final double pct = (event['percent'] as num).toDouble();
-            onProgress?.call(pct);
-          } else if (type == 'log') {
-            final String msg = event['message'] ?? '';
-            onLog?.call(msg);
-          } else if (type == 'done') {
-            final bool success = event['success'] ?? false;
-            final String? err = event['error'];
-            onDone?.call(success, err);
-          } else if (type == 'error') {
-            final String msg = event['message'] ?? 'Unknown error';
-            onLog?.call('[ERROR] $msg');
-            stderrLog.writeln(msg);
-          }
-        } catch (_) {
-          onLog?.call(line);
-        }
-      });
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isEmpty) return;
+            try {
+              final Map<String, dynamic> event = jsonDecode(line);
+              final type = event['type'];
+              if (type == 'progress') {
+                final double pct = (event['percent'] as num).toDouble();
+                onProgress?.call(pct);
+              } else if (type == 'log') {
+                final String msg = event['message'] ?? '';
+                onLog?.call(msg);
+              } else if (type == 'done') {
+                final bool success = event['success'] ?? false;
+                final String? err = event['error'];
+                onDone?.call(success, err);
+              } else if (type == 'error') {
+                final String msg = event['message'] ?? 'Unknown error';
+                onLog?.call('[ERROR] $msg');
+                stderrLog.writeln(msg);
+              }
+            } catch (_) {
+              onLog?.call(line);
+            }
+          });
 
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isNotEmpty) {
-          onLog?.call('[STDERR] $line');
-          stderrLog.writeln(line);
-        }
-      });
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isNotEmpty) {
+              onLog?.call('[STDERR] $line');
+              stderrLog.writeln(line);
+            }
+          });
 
       final exitCode = await process.exitCode;
       if (exitCode != 0) {
@@ -297,7 +346,9 @@ class CoreBridge {
         throw OpenROMException(OpenROMError.conversionFailed, details: details);
       }
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       onDone?.call(false, e.toString());
@@ -333,10 +384,7 @@ class CoreBridge {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--extract', ...files,
-      ]);
+      args.addAll(['--json', '--extract', ...files]);
 
       if (deleteSource) {
         args.add('--delete-source');
@@ -349,37 +397,43 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isEmpty) return;
-        try {
-          final Map<String, dynamic> event = jsonDecode(line);
-          final type = event['type'];
-          if (type == 'progress') {
-            final double pct = (event['percent'] as num).toDouble();
-            onProgress?.call(pct);
-          } else if (type == 'log') {
-            final String msg = event['message'] ?? '';
-            onLog?.call(msg);
-          } else if (type == 'done') {
-            final bool success = event['success'] ?? false;
-            final String? err = event['error'];
-            onDone?.call(success, err);
-          } else if (type == 'error') {
-            final String msg = event['message'] ?? 'Unknown error';
-            onLog?.call('[ERROR] $msg');
-            stderrLog.writeln(msg);
-          }
-        } catch (_) {
-          onLog?.call(line);
-        }
-      });
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isEmpty) return;
+            try {
+              final Map<String, dynamic> event = jsonDecode(line);
+              final type = event['type'];
+              if (type == 'progress') {
+                final double pct = (event['percent'] as num).toDouble();
+                onProgress?.call(pct);
+              } else if (type == 'log') {
+                final String msg = event['message'] ?? '';
+                onLog?.call(msg);
+              } else if (type == 'done') {
+                final bool success = event['success'] ?? false;
+                final String? err = event['error'];
+                onDone?.call(success, err);
+              } else if (type == 'error') {
+                final String msg = event['message'] ?? 'Unknown error';
+                onLog?.call('[ERROR] $msg');
+                stderrLog.writeln(msg);
+              }
+            } catch (_) {
+              onLog?.call(line);
+            }
+          });
 
-      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
-        if (line.trim().isNotEmpty) {
-          onLog?.call('[STDERR] $line');
-          stderrLog.writeln(line);
-        }
-      });
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+            if (line.trim().isNotEmpty) {
+              onLog?.call('[STDERR] $line');
+              stderrLog.writeln(line);
+            }
+          });
 
       final exitCode = await process.exitCode;
       if (exitCode != 0) {
@@ -390,7 +444,9 @@ class CoreBridge {
         throw OpenROMException(OpenROMError.conversionFailed, details: details);
       }
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       onDone?.call(false, e.toString());
@@ -422,11 +478,7 @@ class CoreBridge {
         args.add('main.py');
       }
 
-      args.addAll([
-        '--json',
-        '--m3u', ...discFiles,
-        '--output', outputDir,
-      ]);
+      args.addAll(['--json', '--m3u', ...discFiles, '--output', outputDir]);
 
       if (!relative) {
         args.add('--absolute');
@@ -434,7 +486,9 @@ class CoreBridge {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -445,9 +499,14 @@ class CoreBridge {
         }
       }
       final err = result.stderr.toString().trim();
-      throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'M3U generation failed');
+      throw OpenROMException(
+        OpenROMError.conversionFailed,
+        details: err.isNotEmpty ? err : 'M3U generation failed',
+      );
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 || e.message.toLowerCase().contains('permission'))
+      final err =
+          (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
       throw OpenROMException(err, details: e.toString());
@@ -471,7 +530,9 @@ class CoreBridge {
         }
         final result = await Process.run(corePath, args);
         if (result.exitCode == 0) {
-          final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+          final lines = LineSplitter.split(result.stdout.toString())
+              .where((l) => l.trim().isNotEmpty)
+              .toList();
           if (lines.isNotEmpty) {
             final Map<String, dynamic> jsonMap = jsonDecode(lines.last);
             final p = jsonMap['path'] as String?;

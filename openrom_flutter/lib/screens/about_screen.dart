@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../services/core_bridge.dart';
@@ -56,7 +57,11 @@ class _AboutScreenState extends State<AboutScreen> {
             const SizedBox(height: 6),
             Text(
               _version,
-              style: TextStyle(color: theme.accent, fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(
+                color: theme.accent,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 32),
             ConstrainedBox(
@@ -71,7 +76,10 @@ class _AboutScreenState extends State<AboutScreen> {
                   children: [
                     Text(
                       'Built by M5 Dev',
-                      style: TextStyle(color: theme.textPrimary, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: theme.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -85,7 +93,10 @@ class _AboutScreenState extends State<AboutScreen> {
                     const SizedBox(height: 12),
                     Text(
                       'License: GPL v3',
-                      style: TextStyle(color: theme.textSecondary, fontSize: 12),
+                      style: TextStyle(
+                        color: theme.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),

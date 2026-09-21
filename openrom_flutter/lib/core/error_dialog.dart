@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
 import 'errors.dart';
 
@@ -13,11 +14,8 @@ void showOpenROMError(
 }) {
   showDialog(
     context: context,
-    builder: (ctx) => OpenROMErrorDialog(
-      error: error,
-      details: details,
-      onAction: onAction,
-    ),
+    builder: (ctx) =>
+        OpenROMErrorDialog(error: error, details: details, onAction: onAction),
   );
 }
 
@@ -101,11 +99,7 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                widget.error.icon,
-                color: widget.error.color,
-                size: 32,
-              ),
+              Icon(widget.error.icon, color: widget.error.color, size: 32),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -126,7 +120,8 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
               'assets/icons/romeo_sad.png',
               width: 40,
               height: 40,
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
             ),
           ),
         ],
@@ -149,12 +144,10 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
               const SizedBox(height: 10),
               Text(
                 widget.error.action,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              if (widget.details != null && widget.details!.trim().isNotEmpty) ...[
+              if (widget.details != null &&
+                  widget.details!.trim().isNotEmpty) ...[
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () {
@@ -165,7 +158,9 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
                   child: Row(
                     children: [
                       Icon(
-                        _isDetailsExpanded ? Icons.arrow_drop_down : Icons.arrow_right,
+                        _isDetailsExpanded
+                            ? Icons.arrow_drop_down
+                            : Icons.arrow_right,
                         size: 20,
                         color: Colors.grey,
                       ),

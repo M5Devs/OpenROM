@@ -4,6 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'patcher.dart';
 import 'patch_io.dart';
 
@@ -50,7 +51,12 @@ class PpfPatcher extends RomPatcher {
           break;
         case 2:
           checks = await _applyPpf2(
-              patch, output, patchLen, romLength, ignoreChecksum);
+            patch,
+            output,
+            patchLen,
+            romLength,
+            ignoreChecksum,
+          );
           break;
         case 3:
           checks = await _applyPpf3(patch, output, patchLen, ignoreChecksum);
@@ -93,7 +99,10 @@ class PpfPatcher extends RomPatcher {
 
   /// PPF v1 carries no ROM-compatibility checks.
   Future<List<PatchCheck>> _applyPpf1(
-      RandomAccessFile patch, RandomAccessFile output, int dataEnd) async {
+    RandomAccessFile patch,
+    RandomAccessFile output,
+    int dataEnd,
+  ) async {
     await patch.setPosition(56);
     while (await patch.position() < dataEnd) {
       final offset = await _readLEUint32(patch);
@@ -106,9 +115,13 @@ class PpfPatcher extends RomPatcher {
     return const [];
   }
 
-  Future<List<PatchCheck>> _applyPpf2(RandomAccessFile patch,
-      RandomAccessFile output,
-      int patchLen, int romLength, bool ignoreChecksum) async {
+  Future<List<PatchCheck>> _applyPpf2(
+    RandomAccessFile patch,
+    RandomAccessFile output,
+    int patchLen,
+    int romLength,
+    bool ignoreChecksum,
+  ) async {
     await patch.setPosition(56);
     final romSize = await _readLEUint32(patch);
     if (!ignoreChecksum && romSize != romLength) {
@@ -123,8 +136,7 @@ class PpfPatcher extends RomPatcher {
       throw PatchException("ROM is not compatible with this patch.");
     }
 
-    final outcome =
-        ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
+    final outcome = ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed;
     final checks = [
       PatchCheck("ROM size", outcome),
       PatchCheck("ROM data block", outcome),
@@ -148,9 +160,12 @@ class PpfPatcher extends RomPatcher {
     return checks;
   }
 
-  Future<List<PatchCheck>> _applyPpf3(RandomAccessFile patch,
-      RandomAccessFile output,
-      int patchLen, bool ignoreChecksum) async {
+  Future<List<PatchCheck>> _applyPpf3(
+    RandomAccessFile patch,
+    RandomAccessFile output,
+    int patchLen,
+    bool ignoreChecksum,
+  ) async {
     await patch.setPosition(56);
     final imageType = await patch.readByte();
     final blockCheck = await patch.readByte();
@@ -165,8 +180,12 @@ class PpfPatcher extends RomPatcher {
       if (!ignoreChecksum && !_bytesEqual(patchBinaryBlock, romBinaryBlock)) {
         throw PatchException("ROM is not compatible with this patch.");
       }
-      checks.add(PatchCheck("ROM data block",
-          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed));
+      checks.add(
+        PatchCheck(
+          "ROM data block",
+          ignoreChecksum ? CheckOutcome.skipped : CheckOutcome.passed,
+        ),
+      );
     }
 
     int dataEnd = patchLen;
@@ -193,7 +212,10 @@ class PpfPatcher extends RomPatcher {
 
   /// Returns the size of the trailing FileID (.DIZ) block, or 0 if absent.
   Future<int> _getSizeFileId(
-      RandomAccessFile patch, int ppfVersion, int patchLen) async {
+    RandomAccessFile patch,
+    int ppfVersion,
+    int patchLen,
+  ) async {
     if (ppfVersion == 2) {
       await patch.setPosition(patchLen - 4 - 4);
     } else {

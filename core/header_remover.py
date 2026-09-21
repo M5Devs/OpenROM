@@ -4,7 +4,6 @@
 import os
 import shutil
 
-
 SUPPORTED_HEADERS = {
     "NES": {
         "magic": b"NES\x1a",    # iNES header
