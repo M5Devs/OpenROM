@@ -93,7 +93,7 @@ jobs:
             PY_SECURITY_STATUS="🚨 VULNERABILITY FOUND"
           fi
 
-          if ! pytest tests/ -q > .review_reports/pytest.raw.log 2>&1; then
+          if ! PYTHONPATH=. pytest tests/ -q > .review_reports/pytest.raw.log 2>&1; then
             PY_TESTS_STATUS="🔴 FAILED"
           fi
 
