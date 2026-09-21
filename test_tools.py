@@ -1,5 +1,5 @@
 # OpenROM — Universal ROM Compression Suite
-# M5 Dev | GPL v3 + Commons Clause
+# M5 Dev | GPL v3
 
 """
 Unit tests for OpenROM Compressor, M3U Generator, CUE Generator, BIN Merger, Header Remover, and CLI integration.

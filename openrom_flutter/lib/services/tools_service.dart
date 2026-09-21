@@ -1,5 +1,5 @@
 // OpenROM — Universal ROM Compression Suite
-// M5 Dev | GPL v3 + Commons Clause
+// M5 Dev | GPL v3
 
 import 'dart:async';
 import 'dart:convert';
