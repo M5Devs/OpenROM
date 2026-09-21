@@ -24,6 +24,7 @@ class Sidebar extends StatelessWidget {
       {'icon': Icons.queue_music, 'tooltip': l10n.appTitle},
       {'icon': Icons.build_outlined, 'tooltip': l10n.patcherTitle},
       {'icon': Icons.construction_outlined, 'tooltip': l10n.toolsTitle},
+      {'icon': Icons.sports_esports_outlined, 'tooltip': l10n.dreamcastTitle},
       {'icon': Icons.settings, 'tooltip': l10n.settingsScreen},
       {'icon': Icons.info_outline, 'tooltip': l10n.aboutScreen},
       {'icon': Icons.palette, 'tooltip': l10n.themeScreen},

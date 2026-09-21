@@ -17,6 +17,7 @@ class ThemeConfig {
   final String fontFamily;
   final double borderRadius;
   final String layout;
+  Color get border => textSecondary.withValues(alpha: 0.2);
 
   ThemeConfig({
     required this.name,

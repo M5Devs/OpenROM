@@ -488,6 +488,16 @@ class CoreBridge {
     return binaryName;
   }
 
+  static Future<ProcessResult> runCore(List<String> args) async {
+    final corePath = await getCoreExecutablePath();
+    final List<String> processArgs = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      processArgs.add('main.py');
+    }
+    processArgs.addAll(args);
+    return await Process.run(corePath, processArgs);
+  }
+
   static Future<String> getVersion() async {
     try {
       if (!await coreExists()) {

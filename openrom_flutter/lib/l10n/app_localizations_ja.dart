@@ -292,4 +292,109 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get headerRemoverNoHeader => 'コピアヘッダーは検出されませんでした。';
+
+  @override
+  String get dreamcastTitle => 'ドリームキャスト';
+
+  @override
+  String get dreamcastDcpTab => 'DCP適用';
+
+  @override
+  String get dreamcastIpbinTab => 'IP.BINエディター';
+
+  @override
+  String get dreamcastGdiTab => 'GDI情報';
+
+  @override
+  String get dreamcastDiscDir => 'ディスクディレクトリ';
+
+  @override
+  String get dreamcastDcpFile => 'DCPパッチファイル';
+
+  @override
+  String get dreamcastOutputDir => '出力ディレクトリ';
+
+  @override
+  String get dreamcastApplyButton => 'DCPパッチを適用';
+
+  @override
+  String get dreamcastApplySuccess => 'DCPパッチが正常に適用されました！';
+
+  @override
+  String get dreamcastIpbinFile => 'IP.BINまたはGDIファイル';
+
+  @override
+  String get dreamcastIpbinLoad => '読み込み';
+
+  @override
+  String get dreamcastIpbinSave => '変更を保存';
+
+  @override
+  String get dreamcastIpbinTitle => 'ゲームタイトル';
+
+  @override
+  String get dreamcastIpbinProductNumber => '製品番号';
+
+  @override
+  String get dreamcastIpbinVersion => 'バージョン';
+
+  @override
+  String get dreamcastIpbinDate => '発売日';
+
+  @override
+  String get dreamcastIpbinRegion => 'リージョン';
+
+  @override
+  String get dreamcastIpbinRegionJapan => '日本';
+
+  @override
+  String get dreamcastIpbinRegionUSA => '北米';
+
+  @override
+  String get dreamcastIpbinRegionEurope => '欧州';
+
+  @override
+  String get dreamcastIpbinRegionFree => 'リージョンフリー';
+
+  @override
+  String get dreamcastIpbinVga => 'VGAを有効化';
+
+  @override
+  String get dreamcastIpbinSaveSuccess => 'IP.BINが正常に保存されました！';
+
+  @override
+  String get dreamcastGdiFile => 'GDIファイル';
+
+  @override
+  String get dreamcastGdiLoad => 'GDI読み込み';
+
+  @override
+  String get dreamcastGdiTracks => 'トラック';
+
+  @override
+  String get dreamcastGdiTrackNum => 'トラック';
+
+  @override
+  String get dreamcastGdiTrackLba => 'LBA';
+
+  @override
+  String get dreamcastGdiTrackType => 'タイプ';
+
+  @override
+  String get dreamcastGdiTrackSize => 'セクターサイズ';
+
+  @override
+  String get dreamcastGdiTrackFile => 'ファイル';
+
+  @override
+  String get dreamcastGdiAudio => 'オーディオ';
+
+  @override
+  String get dreamcastGdiData => 'データ';
+
+  @override
+  String get dreamcastSameFolder => 'ソースと同じフォルダー';
+
+  @override
+  String get dreamcastBrowse => '参照';
 }

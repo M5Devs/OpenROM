@@ -294,4 +294,109 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get headerRemoverNoHeader => 'لم يتم اكتشاف ترويسة ناسخة.';
+
+  @override
+  String get dreamcastTitle => 'دريم كاست';
+
+  @override
+  String get dreamcastDcpTab => 'تطبيق DCP';
+
+  @override
+  String get dreamcastIpbinTab => 'محرر IP.BIN';
+
+  @override
+  String get dreamcastGdiTab => 'معلومات GDI';
+
+  @override
+  String get dreamcastDiscDir => 'مجلد القرص';
+
+  @override
+  String get dreamcastDcpFile => 'ملف رقعة DCP';
+
+  @override
+  String get dreamcastOutputDir => 'مجلد الإخراج';
+
+  @override
+  String get dreamcastApplyButton => 'تطبيق رقعة DCP';
+
+  @override
+  String get dreamcastApplySuccess => 'تم تطبيق الرقعة بنجاح!';
+
+  @override
+  String get dreamcastIpbinFile => 'ملف IP.BIN أو GDI';
+
+  @override
+  String get dreamcastIpbinLoad => 'تحميل';
+
+  @override
+  String get dreamcastIpbinSave => 'حفظ التغييرات';
+
+  @override
+  String get dreamcastIpbinTitle => 'اسم اللعبة';
+
+  @override
+  String get dreamcastIpbinProductNumber => 'رقم المنتج';
+
+  @override
+  String get dreamcastIpbinVersion => 'الإصدار';
+
+  @override
+  String get dreamcastIpbinDate => 'تاريخ الإصدار';
+
+  @override
+  String get dreamcastIpbinRegion => 'المنطقة';
+
+  @override
+  String get dreamcastIpbinRegionJapan => 'اليابان';
+
+  @override
+  String get dreamcastIpbinRegionUSA => 'الولايات المتحدة';
+
+  @override
+  String get dreamcastIpbinRegionEurope => 'أوروبا';
+
+  @override
+  String get dreamcastIpbinRegionFree => 'كل المناطق';
+
+  @override
+  String get dreamcastIpbinVga => 'تفعيل VGA';
+
+  @override
+  String get dreamcastIpbinSaveSuccess => 'تم حفظ IP.BIN بنجاح!';
+
+  @override
+  String get dreamcastGdiFile => 'ملف GDI';
+
+  @override
+  String get dreamcastGdiLoad => 'تحميل GDI';
+
+  @override
+  String get dreamcastGdiTracks => 'المسارات';
+
+  @override
+  String get dreamcastGdiTrackNum => 'مسار';
+
+  @override
+  String get dreamcastGdiTrackLba => 'LBA';
+
+  @override
+  String get dreamcastGdiTrackType => 'النوع';
+
+  @override
+  String get dreamcastGdiTrackSize => 'حجم القطاع';
+
+  @override
+  String get dreamcastGdiTrackFile => 'الملف';
+
+  @override
+  String get dreamcastGdiAudio => 'صوت';
+
+  @override
+  String get dreamcastGdiData => 'بيانات';
+
+  @override
+  String get dreamcastSameFolder => 'نفس مجلد المصدر';
+
+  @override
+  String get dreamcastBrowse => 'استعراض';
 }
