@@ -1,0 +1,42 @@
+name: 🪄 Auto Fix & Format Code
+
+on:
+  workflow_dispatch: # زرار تدوس عليه يشغل التصليح أوتوماتيك
+
+permissions:
+  contents: write
+
+jobs:
+  auto-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Auto-Format Dart & Auto-Fix Python
+        run: |
+          # 1. فرمتة كل ملفات فلاتر الـ 36
+          if [ -d "openrom_flutter" ]; then
+            cd openrom_flutter
+            dart format .
+            cd ..
+          fi
+
+          # 2. تصليح بايثون أوتوماتيك
+          pip install ruff
+          ruff check core/ --fix || true
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto format dart files and auto-fix ruff lint issues"
