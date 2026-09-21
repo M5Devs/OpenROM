@@ -298,4 +298,172 @@ class ToolsService {
       throw OpenROMException(OpenROMError.unknownError, details: e.toString());
     }
   }
+
+  /// Import a DAT file into OpenROM's config directory.
+  Future<Map<String, dynamic>> importDat(String datPath) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll(['--json', '--import-dat', datPath]);
+
+    final result = await Process.run(corePath, args);
+    if (result.exitCode == 0) {
+      final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+      for (final line in lines.reversed) {
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          if (event['type'] == 'done') {
+            if (event['success'] == true) {
+              return event;
+            } else {
+              throw OpenROMException(OpenROMError.conversionFailed, details: event['error']?.toString());
+            }
+          }
+        } catch (_) {
+          if (_ is OpenROMException) rethrow;
+        }
+      }
+    }
+    final err = result.stderr.toString().trim();
+    throw OpenROMException(OpenROMError.conversionFailed, details: err.isNotEmpty ? err : 'DAT import failed');
+  }
+
+  /// List all imported DAT files.
+  Future<List<Map<String, dynamic>>> listDats() async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll(['--json', '--list-dats']);
+
+    final result = await Process.run(corePath, args);
+    if (result.exitCode == 0) {
+      final lines = LineSplitter.split(result.stdout.toString()).where((l) => l.trim().isNotEmpty).toList();
+      for (final line in lines.reversed) {
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          if (event['type'] == 'done' && event['success'] == true) {
+            final dats = event['dats'] as List<dynamic>? ?? [];
+            return dats.cast<Map<String, dynamic>>();
+          }
+        } catch (_) {}
+      }
+    }
+    return [];
+  }
+
+  /// Remove an imported DAT file.
+  Future<void> removeDat(String storedPath) async {
+    final file = File(storedPath);
+    if (file.existsSync()) {
+      await file.delete();
+    }
+  }
+
+  /// Scan a ROM folder against imported DATs.
+  Future<List<Map<String, dynamic>>> scanRoms(
+    String folderPath, {
+    void Function(String filename, double percent)? onProgress,
+  }) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll(['--json', '--scan-roms', folderPath]);
+
+    final results = <Map<String, dynamic>>[];
+    final process = await Process.start(corePath, args);
+    final stderrLog = StringBuffer();
+
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+      if (line.trim().isEmpty) return;
+      try {
+        final Map<String, dynamic> event = jsonDecode(line);
+        if (event['type'] == 'result') {
+          results.add(Map<String, dynamic>.from(event));
+        } else if (event['type'] == 'progress' && onProgress != null) {
+          onProgress(
+            event['file'] as String? ?? '',
+            (event['percent'] as num?)?.toDouble() ?? 0,
+          );
+        } else if (event['type'] == 'error') {
+          stderrLog.writeln(event['message'] ?? '');
+        }
+      } catch (_) {}
+    });
+
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+      if (line.trim().isNotEmpty) {
+        stderrLog.writeln(line);
+      }
+    });
+
+    final exitCode = await process.exitCode;
+    if (exitCode != 0 && results.isEmpty) {
+      final details = stderrLog.isNotEmpty ? stderrLog.toString().trim() : 'Scan failed with code $exitCode';
+      throw OpenROMException(OpenROMError.conversionFailed, details: details);
+    }
+    return results;
+  }
+
+  /// Rename ROMs in a folder to their canonical DAT names.
+  Future<List<Map<String, dynamic>>> renameRoms(
+    String folderPath, {
+    bool dryRun = true,
+  }) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll(['--json', '--rename-roms', folderPath]);
+    if (dryRun) {
+      args.add('--dry-run');
+    }
+
+    final results = <Map<String, dynamic>>[];
+    final process = await Process.start(corePath, args);
+    final stderrLog = StringBuffer();
+
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+      if (line.trim().isEmpty) return;
+      try {
+        final Map<String, dynamic> event = jsonDecode(line);
+        if (event['type'] == 'rename') {
+          results.add(Map<String, dynamic>.from(event));
+        } else if (event['type'] == 'error') {
+          stderrLog.writeln(event['message'] ?? '');
+        }
+      } catch (_) {}
+    });
+
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((line) {
+      if (line.trim().isNotEmpty) {
+        stderrLog.writeln(line);
+      }
+    });
+
+    final exitCode = await process.exitCode;
+    if (exitCode != 0 && results.isEmpty) {
+      final details = stderrLog.isNotEmpty ? stderrLog.toString().trim() : 'Rename failed with code $exitCode';
+      throw OpenROMException(OpenROMError.conversionFailed, details: details);
+    }
+    return results;
+  }
 }

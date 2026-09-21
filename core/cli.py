@@ -37,6 +37,10 @@ from core.cue_generator import generate_cue, detect_bin_mode
 from core.bin_merger import merge_bins, parse_cue
 from core.header_remover import detect_header, remove_header
 from core.config import get_tool_path
+from core.rom_renamer import (
+    import_dat, list_dats, remove_dat,
+    scan_folder, rename_roms,
+)
 
 # ── ANSI colors (disabled on Windows if no ANSI support) ─────────────────────
 def _ansi(code: str) -> str:
@@ -176,6 +180,26 @@ examples:
         metavar="FILE",
         help="remove copier header from ROM file",
     )
+    src.add_argument(
+        "--import-dat",
+        metavar="FILE",
+        help="import a No-Intro or Redump DAT file into OpenROM",
+    )
+    src.add_argument(
+        "--list-dats",
+        action="store_true",
+        help="list all imported DAT files",
+    )
+    src.add_argument(
+        "--scan-roms",
+        metavar="DIR",
+        help="scan a ROM folder against imported DATs and show matches",
+    )
+    src.add_argument(
+        "--rename-roms",
+        metavar="DIR",
+        help="rename ROMs in a folder to canonical DAT names",
+    )
 
     # ── Conversion / Tools target ────────────────────────────────────────────
     parser.add_argument(
@@ -195,6 +219,11 @@ examples:
     )
 
     # ── Options ──────────────────────────────────────────────────────────────
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="simulate rename without actually renaming files",
+    )
     parser.add_argument(
         "--json",
         action="store_true",
@@ -593,6 +622,154 @@ def cmd_remove_header(rom_file: str, output_dir: str | None, no_backup: bool, is
             print(f"  {RED}❌ Failed to remove header — {err_msg}{RESET}\n")
         return 2
 
+# ── --import-dat ──────────────────────────────────────────────────────────────
+def cmd_import_dat(dat_path: str, is_json: bool) -> int:
+    try:
+        info = import_dat(dat_path)
+        if is_json:
+            _json_print({"type": "done", "success": True, **info})
+        else:
+            print(f"  {GREEN}✅ Imported:{RESET} {info['name']}")
+            print(f"  Source:  {CYAN}{info['source']}{RESET}")
+            print(f"  Games:   {info['game_count']}")
+            print(f"  Stored:  {GRAY}{info['stored_path']}{RESET}\n")
+        return 0
+    except Exception as e:
+        if is_json:
+            _json_print({"type": "done", "success": False, "error": str(e)})
+        else:
+            print(f"  {RED}❌ {e}{RESET}\n")
+        return 2
+
+# ── --list-dats ───────────────────────────────────────────────────────────────
+def cmd_list_dats(is_json: bool) -> int:
+    dats = list_dats()
+    if is_json:
+        _json_print({"type": "done", "success": True, "dats": dats})
+    else:
+        if not dats:
+            print(f"  {YELLOW}No DATs imported yet. Use --import-dat FILE{RESET}\n")
+        else:
+            print(f"\n{BOLD}Imported DATs:{RESET}\n")
+            for d in dats:
+                print(f"  {CYAN}{d['name']}{RESET}")
+                print(f"    Source: {d['source']}  |  Games: {d['game_count']}")
+                print(f"    {GRAY}{d['stored_path']}{RESET}\n")
+    return 0
+
+# ── --scan-roms ───────────────────────────────────────────────────────────────
+def cmd_scan_roms(folder: str, is_json: bool) -> int:
+    dats = list_dats()
+    if not dats:
+        msg = "No DATs imported. Use --import-dat FILE first."
+        if is_json:
+            _json_print({"type": "error", "message": msg})
+        else:
+            print(f"  {YELLOW}⚠ {msg}{RESET}\n")
+        return 2
+
+    dat_paths = [d["stored_path"] for d in dats]
+    matched   = 0
+    total     = 0
+
+    def on_progress(fname: str, pct: float):
+        if is_json:
+            _json_print({"type": "progress", "file": fname, "percent": pct})
+        else:
+            _render_progress(fname, pct)
+
+    def on_result(r):
+        nonlocal matched, total
+        total += 1
+        if not is_json:
+            _clear_progress()
+        if r.error:
+            if is_json:
+                _json_print({"type": "result", "file": r.filename, "matched": False, "error": r.error})
+            else:
+                print(f"  {RED}✗{RESET} {r.filename}  {GRAY}({r.error}){RESET}")
+            return
+        if r.matched:
+            matched += 1
+            if is_json:
+                _json_print({"type": "result", "file": r.filename, "matched": True,
+                             "canonical_name": r.canonical_name, "crc32": r.crc32,
+                             "suggested_filename": r.suggested_filename})
+            else:
+                renamed = r.suggested_filename != r.filename
+                tag = f"  {GREEN}✅{RESET}" if not renamed else f"  {YELLOW}→{RESET}"
+                print(f"{tag} {r.filename}")
+                if renamed:
+                    print(f"     {GRAY}→ {r.suggested_filename}{RESET}")
+        else:
+            if is_json:
+                _json_print({"type": "result", "file": r.filename, "matched": False, "crc32": r.crc32})
+            else:
+                print(f"  {GRAY}? {r.filename}  [{r.crc32}]{RESET}")
+
+    if not is_json:
+        print(f"\n{BOLD}Scanning:{RESET} {folder}\n")
+
+    try:
+        scan_folder(folder=folder, dat_paths=dat_paths,
+                    on_progress=on_progress, on_result=on_result)
+    except ValueError as e:
+        if is_json:
+            _json_print({"type": "error", "message": str(e)})
+        else:
+            print(f"  {RED}❌ {e}{RESET}\n")
+        return 2
+
+    if not is_json:
+        print(f"\n  Matched: {GREEN}{matched}{RESET} / {total}\n")
+    return 0
+
+# ── --rename-roms ─────────────────────────────────────────────────────────────
+def cmd_rename_roms(folder: str, dry_run: bool, is_json: bool) -> int:
+    dats = list_dats()
+    if not dats:
+        msg = "No DATs imported. Use --import-dat FILE first."
+        if is_json:
+            _json_print({"type": "error", "message": msg})
+        else:
+            print(f"  {YELLOW}⚠ {msg}{RESET}\n")
+        return 2
+
+    dat_paths = [d["stored_path"] for d in dats]
+
+    if not is_json:
+        print(f"\n{BOLD}{'Simulating rename' if dry_run else 'Renaming'}:{RESET} {folder}\n")
+
+    try:
+        results = scan_folder(folder=folder, dat_paths=dat_paths)
+    except ValueError as e:
+        if is_json:
+            _json_print({"type": "error", "message": str(e)})
+        else:
+            print(f"  {RED}❌ {e}{RESET}\n")
+        return 2
+
+    renames = rename_roms(results=results, dry_run=dry_run)
+
+    for r in renames:
+        old = os.path.basename(r.original_path)
+        new = os.path.basename(r.new_path)
+        if is_json:
+            _json_print({"type": "rename", "from": old, "to": new,
+                         "success": r.success, "dry_run": dry_run, "error": r.error})
+        else:
+            if r.success:
+                prefix = f"  {YELLOW}[DRY]{RESET}" if dry_run else f"  {GREEN}✅{RESET}"
+                print(f"{prefix} {old}")
+                print(f"       → {new}\n")
+            else:
+                print(f"  {RED}❌{RESET} {old}  ({r.error})\n")
+
+    if not is_json and dry_run:
+        print(f"  {YELLOW}Dry run — no files were renamed. Remove --dry-run to apply.{RESET}\n")
+
+    return 0
+
 # ── Collect jobs from args ────────────────────────────────────────────────────
 def collect_jobs(args) -> list[ConversionJob]:
     jobs = []
@@ -836,6 +1013,18 @@ def main() -> int:
             no_backup=args.no_backup,
             is_json=args.json,
         )
+
+    if args.import_dat:
+        return cmd_import_dat(args.import_dat, args.json)
+
+    if args.list_dats:
+        return cmd_list_dats(args.json)
+
+    if args.scan_roms:
+        return cmd_scan_roms(args.scan_roms, args.json)
+
+    if args.rename_roms:
+        return cmd_rename_roms(args.rename_roms, args.dry_run, args.json)
 
     input_file = args.input or args.convert
     if not input_file and not args.folder:
