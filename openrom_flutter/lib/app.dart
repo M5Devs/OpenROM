@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
+import 'screens/dreamcast_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/patcher_screen.dart';
@@ -144,6 +145,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
                         HomeScreen(key: _homeKey, theme: theme),
                         PatcherScreen(theme: theme),
                         ToolsScreen(theme: theme),
+                        DreamcastScreen(theme: theme),
                         settingsWidget,
                         AboutScreen(theme: theme),
                         settingsWidget,

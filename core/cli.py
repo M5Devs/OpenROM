@@ -215,6 +215,11 @@ examples:
         help='read and display IP.BIN fields from a standalone IP.BIN or GDI',
     )
     parser.add_argument(
+        '--read-gdi',
+        metavar='FILE',
+        help='read and display GDI tracks',
+    )
+    parser.add_argument(
         '--write-ipbin',
         metavar='FILE',
         help='IP.BIN file to modify (used with --set-* flags below)',
@@ -976,6 +981,9 @@ def main() -> int:
             output_dir=args.output or os.path.join(args.disc_dir, 'patched'),
             ignore_checksum=getattr(args, 'ignore_checksum', False),
         )
+        if args.json:
+            _json_print({'type': 'done', 'success': result['success'], 'files_patched': result.get('files_patched', 0), 'ipbin_replaced': result.get('ipbin_replaced', False), 'error': result.get('error')})
+            return 0 if result['success'] else 1
         if result['success']:
             print(f'{GREEN}✅ DCP applied.{RESET} Files patched: {result["files_patched"]}, '
                   f'IP.BIN replaced: {result["ipbin_replaced"]}')
@@ -998,9 +1006,26 @@ def main() -> int:
             os.unlink(tmp_path)
         else:
             fields = read_ipbin(path)
+        if args.json:
+            clean_fields = {k: v for k, v in fields.items() if not k.startswith('_')}
+            _json_print({"type": "done", "success": True, "fields": clean_fields})
+            return 0
         for offset, length, name in __import__('core.ipbin_editor', fromlist=['IPBIN_FIELDS']).IPBIN_FIELDS:
             print(f'  {name:20s}: {fields.get(name, "")}')
         print(f'  {"regions":20s}: {", ".join(fields.get("regions", []))}')
+        return 0
+
+    if args.read_gdi:
+        from core.gdi_reader import parse_gdi
+        tracks = parse_gdi(args.read_gdi)
+        print(json.dumps([{
+            'number': t.number,
+            'lba': t.lba,
+            'type': 'Data' if t.track_type == 4 else 'Audio',
+            'sector_size': t.sector_size,
+            'filename': os.path.basename(t.filename),
+            'filesize': t.filesize,
+        } for t in tracks]), flush=True)
         return 0
 
     # IP.BIN write handler

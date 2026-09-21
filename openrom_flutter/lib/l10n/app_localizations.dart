@@ -645,6 +645,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No copier header detected.'**
   String get headerRemoverNoHeader;
+
+  /// No description provided for @dreamcastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dreamcast'**
+  String get dreamcastTitle;
+
+  /// No description provided for @dreamcastDcpTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply DCP'**
+  String get dreamcastDcpTab;
+
+  /// No description provided for @dreamcastIpbinTab.
+  ///
+  /// In en, this message translates to:
+  /// **'IP.BIN Editor'**
+  String get dreamcastIpbinTab;
+
+  /// No description provided for @dreamcastGdiTab.
+  ///
+  /// In en, this message translates to:
+  /// **'GDI Info'**
+  String get dreamcastGdiTab;
+
+  /// No description provided for @dreamcastDiscDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Disc Directory'**
+  String get dreamcastDiscDir;
+
+  /// No description provided for @dreamcastDcpFile.
+  ///
+  /// In en, this message translates to:
+  /// **'DCP Patch File'**
+  String get dreamcastDcpFile;
+
+  /// No description provided for @dreamcastOutputDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Directory'**
+  String get dreamcastOutputDir;
+
+  /// No description provided for @dreamcastApplyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply DCP Patch'**
+  String get dreamcastApplyButton;
+
+  /// No description provided for @dreamcastApplySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'DCP patch applied successfully!'**
+  String get dreamcastApplySuccess;
+
+  /// No description provided for @dreamcastIpbinFile.
+  ///
+  /// In en, this message translates to:
+  /// **'IP.BIN or GDI File'**
+  String get dreamcastIpbinFile;
+
+  /// No description provided for @dreamcastIpbinLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get dreamcastIpbinLoad;
+
+  /// No description provided for @dreamcastIpbinSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get dreamcastIpbinSave;
+
+  /// No description provided for @dreamcastIpbinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Title'**
+  String get dreamcastIpbinTitle;
+
+  /// No description provided for @dreamcastIpbinProductNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Number'**
+  String get dreamcastIpbinProductNumber;
+
+  /// No description provided for @dreamcastIpbinVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get dreamcastIpbinVersion;
+
+  /// No description provided for @dreamcastIpbinDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Date'**
+  String get dreamcastIpbinDate;
+
+  /// No description provided for @dreamcastIpbinRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get dreamcastIpbinRegion;
+
+  /// No description provided for @dreamcastIpbinRegionJapan.
+  ///
+  /// In en, this message translates to:
+  /// **'Japan'**
+  String get dreamcastIpbinRegionJapan;
+
+  /// No description provided for @dreamcastIpbinRegionUSA.
+  ///
+  /// In en, this message translates to:
+  /// **'USA'**
+  String get dreamcastIpbinRegionUSA;
+
+  /// No description provided for @dreamcastIpbinRegionEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Europe'**
+  String get dreamcastIpbinRegionEurope;
+
+  /// No description provided for @dreamcastIpbinRegionFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Free'**
+  String get dreamcastIpbinRegionFree;
+
+  /// No description provided for @dreamcastIpbinVga.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable VGA'**
+  String get dreamcastIpbinVga;
+
+  /// No description provided for @dreamcastIpbinSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'IP.BIN saved successfully!'**
+  String get dreamcastIpbinSaveSuccess;
+
+  /// No description provided for @dreamcastGdiFile.
+  ///
+  /// In en, this message translates to:
+  /// **'GDI File'**
+  String get dreamcastGdiFile;
+
+  /// No description provided for @dreamcastGdiLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load GDI'**
+  String get dreamcastGdiLoad;
+
+  /// No description provided for @dreamcastGdiTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks'**
+  String get dreamcastGdiTracks;
+
+  /// No description provided for @dreamcastGdiTrackNum.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get dreamcastGdiTrackNum;
+
+  /// No description provided for @dreamcastGdiTrackLba.
+  ///
+  /// In en, this message translates to:
+  /// **'LBA'**
+  String get dreamcastGdiTrackLba;
+
+  /// No description provided for @dreamcastGdiTrackType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get dreamcastGdiTrackType;
+
+  /// No description provided for @dreamcastGdiTrackSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector Size'**
+  String get dreamcastGdiTrackSize;
+
+  /// No description provided for @dreamcastGdiTrackFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get dreamcastGdiTrackFile;
+
+  /// No description provided for @dreamcastGdiAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get dreamcastGdiAudio;
+
+  /// No description provided for @dreamcastGdiData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get dreamcastGdiData;
+
+  /// No description provided for @dreamcastSameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Same folder as source'**
+  String get dreamcastSameFolder;
+
+  /// No description provided for @dreamcastBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get dreamcastBrowse;
 }
 
 class _AppLocalizationsDelegate
