@@ -108,7 +108,7 @@ def detect_header(filepath: str) -> dict | None:
                 "confidence": "unlikely"
             }
 
-    elif system in ("GB/GBC", "GB"):
+    elif system == "GB/GBC":
         rem = file_size % 1024
         if rem == 512:
             return {
