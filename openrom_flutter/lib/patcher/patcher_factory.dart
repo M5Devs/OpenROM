@@ -35,6 +35,7 @@ class PatcherFactory {
     'xd',
     'vcdiff',
     'ssp',
+    'dcp',
   };
 
   /// Returns true if [path] is an SSP patch (requires external binary).
@@ -79,6 +80,8 @@ class PatcherFactory {
         return 'xdelta';
       case 'ssp':
         return 'SSP (Saturn)';
+      case 'dcp':
+        return 'DCP (Dreamcast)';
       default:
         return null;
     }
