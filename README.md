@@ -15,6 +15,7 @@
   <a href="https://hosted.weblate.org/engage/openrom/"><img src="https://hosted.weblate.org/widget/openrom/svg-badge.svg" alt="Translation status"></a>
 <a href="SECURITY.md">
   <img src="https://img.shields.io/badge/Security-Policy-green.svg" alt="Security Policy">
+  <a href="https://deepwiki.com/M5Devs/OpenROM"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </a>
 
 </p>
