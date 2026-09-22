@@ -13,7 +13,7 @@
   <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/downloads/M5Devs/OpenROM/total"/></a>
   <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dm/openrom.svg?color=1f6feb&logo=sourceforge"/></a>
   <a href="https://hosted.weblate.org/engage/openrom/"><img src="https://hosted.weblate.org/widget/openrom/svg-badge.svg" alt="Translation status"></a>
-<a href="SECURITY.md">
+  <a href="SECURITY.md">
   <img src="https://img.shields.io/badge/Security-Policy-green.svg" alt="Security Policy">
   <a href="https://deepwiki.com/M5Devs/OpenROM"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </a>
@@ -32,8 +32,9 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 
 | Platform | GitHub Release | SourceForge Mirror |
 |----------|---------------|-------------------|
-| 🪟 Windows | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🐧 Linux | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🪟 Windows (Installer) | [OpenROM-v3.0.0-Setup.exe](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🪟 Windows (Portable) | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🐧 Linux x86_64 | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🐧 Linux ARM64 | [OpenROM_Linux_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Intel | [OpenROM_macOS_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
@@ -49,16 +50,22 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 ### 🔁 ROM Conversion
 - **20+ conversion paths** — ISO, BIN, CUE, GDI, IMG, ECM, CHD, CSO, ZSO, XISO, RVZ, WIA, WBFS, GCZ and more.
-- **Smart Platform Detection** — Magic byte detection for PS1, PS2, PSP, Xbox, GameCube, Wii, Dreamcast — not size guessing.
+- **Smart Platform Detection** — Magic byte detection for PS1, PS2, PSP, Xbox, GameCube, Wii, Dreamcast, Saturn, Sega CD — not size guessing.
 - **Real CHD Header Parsing** — Reads actual CHD v4/v5 headers to determine CD vs DVD type accurately.
-- **Auto CUE Generation** — Generates CUE sheets for standalone BIN files with correct track mode (MODE1/MODE2/AUDIO).
+- **Correct CHD Codec Routing** — `createcd` for PS1/Dreamcast/Saturn/Sega CD, `createdvd` for PS2/GameCube/Wii/Xbox — never mixed up.
+- **Auto CUE Generation** — Generates CUE sheets for standalone BIN files with correct track mode detection (MODE1/MODE2/AUDIO) via sector header inspection.
 - **Integrity Verification** — Post-conversion CHD integrity check via `chdman verify`.
 
 ### 🩹 ROM Patching
-- **10 patch formats** — IPS, IPS32, UPS, BPS, PPF, APS, EBP, DPS, xdelta3, **SSP (Sega Saturn)**.
+- **11 patch formats** — IPS, IPS32, UPS, BPS, PPF, APS, EBP, DPS, xdelta3, **SSP (Sega Saturn)**, **DCP (Dreamcast)**.
 - **Auto format detection** — Drop a patch file and OpenROM detects the format automatically.
 - **Checksum verification** — CRC32 integrity checks before and after patching with a detailed report.
 - **Ignore checksum mode** — Force-apply patches even on modified ROMs.
+
+### 🎮 Dreamcast Tools
+- **DCP Patch Applier** — Apply Dreamcast `.dcp` patch files with full xdelta3 delta-patch support. Compatible with Universal Dreamcast Patcher patch files.
+- **IP.BIN Editor** — Read and modify the Dreamcast boot sector: game title, region flags (Japan / USA / Europe / Region Free), VGA mode toggle, and full Shift-JIS encoding support for Japanese game titles.
+- **GDI Track Inspector** — Load and inspect GDI disc image track structure — track number, LBA offset, type (Audio/Data), sector size, and filename.
 
 ### 🗜️ Compression & Extraction
 - **ZIP and 7Z support** — Compress ROMs or entire folders with fast / normal / ultra presets.
@@ -68,12 +75,14 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 ### 🧹 ROM Header Removal
 - **Copier header detection and removal** for NES (iNES), SNES (SMC), Game Boy / GBC — with confidence rating (certain / likely).
-- **Auto backup** — Original ROM backed up as `.bak` before any modification.
+- **Double-strip protection** — SNES internal header validation prevents stripping clean ROMs twice.
+- **Auto backup** — Original ROM backed up as `.bak` before any modification. Existing backups are never overwritten.
 - **Non-destructive** — Output written to a separate file; source untouched by default.
 
 ### 🗂️ Collection Utilities
 - **M3U Playlist Generator** — Auto-generate M3U playlists for multi-disc games (PS1, Saturn, etc.).
-- **BIN Merger** — Merge multi-track BIN files into a single BIN + CUE.
+- **BIN Merger** — Merge multi-track BIN files into a single BIN + CUE, with correct INDEX 00 pregap handling.
+- **CUE Sheet Editor** — Open, edit, and save `.cue` files directly inside OpenROM.
 - **Batch Processing** — Drop a whole folder, process everything at once.
 
 ### 🏷️ ROM Renamer
@@ -81,17 +90,12 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **CRC32 matching** — Identifies ROMs by hash, not filename.
 - **Dry run mode** — Preview renames before applying.
 - **DAT library** — Import multiple DATs and OpenROM stores them locally for reuse.
+- **Streaming XML parser** — Handles massive DAT files (hundreds of MB for PS2/MAME) without RAM spikes.
 - **100% offline** — No network requests, no API keys.
 
-### ✏️ CUE Sheet Editor
-- Open, edit, and save `.cue` files directly inside OpenROM with a built-in text editor.
-
-### 📊 Compression Level Preview
-- See the **estimated output size** before converting — based on format and compression level.
-
-### 🗃️ Queue Manager
-- **Drag to reorder** conversion jobs before running.
-- **Clear completed** — Remove finished or failed jobs with one click.
+### 📊 Queue & Preview
+- **Queue Manager** — Drag to reorder conversion jobs before running. Clear completed jobs with one click.
+- **Compression Preview** — See estimated output size before converting, based on format and compression level.
 
 ### 🖥️ UI & Workflow
 - **Gaming Dashboard UI** — Flutter-powered dark interface inspired by PS5/Xbox aesthetics, with ROM cards, platform badges, and real-time progress.
@@ -99,6 +103,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **Real-time Terminal Log** — Live process output with timestamps, slides up during conversion.
 - **Drag & Drop** — Native drag and drop for files and folders.
 - **Full Headless CLI** — `openrom-core` for scripting, automation, and Flutter IPC.
+- **6 Languages** — English, Arabic, Spanish, French, Japanese, Portuguese.
 - **No Telemetry** — Zero network requests. No analytics. Runs 100% locally forever.
 
 ---
@@ -107,7 +112,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 
 | Input | Output | Tool | Notes |
 |-------|--------|------|-------|
-| ISO | CHD | chdman | `createcd` for PS1/Dreamcast, `createdvd` for PS2/GC |
+| ISO | CHD | chdman | `createcd` for PS1/Dreamcast/Saturn/Sega CD, `createdvd` for PS2/GC/Wii/Xbox |
 | ISO | CSO | maxcso | PSP / PS2 |
 | ISO | ECM | ecm | |
 | ISO | XISO | extract-xiso | Xbox |
@@ -148,6 +153,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 | DPS | DOS / PC |
 | xdelta3 / VCDIFF | Large ROMs, disc images, PS2, PSP |
 | SSP (Sega Saturn Patcher) | Sega Saturn disc patches |
+| DCP (Dreamcast Patch Container) | Sega Dreamcast disc patches |
 
 ---
 
@@ -168,6 +174,21 @@ openrom-core --input game.iso --format CHD --verify
 
 # Apply a patch
 openrom-core --patch game.sfc --patch-file hack.ips
+
+# Apply a Dreamcast DCP patch
+openrom-core --dcp patch.dcp --disc-dir /disc/ --output /out/
+
+# Read IP.BIN fields
+openrom-core --read-ipbin IP.BIN
+
+# Edit IP.BIN — region free + enable VGA
+openrom-core --write-ipbin IP.BIN --region-free --set-vga
+
+# Edit IP.BIN — set custom title
+openrom-core --write-ipbin IP.BIN --set-title "MY GAME"
+
+# Inspect GDI track structure
+openrom-core --read-gdi disc.gdi
 
 # Compress to 7Z
 openrom-core --compress game.iso --format 7z --level ultra
@@ -262,16 +283,20 @@ build_windows.bat
 - [x] Magic byte platform detection
 - [x] CHD header parsing
 - [x] Theme system
-- [x] ROM Patcher (IPS, BPS, UPS, xdelta3, PPF, SSP and more)
+- [x] ROM Patcher — IPS, BPS, UPS, xdelta3, PPF, SSP and more (v2.5.0)
 - [x] ZIP / 7Z compression & extraction
-- [x] ROM header removal (NES, SNES, GB/GBC)
+- [x] ROM header removal — NES, SNES, GB/GBC
 - [x] M3U playlist generator
 - [x] NKit / WUD / WUX support (v2.8.0)
 - [x] SSP Sega Saturn Patcher (v2.8.0)
-- [x] ROM Renamer — No-Intro + Redump DAT support (v3.0.0)
+- [x] Linux ARM64 builds (v2.8.0)
 - [x] CUE Sheet Editor (v2.9.0)
 - [x] Queue Manager + Compression Preview (v2.9.0)
-- [x] Linux ARM64 builds (v2.8.0)
+- [x] ROM Renamer — No-Intro + Redump DAT support (v3.0.0)
+- [x] Dreamcast DCP Patch Applier (v3.0.0)
+- [x] IP.BIN Editor — region, VGA, Shift-JIS (v3.0.0)
+- [x] GDI Track Inspector (v3.0.0)
+- [ ] DCP Patch Builder 🔨
 - [ ] Android support via Termux 🤖
 - [ ] maxcso ARM64 build
 - [ ] RetroAchievements hash verification
