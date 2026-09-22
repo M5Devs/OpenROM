@@ -4,7 +4,6 @@ on:
   schedule:
     # Runs everyday at 06:00 UTC (8:00 AM Egypt Time)
     - cron: '0 6 * * *'
-  # Allows manual triggers from GitHub Actions UI
   workflow_dispatch:
 
 permissions:
@@ -48,7 +47,7 @@ jobs:
         run: |
           mkdir -p .review_reports
           DATE_STR=$(date +'%Y-%m-%d')
-          
+
           DART_ANALYZE_STATUS="🟢 PASSED"
           DART_FORMAT_STATUS="🟢 PASSED"
           DART_TESTS_STATUS="🟢 PASSED"
@@ -57,34 +56,38 @@ jobs:
           PY_TESTS_STATUS="🟢 PASSED"
           CPP_STATUS="🟢 PASSED"
 
-          # ──────── 1. Dart & Flutter (65%) ────────
+          # ──────── 1. Dart & Flutter ────────
           if [ -d "openrom_flutter" ]; then
             cd openrom_flutter
             flutter pub get > /dev/null 2>&1
 
             # Dart Format Check
-            if ! dart format --output=none --set-exit-if-changed . > ../.review_reports/dart_format.raw.log 2>&1; then
+            if ! dart format --output=none --set-exit-if-changed . \
+                 > ../.review_reports/dart_format.raw.log 2>&1; then
               DART_FORMAT_STATUS="🟡 WARNING"
             fi
 
             # Flutter Analyze
-            if ! flutter analyze > ../.review_reports/flutter_analyze.raw.log 2>&1; then
+            if ! flutter analyze \
+                 > ../.review_reports/flutter_analyze.raw.log 2>&1; then
               DART_ANALYZE_STATUS="🔴 ISSUES DETECTED"
             fi
 
             # Flutter Tests
-            if ! flutter test > ../.review_reports/flutter_test.raw.log 2>&1; then
+            if ! flutter test \
+                 > ../.review_reports/flutter_test.raw.log 2>&1; then
               DART_TESTS_STATUS="🔴 FAILED"
             fi
             cd ..
           else
-            echo "openrom_flutter directory not found." > .review_reports/flutter_analyze.raw.log
+            echo "openrom_flutter directory not found." \
+                 > .review_reports/flutter_analyze.raw.log
             DART_ANALYZE_STATUS="⚪ SKIPPED"
             DART_FORMAT_STATUS="⚪ SKIPPED"
             DART_TESTS_STATUS="⚪ SKIPPED"
           fi
 
-          # ──────── 2. Python Core (25.2%) ────────
+          # ──────── 2. Python Core ────────
           if ! ruff check core/ > .review_reports/ruff.raw.log 2>&1; then
             PY_LINT_STATUS="🔴 ISSUES DETECTED"
           fi
@@ -93,15 +96,23 @@ jobs:
             PY_SECURITY_STATUS="🚨 VULNERABILITY FOUND"
           fi
 
-          if ! PYTHONPATH=. pytest tests/ -q > .review_reports/pytest.raw.log 2>&1; then
+          if ! PYTHONPATH=. pytest tests/ -q \
+               > .review_reports/pytest.raw.log 2>&1; then
             PY_TESTS_STATUS="🔴 FAILED"
           fi
 
-          # ──────── 3. Native C++ (4.1%) ────────
-          if ! cppcheck --enable=warning,performance,portability --inline-suppr \
-               --suppress=missingIncludeSystem openrom_flutter/windows/ openrom_flutter/linux/ \
-               > .review_reports/cppcheck.raw.log 2>&1; then
-            CPP_STATUS="🟡 WARNING"
+          # ──────── 3. Native C++ ────────
+          # cppcheck always exits 0 — check output for real errors/warnings
+          cppcheck --enable=warning,performance,portability \
+            --inline-suppr \
+            --suppress=missingIncludeSystem \
+            openrom_flutter/windows/ openrom_flutter/linux/ \
+            > .review_reports/cppcheck.raw.log 2>&1 || true
+
+          if grep -q "error:" .review_reports/cppcheck.raw.log; then
+            CPP_STATUS="🔴 ERRORS FOUND"
+          elif grep -q "warning:" .review_reports/cppcheck.raw.log; then
+            CPP_STATUS="🟡 WARNINGS"
           fi
 
           # ──────── Helper: Safe Log Truncation ────────
@@ -114,7 +125,7 @@ jobs:
             fi
           }
 
-          # ──────── Construct Markdown Report Safely ────────
+          # ──────── Construct Markdown Report ────────
           cat << 'HEADER' > daily_summary.md
           ## 🩺 OpenROM Automated Daily Health Report
           HEADER
@@ -126,12 +137,12 @@ jobs:
           echo "| Component | Target | Status |" >> daily_summary.md
           echo "| :--- | :--- | :--- |" >> daily_summary.md
           echo "| **Flutter / Dart** (Analyze) | \`openrom_flutter/\` | $DART_ANALYZE_STATUS |" >> daily_summary.md
-          echo "| **Flutter / Dart** (Format) | \`openrom_flutter/\` | $DART_FORMAT_STATUS |" >> daily_summary.md
-          echo "| **Flutter / Dart** (Tests) | \`openrom_flutter/test/\` | $DART_TESTS_STATUS |" >> daily_summary.md
-          echo "| **Python** (Ruff Lint) | \`core/\` | $PY_LINT_STATUS |" >> daily_summary.md
-          echo "| **Python** (Bandit Sec) | \`core/\` | $PY_SECURITY_STATUS |" >> daily_summary.md
-          echo "| **Python** (Pytest) | \`tests/\` | $PY_TESTS_STATUS |" >> daily_summary.md
-          echo "| **C++ Native** (Cppcheck) | \`openrom_flutter/*/runner/\` | $CPP_STATUS |" >> daily_summary.md
+          echo "| **Flutter / Dart** (Format)  | \`openrom_flutter/\` | $DART_FORMAT_STATUS |" >> daily_summary.md
+          echo "| **Flutter / Dart** (Tests)   | \`openrom_flutter/test/\` | $DART_TESTS_STATUS |" >> daily_summary.md
+          echo "| **Python** (Ruff Lint)        | \`core/\` | $PY_LINT_STATUS |" >> daily_summary.md
+          echo "| **Python** (Bandit Sec)       | \`core/\` | $PY_SECURITY_STATUS |" >> daily_summary.md
+          echo "| **Python** (Pytest)           | \`tests/\` | $PY_TESTS_STATUS |" >> daily_summary.md
+          echo "| **C++ Native** (Cppcheck)     | \`openrom_flutter/*/runner/\` | $CPP_STATUS |" >> daily_summary.md
           echo "" >> daily_summary.md
           echo "---" >> daily_summary.md
           echo "### 📑 Diagnostic Logs (Tail 60 Lines)" >> daily_summary.md
@@ -149,36 +160,56 @@ jobs:
             echo "" >> daily_summary.md
           }
 
-          append_section "1. Flutter Analyze Output" ".review_reports/flutter_analyze.raw.log"
-          append_section "2. Dart Format Output" ".review_reports/dart_format.raw.log"
-          append_section "3. Flutter Test Output" ".review_reports/flutter_test.raw.log"
-          append_section "4. Python Ruff Linting" ".review_reports/ruff.raw.log"
-          append_section "5. Python Bandit Audit" ".review_reports/bandit.raw.log"
-          append_section "6. Python Pytest Output" ".review_reports/pytest.raw.log"
-          append_section "7. C++ Cppcheck Output" ".review_reports/cppcheck.raw.log"
+          append_section "1. Flutter Analyze Output"  ".review_reports/flutter_analyze.raw.log"
+          append_section "2. Dart Format Output"      ".review_reports/dart_format.raw.log"
+          append_section "3. Flutter Test Output"     ".review_reports/flutter_test.raw.log"
+          append_section "4. Python Ruff Linting"     ".review_reports/ruff.raw.log"
+          append_section "5. Python Bandit Audit"     ".review_reports/bandit.raw.log"
+          append_section "6. Python Pytest Output"    ".review_reports/pytest.raw.log"
+          append_section "7. C++ Cppcheck Output"     ".review_reports/cppcheck.raw.log"
 
-      # ── 5. Create Daily GitHub Issue with Character Limit Protection ──
+      # ── 5. Publish Health Report — close old issues first ──
       - name: Publish Health Report to GitHub Issue
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const MAX_ALLOWED_CHARS = 60000; // Well below GitHub's 65,536 limit
-            
+            const MAX_ALLOWED_CHARS = 60000;
+
+            // ── Close all previous open daily-review issues ──
+            const oldIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'daily-review',
+              state: 'open',
+              per_page: 50,
+            });
+
+            for (const issue of oldIssues.data) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }
+
+            // ── Build report body ──
             let reportBody = fs.readFileSync('daily_summary.md', 'utf8');
             if (reportBody.length > MAX_ALLOWED_CHARS) {
-              reportBody = reportBody.substring(0, MAX_ALLOWED_CHARS) + 
-                "\n\n---\n> ⚠️ **Note:** Some logs were truncated to fit GitHub Issue character limits.";
+              reportBody = reportBody.substring(0, MAX_ALLOWED_CHARS) +
+                '\n\n---\n> ⚠️ **Note:** Some logs were truncated to fit GitHub Issue character limits.';
             }
 
             const today = new Date().toISOString().split('T')[0];
             const issueTitle = `[Daily Health Report] Automated Code Review - ${today}`;
 
+            // ── Open fresh issue for today ──
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: issueTitle,
               body: reportBody,
-              labels: ['daily-review', 'automated', 'quality-assurance']
+              labels: ['daily-review', 'automated', 'quality-assurance'],
             });
