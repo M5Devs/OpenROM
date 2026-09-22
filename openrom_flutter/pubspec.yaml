@@ -18,6 +18,8 @@ dependencies:
   window_manager: ^0.5.2
   shared_preferences: ^2.0.0
   path_provider: ^2.0.0
+  openrom_core:
+    path: ../core
 
 dev_dependencies:
   flutter_test:

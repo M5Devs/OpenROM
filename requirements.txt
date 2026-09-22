@@ -1,7 +1,0 @@
-# Runtime
-py7zr>=1.1.3
-
-# Build
-nuitka>=4.2.1
-zstandard>=0.25.0
-ordered-set>=4.1.0
