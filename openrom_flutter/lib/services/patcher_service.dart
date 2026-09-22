@@ -1,7 +1,6 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';

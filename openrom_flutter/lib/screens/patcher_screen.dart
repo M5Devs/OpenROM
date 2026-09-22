@@ -155,7 +155,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
 
     try {
       if (_isSspPatch) {
-        final output = await _patcherService.applySspPatch(
+        await _patcherService.applySspPatch(
           sspPath: _patchPath,
           binPath: _romPath,
         );
