@@ -226,7 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(color: theme.textSecondary),
             ),
             value: _verifyAfterConversion,
-            activeColor: theme.accent,
+            activeThumbColor: theme.accent,
             onChanged: (val) {
               setState(() => _verifyAfterConversion = val);
               _saveSettings();

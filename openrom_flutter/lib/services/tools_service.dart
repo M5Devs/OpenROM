@@ -353,8 +353,8 @@ class ToolsService {
               );
             }
           }
-        } catch (_) {
-          if (_ is OpenROMException) rethrow;
+        } catch (e) {
+          if (e is OpenROMException) rethrow;
         }
       }
     }
