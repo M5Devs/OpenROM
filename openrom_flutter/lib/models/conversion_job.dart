@@ -47,8 +47,8 @@ class ConversionJob {
         ratio = compression == 'Max'
             ? 0.60
             : compression == 'Fast'
-            ? 0.80
-            : 0.70;
+                ? 0.80
+                : 0.70;
         break;
       case 'RVZ':
         ratio = compression == 'Max' ? 0.50 : 0.55;

@@ -20,8 +20,7 @@ class SettingsScreen extends StatefulWidget {
     bool verify,
     String outputDir,
     bool sameFolder,
-  )
-  onSettingsChanged;
+  ) onSettingsChanged;
 
   const SettingsScreen({
     super.key,
@@ -84,8 +83,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _pickOutputDirectory() async {
-    final String? selectedDirectory = await FilePicker.platform
-        .getDirectoryPath();
+    final String? selectedDirectory =
+        await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDestination = selectedDirectory;

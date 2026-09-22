@@ -86,8 +86,8 @@ class _RomCardState extends State<RomCard> {
     final err = widget.job.error ?? OpenROMError.conversionFailed;
     final details =
         (widget.job.errorMessage != null && widget.job.errorMessage!.isNotEmpty)
-        ? widget.job.errorMessage
-        : widget.job.logs.join('\n');
+            ? widget.job.errorMessage
+            : widget.job.logs.join('\n');
     showOpenROMError(context, err, details: details);
   }
 
@@ -184,8 +184,8 @@ class _RomCardState extends State<RomCard> {
                                 color: isFailed
                                     ? Colors.redAccent
                                     : (widget.job.status == JobStatus.done
-                                          ? Colors.greenAccent
-                                          : widget.theme.textSecondary),
+                                        ? Colors.greenAccent
+                                        : widget.theme.textSecondary),
                                 fontSize: 13,
                               ),
                             ),

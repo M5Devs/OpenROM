@@ -35,7 +35,7 @@ def parse_gdi(gdi_path: str) -> list[GdiTrack]:
     tracks = []
 
     with open(gdi_path, 'r', encoding='utf-8', errors='replace') as f:
-        lines = [l.strip() for l in f if l.strip()]
+        lines = [line.strip() for line in f if line.strip()]
 
     # First line is track count
     for line in lines[1:]:

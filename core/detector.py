@@ -1,6 +1,8 @@
 import os
 import struct
 
+from core.config import get_tool_path as _get_tool_path
+
 SUPPORTED_INPUT = {
     ".iso":  "ISO",
     ".bin":  "BIN",
@@ -265,9 +267,6 @@ def detect_folder(folder: str) -> list:
             info["filename"] = fname
             results.append(info)
     return results
-
-
-from core.config import get_tool_path as _get_tool_path
 
 
 def get_chdman_path() -> str:

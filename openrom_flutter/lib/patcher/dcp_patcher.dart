@@ -40,8 +40,9 @@ class DcpPatcher {
       int filesPatched = 0;
       bool ipbinReplaced = false;
       try {
-        final lines = LineSplitter.split(result.stdout)
-            .where((l) => l.trim().isNotEmpty);
+        final lines = LineSplitter.split(
+          result.stdout,
+        ).where((l) => l.trim().isNotEmpty);
         for (final line in lines.toList().reversed) {
           final decoded = jsonDecode(line);
           if (decoded is Map<String, dynamic>) {

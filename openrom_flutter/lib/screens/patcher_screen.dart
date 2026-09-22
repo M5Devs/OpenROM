@@ -161,7 +161,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
         );
         if (mounted) {
           setState(() {
-            _report = PatchReport(format: 'SSP');
+            _report = const PatchReport(format: 'SSP');
             _isPatching = false;
           });
         }
@@ -203,8 +203,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final formatBadge = PatcherFactory.formatName(_patchPath);
-    final canApply =
-        !_isPatching &&
+    final canApply = !_isPatching &&
         _romPath.isNotEmpty &&
         _patchPath.isNotEmpty &&
         (_isSspPatch || _outputPath.isNotEmpty);
@@ -575,9 +574,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color: path.isEmpty
-                        ? theme.textSecondary
-                        : theme.textPrimary,
+                    color:
+                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,
