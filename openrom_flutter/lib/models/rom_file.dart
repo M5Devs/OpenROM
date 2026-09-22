@@ -35,15 +35,13 @@ class RomFile {
   factory RomFile.fromJson(Map<String, dynamic> json) {
     return RomFile(
       filepath: json['filepath'] ?? '',
-      filename:
-          json['filename'] ??
+      filename: json['filename'] ??
           (json['filepath'] != null ? json['filepath'].split('/')['last'] : ''),
       format: json['format'] ?? 'UNKNOWN',
       platform: json['platform'] ?? 'ROM File',
       sizeBytes: json['size_bytes'] ?? 0,
       sizeStr: json['size_str'] ?? '0 B',
-      validTargets:
-          (json['valid_targets'] as List<dynamic>?)
+      validTargets: (json['valid_targets'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],

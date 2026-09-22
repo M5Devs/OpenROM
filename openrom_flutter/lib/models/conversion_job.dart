@@ -47,8 +47,8 @@ class ConversionJob {
         ratio = compression == 'Max'
             ? 0.60
             : compression == 'Fast'
-            ? 0.80
-            : 0.70;
+                ? 0.80
+                : 0.70;
         break;
       case 'RVZ':
         ratio = compression == 'Max' ? 0.50 : 0.55;
@@ -68,13 +68,11 @@ class ConversionJob {
 
     final estimated = (fileSizeBytes * ratio).round();
     if (estimated < 1024 * 1024) {
-      return '~' + (estimated / 1024).toStringAsFixed(0) + ' KB';
+      return '~${(estimated / 1024).toStringAsFixed(0)} KB';
     } else if (estimated < 1024 * 1024 * 1024) {
-      return '~' + (estimated / (1024 * 1024)).toStringAsFixed(1) + ' MB';
+      return '~${(estimated / (1024 * 1024)).toStringAsFixed(1)} MB';
     } else {
-      return '~' +
-          (estimated / (1024 * 1024 * 1024)).toStringAsFixed(2) +
-          ' GB';
+      return '~${(estimated / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
     }
   }
 

@@ -1,7 +1,6 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -62,7 +61,8 @@ class PatcherService {
     if (saturnPatcher == null || saturnPatcher.isEmpty) {
       throw OpenROMException(
         OpenROMError.toolFailed,
-        details: 'saturn-patcher binary not found. Please check your OpenROM installation.',
+        details:
+            'saturn-patcher binary not found. Please check your OpenROM installation.',
       );
     }
 

@@ -20,14 +20,12 @@ class MockPatcherService extends PatcherService {
     required String patchPath,
     required String outputPath,
     bool ignoreChecksum,
-  })?
-  onApplyPatch;
+  })? onApplyPatch;
 
   final Future<String> Function({
     required String sspPath,
     required String binPath,
-  })?
-  onApplySspPatch;
+  })? onApplySspPatch;
 
   MockPatcherService({this.onApplyPatch, this.onApplySspPatch});
 

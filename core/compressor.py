@@ -1,5 +1,3 @@
-import threading
-
 """
 OpenROM Compressor — ZIP/7Z Compression & Extraction Utility
 M5 Dev | GPL v3
@@ -7,6 +5,7 @@ M5 Dev | GPL v3
 
 import os
 import shutil
+import threading
 import zipfile
 from collections.abc import Callable
 
@@ -59,14 +58,14 @@ class Compressor:
         if self.on_log:
             try:
                 self.on_log(msg)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
     def _update_progress(self, job: CompressionJob, pct: float):
         job.progress = min(100.0, max(0.0, pct))
         try:
             self.on_progress(job, job.progress)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     def is_already_compressed(self, filepath: str) -> bool:
@@ -112,7 +111,7 @@ class Compressor:
             else:
                 job.status = "Failed"
                 return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             job.status = "Failed"
             job.error = str(e)
             self._log(f"[ERROR] Compression failed: {e}")
@@ -152,7 +151,7 @@ class Compressor:
             else:
                 job.status = "Failed"
                 return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             job.status = "Failed"
             job.error = str(e)
             self._log(f"[ERROR] Extraction failed: {e}")
@@ -272,5 +271,5 @@ class Compressor:
             elif os.path.isdir(filepath):
                 shutil.rmtree(filepath)
                 self._log(f"[CLEANUP] Deleted source directory: {filepath}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self._log(f"[WARN] Failed to delete source {filepath}: {e}")
