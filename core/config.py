@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import stat
 
 APP_NAME = "OpenROM"
 
@@ -27,6 +28,17 @@ CONFIG_FILE = os.path.join(get_config_dir(), "config.json")
 
 _config_cache: dict | None = None
 
+
+def _ensure_executable(path: str) -> None:
+    """Ensure a file has executable permissions on POSIX systems."""
+    if platform.system() in ("Linux", "Darwin") and os.path.isfile(path):
+        if not os.access(path, os.X_OK):
+            try:
+                os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            except Exception:
+                pass
+
+
 def get_default_bundled_path(tool: str) -> str:
     """
     Returns the bundled binary path for the given tool.
@@ -43,11 +55,15 @@ def get_default_bundled_path(tool: str) -> str:
         machine     = platform.machine()
         arch_folder = "arm64" if machine == "aarch64" else ("arm64" if machine == "arm64" else "x86_64")
         if system == "Windows":
-            return os.path.join(base, "assets", "windows", "nkit", "nkit.exe")
+            res = os.path.join(base, "assets", "windows", "nkit", "nkit.exe")
         elif system == "Darwin":
-            return os.path.join(base, "assets", "macos", arch_folder, "nkit", "nkit")
+            res = os.path.join(base, "assets", "macos", arch_folder, "nkit", "nkit")
         else:
-            return os.path.join(base, "assets", "linux", arch_folder, "nkit", "nkit")
+            res = os.path.join(base, "assets", "linux", arch_folder, "nkit", "nkit")
+
+        if os.path.isfile(res):
+            _ensure_executable(res)
+            return res
 
     win_names = {
         "chdman":         "chdman.exe",
@@ -56,7 +72,7 @@ def get_default_bundled_path(tool: str) -> str:
         "maxcso":         "maxcso.exe",
         "extract-xiso":   "extract-xiso.exe",
         "nodtool":        "nodtool.exe",
-        "xdelta3":        "xdelta3.exe",      # ← جديد
+        "xdelta3":        "xdelta3.exe",
         "nkit":           "nkit.exe",
         "saturn-patcher": "saturn-patcher.exe",
     }
@@ -67,7 +83,7 @@ def get_default_bundled_path(tool: str) -> str:
         "maxcso":         "maxcso",
         "extract-xiso":   "extract-xiso",
         "nodtool":        "nodtool",
-        "xdelta3":        "xdelta3",          # ← جديد
+        "xdelta3":        "xdelta3",
         "nkit":           "nkit",
         "saturn-patcher": "saturn-patcher",
     }
@@ -79,30 +95,29 @@ def get_default_bundled_path(tool: str) -> str:
 
     elif system == "Darwin":
         fname = unix_names.get(tool, tool)
-        # macOS: try arch-specific folder first (arm64 / x86_64)
-        arch = platform.machine()  # "arm64" on Apple Silicon, "x86_64" on Intel
+        arch = platform.machine()
         if arch not in ("arm64", "x86_64"):
-            arch = "x86_64"  # safe fallback for unknown architectures
+            arch = "x86_64"
         bundled = os.path.join(base, "assets", "macos", arch, fname)
-        # fallback to flat macos/ folder (non-arch-split tools)
         if not os.path.isfile(bundled):
             bundled = os.path.join(base, "assets", "macos", fname)
 
     else:  # Linux
         fname        = unix_names.get(tool, tool)
-        machine      = platform.machine()                        # "x86_64" or "aarch64"
+        machine      = platform.machine()
         arch_folder  = "arm64" if machine == "aarch64" else "x86_64"
         bundled      = os.path.join(base, "assets", "linux", arch_folder, fname)
-        # Fallback: if arch-specific binary doesn't exist, try the flat linux/ folder
-        # (supports older installs or partial bundles)
         if not os.path.isfile(bundled):
             bundled = os.path.join(base, "assets", "linux", fname)
 
     if os.path.isfile(bundled):
+        _ensure_executable(bundled)
         return bundled
 
     # Not bundled — fall back to system PATH
-    return unix_names.get(tool, tool) if system != "Windows" else win_names.get(tool, tool)
+    fallback = unix_names.get(tool, tool) if system != "Windows" else win_names.get(tool, tool)
+    _ensure_executable(fallback)
+    return fallback
 
 
 DEFAULT_CONFIG = {
@@ -112,7 +127,7 @@ DEFAULT_CONFIG = {
     "unecm":          "",
     "extract-xiso":   "",
     "nodtool":        "",
-    "xdelta3":        "",   # ← جديد
+    "xdelta3":        "",
     "nkit":           "",
     "saturn-patcher": "",
 }
@@ -152,5 +167,6 @@ def get_tool_path(tool: str) -> str:
     config = load_config()
     val = config.get(tool, "")
     if val and (os.path.exists(val) or os.path.isabs(val)):
+        _ensure_executable(val)
         return val
     return get_default_bundled_path(tool)

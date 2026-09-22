@@ -75,10 +75,6 @@ class Converter:
         self._stop_event.set()
 
     def convert(self, job: ConversionJob) -> bool:
-        # Removed: self._stop_event.clear()
-        # Reason: clearing here races with stop() called between batch jobs.
-        # convert_batch() is responsible for clearing before a new batch starts.
-        # Callers using convert() directly must call _stop_event.clear() themselves.
         job.status = "Converting"
         try:
             ok = self._dispatch(job)
@@ -125,6 +121,7 @@ class Converter:
 
         if "error" in info:
             self._log(f"[ERROR] {info['error']}")
+            job.error = info['error']
             return False
 
         fmt = info.get("format", "UNKNOWN")
@@ -136,10 +133,12 @@ class Converter:
 
         valid = get_valid_targets(fmt)
         if tgt not in valid and tgt not in ("BIN/CUE", "FILES"):
-            self._log(
-                f"[ERROR] Cannot convert {fmt} → {tgt}. "
+            err_msg = (
+                f"Cannot convert {fmt} → {tgt}. "
                 f"Supported targets for {fmt}: {', '.join(valid) if valid else 'none'}"
             )
+            self._log(f"[ERROR] {err_msg}")
+            job.error = err_msg
             return False
 
         if tgt == "CHD":
@@ -163,7 +162,6 @@ class Converter:
         if tgt == "ECM":
             return self._to_ecm(job, src)
 
-        # FIX #5 — XISO target is now "Files" (honest label), not "ISO"
         if fmt == "XISO" and tgt in ("ISO", "FILES"):
             return self._xiso_to_files(job, src)
 
@@ -173,7 +171,9 @@ class Converter:
         if (fmt in ("WUD", "WUX", "NKIT") and tgt == "ISO") or (fmt == "ISO" and tgt == "NKIT"):
             return self._nkit_convert(job, src, tgt)
 
-        self._log(f"[ERROR] Unhandled conversion route: {fmt} → {tgt}")
+        err_msg = f"Unhandled conversion route: {fmt} → {tgt}"
+        self._log(f"[ERROR] {err_msg}")
+        job.error = err_msg
         return False
 
     # ── CHD conversion ────────────────────────────────────────────────────────
@@ -195,13 +195,11 @@ class Converter:
         cmd = [chdman, sub_cmd, "-i", src, "-o", out,
                "--compression", compression_map.get(job.compression, default_codec)]
 
-        # BIN without CUE → auto-generate CUE then register for cleanup
         if fmt == "BIN":
             cue_input = info.get("paired_cue")
             if not cue_input:
                 cue_input = self._auto_cue(src)
                 if cue_input:
-                    # FIX #4 — always register the generated CUE for cleanup
                     job._temp_files.append(cue_input)
             if cue_input:
                 idx = cmd.index(src)
@@ -212,7 +210,7 @@ class Converter:
 
     def _from_chd(self, job: ConversionJob, src: str, tgt: str, info: dict) -> bool:
         chdman   = get_chdman_path()
-        chd_type = info.get("chd_type", "cd")  # now populated from actual CHD header (FIX #2)
+        chd_type = info.get("chd_type", "cd")
 
         if tgt in ("BIN", "BIN/CUE"):
             cue_out = self._out_path(job, src, ".cue")
@@ -296,7 +294,7 @@ class Converter:
 
     def _xiso_to_files(self, job: ConversionJob, src: str) -> bool:
         """
-        FIX #5 — XISO → extracted files.
+        XISO → extracted files.
         extract-xiso cannot produce a single ISO output; it always extracts to a folder.
         The target label is now honestly "Files" instead of "ISO" to avoid user confusion.
         """
@@ -345,6 +343,7 @@ class Converter:
 
     def _run(self, cmd: list, job: ConversionJob) -> bool:
         self._log(f"  cmd: {' '.join(os.path.basename(c) if i == 0 else c for i, c in enumerate(cmd))}")
+        last_line = ""
         try:
             proc = subprocess.Popen(
                 cmd,
@@ -357,6 +356,7 @@ class Converter:
             for line in proc.stdout:
                 line = line.rstrip()
                 if line:
+                    last_line = line
                     self._log(f"  {line}")
                     pct = _parse_progress(line)
                     if pct is not None:
@@ -364,6 +364,7 @@ class Converter:
                         self.on_progress(job, pct)
                 if self._stop_event.is_set():
                     proc.terminate()
+                    job.error = "Process terminated by user"
                     return False
             proc.wait()
             if proc.returncode == 0:
@@ -372,10 +373,14 @@ class Converter:
                 self.on_progress(job, 100.0)
                 return True
             else:
-                self._log(f"  ❌ Process returned exit code {proc.returncode}")
+                err_msg = f"Process failed (code {proc.returncode}): {last_line}" if last_line else f"Process failed with exit code {proc.returncode}"
+                job.error = err_msg
+                self._log(f"  ❌ {err_msg}")
                 return False
         except FileNotFoundError:
-            self._log(f"  ❌ Tool not found: {cmd[0]}")
+            err_msg = f"Tool not found: {cmd[0]}"
+            job.error = err_msg
+            self._log(f"  ❌ {err_msg}")
             return False
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -393,7 +398,6 @@ class Converter:
                 pass
 
     def _cleanup(self, job: ConversionJob):
-        """FIX #4 — clean up ALL temp files registered in job._temp_files (incl. auto-CUE)."""
         for f in job._temp_files:
             try:
                 if os.path.isfile(f):
@@ -403,11 +407,6 @@ class Converter:
                 global_log(f"[CLEANUP WARN] Could not remove {f}: {e}")
 
     def _auto_cue(self, bin_path: str) -> str | None:
-        """
-        Generate a temporary CUE file next to the source BIN.
-        NOTE: The CUE is intentionally written beside the BIN (not in output_dir)
-        because chdman resolves BIN track paths relative to the CUE file's location.
-        """
         base      = os.path.basename(bin_path).rsplit('.', 1)[0]
         bin_dir   = os.path.dirname(os.path.abspath(bin_path))
         cue_path  = os.path.join(bin_dir, base + "_auto.cue")
@@ -420,27 +419,28 @@ class Converter:
                 f.write(f"  TRACK 01 {track_mode}\n")
                 f.write("    INDEX 01 00:00:00\n")
             self._log(f"[AUTO-CUE] Generated CUE file: {os.path.basename(cue_path)}")
-            # NOTE: caller is responsible for appending cue_path to job._temp_files
             return cue_path
         except Exception as e:
             self._log(f"[WARN] Could not write auto CUE: {e}")
             return None
 
 
-
-
 # ── Progress line parser ──────────────────────────────────────────────────────
 
 def _parse_progress(line: str) -> float | None:
     """
-    FIX (IMPROVEMENT #1) — Parse progress from both chdman and maxcso output formats.
+    Parse progress percentage from conversion tool outputs while ignoring system performance warnings/stats.
 
-    chdman  : "Compressing, 42.3% complete..."  or  "42.3%"
-    maxcso  : "Wrote 1234567 of 9876543 bytes"  (bytes-based → convert to %)
-    nodtool : "Progress: 42%" or similar
+    chdman  : "Compressing, 42.3% complete..." or "42.3%"
+    maxcso  : "Wrote 1234567 of 9876543 bytes"
+    nodtool : "Progress: 42%" or "42%"
     """
-    # Generic percentage (chdman, nodtool)
-    m = re.search(r"(\d+(?:\.\d+)?)\s*%", line)
+    # Ignore CPU / RAM / System statistics lines
+    if re.search(r"\b(?:cpu|memory|ram|disk|swap|usage|load)\b", line, re.IGNORECASE):
+        return None
+
+    # Match conversion/progress/complete percentage patterns
+    m = re.search(r"(?:progress|complete|done)?\s*(\d+(?:\.\d+)?)\s*%", line, re.IGNORECASE)
     if m:
         return float(m.group(1))
 

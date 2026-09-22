@@ -25,6 +25,25 @@ SUPPORTED_HEADERS = {
 }
 
 
+def _verify_snes_internal_header(data: bytes, offset: int) -> bool:
+    """
+    Verify internal SNES ROM registration header at given offset.
+    Checks if checksum + checksum complement == 0xFFFF and complement != 0.
+    LoROM offset: 0x7FC0 (or 0x81C0 with copier header)
+    HiROM offset: 0xFFC0 (or 0x101C0 with copier header)
+    """
+    if len(data) < offset + 0x40:
+        return False
+    # Checksum complement is at offset + 0x1C (2 bytes, little endian)
+    # Checksum is at offset + 0x1E (2 bytes, little endian)
+    complement = data[offset + 0x1C] | (data[offset + 0x1D] << 8)
+    checksum   = data[offset + 0x1E] | (data[offset + 0x1F] << 8)
+
+    if (checksum ^ complement) == 0xFFFF and complement != 0:
+        return True
+    return False
+
+
 def detect_header(filepath: str) -> dict | None:
     """
     Detect if a ROM file has a copier/system header.
@@ -80,16 +99,47 @@ def detect_header(filepath: str) -> dict | None:
 
     elif system == "SNES":
         # SNES detection logic:
-        # File size % 1024 == 512 -> has copier header (512 bytes)
-        # File size % 1024 == 0   -> no header
-        # confidence: "certain" if size check passes, "likely" otherwise
+        # Check size % 1024 == 512 as baseline, then validate internal SNES registration header.
         rem = file_size % 1024
+        try:
+            with open(filepath, "rb") as f:
+                header_data = f.read(0x10200)  # Read up to 0x10200 bytes for header check
+
+            # Check if copier header exists (512 bytes prefix)
+            has_copier_header_internal = (
+                _verify_snes_internal_header(header_data, 0x81C0) or
+                _verify_snes_internal_header(header_data, 0x101C0)
+            )
+            # Check if clean ROM without copier header
+            has_clean_internal = (
+                _verify_snes_internal_header(header_data, 0x7FC0) or
+                _verify_snes_internal_header(header_data, 0xFFC0)
+            )
+
+            if has_copier_header_internal:
+                return {
+                    "system": "SNES",
+                    "header_size": 512,
+                    "has_header": True,
+                    "confidence": "certain"
+                }
+            elif has_clean_internal:
+                return {
+                    "system": "SNES",
+                    "header_size": 0,
+                    "has_header": False,
+                    "confidence": "certain"
+                }
+        except Exception:
+            pass
+
+        # Fallback to size check if internal registration header check is inconclusive
         if rem == 512:
             return {
                 "system": "SNES",
                 "header_size": 512,
                 "has_header": True,
-                "confidence": "certain"
+                "confidence": "likely"
             }
         elif rem == 0:
             return {
@@ -99,7 +149,6 @@ def detect_header(filepath: str) -> dict | None:
                 "confidence": "certain"
             }
         else:
-            # File size is not aligned to 512 or 1024 — unusual, cannot determine header
             return {
                 "system": "SNES",
                 "header_size": 0,
@@ -166,10 +215,9 @@ def remove_header(
     # If backup is requested and outputting in place or same filename
     if backup and os.path.abspath(clean_path) == os.path.abspath(filepath):
         bak_path = filepath + ".bak"
-        # Always overwrite the backup to reflect the current state of the source.
-        # If the source no longer has a header (second run), the backup is still
-        # a faithful copy of what is being processed.
-        shutil.copy2(filepath, bak_path)
+        # Only create backup if .bak file does NOT already exist to preserve original dump
+        if not os.path.exists(bak_path):
+            shutil.copy2(filepath, bak_path)
 
     if not info or not info.get("has_header") or info.get("header_size", 0) <= 0:
         # No header to remove — copy or keep as is
