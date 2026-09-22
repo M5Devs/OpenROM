@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Ported from Final ROM (https://github.com/eon-com/final_rom) and
+// Ported from Final ROM (https://github.com/Yasome/FinalRom) and
 // UniPatcher (https://github.com/btimofeev/UniPatcher) — both GPL v3.
 // Adapted for OpenROM by M5 Dev.
 /// Buffer size constants for OpenROM patchers.
