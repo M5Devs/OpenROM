@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openrom_flutter/core/errors.dart';
-import 'package:openrom_flutter/services/core_bridge.dart';
+import 'package:gui/core/errors.dart';
+import 'package:gui/services/core_bridge.dart';
 
 void main() {
   group('OpenROMError tests', () {

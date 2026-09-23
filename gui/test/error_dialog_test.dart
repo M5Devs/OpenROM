@@ -4,13 +4,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openrom_flutter/core/error_dialog.dart';
-import 'package:openrom_flutter/core/errors.dart';
-import 'package:openrom_flutter/l10n/app_localizations.dart';
-import 'package:openrom_flutter/models/conversion_job.dart';
-import 'package:openrom_flutter/models/rom_file.dart';
-import 'package:openrom_flutter/models/theme_config.dart';
-import 'package:openrom_flutter/widgets/rom_card.dart';
+import 'package:gui/core/error_dialog.dart';
+import 'package:gui/core/errors.dart';
+import 'package:gui/l10n/app_localizations.dart';
+import 'package:gui/models/conversion_job.dart';
+import 'package:gui/models/rom_file.dart';
+import 'package:gui/models/theme_config.dart';
+import 'package:gui/widgets/rom_card.dart';
 
 Widget _wrapWithLocalizations(Widget child) {
   return MaterialApp(

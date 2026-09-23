@@ -1,4 +1,4 @@
-name: openrom
+name: gui
 description: OpenROM — Universal ROM Compression Suite Desktop App
 publish_to: 'none'
 version: 2.2.0+1
