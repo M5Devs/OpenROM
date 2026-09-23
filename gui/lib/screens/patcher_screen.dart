@@ -6,8 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
-import '../core/error_dialog.dart';
-import '../core/errors.dart';
+import '../widgets/error_dialog.dart';
+import '../models/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../patcher/patcher.dart';

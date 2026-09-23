@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import 'errors.dart';
+import '../models/errors.dart';
 
 void showOpenROMError(
   BuildContext context,

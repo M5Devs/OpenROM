@@ -35,6 +35,61 @@ class ThemeConfig {
     required this.layout,
   });
 
+  /// Converts a Color to a 6-char hex string e.g. '#e94560'
+  static String _colorToHex(Color color) {
+    return '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'background': _colorToHex(background),
+      'surface': _colorToHex(surface),
+      'accent': _colorToHex(accent),
+      'text_primary': _colorToHex(textPrimary),
+      'text_secondary': _colorToHex(textSecondary),
+      'sidebar_bg': _colorToHex(sidebarBg),
+      'card_bg': _colorToHex(cardBg),
+      'terminal_bg': _colorToHex(terminalBg),
+      'terminal_text': _colorToHex(terminalText),
+      'font_family': fontFamily,
+      'border_radius': borderRadius,
+      'layout': layout,
+    };
+  }
+
+  ThemeConfig copyWith({
+    String? name,
+    Color? background,
+    Color? surface,
+    Color? accent,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? sidebarBg,
+    Color? cardBg,
+    Color? terminalBg,
+    Color? terminalText,
+    String? fontFamily,
+    double? borderRadius,
+    String? layout,
+  }) {
+    return ThemeConfig(
+      name: name ?? this.name,
+      background: background ?? this.background,
+      surface: surface ?? this.surface,
+      accent: accent ?? this.accent,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      sidebarBg: sidebarBg ?? this.sidebarBg,
+      cardBg: cardBg ?? this.cardBg,
+      terminalBg: terminalBg ?? this.terminalBg,
+      terminalText: terminalText ?? this.terminalText,
+      fontFamily: fontFamily ?? this.fontFamily,
+      borderRadius: borderRadius ?? this.borderRadius,
+      layout: layout ?? this.layout,
+    );
+  }
+
   factory ThemeConfig.fromJson(Map<String, dynamic> json) {
     Color hexToColor(String hex, Color defaultColor) {
       try {

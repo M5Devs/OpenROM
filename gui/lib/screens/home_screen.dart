@@ -4,8 +4,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-import '../core/error_dialog.dart';
-import '../core/errors.dart';
+import '../widgets/error_dialog.dart';
+import '../models/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
