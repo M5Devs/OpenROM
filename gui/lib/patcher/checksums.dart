@@ -5,7 +5,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:openrom_flutter/patcher/io_tuning.dart';
+import 'package:gui/patcher/io_tuning.dart';
 
 /// Standard CRC-32 (IEEE 802.3, polynomial 0xEDB88820, reflected) — the same
 /// algorithm used by `java.util.zip.CRC32`, which the patch formats rely on.

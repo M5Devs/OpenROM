@@ -5,7 +5,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:openrom_flutter/patcher/io_tuning.dart';
+import 'package:gui/patcher/io_tuning.dart';
 
 /// Patcher copy/CRC buffer size; defined centrally as [patchCopyBufferSize].
 const int patchBufferSize = patchCopyBufferSize;

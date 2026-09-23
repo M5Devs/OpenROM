@@ -7,12 +7,12 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:openrom_flutter/l10n/app_localizations.dart';
-import 'package:openrom_flutter/models/theme_config.dart';
-import 'package:openrom_flutter/patcher/patcher.dart';
-import 'package:openrom_flutter/patcher/patcher_factory.dart';
-import 'package:openrom_flutter/screens/patcher_screen.dart';
-import 'package:openrom_flutter/services/patcher_service.dart';
+import 'package:gui/l10n/app_localizations.dart';
+import 'package:gui/models/theme_config.dart';
+import 'package:gui/patcher/patcher.dart';
+import 'package:gui/patcher/patcher_factory.dart';
+import 'package:gui/screens/patcher_screen.dart';
+import 'package:gui/services/patcher_service.dart';
 
 class MockPatcherService extends PatcherService {
   final Future<PatchReport> Function({

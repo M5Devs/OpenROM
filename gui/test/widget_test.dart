@@ -2,8 +2,8 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openrom_flutter/app.dart';
-import 'package:openrom_flutter/services/theme_service.dart';
+import 'package:gui/app.dart';
+import 'package:gui/services/theme_service.dart';
 
 void main() {
   testWidgets('App loads cleanly test', (WidgetTester tester) async {

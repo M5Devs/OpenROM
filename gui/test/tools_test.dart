@@ -3,9 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openrom/l10n/app_localizations.dart';
-import 'package:openrom/models/theme_config.dart';
-import 'package:openrom/screens/tools_screen.dart';
+import 'package:gui/l10n/app_localizations.dart';
+import 'package:gui/models/theme_config.dart';
+import 'package:gui/screens/tools_screen.dart';
 
 void main() {
   group('ToolsScreen Widget Tests', () {
