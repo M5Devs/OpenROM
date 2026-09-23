@@ -14,7 +14,7 @@ dependencies:
   intl: ^0.20.2
   path: ^1.9.0
   desktop_drop: ^0.4.0
-  file_picker: ^8.0.0
+  file_picker: ^13.1.0
   window_manager: ^0.5.2
   shared_preferences: ^2.0.0
   path_provider: ^2.0.0
