@@ -6,7 +6,7 @@ call dart compile exe bin/openrom.dart -o ..\openrom-core.exe
 cd ..
 
 echo === Building OpenROM Flutter UI ===
-cd openrom_flutter
+cd gui
 call flutter pub get
 call flutter build windows --release
 cd ..

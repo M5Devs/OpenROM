@@ -17,12 +17,12 @@ Just pick your language, start translating, and Weblate will open a Pull Request
 ## Contributing Translations via Git
 
 Prefer working directly with files? OpenROM uses Flutter's standard Application Resource Bundle (`.arb`) format.
-All translation files are located in `openrom_flutter/lib/l10n/`.
+All translation files are located in `gui/lib/l10n/`.
 
 ### How to Add a New Language
 
 1. **Copy the Template**:
-   Copy `openrom_flutter/lib/l10n/app_en.arb` to `openrom_flutter/lib/l10n/app_<locale>.arb` (e.g., `app_de.arb` for German).
+   Copy `gui/lib/l10n/app_en.arb` to `gui/lib/l10n/app_<locale>.arb` (e.g., `app_de.arb` for German).
 
 2. **Update Locale Header**:
    Set `"@@locale": "<locale>"` at the top of your new ARB file.
@@ -35,12 +35,12 @@ All translation files are located in `openrom_flutter/lib/l10n/`.
    > - Preserve placeholder variables such as `{count}` without modifying the variable name inside brackets.
 
 4. **Add Locale to `LocaleProvider`**:
-   In `openrom_flutter/lib/providers/locale_provider.dart`:
+   In `gui/lib/providers/locale_provider.dart`:
    - Add `Locale('<locale>')` to `supportedLocales`.
    - Update `getNativeName` to return the native name of your language (e.g., `'Deutsch'` for `'de'`).
 
 5. **Test Your Changes**:
-   Run `flutter gen-l10n` and `flutter test` inside `openrom_flutter/`.
+   Run `flutter gen-l10n` and `flutter test` inside `gui/`.
 
 6. **Submit a Pull Request**:
    Commit your changes and open a PR on GitHub!

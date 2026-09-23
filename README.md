@@ -258,7 +258,7 @@ pip install nuitka ordered-set zstandard
 python -m nuitka --onefile --output-filename=openrom-core --include-data-dir=assets=assets core/cli.py
 
 # Run Flutter UI
-cd openrom_flutter
+cd gui
 flutter pub get
 flutter run -d windows   # or linux / macos
 ```

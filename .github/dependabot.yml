@@ -14,7 +14,7 @@ updates:
 
   # Flutter dependencies (pubspec.yaml)
   - package-ecosystem: "pub"
-    directory: "/openrom_flutter"
+    directory: "/gui"
     schedule:
       interval: "weekly"
       day: "monday"

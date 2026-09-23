@@ -41,7 +41,7 @@ jobs:
       - name: Patch pubspec version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+          sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       # ── Build openrom-core ──
       - name: Set up Python
@@ -71,20 +71,20 @@ jobs:
           channel: 'stable'
 
       - name: Flutter dependencies
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter pub get
 
       - name: Build Flutter Linux
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter build linux --release
 
       # ── Prepare flatpak-build folder ──
       - name: Prepare flatpak-build
         run: |
           mkdir -p flatpak-build/bundle
-          cp -r openrom_flutter/build/linux/x64/release/bundle/. flatpak-build/bundle/
+          cp -r gui/build/linux/x64/release/bundle/. flatpak-build/bundle/
           cp openrom-core flatpak-build/openrom-core
-          chmod +x flatpak-build/openrom-core flatpak-build/bundle/openrom_flutter
+          chmod +x flatpak-build/openrom-core flatpak-build/bundle/gui
 
       # ── Push to temp branch ──
       - name: Push flatpak-build to temp branch
@@ -114,7 +114,7 @@ jobs:
       - name: Fix binary permissions
         run: |
           chmod +x flatpak-build/openrom-core
-          chmod +x flatpak-build/bundle/openrom_flutter
+          chmod +x flatpak-build/bundle/gui
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
