@@ -45,7 +45,7 @@ jobs:
             Set-Content gui/pubspec.yaml
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -190,7 +190,7 @@ jobs:
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -339,7 +339,7 @@ jobs:
           chmod +x assets/linux/arm64/*
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -425,7 +425,7 @@ jobs:
           sed -i "" "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
