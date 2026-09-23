@@ -129,13 +129,13 @@ jobs:
           makensis /DAPP_VERSION=$version openrom.nsi
 
       - name: Upload ZIP artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Windows
           path: OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Windows_Installer
           path: OpenROM-v${{ github.event.inputs.version }}-Setup.exe
@@ -257,7 +257,7 @@ jobs:
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
@@ -354,7 +354,7 @@ jobs:
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Linux_arm64
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
@@ -451,7 +451,7 @@ jobs:
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM_macOS_${{ matrix.arch }}
           path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip
