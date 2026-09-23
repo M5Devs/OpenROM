@@ -19,13 +19,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # ── 1. Setup Python Environment ──
-      - name: Setup Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-
       # ── 2. Setup Flutter Environment ──
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
@@ -37,9 +30,6 @@ jobs:
       - name: Install Tooling Dependencies
         run: |
           sudo apt-get update -qq && sudo apt-get install -y cppcheck
-          pip install --upgrade pip
-          pip install ruff bandit pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       # ── 4. Execute Multi-Language Review Engine ──
       - name: Run Full Diagnostic Pipeline
@@ -51,9 +41,8 @@ jobs:
           DART_ANALYZE_STATUS="🟢 PASSED"
           DART_FORMAT_STATUS="🟢 PASSED"
           DART_TESTS_STATUS="🟢 PASSED"
-          PY_LINT_STATUS="🟢 PASSED"
-          PY_SECURITY_STATUS="🟢 PASSED"
-          PY_TESTS_STATUS="🟢 PASSED"
+          DART_CORE_STATUS="🟢 PASSED"
+          DART_CORE_TESTS_STATUS="🟢 PASSED"
           CPP_STATUS="🟢 PASSED"
 
           # ──────── 1. Dart & Flutter ────────
@@ -87,18 +76,21 @@ jobs:
             DART_TESTS_STATUS="⚪ SKIPPED"
           fi
 
-          # ──────── 2. Python Core ────────
-          if ! ruff check core/ > .review_reports/ruff.raw.log 2>&1; then
-            PY_LINT_STATUS="🔴 ISSUES DETECTED"
-          fi
+          # ──────── 2. Dart Core ────────
+          if [ -d "core" ]; then
+            cd core
+            dart pub get > /dev/null 2>&1
 
-          if ! bandit -r core/ -lll > .review_reports/bandit.raw.log 2>&1; then
-            PY_SECURITY_STATUS="🚨 VULNERABILITY FOUND"
-          fi
+            if ! dart analyze \
+                 > ../.review_reports/dart_core_analyze.raw.log 2>&1; then
+              DART_CORE_STATUS="🔴 ISSUES DETECTED"
+            fi
 
-          if ! PYTHONPATH=. pytest tests/ -q \
-               > .review_reports/pytest.raw.log 2>&1; then
-            PY_TESTS_STATUS="🔴 FAILED"
+            if ! dart test \
+                 > ../.review_reports/dart_core_test.raw.log 2>&1; then
+              DART_CORE_TESTS_STATUS="🔴 FAILED"
+            fi
+            cd ..
           fi
 
           # ──────── 3. Native C++ ────────
@@ -130,7 +122,7 @@ jobs:
           ## 🩺 OpenROM Automated Daily Health Report
           HEADER
 
-          echo "Audit date: **$DATE_STR** | Layers: **Flutter/Dart**, **Python Core**, and **Native C++**" >> daily_summary.md
+          echo "Audit date: **$DATE_STR** | Layers: **Flutter/Dart GUI**, **Dart Core**, and **Native C++**" >> daily_summary.md
           echo "" >> daily_summary.md
           echo "### 📌 Executive Health Summary" >> daily_summary.md
           echo "" >> daily_summary.md
@@ -139,9 +131,8 @@ jobs:
           echo "| **Flutter / Dart** (Analyze) | \`gui/\` | $DART_ANALYZE_STATUS |" >> daily_summary.md
           echo "| **Flutter / Dart** (Format)  | \`gui/\` | $DART_FORMAT_STATUS |" >> daily_summary.md
           echo "| **Flutter / Dart** (Tests)   | \`gui/test/\` | $DART_TESTS_STATUS |" >> daily_summary.md
-          echo "| **Python** (Ruff Lint)        | \`core/\` | $PY_LINT_STATUS |" >> daily_summary.md
-          echo "| **Python** (Bandit Sec)       | \`core/\` | $PY_SECURITY_STATUS |" >> daily_summary.md
-          echo "| **Python** (Pytest)           | \`tests/\` | $PY_TESTS_STATUS |" >> daily_summary.md
+          echo "| **Dart Core** (Analyze)       | \`core/\` | $DART_CORE_STATUS |" >> daily_summary.md
+          echo "| **Dart Core** (Tests)         | \`core/test/\` | $DART_CORE_TESTS_STATUS |" >> daily_summary.md
           echo "| **C++ Native** (Cppcheck)     | \`gui/*/runner/\` | $CPP_STATUS |" >> daily_summary.md
           echo "" >> daily_summary.md
           echo "---" >> daily_summary.md
@@ -163,10 +154,9 @@ jobs:
           append_section "1. Flutter Analyze Output"  ".review_reports/flutter_analyze.raw.log"
           append_section "2. Dart Format Output"      ".review_reports/dart_format.raw.log"
           append_section "3. Flutter Test Output"     ".review_reports/flutter_test.raw.log"
-          append_section "4. Python Ruff Linting"     ".review_reports/ruff.raw.log"
-          append_section "5. Python Bandit Audit"     ".review_reports/bandit.raw.log"
-          append_section "6. Python Pytest Output"    ".review_reports/pytest.raw.log"
-          append_section "7. C++ Cppcheck Output"     ".review_reports/cppcheck.raw.log"
+          append_section "4. Dart Core Analyze"       ".review_reports/dart_core_analyze.raw.log"
+          append_section "5. Dart Core Tests"         ".review_reports/dart_core_test.raw.log"
+          append_section "6. C++ Cppcheck Output"     ".review_reports/cppcheck.raw.log"
 
       # ── 5. Publish Health Report — close old issues first ──
       - name: Publish Health Report to GitHub Issue

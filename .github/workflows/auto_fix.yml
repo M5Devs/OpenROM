@@ -13,30 +13,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Auto-Format Dart & Auto-Fix Python
+      - name: Auto-Format Dart
         run: |
-          # 1. فرمتة كل ملفات فلاتر الـ 36
           if [ -d "gui" ]; then
             cd gui
             dart format .
             cd ..
           fi
-
-          # 2. تصليح بايثون أوتوماتيك
-          pip install ruff
-          ruff check core/ --fix || true
+          if [ -d "core" ]; then
+            cd core
+            dart format .
+            cd ..
+          fi
 
       - name: Commit and Push Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto format dart files and auto-fix ruff lint issues"
+          commit_message: "style: auto format dart files"

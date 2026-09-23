@@ -243,19 +243,18 @@ All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA
 ## 🚀 Building from Source
 
 ### Requirements
-- Python 3.10+
-- Flutter (latest stable)
-- Nuitka 4.0+
+- Dart SDK 3.0+
+- Flutter SDK (stable channel)
 
 ### Run Flutter UI from source
 ```bash
 git clone https://github.com/M5Devs/OpenROM
 cd OpenROM
 
-# Build headless Python core
-pip install -r requirements.txt
-pip install nuitka ordered-set zstandard
-python -m nuitka --onefile --output-filename=openrom-core --include-data-dir=assets=assets core/cli.py
+# Build Dart core CLI
+cd core
+dart pub get
+dart compile exe bin/openrom.dart -o ../openrom-core
 
 # Run Flutter UI
 cd gui

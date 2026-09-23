@@ -13,9 +13,9 @@ permissions:
 
 jobs:
 
-  # ── Job 1: Build Flutter + Nuitka on standard runner ────────────────────────
+  # ── Job 1: Build Flutter + Dart on standard runner ────────────────────────
   build-app:
-    name: Build App (Flutter + Nuitka)
+    name: Build App (Flutter + Dart)
     runs-on: ubuntu-22.04
 
     steps:
@@ -44,25 +44,17 @@ jobs:
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       # ── Build openrom-core ──
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
         with:
-          python-version: "3.11"
+          sdk: stable
 
-      - name: Install Python dependencies
+      - name: Build openrom-core (Dart)
         run: |
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
-
-      - name: Build openrom-core (Nuitka)
-        run: |
-          python -m nuitka \
-            --onefile \
-            --assume-yes-for-downloads \
-            --output-filename=openrom-core \
-            --include-data-dir=assets=assets \
-            core/cli.py
-          chmod +x openrom-core
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../openrom-core
+          chmod +x ../openrom-core
 
       # ── Build Flutter ──
       - name: Set up Flutter
