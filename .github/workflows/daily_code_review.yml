@@ -57,8 +57,8 @@ jobs:
           CPP_STATUS="🟢 PASSED"
 
           # ──────── 1. Dart & Flutter ────────
-          if [ -d "openrom_flutter" ]; then
-            cd openrom_flutter
+          if [ -d "gui" ]; then
+            cd gui
             flutter pub get > /dev/null 2>&1
 
             # Dart Format Check
@@ -80,7 +80,7 @@ jobs:
             fi
             cd ..
           else
-            echo "openrom_flutter directory not found." \
+            echo "gui directory not found." \
                  > .review_reports/flutter_analyze.raw.log
             DART_ANALYZE_STATUS="⚪ SKIPPED"
             DART_FORMAT_STATUS="⚪ SKIPPED"
@@ -106,7 +106,7 @@ jobs:
           cppcheck --enable=warning,performance,portability \
             --inline-suppr \
             --suppress=missingIncludeSystem \
-            openrom_flutter/windows/ openrom_flutter/linux/ \
+            gui/windows/ gui/linux/ \
             > .review_reports/cppcheck.raw.log 2>&1 || true
 
           if grep -q "error:" .review_reports/cppcheck.raw.log; then
@@ -136,13 +136,13 @@ jobs:
           echo "" >> daily_summary.md
           echo "| Component | Target | Status |" >> daily_summary.md
           echo "| :--- | :--- | :--- |" >> daily_summary.md
-          echo "| **Flutter / Dart** (Analyze) | \`openrom_flutter/\` | $DART_ANALYZE_STATUS |" >> daily_summary.md
-          echo "| **Flutter / Dart** (Format)  | \`openrom_flutter/\` | $DART_FORMAT_STATUS |" >> daily_summary.md
-          echo "| **Flutter / Dart** (Tests)   | \`openrom_flutter/test/\` | $DART_TESTS_STATUS |" >> daily_summary.md
+          echo "| **Flutter / Dart** (Analyze) | \`gui/\` | $DART_ANALYZE_STATUS |" >> daily_summary.md
+          echo "| **Flutter / Dart** (Format)  | \`gui/\` | $DART_FORMAT_STATUS |" >> daily_summary.md
+          echo "| **Flutter / Dart** (Tests)   | \`gui/test/\` | $DART_TESTS_STATUS |" >> daily_summary.md
           echo "| **Python** (Ruff Lint)        | \`core/\` | $PY_LINT_STATUS |" >> daily_summary.md
           echo "| **Python** (Bandit Sec)       | \`core/\` | $PY_SECURITY_STATUS |" >> daily_summary.md
           echo "| **Python** (Pytest)           | \`tests/\` | $PY_TESTS_STATUS |" >> daily_summary.md
-          echo "| **C++ Native** (Cppcheck)     | \`openrom_flutter/*/runner/\` | $CPP_STATUS |" >> daily_summary.md
+          echo "| **C++ Native** (Cppcheck)     | \`gui/*/runner/\` | $CPP_STATUS |" >> daily_summary.md
           echo "" >> daily_summary.md
           echo "---" >> daily_summary.md
           echo "### 📑 Diagnostic Logs (Tail 60 Lines)" >> daily_summary.md

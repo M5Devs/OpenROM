@@ -4,7 +4,7 @@
 Unicode True
 
 !define APP_NAME    "OpenROM"
-!define APP_EXE     "openrom_flutter.exe"
+!define APP_EXE     "gui.exe"
 !define APP_CORE    "openrom-core.exe"
 !define APP_ICON    "assets\icons\icon.ico"
 !define REG_KEY     "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenROM"

@@ -40,9 +40,9 @@ jobs:
       - name: Patch pubspec version
         run: |
           $version = "${{ github.event.inputs.version }}"
-          (Get-Content openrom_flutter/pubspec.yaml) `
+          (Get-Content gui/pubspec.yaml) `
             -replace '^version: .*', "version: $version+1" |
-            Set-Content openrom_flutter/pubspec.yaml
+            Set-Content gui/pubspec.yaml
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -76,16 +76,16 @@ jobs:
           channel: 'stable'
 
       - name: Flutter dependencies
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter pub get
 
       - name: Build Flutter Windows
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter build windows --release
 
       - name: Prepare release files
         run: |
-          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          $releaseDir = "gui/build/windows/x64/runner/Release"
 
           # Copy openrom-core standalone folder contents (exe + DLLs)
           Copy-Item -Recurse -Force "dist\openrom-core.dist\*" "$releaseDir\"
@@ -93,7 +93,7 @@ jobs:
           Copy-Item -Recurse -Force "themes/" "$releaseDir/themes/"
 
           $version = "${{ github.event.inputs.version }}"
-          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: openrom_flutter.exe`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
+          $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: gui.exe`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
           Set-Content -Path "$releaseDir/README.txt" -Value $readme
 
           New-Item -ItemType Directory -Path dist\release -Force
@@ -104,7 +104,7 @@ jobs:
 
       - name: Package ZIP
         run: |
-          $releaseDir = "openrom_flutter/build/windows/x64/runner/Release"
+          $releaseDir = "gui/build/windows/x64/runner/Release"
           Compress-Archive -Path "$releaseDir/*" `
             -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
 
@@ -187,7 +187,7 @@ jobs:
       - name: Patch pubspec version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+          sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -217,11 +217,11 @@ jobs:
           channel: 'stable'
 
       - name: Flutter dependencies
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter pub get
 
       - name: Build Flutter Linux
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter build linux --release
 
       - name: Download appimagetool
@@ -235,7 +235,7 @@ jobs:
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
-          cp -r openrom_flutter/build/linux/x64/release/bundle/. AppDir/usr/bin/
+          cp -r gui/build/linux/x64/release/bundle/. AppDir/usr/bin/
 
           # Copy openrom-core standalone folder into AppDir
           cp -r dist/openrom-core.dist/. AppDir/usr/bin/
@@ -249,7 +249,7 @@ jobs:
           cat > AppDir/OpenROM.desktop << EOF
           [Desktop Entry]
           Name=OpenROM
-          Exec=openrom_flutter
+          Exec=gui
           Icon=openrom
           Type=Application
           Categories=Utility;
@@ -260,7 +260,7 @@ jobs:
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "${0}")")"
           export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
-          exec "$HERE/usr/bin/openrom_flutter" "$@"
+          exec "$HERE/usr/bin/gui" "$@"
           EOF
           chmod +x AppDir/AppRun
 
@@ -317,7 +317,7 @@ jobs:
       - name: Patch pubspec version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          sed -i "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+          sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Build ecm / unecm from source
         run: |
@@ -371,20 +371,20 @@ jobs:
         run: flutter precache --linux
 
       - name: Flutter dependencies
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter pub get
 
       - name: Build Flutter Linux ARM64
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter build linux --release
 
       - name: Package ZIP
         run: |
           mkdir release
-          cp -r openrom_flutter/build/linux/arm64/release/bundle/. release/
+          cp -r gui/build/linux/arm64/release/bundle/. release/
           cp -r dist/openrom-core.dist/. release/
           chmod +x release/openrom-core
-          printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./openrom_flutter\n\nNOTE: Light tools only on ARM64 (patching, header removal,\nM3U/CUE). Heavy conversions (CHD, CSO, RVZ) need x86_64 build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
+          printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./gui\n\nNOTE: Light tools only on ARM64 (patching, header removal,\nM3U/CUE). Heavy conversions (CHD, CSO, RVZ) need x86_64 build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
           cd release
           zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip .
@@ -422,7 +422,7 @@ jobs:
       - name: Patch pubspec version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          sed -i "" "s/^version: .*/version: ${VERSION}+1/" openrom_flutter/pubspec.yaml
+          sed -i "" "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -453,16 +453,16 @@ jobs:
           channel: 'stable'
 
       - name: Flutter dependencies
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter pub get
 
       - name: Build Flutter macOS
-        working-directory: openrom_flutter
+        working-directory: gui
         run: flutter build macos --release
 
       - name: Embed openrom-core in .app bundle
         run: |
-          APP_MACOS="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app/Contents/MacOS"
+          APP_MACOS="gui/build/macos/Build/Products/Release/gui.app/Contents/MacOS"
           # Copy standalone folder contents into the bundle
           cp -r dist/openrom-core.dist/. "$APP_MACOS/"
           chmod +x "$APP_MACOS/openrom-core"
@@ -470,7 +470,7 @@ jobs:
 
       - name: Sign app bundle (ad-hoc)
         run: |
-          APP="openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app"
+          APP="gui/build/macos/Build/Products/Release/gui.app"
           xattr -cr "$APP"
           codesign --deep --force \
             --entitlements macos_entitlements.plist \
@@ -480,7 +480,7 @@ jobs:
       - name: Create DMG
         run: |
           mkdir -p dmg_contents
-          cp -r "openrom_flutter/build/macos/Build/Products/Release/openrom_flutter.app" \
+          cp -r "gui/build/macos/Build/Products/Release/gui.app" \
                 dmg_contents/OpenROM.app
           hdiutil create \
             -volname "OpenROM" \

@@ -8,7 +8,7 @@ dart compile exe bin/openrom.dart -o ../openrom-core
 cd ..
 
 echo "=== Building OpenROM Flutter UI ==="
-cd openrom_flutter
+cd gui
 flutter pub get
 flutter build linux --release
 cd ..

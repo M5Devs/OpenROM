@@ -26,8 +26,8 @@ jobs:
       - name: Auto-Format Dart & Auto-Fix Python
         run: |
           # 1. فرمتة كل ملفات فلاتر الـ 36
-          if [ -d "openrom_flutter" ]; then
-            cd openrom_flutter
+          if [ -d "gui" ]; then
+            cd gui
             dart format .
             cd ..
           fi
