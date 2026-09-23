@@ -1,16 +1,6 @@
 version: 2
 updates:
 
-  # Python dependencies (requirements.txt)
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "python"
 
   # Flutter dependencies (pubspec.yaml)
   - package-ecosystem: "pub"

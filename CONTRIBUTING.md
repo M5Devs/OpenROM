@@ -25,7 +25,7 @@ Before opening an issue, please:
 When opening a bug report, include:
 
 - **OS and version** (e.g. Windows 11, Ubuntu 22.04)
-- **Python version** (`python --version`)
+- **Dart version** (`dart --version`)
 - **Steps to reproduce** — what file, what conversion, what settings
 - **Expected behavior** vs **what actually happened**
 - **Log file** — found in:
@@ -72,13 +72,13 @@ OpenROM's conversion logic lives in two files:
 
 | File | What to edit |
 |------|-------------|
-| `core/detector.py` | Add the new extension to `SUPPORTED_INPUT`, `CONVERSION_MAP`, and `COMMAND_TEMPLATES` |
-| `core/converter.py` | Add the conversion route in `_dispatch()` and implement the method |
+| `core/lib/src/detector.dart` | Add the new extension to `SUPPORTED_INPUT`, `CONVERSION_MAP`, and `COMMAND_TEMPLATES` |
+| `core/lib/src/converter.dart` | Add the conversion route in `_dispatch()` and implement the method |
 
 ### Example — adding a new input format `XYZ`:
 
-**`core/detector.py`:**
-```python
+**`core/lib/src/detector.dart`:**
+```dart
 SUPPORTED_INPUT = {
     ...
     ".xyz": "XYZ",
@@ -90,8 +90,8 @@ CONVERSION_MAP = {
 }
 ```
 
-**`core/converter.py`:**
-```python
+**`core/lib/src/converter.dart`:**
+```dart
 def _dispatch(self, job):
     ...
     if fmt == "XYZ" and tgt == "CHD":
@@ -154,10 +154,10 @@ and place it at `assets/linux/extract-xiso`.
 
 OpenROM follows a few simple conventions:
 
-- **Python 3.10+** — use modern syntax (`match`, `X | Y` unions, etc.)
+- **Dart 3.0+** — use modern syntax (patterns, records, sealed classes)
 - **Type hints** on all function signatures
-- **Log everything** through `core/logger.py` — never use bare `print()` in core logic
-- **No hardcoded paths** — always use `core/config.py` for tool and directory resolution
+- **Log everything** through `core/lib/src/logger.dart` — never use bare `print()` in core logic
+- **No hardcoded paths** — always use `core/lib/src/config.dart` for tool and directory resolution
 - **One class per file** in `ui/` — keep windows self-contained
 - **Thread safety** — any background operation goes in a thread; never block the UI
 

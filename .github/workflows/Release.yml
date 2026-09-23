@@ -13,7 +13,7 @@ permissions:
 
 jobs:
 
-  # ── Windows — Flutter GUI + Nuitka CLI ──────────────────────────────────────
+  # ── Windows — Flutter GUI + Dart CLI ────────────────────
   build-windows:
     runs-on: windows-2022
     steps:
@@ -44,31 +44,17 @@ jobs:
             -replace '^version: .*', "version: $version+1" |
             Set-Content gui/pubspec.yaml
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
         with:
-          python-version: "3.11"
+          sdk: stable
 
-      - name: Install Python dependencies
+      - name: Build openrom-core (Dart)
         run: |
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
-
-      # ── Nuitka standalone — avoids AV false positives from --onefile ──
-      # --onefile uses a self-extracting stub identical to malware droppers,
-      # triggering trojan.badjoke/Wacapew/Stealer flags on 10+ AV engines.
-      # --standalone produces a folder distribution: no extraction, no flags.
-      - name: Build openrom-core (Nuitka standalone)
-        run: |
-          python -m nuitka `
-            --standalone `
-            --assume-yes-for-downloads `
-            --output-filename=openrom-core `
-            --output-dir=dist `
-            --include-data-dir=assets=assets `
-            --windows-icon-from-ico=assets/icons/icon.ico `
-            --windows-console-mode=force `
-            core/cli.py
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../dist/openrom-core.exe
+          New-Item -ItemType Directory -Force -Path ..\dist
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -87,8 +73,8 @@ jobs:
         run: |
           $releaseDir = "gui/build/windows/x64/runner/Release"
 
-          # Copy openrom-core standalone folder contents (exe + DLLs)
-          Copy-Item -Recurse -Force "dist\openrom-core.dist\*" "$releaseDir\"
+          # Copy single dart binary
+          Copy-Item -Force "dist\openrom-core.exe" "$releaseDir\"
 
           Copy-Item -Recurse -Force "themes/" "$releaseDir/themes/"
 
@@ -154,7 +140,7 @@ jobs:
           name: OpenROM_Windows_Installer
           path: OpenROM-v${{ github.event.inputs.version }}-Setup.exe
 
-  # ── Linux — Flutter AppImage + Nuitka CLI ───────────────────────────────────
+  # ── Linux — Flutter AppImage + Dart CLI ─────────────────
   build-linux:
     runs-on: ubuntu-22.04
     steps:
@@ -189,27 +175,17 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
         with:
-          python-version: "3.11"
+          sdk: stable
 
-      - name: Install Python dependencies
+      - name: Build openrom-core (Dart)
         run: |
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
-
-      # ── Nuitka standalone — avoids AV false positives from --onefile ──
-      - name: Build openrom-core (Nuitka standalone)
-        run: |
-          python -m nuitka \
-            --standalone \
-            --assume-yes-for-downloads \
-            --output-filename=openrom-core \
-            --output-dir=dist \
-            --include-data-dir=assets=assets \
-            core/cli.py
-          chmod +x dist/openrom-core.dist/openrom-core
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../dist/openrom-core
+          chmod +x ../dist/openrom-core
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -237,8 +213,7 @@ jobs:
 
           cp -r gui/build/linux/x64/release/bundle/. AppDir/usr/bin/
 
-          # Copy openrom-core standalone folder into AppDir
-          cp -r dist/openrom-core.dist/. AppDir/usr/bin/
+          cp dist/openrom-core AppDir/usr/bin/openrom-core
           chmod +x AppDir/usr/bin/openrom-core
 
           cp -r themes/ AppDir/usr/bin/themes/
@@ -274,8 +249,7 @@ jobs:
         run: |
           mkdir release
           cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
-          # Include openrom-core standalone for headless CLI use
-          cp -r dist/openrom-core.dist/. release/
+          cp dist/openrom-core release/openrom-core
           chmod +x release/openrom-core
           printf 'OpenROM - Linux\n======================================================\nRUN THIS: ./OpenROM-*.AppImage\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
@@ -338,27 +312,17 @@ jobs:
           cp ./unecm          assets/linux/arm64/unecm
           chmod +x assets/linux/arm64/*
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
         with:
-          python-version: "3.11"
+          sdk: stable
 
-      - name: Install Python dependencies
+      - name: Build openrom-core (Dart)
         run: |
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
-
-      # ── Nuitka standalone — avoids AV false positives from --onefile ──
-      - name: Build openrom-core (Nuitka standalone)
-        run: |
-          python -m nuitka \
-            --standalone \
-            --assume-yes-for-downloads \
-            --output-filename=openrom-core \
-            --output-dir=dist \
-            --include-data-dir=assets=assets \
-            core/cli.py
-          chmod +x dist/openrom-core.dist/openrom-core
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../dist/openrom-core
+          chmod +x ../dist/openrom-core
 
       - name: Set up Flutter (manual install for ARM64)
         run: |
@@ -382,7 +346,7 @@ jobs:
         run: |
           mkdir release
           cp -r gui/build/linux/arm64/release/bundle/. release/
-          cp -r dist/openrom-core.dist/. release/
+          cp dist/openrom-core release/openrom-core
           chmod +x release/openrom-core
           printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./gui\n\nNOTE: Light tools only on ARM64 (patching, header removal,\nM3U/CUE). Heavy conversions (CHD, CSO, RVZ) need x86_64 build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
@@ -424,28 +388,17 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "" "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
         with:
-          python-version: "3.11"
+          sdk: stable
 
-      - name: Install Python dependencies
+      - name: Build openrom-core (Dart)
         run: |
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
-
-      # ── Nuitka standalone — avoids AV false positives from --onefile ──
-      - name: Build openrom-core (Nuitka standalone)
-        run: |
-          python -m nuitka \
-            --standalone \
-            --assume-yes-for-downloads \
-            --output-filename=openrom-core \
-            --output-dir=dist \
-            --include-data-dir=assets=assets \
-            --macos-target-arch=${{ matrix.arch }} \
-            core/cli.py
-          chmod +x dist/openrom-core.dist/openrom-core
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../dist/openrom-core
+          chmod +x ../dist/openrom-core
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -463,8 +416,7 @@ jobs:
       - name: Embed openrom-core in .app bundle
         run: |
           APP_MACOS="gui/build/macos/Build/Products/Release/gui.app/Contents/MacOS"
-          # Copy standalone folder contents into the bundle
-          cp -r dist/openrom-core.dist/. "$APP_MACOS/"
+          cp dist/openrom-core "$APP_MACOS/openrom-core"
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
 
