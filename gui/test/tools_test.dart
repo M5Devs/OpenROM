@@ -3,9 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openrom_flutter/l10n/app_localizations.dart';
-import 'package:openrom_flutter/models/theme_config.dart';
-import 'package:openrom_flutter/screens/tools_screen.dart';
+import 'package:openrom/l10n/app_localizations.dart';
+import 'package:openrom/models/theme_config.dart';
+import 'package:openrom/screens/tools_screen.dart';
 
 void main() {
   group('ToolsScreen Widget Tests', () {
@@ -19,9 +19,7 @@ void main() {
       );
     }
 
-    testWidgets('Renders Tools tabs and compressor UI', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Renders Tools tabs and compressor UI', (WidgetTester tester) async {
       await tester.pumpWidget(createToolsScreen());
       await tester.pumpAndSettle();
 
@@ -42,39 +40,31 @@ void main() {
       await tester.pumpWidget(createToolsScreen());
       await tester.pumpAndSettle();
 
-      // M3U Tab
       final m3uTabFinder = find.widgetWithText(Tab, 'M3U Generator');
       expect(m3uTabFinder, findsOneWidget);
       await tester.tap(m3uTabFinder);
       await tester.pumpAndSettle();
-
       expect(find.text('Generate M3U'), findsOneWidget);
       expect(find.text('Output folder'), findsOneWidget);
 
-      // CUE Generator Tab
       final cueTabFinder = find.widgetWithText(Tab, 'CUE Generator');
       expect(cueTabFinder, findsOneWidget);
       await tester.tap(cueTabFinder);
       await tester.pumpAndSettle();
-
       expect(find.text('Generate CUE'), findsOneWidget);
       expect(find.text('BIN File'), findsOneWidget);
 
-      // BIN Merger Tab
       final binMergerTabFinder = find.widgetWithText(Tab, 'BIN Merger');
       expect(binMergerTabFinder, findsOneWidget);
       await tester.tap(binMergerTabFinder);
       await tester.pumpAndSettle();
-
       expect(find.text('Merge BINs'), findsOneWidget);
       expect(find.text('CUE File (multi-track)'), findsOneWidget);
 
-      // Header Remover Tab
       final headerRemoverTabFinder = find.widgetWithText(Tab, 'Header Remover');
       expect(headerRemoverTabFinder, findsOneWidget);
       await tester.tap(headerRemoverTabFinder);
       await tester.pumpAndSettle();
-
       expect(find.text('Remove Header'), findsOneWidget);
       expect(find.text('Keep backup (.bak)'), findsOneWidget);
     });
