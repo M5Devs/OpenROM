@@ -1,0 +1,18 @@
+name: openrom_core
+description: OpenROM Pure Dart Backend Core & Toolkit Library
+version: 3.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  path: ^1.9.0
+  args: ^2.5.0
+  crypto: ^3.0.3
+  archive: ^3.6.1
+  xml: ^6.5.0
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^3.0.0
