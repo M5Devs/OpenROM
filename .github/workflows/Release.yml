@@ -425,7 +425,8 @@ jobs:
 
       - name: Sign app bundle (ad-hoc)
         run: |
-          APP="gui/build/macos/Build/Products/Release/gui.app"
+          APP=$(find gui/build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -1)
+          echo "Signing: $APP"
           xattr -cr "$APP"
           codesign --deep --force \
             --entitlements macos_entitlements.plist \
@@ -434,9 +435,10 @@ jobs:
 
       - name: Create DMG
         run: |
+          APP=$(find gui/build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -1)
+          echo "Packaging: $APP"
           mkdir -p dmg_contents
-          cp -r "gui/build/macos/Build/Products/Release/gui.app" \
-                dmg_contents/OpenROM.app
+          cp -r "$APP" dmg_contents/OpenROM.app
           hdiutil create \
             -volname "OpenROM" \
             -srcfolder dmg_contents \
