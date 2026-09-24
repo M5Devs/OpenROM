@@ -44,7 +44,30 @@ jobs:
       - name: Configure Flathub
         run: |
           sudo flatpak --system remote-add --if-not-exists \
-            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+            flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+          sudo flatpak --system update -y
+
+      # flatpak-builder runs as the GitHub Actions runner user, but the
+      # flatpak-github-actions action installs dependencies into the system
+      # Flatpak repository. Install them explicitly with sudo first.
+      - name: Install Flatpak SDK and runtimes
+        run: |
+          sudo flatpak --system install -y --noninteractive flathub \
+            org.freedesktop.Sdk/x86_64/24.08 \
+            org.freedesktop.Sdk.Locale/x86_64/24.08 \
+            org.freedesktop.Platform/x86_64/24.08 \
+            org.freedesktop.Platform.Locale/x86_64/24.08 \
+            org.freedesktop.Platform.GL.default/x86_64/24.08 \
+            org.freedesktop.Platform.GL.default/x86_64/24.08-extra \
+            org.freedesktop.Platform.openh264/x86_64/2.5.1
+
+      - name: Verify Flatpak SDK installation
+        run: |
+          sudo flatpak --system list --runtime
+          sudo flatpak --system info org.freedesktop.Sdk//24.08
+          sudo flatpak --system info org.freedesktop.Platform//24.08
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -57,7 +80,8 @@ jobs:
           mkdir -p flatpak-build
           cd core
           dart pub get
-          dart compile exe bin/openrom.dart -o ../flatpak-build/openrom-core
+          dart compile exe bin/openrom.dart \
+            -o ../flatpak-build/openrom-core
 
       - name: Build Flutter Linux Bundle
         run: |
@@ -68,7 +92,14 @@ jobs:
       - name: Prepare Flatpak Bundle Directory
         run: |
           mkdir -p flatpak-build/bundle
-          cp -r gui/build/linux/x64/release/bundle/. flatpak-build/bundle/
+          cp -r gui/build/linux/x64/release/bundle/. \
+            flatpak-build/bundle/
+
+      - name: Verify Flatpak build inputs
+        run: |
+          test -f flatpak-build/openrom-core
+          test -f flatpak-build/bundle/gui
+          test -f flatpak/io.github.M5Devs.OpenROM.yml
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
