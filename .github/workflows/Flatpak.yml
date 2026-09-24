@@ -12,28 +12,13 @@ permissions:
   contents: write
 
 jobs:
-
-  # ── Job 1: Build Flutter + Dart on standard runner ────────────────────────
-  build-app:
-    name: Build App (Flutter + Dart)
+  flatpak:
+    name: Build Flatpak
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout OpenROM
         uses: actions/checkout@v4
-
-      - name: Install system dependencies
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/google-chrome*.list \
-                     /etc/apt/sources.list.d/microsoft-*.list \
-                     /etc/apt/sources.list.d/azure-cli.list \
-                     /etc/apt/sources.list.d/github-cli.list
-          sudo apt-get update -qq
-          sudo apt-get install -y -q \
-            clang cmake ninja-build pkg-config \
-            libgtk-3-dev liblzma-dev libstdc++-12-dev \
-            libglib2.0-dev libgdk-pixbuf2.0-dev \
-            patchelf ccache
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION
@@ -43,87 +28,43 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
-      # ── Build openrom-core ──
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Build openrom-core (Dart)
+      # 1. طبخ متطلبات لينكس عشان فلاتر يعرف يبني
+      - name: Install Linux build dependencies
         run: |
-          cd core
-          dart pub get
-          mkdir -p ../flatpak-build
-          dart compile exe bin/openrom.dart -o ../flatpak-build/openrom-core
-          chmod +x ../flatpak-build/openrom-core
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
 
-      # ── Build Flutter ──
+      # 2. تجهيز Dart و Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
-      - name: Flutter dependencies
-        working-directory: gui
-        run: flutter pub get
+      # 3. بيلد الـ CLI (openrom-core)
+      - name: Build Dart Core CLI
+        run: |
+          mkdir -p flatpak-build
+          cd core
+          dart pub get
+          dart compile exe bin/openrom.dart -o ../flatpak-build/openrom-core
+          cd ..
 
-      - name: Build Flutter Linux
-        working-directory: gui
-        run: flutter build linux --release
+      # 4. بيلد واجهة Flutter للينكس
+      - name: Build Flutter Linux Bundle
+        run: |
+          cd gui
+          flutter pub get
+          flutter build linux --release
+          cd ..
 
-      # ── Prepare flatpak-build folder ──
-      - name: Prepare flatpak-build
+      # 5. نقل ملفات الـ Bundle للمسار اللي فلاتباك مستنيه!
+      - name: Prepare Flatpak Bundle Directory
         run: |
           mkdir -p flatpak-build/bundle
-          cp -r gui/build/linux/x64/release/bundle/. flatpak-build/bundle/
-          chmod +x flatpak-build/bundle/gui
-          echo "=== flatpak-build contents ==="
-          ls -la flatpak-build/
-          echo "=== flatpak-build/bundle contents ==="
-          ls -la flatpak-build/bundle/
+          cp -r gui/build/linux/x64/release/bundle/* flatpak-build/bundle/
 
-      # ── Push to temp branch ──
-      - name: Push flatpak-build to temp branch
-        run: |
-          git config user.email "ci@github.com"
-          git config user.name "GitHub CI"
-          git checkout -b flatpak-tmp-${{ github.run_id }}
-          # Force add even if in .gitignore
-          git add -f flatpak-build/
-          echo "=== git status ==="
-          git status
-          echo "=== staged files ==="
-          git diff --cached --name-only
-          git commit -m "ci: temp flatpak build artifacts [skip ci]"
-          git push origin flatpak-tmp-${{ github.run_id }}
-
-  # ── Job 2: Build Flatpak inside privileged container ────────────────────────
-  package-flatpak:
-    name: Package Flatpak
-    needs: build-app
-    runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
-
-    steps:
-      - name: Checkout temp branch (with flatpak-build/)
-        uses: actions/checkout@v4
-        with:
-          ref: flatpak-tmp-${{ github.run_id }}
-
-      - name: Verify flatpak-build contents
-        run: |
-          echo "=== flatpak-build/ ==="
-          ls -la flatpak-build/
-          echo "=== flatpak-build/bundle/ ==="
-          ls -la flatpak-build/bundle/
-
-      - name: Fix binary permissions
-        run: |
-          chmod +x flatpak-build/openrom-core
-          chmod +x flatpak-build/bundle/gui
-
+      # 6. دلوقتي بقى الفلاتباك يدخل يلاقي حاجته جاهزة!
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
@@ -138,18 +79,3 @@ jobs:
           files: OpenROM-v${{ github.event.inputs.version }}.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # ── Job 3: Cleanup temp branch ───────────────────────────────────────────────
-  cleanup:
-    name: Cleanup Temp Branch
-    needs: [build-app, package-flatpak]
-    runs-on: ubuntu-22.04
-    if: always()
-
-    steps:
-      - name: Checkout OpenROM
-        uses: actions/checkout@v4
-
-      - name: Delete temp branch
-        run: |
-          git push origin --delete flatpak-tmp-${{ github.run_id }} || true
