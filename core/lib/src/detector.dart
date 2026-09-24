@@ -11,6 +11,7 @@ const Map<String, String> supportedInput = {
   '.bin': 'BIN',
   '.cue': 'CUE',
   '.gdi': 'GDI',
+  '.cdi': 'CDI',
   '.img': 'IMG',
   '.ecm': 'ECM',
   '.chd': 'CHD',
@@ -30,6 +31,7 @@ const Map<String, String> platformMap = {
   'BIN': 'CD Image',
   'CUE': 'CD Cue Sheet',
   'GDI': 'Dreamcast GDI',
+  'CDI': 'Dreamcast CDI',
   'IMG': 'Disk Image',
   'ECM': 'ECM Compressed',
   'CHD': 'CHD Archive',
@@ -54,6 +56,7 @@ const Map<String, String> formatColors = {
   'BIN': '#f9a825',
   'CUE': '#f9a825',
   'GDI': '#9c27b0',
+  'CDI': '#7b1fa2',
   'IMG': '#673ab7',
   'CHD': '#00bcd4',
   'CSO': '#4caf50',
@@ -79,6 +82,7 @@ const Map<String, List<String>> conversionMap = {
   'BIN': ['CHD', 'ECM'],
   'CUE': ['CHD'],
   'GDI': ['CHD'],
+  'CDI': ['CHD'],
   'IMG': ['CHD'],
   'CHD': ['ISO', 'BIN/CUE'],
   'CSO': ['ISO'],
@@ -104,6 +108,7 @@ const Map<String, String> commandTemplates = {
   'BIN->ECM': 'ecm "{in}" "{out}"',
   'CUE->CHD': 'chdman createcd -i "{in}" -o "{out}"',
   'GDI->CHD': 'chdman createcd -i "{in}" -o "{out}"',
+  'CDI->CHD': 'chdman createcd -i "{in}" -o "{out}"',
   'IMG->CHD': 'chdman createdvd -i "{in}" -o "{out}"',
   'CHD->ISO': 'chdman extractdvd -i "{in}" -o "{out}"',
   'CHD->BIN/CUE': 'chdman extractcd -i "{in}" -o "{out_cue}"',
@@ -273,6 +278,7 @@ Uint8List _readHeader(String filepath, int size) {
 
 String _guessPlatform(String filepath, String fmt, int size, Uint8List header) {
   if (fmt == 'GDI') return 'Dreamcast';
+  if (fmt == 'CDI') return 'Dreamcast';
   if (fmt == 'CSO' || fmt == 'ZSO') {
     return (size < 2 * 1024 * 1024 * 1024) ? 'PSP' : 'PSP / PS2';
   }
