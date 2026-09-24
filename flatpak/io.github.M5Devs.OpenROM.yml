@@ -1,6 +1,6 @@
 app-id: io.github.M5Devs.OpenROM
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: "24.08"
 sdk: org.freedesktop.Sdk
 command: gui
 
@@ -15,32 +15,25 @@ modules:
   - name: openrom
     buildsystem: simple
     build-commands:
-      # Flutter bundle (pre-built by CI, placed in flatpak-build/bundle/)
+      - mkdir -p /app
       - cp -r flatpak-build/bundle/. /app/
 
-      # Link GUI executable to /app/bin so Flatpak can run 'command: gui'
       - mkdir -p /app/bin
       - ln -sf /app/gui /app/bin/gui
 
-      # openrom-core CLI backend
       - install -Dm755 flatpak-build/openrom-core /app/bin/openrom-core
 
-      # Bundled tools
-      - install -Dm755 assets/linux/x86_64/chdman       /app/bin/chdman
-      - install -Dm755 assets/linux/x86_64/ecm          /app/bin/ecm
-      - install -Dm755 assets/linux/x86_64/unecm        /app/bin/unecm
-      - install -Dm755 assets/linux/x86_64/maxcso       /app/bin/maxcso
+      - install -Dm755 assets/linux/x86_64/chdman /app/bin/chdman
+      - install -Dm755 assets/linux/x86_64/ecm /app/bin/ecm
+      - install -Dm755 assets/linux/x86_64/unecm /app/bin/unecm
+      - install -Dm755 assets/linux/x86_64/maxcso /app/bin/maxcso
       - install -Dm755 assets/linux/x86_64/extract-xiso /app/bin/extract-xiso
-      - install -Dm755 assets/linux/x86_64/nodtool      /app/bin/nodtool
+      - install -Dm755 assets/linux/x86_64/nodtool /app/bin/nodtool
 
-      # Desktop integration
-      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop
-          /app/share/applications/io.github.M5Devs.OpenROM.desktop
-      - install -Dm644 assets/icons/icon.png
-          /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
-      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml
-          /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop /app/share/applications/io.github.M5Devs.OpenROM.desktop
+      - install -Dm644 assets/icons/icon.png /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
 
     sources:
       - type: dir
-        path: .
+        path: ..
