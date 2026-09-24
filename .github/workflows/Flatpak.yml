@@ -49,19 +49,13 @@ jobs:
 
           sudo flatpak --system update -y
 
-      # flatpak-builder runs as the GitHub Actions runner user, but the
-      # flatpak-github-actions action installs dependencies into the system
-      # Flatpak repository. Install them explicitly with sudo first.
       - name: Install Flatpak SDK and runtimes
         run: |
           sudo flatpak --system install -y --noninteractive flathub \
             org.freedesktop.Sdk/x86_64/24.08 \
             org.freedesktop.Sdk.Locale/x86_64/24.08 \
             org.freedesktop.Platform/x86_64/24.08 \
-            org.freedesktop.Platform.Locale/x86_64/24.08 \
-            org.freedesktop.Platform.GL.default/x86_64/24.08 \
-            org.freedesktop.Platform.GL.default/x86_64/24.08-extra \
-            org.freedesktop.Platform.openh264/x86_64/2.5.1
+            org.freedesktop.Platform.Locale/x86_64/24.08
 
       - name: Verify Flatpak SDK installation
         run: |
