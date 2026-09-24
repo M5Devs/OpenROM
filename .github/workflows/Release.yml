@@ -414,7 +414,11 @@ jobs:
 
       - name: Embed openrom-core in .app bundle
         run: |
-          APP_MACOS="gui/build/macos/Build/Products/Release/gui.app/Contents/MacOS"
+          APP=$(find gui/build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -1)
+          APP_MACOS="$APP/Contents/MacOS"
+          echo "Found .app at: $APP"
+          echo "MacOS dir: $APP_MACOS"
+          ls -la dist/
           cp dist/openrom-core "$APP_MACOS/openrom-core"
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
