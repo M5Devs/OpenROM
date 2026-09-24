@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (e.g., 3.5.0)'
+        description: "Version (e.g., 3.5.0)"
         required: true
-        default: '3.5.0'
+        default: "3.5.0"
 
 permissions:
   contents: write
@@ -28,43 +28,48 @@ jobs:
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
-      # 1. طبخ متطلبات لينكس عشان فلاتر يعرف يبني
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev flatpak flatpak-builder elfutils
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            flatpak \
+            flatpak-builder \
+            elfutils
 
-      # 2. تجهيز Dart و Flutter
+      - name: Configure Flathub
+        run: |
+          sudo flatpak --system remote-add --if-not-exists \
+            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      # 3. بيلد الـ CLI (openrom-core)
       - name: Build Dart Core CLI
         run: |
           mkdir -p flatpak-build
           cd core
           dart pub get
           dart compile exe bin/openrom.dart -o ../flatpak-build/openrom-core
-          cd ..
 
-      # 4. بيلد واجهة Flutter للينكس
       - name: Build Flutter Linux Bundle
         run: |
           cd gui
           flutter pub get
           flutter build linux --release
-          cd ..
 
-      # 5. نقل ملفات الـ Bundle للمسار اللي فلاتباك مستنيه!
       - name: Prepare Flatpak Bundle Directory
         run: |
           mkdir -p flatpak-build/bundle
-          cp -r gui/build/linux/x64/release/bundle/* flatpak-build/bundle/
+          cp -r gui/build/linux/x64/release/bundle/. flatpak-build/bundle/
 
-      # 6. دلوقتي بقى الفلاتباك يدخل يلاقي حاجته جاهزة!
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
