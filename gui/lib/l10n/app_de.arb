@@ -1,0 +1,177 @@
+{
+  "@@locale": "de",
+  "appTitle": "OpenROM",
+  "appSubtitle": "Universal ROM Conversion Suite",
+  "convertButton": "Convert",
+  "convertButtonWithCount": "Convert ({count} Files)",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dropZoneHint": "Drag & Drop ROM files here",
+  "dropZoneSubHint": "or Click to browse",
+  "settingsTitle": "Conversion Settings",
+  "outputFormat": "Output Format",
+  "compressionLevel": "Compression Level",
+  "compressionNormal": "Normal",
+  "compressionHigh": "High",
+  "compressionMax": "Max",
+  "postProcessing": "Post-Processing",
+  "verifyAfterConversion": "Verify after conversion",
+  "outputDestination": "Output Destination",
+  "browse": "Browse",
+  "statusWaiting": "Waiting...",
+  "statusConverting": "Converting...",
+  "statusDone": "Done",
+  "statusFailed": "Failed",
+  "aboutTitle": "About OpenROM",
+  "settingsScreen": "Settings",
+  "aboutScreen": "About",
+  "themeScreen": "Themes",
+  "errorCoreNotFound": "openrom-core is missing from the app folder.",
+  "errorUnsupportedFormat": "This file format cannot be converted with the selected output.",
+  "errorDiskSpace": "Not enough free space to complete this conversion.",
+  "errorToolFailed": "The conversion tool (chdman/maxcso) exited unexpectedly.",
+  "errorConversionFailed": "Conversion stopped before completing.",
+  "errorFileNotFound": "The input file was moved or deleted.",
+  "errorOutputDirNotFound": "The selected output folder no longer exists.",
+  "errorPermissionDenied": "OpenROM can't write to the output folder.",
+  "errorCorruptedFile": "The file appears to be corrupted or is 0 bytes.",
+  "errorUnknown": "Something went wrong. This might be a bug.",
+  "errorDetailsLabel": "Details",
+  "retryButton": "Retry",
+  "closeButton": "Close",
+  "reportBugButton": "Report Bug",
+  "clearQueue": "Clear Queue",
+  "removeFile": "Remove",
+  "openOutputFolder": "Open Output Folder",
+  "patcherTitle": "ROM Patcher",
+  "patcherRomFile": "ROM File",
+  "patcherPatchFile": "Patch File",
+  "patcherOutputFile": "Output File",
+  "patcherSameFolder": "Same folder as ROM",
+  "patcherIgnoreChecksum": "Ignore checksum errors",
+  "patcherApplyButton": "Apply Patch",
+  "patcherSuccess": "Patched successfully!",
+  "patcherFormat": "Format",
+  "patcherChecksumPassed": "passed",
+  "patcherChecksumSkipped": "skipped",
+  "patcherDropHint": "Drop ROM + Patch files here",
+  "toolsTitle": "Tools",
+  "compressorTitle": "ROM Compressor",
+  "compressorAddFiles": "Add Files",
+  "compressorAddFolder": "Add Folder",
+  "compressorOutputFormat": "Output Format",
+  "compressorLevel": "Compression Level",
+  "compressorLevelFast": "Fast",
+  "compressorLevelNormal": "Normal",
+  "compressorLevelUltra": "Ultra",
+  "compressorDeleteSource": "Delete source after done",
+  "compressorSameFolder": "Same folder as source",
+  "compressorButton": "Compress ({count} Files)",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "compressorSkipped": "Skipped (already compressed)",
+  "m3uTitle": "M3U Generator",
+  "m3uDropHint": "Drop disc files here",
+  "m3uOutputLabel": "Output folder",
+  "m3uButton": "Generate M3U",
+  "m3uSuccess": "Created: {filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "cueGeneratorTitle": "CUE Generator",
+  "cueGeneratorBinFile": "BIN File",
+  "cueGeneratorDetectedMode": "Detected mode",
+  "cueGeneratorButton": "Generate CUE",
+  "cueGeneratorSuccess": "Created: {filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "binMergerTitle": "BIN Merger",
+  "binMergerCueFile": "CUE File (multi-track)",
+  "binMergerDetected": "Detected: {count} BIN files",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "binMergerButton": "Merge BINs",
+  "binMergerSuccess": "Merged: {filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverTitle": "Header Remover",
+  "headerRemoverSystem": "System",
+  "headerRemoverFound": "Header Found",
+  "headerRemoverNotFound": "No Header Found",
+  "headerRemoverConfidence": "Confidence",
+  "headerRemoverBackup": "Keep backup (.bak)",
+  "headerRemoverButton": "Remove Header",
+  "headerRemoverSuccess": "Clean ROM: {filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverNoHeader": "No copier header detected.",
+  "dreamcastTitle": "Dreamcast",
+  "dreamcastDcpTab": "Apply DCP",
+  "dreamcastIpbinTab": "IP.BIN Editor",
+  "dreamcastGdiTab": "GDI Info",
+  "dreamcastDiscDir": "Disc Directory",
+  "dreamcastDcpFile": "DCP Patch File",
+  "dreamcastOutputDir": "Output Directory",
+  "dreamcastApplyButton": "Apply DCP Patch",
+  "dreamcastApplySuccess": "DCP patch applied successfully!",
+  "dreamcastIpbinFile": "IP.BIN or GDI File",
+  "dreamcastIpbinLoad": "Load",
+  "dreamcastIpbinSave": "Save Changes",
+  "dreamcastIpbinTitle": "Game Title",
+  "dreamcastIpbinProductNumber": "Product Number",
+  "dreamcastIpbinVersion": "Version",
+  "dreamcastIpbinDate": "Release Date",
+  "dreamcastIpbinRegion": "Region",
+  "dreamcastIpbinRegionJapan": "Japan",
+  "dreamcastIpbinRegionUSA": "USA",
+  "dreamcastIpbinRegionEurope": "Europe",
+  "dreamcastIpbinRegionFree": "Region Free",
+  "dreamcastIpbinVga": "Enable VGA",
+  "dreamcastIpbinSaveSuccess": "IP.BIN saved successfully!",
+  "dreamcastGdiFile": "GDI File",
+  "dreamcastGdiLoad": "Load GDI",
+  "dreamcastGdiTracks": "Tracks",
+  "dreamcastGdiTrackNum": "Track",
+  "dreamcastGdiTrackLba": "LBA",
+  "dreamcastGdiTrackType": "Type",
+  "dreamcastGdiTrackSize": "Sector Size",
+  "dreamcastGdiTrackFile": "File",
+  "dreamcastGdiAudio": "Audio",
+  "dreamcastGdiData": "Data",
+  "dreamcastSameFolder": "Same folder as source",
+  "dreamcastBrowse": "Browse"
+}
