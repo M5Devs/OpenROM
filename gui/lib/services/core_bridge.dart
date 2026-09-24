@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
-import '../core/errors.dart';
+import '../models/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
 

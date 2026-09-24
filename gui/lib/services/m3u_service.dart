@@ -1,7 +1,7 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
-import '../core/errors.dart';
+import '../models/errors.dart';
 import 'core_bridge.dart';
 
 class M3UService {

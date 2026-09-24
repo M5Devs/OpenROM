@@ -1,7 +1,7 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
-import '../core/errors.dart';
+import 'errors.dart';
 import 'rom_file.dart';
 
 enum JobStatus { queued, converting, done, failed }

@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gui/core/errors.dart';
+import 'package:gui/models/errors.dart';
 import 'package:gui/services/core_bridge.dart';
 
 void main() {

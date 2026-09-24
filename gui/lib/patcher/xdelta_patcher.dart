@@ -4,7 +4,7 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 
-import '../core/config.dart';
+import '../utils/config.dart';
 import 'patcher.dart';
 
 /// xdelta3 / VCDIFF patcher — delegates to the xdelta3 binary via subprocess.

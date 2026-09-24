@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../core/errors.dart';
+import '../models/errors.dart';
 import 'core_bridge.dart';
 
 class HeaderInfo {

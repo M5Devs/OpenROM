@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
-import '../core/errors.dart';
+import '../models/errors.dart';
 import '../patcher/patcher.dart';
 import '../patcher/patcher_factory.dart';
 import '../patcher/dcp_patcher.dart';

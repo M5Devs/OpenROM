@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
-import 'screens/dreamcast_screen.dart';
 import 'screens/about_screen.dart';
+import 'screens/dreamcast_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/patcher_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/theme_editor_screen.dart';
 import 'screens/tools_screen.dart';
 import 'services/theme_service.dart';
 import 'widgets/sidebar.dart';
@@ -149,7 +150,10 @@ class _OpenROMAppState extends State<OpenROMApp> {
                         DreamcastScreen(theme: theme),
                         settingsWidget,
                         AboutScreen(theme: theme),
-                        settingsWidget,
+                        ThemeEditorScreen(
+                          theme: theme,
+                          themeService: widget.themeService,
+                        ),
                       ],
                     ),
                   ),

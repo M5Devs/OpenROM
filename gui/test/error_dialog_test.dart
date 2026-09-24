@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gui/core/error_dialog.dart';
-import 'package:gui/core/errors.dart';
+import 'package:gui/widgets/error_dialog.dart';
+import 'package:gui/models/errors.dart';
 import 'package:gui/l10n/app_localizations.dart';
 import 'package:gui/models/conversion_job.dart';
 import 'package:gui/models/rom_file.dart';
