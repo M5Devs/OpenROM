@@ -18,6 +18,10 @@ modules:
       # Flutter bundle (pre-built by CI, placed in flatpak-build/bundle/)
       - cp -r flatpak-build/bundle/. /app/
 
+      # Link GUI executable to /app/bin so Flatpak can run 'command: gui'
+      - mkdir -p /app/bin
+      - ln -sf /app/gui /app/bin/gui
+
       # openrom-core CLI backend
       - install -Dm755 flatpak-build/openrom-core /app/bin/openrom-core
 
