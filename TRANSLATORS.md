@@ -2,15 +2,15 @@
 
 Thank you for helping make OpenROM accessible to gamers and preservationists around the world!
 
-## 🌐 Translate via Weblate
+## 🌐 Translate via Crowdin
 
-The easiest way to contribute a translation is through our Weblate project — no Git knowledge needed:
+The easiest way to contribute a translation is through our Crowdin project — no Git knowledge needed:
 
-**👉 https://hosted.weblate.org/engage/openrom/**
+**👉 https://crowdin.com/project/openrom**
 
-[![Translation status](https://hosted.weblate.org/widget/openrom/multi-auto.svg)](https://hosted.weblate.org/engage/openrom/)
+[![Crowdin](https://badges.crowdin.net/openrom/localized.svg)](https://crowdin.com/project/openrom)
 
-Just pick your language, start translating, and Weblate will open a Pull Request automatically. Native speakers of any language are welcome!
+Just pick your language, start translating, and Crowdin will open a Pull Request automatically. Native speakers of any language are welcome!
 
 ---
 
@@ -55,9 +55,14 @@ Special thanks to the community members contributing localizations:
 |----------|------|--------|------------|
 | English | `en` | ✅ Complete | OpenROM Team |
 | Arabic | `ar` | ✅ Complete | [@clausvalcatd](https://github.com/clausvalcatd) |
-| French | `fr` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
-| Spanish | `es` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
-| Japanese | `ja` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
-| Portuguese (BR) | `pt` | ⚠️ Machine-translated — native review welcome! | [Contribute →](https://hosted.weblate.org/engage/openrom/) |
+| French | `fr` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Spanish | `es` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Japanese | `ja` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Portuguese | `pt` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| German | `de` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Italian | `it` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Russian | `ru` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Turkish | `tr` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
+| Chinese Simplified | `zh` | 🔴 Need Translation — native review welcome! | [Contribute →](https://crowdin.com/project/openrom) |
 
-> **Want to maintain a language?** Translate via Weblate or open a PR and your name will be listed here! 🎉
+> **Want to maintain a language?** Translate via Crowdin or open a PR and your name will be listed here
