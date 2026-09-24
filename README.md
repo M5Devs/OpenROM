@@ -32,7 +32,7 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 
 | Platform | GitHub Release | SourceForge Mirror |
 |----------|---------------|-------------------|
-| 🪟 Windows (Installer) | [OpenROM-v3.0.0-Setup.exe](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🪟 Windows (Installer) | [OpenROM-Windows-Setup.exe](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🪟 Windows (Portable) | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🐧 Linux x86_64 | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🐧 Linux ARM64 | [OpenROM_Linux_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
@@ -296,7 +296,6 @@ build_windows.bat
 - [x] IP.BIN Editor — region, VGA, Shift-JIS (v3.0.0)
 - [x] GDI Track Inspector (v3.0.0)
 - [ ] DCP Patch Builder 🔨
-- [ ] Android support via Termux 🤖
 - [ ] maxcso ARM64 build
 - [ ] RetroAchievements hash verification
 
