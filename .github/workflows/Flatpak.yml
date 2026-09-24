@@ -34,7 +34,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev flatpak flatpak-builder elfutils
       # إضافة ريبو Flathub للسيستم
-       flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        run: |
+         flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
       # 2. تجهيز Dart و Flutter
       - name: Set up Flutter
