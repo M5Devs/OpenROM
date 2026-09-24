@@ -63,6 +63,10 @@ jobs:
           sudo flatpak --system info org.freedesktop.Sdk//24.08
           sudo flatpak --system info org.freedesktop.Platform//24.08
 
+      - name: Clone OpenROM binaries repo
+        run: |
+          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -97,6 +101,9 @@ jobs:
           test -f flatpak/io.github.M5Devs.OpenROM.yml
           test -f flatpak/io.github.M5Devs.OpenROM.desktop
           test -f flatpak/io.github.M5Devs.OpenROM.metainfo.xml
+          for tool in chdman ecm unecm maxcso extract-xiso nodtool; do
+            test -x "bins/linux/x86_64/$tool"
+          done
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
