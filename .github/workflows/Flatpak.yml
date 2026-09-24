@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (e.g., 2.3.0)'
+        description: 'Version (e.g., 3.5.0)'
         required: true
-        default: '2.3.0'
+        default: '3.5.0'
 
 permissions:
   contents: write
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout OpenROM
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: |
@@ -53,8 +53,9 @@ jobs:
         run: |
           cd core
           dart pub get
-          dart compile exe bin/openrom.dart -o ../openrom-core
-          chmod +x ../openrom-core
+          mkdir -p ../flatpak-build
+          dart compile exe bin/openrom.dart -o ../flatpak-build/openrom-core
+          chmod +x ../flatpak-build/openrom-core
 
       # ── Build Flutter ──
       - name: Set up Flutter
@@ -75,8 +76,11 @@ jobs:
         run: |
           mkdir -p flatpak-build/bundle
           cp -r gui/build/linux/x64/release/bundle/. flatpak-build/bundle/
-          cp openrom-core flatpak-build/openrom-core
-          chmod +x flatpak-build/openrom-core flatpak-build/bundle/gui
+          chmod +x flatpak-build/bundle/gui
+          echo "=== flatpak-build contents ==="
+          ls -la flatpak-build/
+          echo "=== flatpak-build/bundle contents ==="
+          ls -la flatpak-build/bundle/
 
       # ── Push to temp branch ──
       - name: Push flatpak-build to temp branch
@@ -84,7 +88,12 @@ jobs:
           git config user.email "ci@github.com"
           git config user.name "GitHub CI"
           git checkout -b flatpak-tmp-${{ github.run_id }}
+          # Force add even if in .gitignore
           git add -f flatpak-build/
+          echo "=== git status ==="
+          git status
+          echo "=== staged files ==="
+          git diff --cached --name-only
           git commit -m "ci: temp flatpak build artifacts [skip ci]"
           git push origin flatpak-tmp-${{ github.run_id }}
 
@@ -99,9 +108,16 @@ jobs:
 
     steps:
       - name: Checkout temp branch (with flatpak-build/)
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           ref: flatpak-tmp-${{ github.run_id }}
+
+      - name: Verify flatpak-build contents
+        run: |
+          echo "=== flatpak-build/ ==="
+          ls -la flatpak-build/
+          echo "=== flatpak-build/bundle/ ==="
+          ls -la flatpak-build/bundle/
 
       - name: Fix binary permissions
         run: |
@@ -132,7 +148,7 @@ jobs:
 
     steps:
       - name: Checkout OpenROM
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Delete temp branch
         run: |
