@@ -91,9 +91,12 @@ jobs:
 
       - name: Verify Flatpak build inputs
         run: |
-          test -f flatpak-build/openrom-core
-          test -f flatpak-build/bundle/gui
+          test -x flatpak-build/openrom-core
+          test -d flatpak-build/bundle
+          test -x flatpak-build/bundle/gui
           test -f flatpak/io.github.M5Devs.OpenROM.yml
+          test -f flatpak/io.github.M5Devs.OpenROM.desktop
+          test -f flatpak/io.github.M5Devs.OpenROM.metainfo.xml
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
