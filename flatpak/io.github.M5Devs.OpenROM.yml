@@ -25,49 +25,31 @@ modules:
       - ln -sf /app/gui /app/bin/gui
 
       # Install the Dart core backend.
-      - install -Dm755 flatpak-build/openrom-core \
-          /app/bin/openrom-core
+      - install -Dm755 flatpak-build/openrom-core /app/bin/openrom-core
 
       # Install conversion and patching tools.
-      - install -Dm755 bins/linux/x86_64/chdman \
-          /app/bin/chdman
-      - install -Dm755 bins/linux/x86_64/ecm \
-          /app/bin/ecm
-      - install -Dm755 bins/linux/x86_64/unecm \
-          /app/bin/unecm
-      - install -Dm755 bins/linux/x86_64/maxcso \
-          /app/bin/maxcso
-      - install -Dm755 bins/linux/x86_64/extract-xiso \
-          /app/bin/extract-xiso
-      - install -Dm755 bins/linux/x86_64/nodtool \
-          /app/bin/nodtool
-      - install -Dm755 bins/linux/x86_64/xdelta3 \
-          /app/bin/xdelta3
-      - install -Dm755 bins/linux/x86_64/saturn-patcher \
-          /app/bin/saturn-patcher
+      - install -Dm755 bins/linux/x86_64/chdman /app/bin/chdman
+      - install -Dm755 bins/linux/x86_64/ecm /app/bin/ecm
+      - install -Dm755 bins/linux/x86_64/unecm /app/bin/unecm
+      - install -Dm755 bins/linux/x86_64/maxcso /app/bin/maxcso
+      - install -Dm755 bins/linux/x86_64/extract-xiso /app/bin/extract-xiso
+      - install -Dm755 bins/linux/x86_64/nodtool /app/bin/nodtool
+      - install -Dm755 bins/linux/x86_64/xdelta3 /app/bin/xdelta3
+      - install -Dm755 bins/linux/x86_64/saturn-patcher /app/bin/saturn-patcher
 
       # NKit requires additional files from its directory.
       - mkdir -p /app/lib/openrom/nkit
-      - cp -a bins/linux/x86_64/nkit/. \
-          /app/lib/openrom/nkit/
+      - cp -a bins/linux/x86_64/nkit/. /app/lib/openrom/nkit/
       - chmod 755 /app/lib/openrom/nkit/nkit
       - chmod 755 /app/lib/openrom/nkit/nkds
-      - ln -sf /app/lib/openrom/nkit/nkit \
-          /app/bin/nkit
-      - ln -sf /app/lib/openrom/nkit/nkds \
-          /app/bin/nkds
+      - ln -sf /app/lib/openrom/nkit/nkit /app/bin/nkit
+      - ln -sf /app/lib/openrom/nkit/nkds /app/bin/nkds
 
       # Install desktop integration files.
-      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop \
-          /app/share/applications/io.github.M5Devs.OpenROM.desktop
-
-      - install -Dm644 assets/icons/icon.png \
-          /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
-
-      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml \
-          /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop /app/share/applications/io.github.M5Devs.OpenROM.desktop
+      - install -Dm644 assets/icons/icon.png /app/share/icons/hicolor/256x256/apps/io.github.M5Devs.OpenROM.png
+      - install -Dm644 flatpak/io.github.M5Devs.OpenROM.metainfo.xml /app/share/metainfo/io.github.M5Devs.OpenROM.metainfo.xml
 
     sources:
-      # The manifest is inside flatpak/, so .. is the repository root.
       - type: dir
         path: ..
