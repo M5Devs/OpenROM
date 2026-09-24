@@ -4,6 +4,13 @@
   "appSubtitle": "Suite Universelle de Conversion de ROMs",
   "convertButton": "Convertir",
   "convertButtonWithCount": "Convertir ({count} Fichiers)",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dropZoneHint": "Glissez & déposez des fichiers ROM ici",
   "dropZoneSubHint": "ou Cliquez pour parcourir",
   "settingsTitle": "Paramètres de Conversion",
@@ -27,8 +34,8 @@
   "errorCoreNotFound": "openrom-core introuvable. Veuillez télécharger à nouveau le ZIP complet.",
   "errorUnsupportedFormat": "Ce format de fichier n'est pas pris en charge.",
   "errorDiskSpace": "Espace disque insuffisant pour cette conversion.",
-  "errorConversionFailed": "La conversion a échoué. Le fichier ROM est peut-être corrompu.",
   "errorToolFailed": "L'outil de conversion (chdman/maxcso) a quitté de manière inattendue.",
+  "errorConversionFailed": "La conversion a échoué. Le fichier ROM est peut-être corrompu.",
   "errorFileNotFound": "Le fichier d'entrée a été déplacé ou supprimé.",
   "errorOutputDirNotFound": "Le dossier de sortie sélectionné n'existe plus.",
   "errorPermissionDenied": "OpenROM ne peut pas écrire dans le dossier de sortie.",
@@ -65,22 +72,57 @@
   "compressorDeleteSource": "Supprimer la source après fin",
   "compressorSameFolder": "Même dossier que la source",
   "compressorButton": "Compresser ({count} fichiers)",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "compressorSkipped": "Ignoré (déjà compressé)",
   "m3uTitle": "Générateur M3U",
   "m3uDropHint": "Déposez les fichiers de disque ici",
   "m3uOutputLabel": "Dossier de sortie",
   "m3uButton": "Générer M3U",
   "m3uSuccess": "Créé : {filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "cueGeneratorTitle": "Générateur CUE",
   "cueGeneratorBinFile": "Fichier BIN",
   "cueGeneratorDetectedMode": "Mode détecté",
   "cueGeneratorButton": "Générer CUE",
   "cueGeneratorSuccess": "Créé : {filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "binMergerTitle": "Fusionneur de BIN",
   "binMergerCueFile": "Fichier CUE (multi-pistes)",
   "binMergerDetected": "Détectés : {count} fichiers BIN",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "binMergerButton": "Fusionner les BIN",
   "binMergerSuccess": "Fusionné : {filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverTitle": "Suppresseur d'En-tête",
   "headerRemoverSystem": "Système",
   "headerRemoverFound": "En-tête trouvé",
@@ -89,6 +131,13 @@
   "headerRemoverBackup": "Conserver la sauvegarde (.bak)",
   "headerRemoverButton": "Supprimer l'En-tête",
   "headerRemoverSuccess": "ROM propre : {filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverNoHeader": "Aucun en-tête de copieur détecté.",
   "dreamcastTitle": "Dreamcast",
   "dreamcastDcpTab": "Appliquer DCP",
