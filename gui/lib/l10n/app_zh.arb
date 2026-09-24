@@ -1,5 +1,5 @@
 {
-  "@@locale": "zh-CN",
+  "@@locale": "zh",
   "appTitle": "OpenROM",
   "appSubtitle": "Universal ROM Conversion Suite",
   "convertButton": "Convert",
