@@ -4,6 +4,13 @@
   "appSubtitle": "حزمة تحويل ROM الشاملة",
   "convertButton": "تحويل",
   "convertButtonWithCount": "تحويل ({count} ملفات)",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dropZoneHint": "اسحب وافلت ملفات ROM هنا",
   "dropZoneSubHint": "أو اضغط للتصفح",
   "settingsTitle": "إعدادات التحويل",
@@ -27,8 +34,8 @@
   "errorCoreNotFound": "لم يتم العثور على openrom-core. يرجى إعادة تنزيل الملف المضغوط الكامل.",
   "errorUnsupportedFormat": "صيغة الملف هذه غير مدعومة.",
   "errorDiskSpace": "لا توجد مساحة كافية على القرص لهذا التحويل.",
-  "errorConversionFailed": "فشل التحويل. قد يكون ملف ROM تالفًا.",
   "errorToolFailed": "تعطلت أداة التحويل (chdman/maxcso) بشكل غير متوقع.",
+  "errorConversionFailed": "فشل التحويل. قد يكون ملف ROM تالفًا.",
   "errorFileNotFound": "الملف المدخل تم نقله أو حذفه.",
   "errorOutputDirNotFound": "مجلد الإخراج المحدد لم يعد موجوداً.",
   "errorPermissionDenied": "لا يملك OpenROM أذونات الكتابة في مجلد الإخراج.",
@@ -65,22 +72,57 @@
   "compressorDeleteSource": "حذف المصدر بعد الانتهاء",
   "compressorSameFolder": "نفس مجلد المصدر",
   "compressorButton": "ضغط ({count} ملفات)",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "compressorSkipped": "تم التخطي (مضغوط بالفعل)",
   "m3uTitle": "مولد قائمة M3U",
   "m3uDropHint": "أفلت ملفات الأقراص هنا",
   "m3uOutputLabel": "مجلد الإخراج",
   "m3uButton": "إنشاء M3U",
   "m3uSuccess": "تم الإنشاء: {filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "cueGeneratorTitle": "مولد CUE",
   "cueGeneratorBinFile": "ملف BIN",
   "cueGeneratorDetectedMode": "النمط المكتشف",
   "cueGeneratorButton": "إنشاء CUE",
   "cueGeneratorSuccess": "تم الإنشاء: {filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "binMergerTitle": "دمج BIN",
   "binMergerCueFile": "ملف CUE (متعدد المسارات)",
   "binMergerDetected": "تم اكتشاف: {count} ملفات BIN",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "binMergerButton": "دمج ملفات BIN",
   "binMergerSuccess": "تم الدمج: {filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverTitle": "مزيل الترويسة",
   "headerRemoverSystem": "النظام",
   "headerRemoverFound": "تم العثور على ترويسة",
@@ -89,6 +131,13 @@
   "headerRemoverBackup": "الاحتفاظ بنسخة احتياطية (.bak)",
   "headerRemoverButton": "إزالة الترويسة",
   "headerRemoverSuccess": "ROM نظيف: {filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverNoHeader": "لم يتم اكتشاف ترويسة ناسخة.",
   "dreamcastTitle": "دريم كاست",
   "dreamcastDcpTab": "تطبيق DCP",
