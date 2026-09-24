@@ -4,6 +4,13 @@
   "appSubtitle": "ユニバーサルROM変換スイート",
   "convertButton": "変換",
   "convertButtonWithCount": "変換 ({count}個のファイル)",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dropZoneHint": "ここにROMファイルをドラッグ＆ドロップ",
   "dropZoneSubHint": "またはクリックして参照",
   "settingsTitle": "変換設定",
@@ -27,8 +34,8 @@
   "errorCoreNotFound": "openrom-core が見つかりません。完全なZIPファイルを再ダウンロードしてください。",
   "errorUnsupportedFormat": "このファイル形式はサポートされていません。",
   "errorDiskSpace": "変換に必要なディスク容量が不足しています。",
-  "errorConversionFailed": "変換に失敗しました。ROMファイルが破損している可能性があります。",
   "errorToolFailed": "変換ツール (chdman/maxcso) が予期せず終了しました。",
+  "errorConversionFailed": "変換に失敗しました。ROMファイルが破損している可能性があります。",
   "errorFileNotFound": "入力ファイルが移動または削除されました。",
   "errorOutputDirNotFound": "選択された出力フォルダが存在しません。",
   "errorPermissionDenied": "出力フォルダへの書き込み権限がありません。",
@@ -65,22 +72,57 @@
   "compressorDeleteSource": "完了後に元ファイルを削除",
   "compressorSameFolder": "元ファイルと同じフォルダ",
   "compressorButton": "圧縮 ({count} 個のファイル)",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "compressorSkipped": "スキップ (圧縮済み)",
   "m3uTitle": "M3U プレイリスト生成",
   "m3uDropHint": "ディスクファイルをここにドロップ",
   "m3uOutputLabel": "出力フォルダ",
   "m3uButton": "M3U を生成",
   "m3uSuccess": "作成完了: {filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "cueGeneratorTitle": "CUE 生成",
   "cueGeneratorBinFile": "BIN ファイル",
   "cueGeneratorDetectedMode": "検出されたモード",
   "cueGeneratorButton": "CUE を生成",
   "cueGeneratorSuccess": "作成完了: {filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "binMergerTitle": "BIN 結合",
   "binMergerCueFile": "CUE ファイル (マルチトラック)",
   "binMergerDetected": "検出: {count} 個の BIN ファイル",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "binMergerButton": "BIN を結合",
   "binMergerSuccess": "結合完了: {filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverTitle": "ヘッダー削除",
   "headerRemoverSystem": "システム",
   "headerRemoverFound": "ヘッダー検出",
@@ -89,6 +131,13 @@
   "headerRemoverBackup": "バックアップを保持 (.bak)",
   "headerRemoverButton": "ヘッダーを削除",
   "headerRemoverSuccess": "クリーン ROM: {filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
   "headerRemoverNoHeader": "コピアヘッダーは検出されませんでした。",
   "dreamcastTitle": "ドリームキャスト",
   "dreamcastDcpTab": "DCP適用",
