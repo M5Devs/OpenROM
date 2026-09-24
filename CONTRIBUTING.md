@@ -79,30 +79,39 @@ OpenROM's conversion logic lives in two files:
 
 **`core/lib/src/detector.dart`:**
 ```dart
-SUPPORTED_INPUT = {
-    ...
-    ".xyz": "XYZ",
-}
+const Map<String, String> supportedInput = {
+  // ...
+  '.xyz': 'XYZ',
+};
 
-CONVERSION_MAP = {
-    ...
-    "XYZ": ["CHD", "ISO"],
-}
+const Map<String, List<String>> conversionMap = {
+  // ...
+  'XYZ': ['CHD', 'ISO'],
+};
 ```
 
 **`core/lib/src/converter.dart`:**
 ```dart
-def _dispatch(self, job):
-    ...
-    if fmt == "XYZ" and tgt == "CHD":
-        return self._xyz_to_chd(job, src)
+Future<ConversionResult> _dispatch(ConversionJob job) async {
+  // ...
+  final fmt = job.sourceFormat;
+  final tgt = job.targetFormat;
+  final src = job.sourcePath;
 
-def _xyz_to_chd(self, job, src):
-    tool = get_tool_path("your_tool")
-    out  = self._out_path(job, src, ".chd")
-    cmd  = [tool, "-i", src, "-o", out]
-    self._log(f"[XYZ→CHD] {os.path.basename(src)}")
-    return self._run(cmd, job)
+  if (fmt == 'XYZ' && tgt == 'CHD') {
+    return _xyzToChd(job, src);
+  }
+  // ...
+}
+
+Future<ConversionResult> _xyzToChd(ConversionJob job, String src) async {
+  final tool = Config.getToolPath('your_tool');
+  final out  = _outPath(job, src, '.chd');
+  final cmd  = [tool, '-i', src, '-o', out];
+
+  AppLogger.info('[XYZ→CHD] ${path.basename(src)}');
+  return _run(cmd, job);
+}
 ```
 
 Make sure the tool binary is available or document how to install it.
