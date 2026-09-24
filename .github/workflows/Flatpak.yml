@@ -101,9 +101,23 @@ jobs:
           test -f flatpak/io.github.M5Devs.OpenROM.yml
           test -f flatpak/io.github.M5Devs.OpenROM.desktop
           test -f flatpak/io.github.M5Devs.OpenROM.metainfo.xml
-          for tool in chdman ecm unecm maxcso extract-xiso nodtool; do
+          test -f assets/icons/icon.png
+
+          for tool in \
+            chdman \
+            ecm \
+            unecm \
+            maxcso \
+            extract-xiso \
+            nodtool \
+            xdelta3 \
+            saturn-patcher; do
             test -x "bins/linux/x86_64/$tool"
           done
+
+          test -x bins/linux/x86_64/nkit/nkit
+          test -x bins/linux/x86_64/nkit/nkds
+          test -d bins/linux/x86_64/nkit/defaults
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
