@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (e.g., 3.0.1)'
+        description: 'Version (e.g., 3.5.0)'
         required: true
-        default: '3.0.1'
+        default: '3.5.0'
 
 permissions:
   contents: write
@@ -53,8 +53,8 @@ jobs:
         run: |
           cd core
           dart pub get
-          dart compile exe bin/openrom.dart -o ../dist/openrom-core.exe
           New-Item -ItemType Directory -Force -Path ..\dist
+          dart compile exe bin/openrom.dart -o ../dist/openrom-core.exe
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -73,9 +73,7 @@ jobs:
         run: |
           $releaseDir = "gui/build/windows/x64/runner/Release"
 
-          # Copy single dart binary
           Copy-Item -Force "dist\openrom-core.exe" "$releaseDir\"
-
           Copy-Item -Recurse -Force "themes/" "$releaseDir/themes/"
 
           $version = "${{ github.event.inputs.version }}"
@@ -184,6 +182,7 @@ jobs:
         run: |
           cd core
           dart pub get
+          mkdir -p ../dist
           dart compile exe bin/openrom.dart -o ../dist/openrom-core
           chmod +x ../dist/openrom-core
 
@@ -212,10 +211,8 @@ jobs:
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
           cp -r gui/build/linux/x64/release/bundle/. AppDir/usr/bin/
-
           cp dist/openrom-core AppDir/usr/bin/openrom-core
           chmod +x AppDir/usr/bin/openrom-core
-
           cp -r themes/ AppDir/usr/bin/themes/
           cp assets/icons/icon.png AppDir/openrom.png
           cp assets/icons/icon.png \
@@ -262,7 +259,7 @@ jobs:
           name: OpenROM_Linux
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
-  # ── Linux ARM64 ──────────────────────────────────────────────────────────────
+  # ── Linux ARM64 ──────────────────────────────────────────
   build-linux-arm64:
     runs-on: ubuntu-24.04-arm
     steps:
@@ -321,6 +318,7 @@ jobs:
         run: |
           cd core
           dart pub get
+          mkdir -p ../dist
           dart compile exe bin/openrom.dart -o ../dist/openrom-core
           chmod +x ../dist/openrom-core
 
@@ -359,7 +357,7 @@ jobs:
           name: OpenROM_Linux_arm64
           path: OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
 
-  # ── macOS ────────────────────────────────────────────────────────────────────
+  # ── macOS ────────────────────────────────────────────────
   build-macos:
     strategy:
       matrix:
@@ -397,6 +395,7 @@ jobs:
         run: |
           cd core
           dart pub get
+          mkdir -p ../dist
           dart compile exe bin/openrom.dart -o ../dist/openrom-core
           chmod +x ../dist/openrom-core
 
@@ -456,7 +455,7 @@ jobs:
           name: OpenROM_macOS_${{ matrix.arch }}
           path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip
 
-  # ── GitHub Release ───────────────────────────────────────────────────────────
+  # ── GitHub Release ───────────────────────────────────────
   release:
     needs: [build-windows, build-linux, build-linux-arm64, build-macos]
     runs-on: ubuntu-latest
@@ -474,7 +473,7 @@ jobs:
           body: |
             ## OpenROM v${{ github.event.inputs.version }}
 
-            Universal Retro Gaming Toolkit for retro gaming.
+            Universal Retro Gaming Toolkit for retro gaming enthusiasts.
 
             Each download includes:
             - **OpenROM** — Flutter desktop GUI
@@ -499,7 +498,7 @@ jobs:
             |----------|------|
             | 🪟 Windows (Portable) | `OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip` |
             | 🪟 Windows (Installer) | `OpenROM-v${{ github.event.inputs.version }}-Setup.exe` |
-            | 🐧 Linux | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
+            | 🐧 Linux x86_64 | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
             | 🐧 Linux ARM64 | `OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip` |
             | 🍎 macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip` |
             | 🍎 macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip` |
