@@ -169,7 +169,7 @@
   "dreamcastGdiTrackLba": "LBA",
   "dreamcastGdiTrackType": "النوع",
   "dreamcastGdiTrackSize": "حجم القطاع",
-  "dreamcastGdiTrackFile": "الملف",
+  "dreamcastGdiTrackFile": "المِلَفّ",
   "dreamcastGdiAudio": "صوت",
   "dreamcastGdiData": "بيانات",
   "dreamcastSameFolder": "نفس مجلد المصدر",
