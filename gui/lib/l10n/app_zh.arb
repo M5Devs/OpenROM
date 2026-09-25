@@ -57,7 +57,7 @@
   "patcherApplyButton": "Apply Patch",
   "patcherSuccess": "Patched successfully!",
   "patcherFormat": "Format",
-  "patcherChecksumPassed": "passed",
+  "patcherChecksumPassed": "通过",
   "patcherChecksumSkipped": "skipped",
   "patcherDropHint": "Drop ROM + Patch files here",
   "toolsTitle": "Tools",
@@ -164,8 +164,8 @@
   "dreamcastIpbinSaveSuccess": "IP.BIN saved successfully!",
   "dreamcastGdiFile": "GDI File",
   "dreamcastGdiLoad": "Load GDI",
-  "dreamcastGdiTracks": "Tracks",
-  "dreamcastGdiTrackNum": "Track",
+  "dreamcastGdiTracks": "轨道列表",
+  "dreamcastGdiTrackNum": "轨道",
   "dreamcastGdiTrackLba": "LBA",
   "dreamcastGdiTrackType": "Type",
   "dreamcastGdiTrackSize": "Sector Size",
@@ -173,5 +173,5 @@
   "dreamcastGdiAudio": "Audio",
   "dreamcastGdiData": "Data",
   "dreamcastSameFolder": "Same folder as source",
-  "dreamcastBrowse": "Browse"
+  "dreamcastBrowse": "浏览"
 }
