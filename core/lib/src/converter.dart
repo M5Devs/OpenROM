@@ -179,6 +179,10 @@ class Converter {
       return _nkitConvert(job, src, tgt);
     }
 
+    if ((fmt == 'CCI' || fmt == 'ZAR') && tgt == 'ISO') {
+      return _xboxConvert(job, src, fmt);
+    }
+
     final err = 'Unhandled conversion route: $fmt → $tgt';
     _log('[ERROR] $err');
     job.error = err;
@@ -365,7 +369,33 @@ class Converter {
     return _run(cmd, job);
   }
 
+  bool _xboxConvert(ConversionJob job, String src, String fmt) {
+    if (Platform.isMacOS) {
+      job.error =
+          'Xbox format conversion is not supported on macOS. '
+          'XGDTool does not currently provide a macOS build.';
+      _log('  ❌ ${job.error}');
+      return false;
+    }
+    final xgdtool = config.getToolPath('xgdtool');
+    final cmd = [xgdtool, '--xiso', src, '--out', job.outputDir];
+    _log('[Xbox→ISO] ${p.basename(src)} → ISO via XGDTool');
+    return _run(cmd, job);
+  }
+
   bool _run(List<String> cmd, ConversionJob job) {
+    final toolPath = cmd.first;
+    final isAbsolute = p.isAbsolute(toolPath);
+    if (isAbsolute && !File(toolPath).existsSync()) {
+      final toolName = p.basename(toolPath);
+      final err =
+          'Tool not found: "$toolName" is missing from the assets folder. '
+          'Please reinstall OpenROM or set the tool path manually in Settings.';
+      job.error = err;
+      _log('  ❌ $err');
+      return false;
+    }
+
     _log('  cmd: ${cmd.asMap().entries.map((e) => e.key == 0 ? p.basename(e.value) : e.value).join(' ')}');
     String lastLine = '';
 

@@ -30,6 +30,8 @@ void main() {
       ['psp_game.cso', 'CSO', ['ISO']],
       ['psp_game.zso', 'ZSO', ['ISO']],
       ['xbox_iso.iso', 'ISO', ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT']],
+      ['game360.cci', 'CCI', ['ISO']],
+      ['game360.zar', 'ZAR', ['ISO']],
     ];
 
     final tmpDir = Directory.systemTemp.createTempSync('detector_test_');
@@ -80,5 +82,39 @@ void main() {
     } finally {
       tmpDir.deleteSync(recursive: true);
     }
+  });
+
+
+  test('missing_tool_preflight_check', () {
+    final tmpDir = Directory.systemTemp.createTempSync('missing_tool_test_');
+    try {
+      final dummyFile = p.join(tmpDir.path, 'dummy.cci');
+      File(dummyFile).writeAsBytesSync(List<int>.filled(100, 0));
+
+      // Force config to use a non-existent absolute tool path
+      saveConfig({'xgdtool': p.join(tmpDir.path, 'missing_XGDTool')});
+
+      final job = ConversionJob(
+        filepath: dummyFile,
+        outputDir: tmpDir.path,
+        targetFormat: 'ISO',
+      );
+
+      final converter = Converter();
+      final success = converter.convert(job);
+
+      expect(success, isFalse);
+      expect(job.status, equals('Failed'));
+      expect(job.error, contains('Tool not found'));
+      expect(job.error, contains('missing from the assets folder'));
+    } finally {
+      saveConfig({});
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('config_xgdtool_path', () {
+    final xgdtoolPath = getToolPath('xgdtool');
+    expect(xgdtoolPath, isNotEmpty);
   });
 }

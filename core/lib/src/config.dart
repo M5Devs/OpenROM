@@ -92,6 +92,7 @@ String getDefaultBundledPath(String tool) {
     'xdelta3': 'xdelta3.exe',
     'nkit': 'nkit.exe',
     'saturn-patcher': 'saturn-patcher.exe',
+    'xgdtool': 'XGDTool.exe',
   };
 
   final unixNames = {
@@ -104,6 +105,7 @@ String getDefaultBundledPath(String tool) {
     'xdelta3': 'xdelta3',
     'nkit': 'nkit',
     'saturn-patcher': 'saturn-patcher',
+    'xgdtool': 'XGDTool',
   };
 
   String bundled;
@@ -146,6 +148,7 @@ const Map<String, String> defaultConfig = {
   'xdelta3': '',
   'nkit': '',
   'saturn-patcher': '',
+  'xgdtool': '',
 };
 
 Map<String, dynamic> loadConfig() {
