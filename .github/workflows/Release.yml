@@ -75,6 +75,7 @@ jobs:
 
           Copy-Item -Force "dist\openrom-core.exe" "$releaseDir\"
           Copy-Item -Recurse -Force "themes/" "$releaseDir/themes/"
+          Copy-Item -Recurse -Force "assets/" "$releaseDir/assets/"
 
           $version = "${{ github.event.inputs.version }}"
           $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: gui.exe`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
@@ -214,6 +215,7 @@ jobs:
           cp dist/openrom-core AppDir/usr/bin/openrom-core
           chmod +x AppDir/usr/bin/openrom-core
           cp -r themes/ AppDir/usr/bin/themes/
+          cp -r assets/ AppDir/usr/bin/assets/
           cp assets/icons/icon.png AppDir/openrom.png
           cp assets/icons/icon.png \
             AppDir/usr/share/icons/hicolor/256x256/apps/openrom.png
@@ -248,6 +250,7 @@ jobs:
           cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
           cp dist/openrom-core release/openrom-core
           chmod +x release/openrom-core
+          cp -r assets/ release/assets/
           printf 'OpenROM - Linux\n======================================================\nRUN THIS: ./OpenROM-*.AppImage\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
           cd release
@@ -346,6 +349,7 @@ jobs:
           cp -r gui/build/linux/arm64/release/bundle/. release/
           cp dist/openrom-core release/openrom-core
           chmod +x release/openrom-core
+          cp -r assets/ release/assets/
           printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./gui\n\nNOTE: Light tools only on ARM64 (patching, header removal,\nM3U/CUE). Heavy conversions (CHD, CSO, RVZ) need x86_64 build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
           cd release
@@ -422,6 +426,7 @@ jobs:
           cp dist/openrom-core "$APP_MACOS/openrom-core"
           chmod +x "$APP_MACOS/openrom-core"
           cp -r themes/ "$APP_MACOS/themes/"
+          cp -r assets/ "$APP_MACOS/assets/"
 
       - name: Sign app bundle (ad-hoc)
         run: |
