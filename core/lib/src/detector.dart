@@ -24,6 +24,8 @@ const Map<String, String> supportedInput = {
   '.wux': 'WUX',
   '.nkit.iso': 'NKIT',
   '.gcz': 'GCZ',
+  '.cci': 'CCI',
+  '.zar': 'ZAR',
 };
 
 const Map<String, String> platformMap = {
@@ -38,6 +40,8 @@ const Map<String, String> platformMap = {
   'CSO': 'Compressed ISO',
   'ZSO': 'Compressed ISO',
   'XISO': 'Xbox ISO',
+  'CCI': 'Xbox 360 CCI',
+  'ZAR': 'Xbox 360 ZAR',
   'RVZ': 'GameCube / Wii',
   'WIA': 'GameCube / Wii',
   'WBFS': 'Wii',
@@ -63,6 +67,8 @@ const Map<String, String> formatColors = {
   'ZSO': '#4caf50',
   'ECM': '#ff9800',
   'XISO': '#e91e63',
+  'CCI': '#4caf50',
+  'ZAR': '#388e3c',
   'RVZ': '#3f51b5',
   'WIA': '#5c6bc0',
   'WBFS': '#7986cb',
@@ -96,6 +102,8 @@ const Map<String, List<String>> conversionMap = {
   'WUD': ['ISO'],
   'WUX': ['ISO'],
   'NKIT': ['ISO'],
+  'CCI': ['ISO'],
+  'ZAR': ['ISO'],
 };
 
 const Map<String, String> commandTemplates = {
@@ -126,6 +134,8 @@ const Map<String, String> commandTemplates = {
   'WUX->ISO': 'nkit convert -i "{in}" -o "{out}"',
   'NKIT->ISO': 'nkit convert -i "{in}" -o "{out}"',
   'ISO->NKIT': 'nkit convert -i "{in}" -o "{out}"',
+  'CCI->ISO': 'xgdtool --xiso "{in}" "{outdir}"',
+  'ZAR->ISO': 'xgdtool --xiso "{in}" "{outdir}"',
 };
 
 // Magic bytes
@@ -277,6 +287,8 @@ Uint8List _readHeader(String filepath, int size) {
 }
 
 String _guessPlatform(String filepath, String fmt, int size, Uint8List header) {
+  if (fmt == 'CCI') return 'Xbox 360';
+  if (fmt == 'ZAR') return 'Xbox 360';
   if (fmt == 'GDI') return 'Dreamcast';
   if (fmt == 'CDI') return 'Dreamcast';
   if (fmt == 'CSO' || fmt == 'ZSO') {
