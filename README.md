@@ -296,7 +296,7 @@ build_windows.bat
 - [x] IP.BIN Editor — region, VGA, Shift-JIS (v3.0.0)
 - [x] GDI Track Inspector (v3.0.0)
 - [ ] DCP Patch Builder 🔨
-- [ ] maxcso ARM64 build
+- [x] maxcso ARM64 build
 - [ ] RetroAchievements hash verification
 
 ---
