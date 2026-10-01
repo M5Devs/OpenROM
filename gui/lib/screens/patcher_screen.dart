@@ -14,18 +14,87 @@ import '../patcher/patcher.dart';
 import '../patcher/patcher_factory.dart';
 import '../services/core_bridge.dart';
 import '../services/patcher_service.dart';
+import '../services/patch_builder_service.dart';
 
 class PatcherScreen extends StatefulWidget {
   final ThemeConfig theme;
   final PatcherService? patcherService;
+  final PatchBuilderService? patchBuilderService;
 
-  const PatcherScreen({super.key, required this.theme, this.patcherService});
+  const PatcherScreen({
+    super.key,
+    required this.theme,
+    this.patcherService,
+    this.patchBuilderService,
+  });
 
   @override
   State<PatcherScreen> createState() => _PatcherScreenState();
 }
 
 class _PatcherScreenState extends State<PatcherScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: theme.background,
+        body: Column(
+          children: [
+            Container(
+              color: theme.sidebarBg,
+              child: TabBar(
+                indicatorColor: theme.accent,
+                labelColor: theme.accent,
+                unselectedLabelColor: theme.textSecondary,
+                tabs: const [
+                  Tab(
+                    icon: Icon(Icons.healing_outlined),
+                    text: 'Apply Patch',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.build_outlined),
+                    text: 'Build Patch',
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _ApplyPatchTab(
+                    theme: theme,
+                    patcherService: widget.patcherService,
+                  ),
+                  _BuildPatchTab(
+                    theme: theme,
+                    patchBuilderService: widget.patchBuilderService,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tab 1: Apply Patch ────────────────────────────────────────────────────────
+
+class _ApplyPatchTab extends StatefulWidget {
+  final ThemeConfig theme;
+  final PatcherService? patcherService;
+
+  const _ApplyPatchTab({required this.theme, this.patcherService});
+
+  @override
+  State<_ApplyPatchTab> createState() => _ApplyPatchTabState();
+}
+
+class _ApplyPatchTabState extends State<_ApplyPatchTab> {
   late final PatcherService _patcherService;
 
   String _romPath = '';
@@ -535,6 +604,426 @@ class _PatcherScreenState extends State<PatcherScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFileSection({
+    required String label,
+    required String path,
+    required VoidCallback onBrowse,
+    required ThemeConfig theme,
+    required String browseTooltip,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: theme.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.surface,
+                  borderRadius: BorderRadius.circular(theme.borderRadius),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Text(
+                  path.isEmpty ? '...' : path,
+                  style: TextStyle(
+                    color:
+                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            IconButton.filledTonal(
+              style: IconButton.styleFrom(
+                backgroundColor: theme.surface,
+                foregroundColor: theme.textPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(theme.borderRadius),
+                  side: const BorderSide(color: Colors.white12),
+                ),
+                padding: const EdgeInsets.all(12),
+              ),
+              onPressed: onBrowse,
+              tooltip: browseTooltip,
+              icon: const Icon(Icons.folder_open, size: 20),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Tab 2: Build Patch ────────────────────────────────────────────────────────
+
+class _BuildPatchTab extends StatefulWidget {
+  final ThemeConfig theme;
+  final PatchBuilderService? patchBuilderService;
+
+  const _BuildPatchTab({required this.theme, this.patchBuilderService});
+
+  @override
+  State<_BuildPatchTab> createState() => _BuildPatchTabState();
+}
+
+class _BuildPatchTabState extends State<_BuildPatchTab> {
+  late final PatchBuilderService _patchBuilderService;
+
+  String _originalPath = '';
+  String _modifiedPath = '';
+  String _outputPath = '';
+  String _selectedFormat = 'xdelta'; // 'xdelta', 'IPS', 'BPS'
+
+  bool _isBuilding = false;
+  PatchBuildReport? _report;
+
+  final List<String> _formats = ['xdelta', 'IPS', 'BPS'];
+
+  @override
+  void initState() {
+    super.initState();
+    _patchBuilderService =
+        widget.patchBuilderService ?? PatchBuilderService();
+  }
+
+  String _getFormatExtension(String format) {
+    switch (format.toLowerCase()) {
+      case 'ips':
+        return '.ips';
+      case 'bps':
+        return '.bps';
+      case 'xdelta':
+      default:
+        return '.xdelta';
+    }
+  }
+
+  void _updateOutputPath() {
+    if (_originalPath.isNotEmpty) {
+      final dir = p.dirname(_originalPath);
+      final nameWithoutExt = p.basenameWithoutExtension(_originalPath);
+      final ext = _getFormatExtension(_selectedFormat);
+      setState(() {
+        _outputPath = p.join(dir, '${nameWithoutExt}_patch$ext');
+      });
+    }
+  }
+
+  Future<void> _pickOriginalFile() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _originalPath = result.files.single.path!;
+        _report = null;
+      });
+      _updateOutputPath();
+    }
+  }
+
+  Future<void> _pickModifiedFile() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _modifiedPath = result.files.single.path!;
+        _report = null;
+      });
+    }
+  }
+
+  Future<void> _pickOutputFile() async {
+    String? initialDir;
+    String? initialName;
+    if (_originalPath.isNotEmpty) {
+      initialDir = p.dirname(_originalPath);
+      final nameWithoutExt = p.basenameWithoutExtension(_originalPath);
+      final ext = _getFormatExtension(_selectedFormat);
+      initialName = '${nameWithoutExt}_patch$ext';
+    }
+
+    final savePath = await FilePicker.platform.saveFile(
+      dialogTitle: 'Select Patch Output File',
+      fileName: initialName ?? 'patch',
+      initialDirectory: initialDir,
+    );
+
+    if (savePath != null && savePath.isNotEmpty) {
+      setState(() {
+        _outputPath = savePath;
+        _report = null;
+      });
+    }
+  }
+
+  Future<void> _createPatch() async {
+    if (_originalPath.isEmpty || _modifiedPath.isEmpty || _outputPath.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isBuilding = true;
+      _report = null;
+    });
+
+    try {
+      final report = await _patchBuilderService.buildPatch(
+        originalPath: _originalPath,
+        modifiedPath: _modifiedPath,
+        outputPath: _outputPath,
+        format: _selectedFormat,
+      );
+
+      if (mounted) {
+        setState(() {
+          _report = report;
+          _isBuilding = false;
+        });
+      }
+    } on OpenROMException catch (e) {
+      if (mounted) {
+        setState(() => _isBuilding = false);
+        showOpenROMError(context, e.error, details: e.details);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isBuilding = false);
+        showOpenROMError(
+          context,
+          OpenROMError.conversionFailed,
+          details: e.toString(),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = widget.theme;
+    final canBuild = !_isBuilding &&
+        _originalPath.isNotEmpty &&
+        _modifiedPath.isNotEmpty &&
+        _outputPath.isNotEmpty;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(28.0),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  const Text('🛠️', style: TextStyle(fontSize: 28)),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Build Patch',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: theme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Original ROM Picker
+              _buildFileSection(
+                label: 'Original ROM (Source)',
+                path: _originalPath,
+                onBrowse: _pickOriginalFile,
+                theme: theme,
+                browseTooltip: l10n.browse,
+              ),
+              const SizedBox(height: 20),
+
+              // Modified ROM Picker
+              _buildFileSection(
+                label: 'Modified ROM (Target)',
+                path: _modifiedPath,
+                onBrowse: _pickModifiedFile,
+                theme: theme,
+                browseTooltip: l10n.browse,
+              ),
+              const SizedBox(height: 20),
+
+              // Format Dropdown
+              Text(
+                'Output Format',
+                style: TextStyle(
+                  color: theme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: theme.surface,
+                  borderRadius: BorderRadius.circular(theme.borderRadius),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedFormat,
+                    isExpanded: true,
+                    dropdownColor: theme.surface,
+                    style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                    items: _formats.map((f) {
+                      return DropdownMenuItem<String>(
+                        value: f,
+                        child: Text(f),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _selectedFormat = val;
+                        });
+                        _updateOutputPath();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Output Patch Picker
+              _buildFileSection(
+                label: 'Output Patch File',
+                path: _outputPath,
+                onBrowse: _pickOutputFile,
+                theme: theme,
+                browseTooltip: l10n.browse,
+              ),
+              const SizedBox(height: 28),
+
+              // Create Patch Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.accent,
+                    disabledBackgroundColor: theme.accent.withValues(
+                      alpha: 0.4,
+                    ),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(theme.borderRadius),
+                    ),
+                  ),
+                  onPressed: canBuild ? _createPatch : null,
+                  child: _isBuilding
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'Create Patch',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+
+              // Result Card
+              if (_report != null) ...[
+                const SizedBox(height: 28),
+                const Divider(color: Colors.white12),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: theme.surface,
+                    borderRadius: BorderRadius.circular(theme.borderRadius),
+                    border: Border.all(
+                      color: Colors.green.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.greenAccent,
+                            size: 24,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Patch Created Successfully!',
+                            style: TextStyle(
+                              color: Colors.greenAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Format: ${_report!.format}',
+                        style: TextStyle(
+                          color: theme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Output Path: ${_report!.outputPath}',
+                        style: TextStyle(
+                          color: theme.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Size: ${_report!.outputSizeBytes} bytes',
+                        style: TextStyle(
+                          color: theme.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
