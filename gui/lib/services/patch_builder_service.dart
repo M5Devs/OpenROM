@@ -7,8 +7,11 @@ import 'package:flutter/foundation.dart';
 
 import '../models/errors.dart';
 import '../patcher/bps_builder.dart';
+import '../patcher/ebp_builder.dart';
+import '../patcher/ips32_builder.dart';
 import '../patcher/ips_builder.dart';
 import '../patcher/patcher.dart';
+import '../patcher/ups_builder.dart';
 import '../patcher/xdelta_builder.dart';
 import 'core_bridge.dart';
 
@@ -61,8 +64,35 @@ Future<PatchBuildReport> _buildPatchIsolate(Map<String, String> params) async {
       await builder.build();
       break;
 
+    case 'ips32':
+      final builder = IPS32Builder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
     case 'bps':
       final builder = BpsBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
+    case 'ebp':
+      final builder = EbpBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
+    case 'ups':
+      final builder = UpsBuilder(
         originalFile: origFile,
         modifiedFile: modFile,
         outputFile: outFile,
@@ -92,7 +122,7 @@ class PatchBuilderService {
     required String originalPath,
     required String modifiedPath,
     required String outputPath,
-    required String format, // 'xdelta' | 'ips' | 'bps'
+    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp'
   }) async {
     try {
       return await compute(_buildPatchIsolate, {
