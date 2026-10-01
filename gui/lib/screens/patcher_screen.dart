@@ -697,7 +697,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   bool _isBuilding = false;
   PatchBuildReport? _report;
 
-  final List<String> _formats = ['xdelta', 'IPS', 'BPS'];
+  final List<String> _formats = ['xdelta', 'IPS', 'IPS32', 'BPS', 'UPS', 'EBP'];
 
   @override
   void initState() {
@@ -710,8 +710,14 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
     switch (format.toLowerCase()) {
       case 'ips':
         return '.ips';
+      case 'ips32':
+        return '.ips32';
       case 'bps':
         return '.bps';
+      case 'ups':
+        return '.ups';
+      case 'ebp':
+        return '.ebp';
       case 'xdelta':
       default:
         return '.xdelta';
