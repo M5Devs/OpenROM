@@ -5,6 +5,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gui/patcher/aps_gba_builder.dart';
+import 'package:gui/patcher/aps_gba_patcher.dart';
+import 'package:gui/patcher/aps_n64_builder.dart';
+import 'package:gui/patcher/aps_n64_patcher.dart';
 import 'package:gui/patcher/bps_builder.dart';
 import 'package:gui/patcher/bps_patcher.dart';
 import 'package:gui/patcher/ebp_builder.dart';
@@ -13,6 +17,8 @@ import 'package:gui/patcher/ips32_builder.dart';
 import 'package:gui/patcher/ips_builder.dart';
 import 'package:gui/patcher/ips_patcher.dart';
 import 'package:gui/patcher/patcher.dart';
+import 'package:gui/patcher/ppf_builder.dart';
+import 'package:gui/patcher/ppf_patcher.dart';
 import 'package:gui/patcher/ups_builder.dart';
 import 'package:gui/patcher/ups_patcher.dart';
 import 'package:gui/patcher/xdelta_builder.dart';
@@ -330,6 +336,126 @@ void main() {
         outputFile: outFile,
       );
       await patcher.apply();
+
+      final outData = await outFile.readAsBytes();
+      expect(outData, equals(modData));
+    });
+  });
+
+  group('PPF3 Builder Tests', () {
+    test('PPF3 Round-trip test', () async {
+      final origFile = File('${tempDir.path}/orig_ppf.bin');
+      final modFile = File('${tempDir.path}/mod_ppf.bin');
+      final patchFile = File('${tempDir.path}/patch.ppf');
+      final outFile = File('${tempDir.path}/out_ppf.bin');
+
+      final origData = Uint8List.fromList(List.generate(2000, (i) => i % 256));
+      final modData = Uint8List.fromList(List.from(origData));
+      for (int i = 0; i < 15; i++) {
+        modData[200 + i] = (modData[200 + i] + 50) % 256;
+      }
+
+      await origFile.writeAsBytes(origData);
+      await modFile.writeAsBytes(modData);
+
+      final builder = PpfBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: patchFile,
+      );
+      await builder.build();
+
+      expect(await patchFile.exists(), isTrue);
+
+      final patcher = PpfPatcher(
+        patchFile: patchFile,
+        romFile: origFile,
+        outputFile: outFile,
+      );
+      final report = await patcher.apply();
+      expect(report.format, equals('PPF'));
+
+      final outData = await outFile.readAsBytes();
+      expect(outData, equals(modData));
+    });
+  });
+
+  group('APS GBA Builder Tests', () {
+    test('APS GBA Round-trip test', () async {
+      final origFile = File('${tempDir.path}/orig_aps_gba.bin');
+      final modFile = File('${tempDir.path}/mod_aps_gba.bin');
+      final patchFile = File('${tempDir.path}/patch_gba.aps');
+      final outFile = File('${tempDir.path}/out_aps_gba.bin');
+
+      final origData = Uint8List.fromList(List.generate(70000, (i) => (i * 3) % 256));
+      final modData = Uint8List.fromList(List.from(origData));
+      for (int i = 0; i < 30; i++) {
+        modData[1000 + i] = (modData[1000 + i] + 20) % 256;
+      }
+
+      await origFile.writeAsBytes(origData);
+      await modFile.writeAsBytes(modData);
+
+      final builder = ApsGbaBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: patchFile,
+      );
+      await builder.build();
+
+      expect(await patchFile.exists(), isTrue);
+
+      final patcher = ApsGbaPatcher(
+        patchFile: patchFile,
+        romFile: origFile,
+        outputFile: outFile,
+      );
+      final report = await patcher.apply();
+      expect(report.format, equals('APS'));
+
+      final outData = await outFile.readAsBytes();
+      expect(outData, equals(modData));
+    });
+  });
+
+  group('APS N64 Builder Tests', () {
+    test('APS N64 Round-trip test', () async {
+      final origFile = File('${tempDir.path}/orig_aps_n64.z64');
+      final modFile = File('${tempDir.path}/mod_aps_n64.z64');
+      final patchFile = File('${tempDir.path}/patch_n64.aps');
+      final outFile = File('${tempDir.path}/out_aps_n64.z64');
+
+      final origData = Uint8List.fromList(List.generate(1024, (i) => (i * 17) % 256));
+      // Set mock N64 header
+      origData[0] = 0x80; // Big endian
+      origData[0x3c] = 0x4e; // Cart ID
+      origData[0x3d] = 0x36;
+      origData[0x3e] = 0x45; // Country
+
+      final modData = Uint8List.fromList(List.from(origData));
+      for (int i = 0; i < 20; i++) {
+        modData[500 + i] = (modData[500 + i] + 88) % 256;
+      }
+
+      await origFile.writeAsBytes(origData);
+      await modFile.writeAsBytes(modData);
+
+      final builder = ApsN64Builder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: patchFile,
+      );
+      await builder.build();
+
+      expect(await patchFile.exists(), isTrue);
+
+      final patcher = ApsN64Patcher(
+        patchFile: patchFile,
+        romFile: origFile,
+        outputFile: outFile,
+      );
+      final report = await patcher.apply();
+      expect(report.format, equals('APS'));
 
       final outData = await outFile.readAsBytes();
       expect(outData, equals(modData));
