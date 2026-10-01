@@ -26,7 +26,7 @@ jobs:
           Copy-Item -Path "bins\windows\x86_64\*" -Destination "assets\windows\" -Recurse
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Install Flutter Windows dependencies (VC++ workload)
         run: |
