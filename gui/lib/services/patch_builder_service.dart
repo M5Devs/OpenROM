@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
@@ -6,11 +7,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../models/errors.dart';
+import '../patcher/aps_gba_builder.dart';
+import '../patcher/aps_n64_builder.dart';
 import '../patcher/bps_builder.dart';
 import '../patcher/ebp_builder.dart';
 import '../patcher/ips32_builder.dart';
 import '../patcher/ips_builder.dart';
 import '../patcher/patcher.dart';
+import '../patcher/ppf_builder.dart';
 import '../patcher/ups_builder.dart';
 import '../patcher/xdelta_builder.dart';
 import 'core_bridge.dart';
@@ -100,6 +104,37 @@ Future<PatchBuildReport> _buildPatchIsolate(Map<String, String> params) async {
       await builder.build();
       break;
 
+    case 'ppf':
+    case 'ppf3':
+      final builder = PpfBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
+    case 'aps_gba':
+    case 'aps (gba)':
+      final builder = ApsGbaBuilder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
+    case 'aps_n64':
+    case 'aps (n64)':
+    case 'aps':
+      final builder = ApsN64Builder(
+        originalFile: origFile,
+        modifiedFile: modFile,
+        outputFile: outFile,
+      );
+      await builder.build();
+      break;
+
     default:
       throw PatchException('Unsupported output format: $format');
   }
@@ -122,7 +157,7 @@ class PatchBuilderService {
     required String originalPath,
     required String modifiedPath,
     required String outputPath,
-    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp'
+    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp' | 'ppf3' | 'aps (gba)' | 'aps (n64)'
   }) async {
     try {
       return await compute(_buildPatchIsolate, {
