@@ -107,7 +107,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
   bool? _ipbinReplaced;
 
   Future<void> _pickDiscDir() async {
-    final path = await FilePicker.platform.getDirectoryPath();
+    final path = await FilePicker().getDirectoryPath();
     if (path != null && path.isNotEmpty) {
       setState(() {
         _discDir = path;
@@ -119,7 +119,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
   }
 
   Future<void> _pickDcpFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker().pickFiles(
       type: FileType.custom,
       allowedExtensions: ['dcp'],
     );
@@ -131,7 +131,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
   }
 
   Future<void> _pickOutputDir() async {
-    final path = await FilePicker.platform.getDirectoryPath();
+    final path = await FilePicker().getDirectoryPath();
     if (path != null && path.isNotEmpty) {
       setState(() {
         _outputDir = path;
@@ -531,7 +531,7 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
   }
 
   Future<void> _pickIpBinFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker().pickFiles(
       type: FileType.custom,
       allowedExtensions: ['bin', 'gdi'],
     );
@@ -1042,7 +1042,7 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
   List<Map<String, dynamic>> _tracks = [];
 
   Future<void> _pickGdiFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker().pickFiles(
       type: FileType.custom,
       allowedExtensions: ['gdi'],
     );

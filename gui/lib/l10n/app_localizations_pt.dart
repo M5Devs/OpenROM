@@ -143,13 +143,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get openOutputFolder => 'Abrir Pasta de Saída';
 
   @override
-  String get patcherTitle => 'Aplicador de Patches';
+  String get patcherTitle => 'Aplicador de correções';
 
   @override
   String get patcherRomFile => 'Arquivo ROM';
 
   @override
-  String get patcherPatchFile => 'Arquivo de Patch';
+  String get patcherPatchFile => 'Arquivo de correção';
 
   @override
   String get patcherOutputFile => 'Arquivo de Saída';
@@ -158,13 +158,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get patcherSameFolder => 'Mesma pasta do ROM';
 
   @override
-  String get patcherIgnoreChecksum => 'Ignorar erros de checksum';
+  String get patcherIgnoreChecksum => 'Ignorar erros de verificação';
 
   @override
-  String get patcherApplyButton => 'Aplicar Patch';
+  String get patcherApplyButton => 'Aplicar correção';
 
   @override
-  String get patcherSuccess => 'Patch aplicado com sucesso!';
+  String get patcherSuccess => 'Correção aplicada com sucesso!';
 
   @override
   String get patcherFormat => 'Formato';
@@ -302,7 +302,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get headerRemoverNoHeader => 'Nenhum cabeçalho de copiador detectado.';
 
   @override
-  String get dreamcastTitle => 'Dreamcast';
+  String get dreamcastTitle => 'Dreamstime';
 
   @override
   String get dreamcastDcpTab => 'Aplicar DCP';

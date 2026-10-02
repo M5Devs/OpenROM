@@ -386,7 +386,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dreamcastGdiTrackSize => 'حجم القطاع';
 
   @override
-  String get dreamcastGdiTrackFile => 'الملف';
+  String get dreamcastGdiTrackFile => 'المِلَفّ';
 
   @override
   String get dreamcastGdiAudio => 'صوت';
