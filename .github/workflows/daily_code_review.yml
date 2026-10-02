@@ -160,7 +160,7 @@ jobs:
 
       # ── 5. Publish Health Report — close old issues first ──
       - name: Publish Health Report to GitHub Issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
