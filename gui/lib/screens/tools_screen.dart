@@ -182,7 +182,7 @@ class _CompressorTabState extends State<_CompressorTab> {
   }
 
   Future<void> _pickFiles() async {
-    final result = await FilePicker().pickFiles(allowMultiple: true);
+    final result = await FilePicker.pickFiles(allowMultiple: true);
     if (result != null && result.paths.isNotEmpty) {
       final paths = result.paths.whereType<String>().toList();
       _addFiles(paths);
@@ -190,7 +190,7 @@ class _CompressorTabState extends State<_CompressorTab> {
   }
 
   Future<void> _pickFolder() async {
-    final folderPath = await FilePicker().getDirectoryPath();
+    final folderPath = await FilePicker.getDirectoryPath();
     if (folderPath != null && folderPath.isNotEmpty) {
       final dir = Directory(folderPath);
       if (dir.existsSync()) {
@@ -209,7 +209,7 @@ class _CompressorTabState extends State<_CompressorTab> {
   }
 
   Future<void> _pickOutputDir() async {
-    final folderPath = await FilePicker().getDirectoryPath();
+    final folderPath = await FilePicker.getDirectoryPath();
     if (folderPath != null && folderPath.isNotEmpty) {
       setState(() {
         _outputDir = folderPath;
@@ -759,7 +759,7 @@ class _M3uTabState extends State<_M3uTab> {
   }
 
   Future<void> _pickDiscFiles() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: ['chd', 'bin', 'cue', 'iso', 'gdi', 'img', 'cdi'],
@@ -771,7 +771,7 @@ class _M3uTabState extends State<_M3uTab> {
   }
 
   Future<void> _pickOutputDir() async {
-    final folderPath = await FilePicker().getDirectoryPath();
+    final folderPath = await FilePicker.getDirectoryPath();
     if (folderPath != null && folderPath.isNotEmpty) {
       setState(() {
         _outputDir = folderPath;
@@ -1081,7 +1081,7 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
   }
 
   Future<void> _pickBinFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['bin'],
     );
@@ -1093,7 +1093,7 @@ class _CueGeneratorTabState extends State<_CueGeneratorTab> {
   }
 
   Future<void> _pickOutputDir() async {
-    final folderPath = await FilePicker().getDirectoryPath();
+    final folderPath = await FilePicker.getDirectoryPath();
     if (folderPath != null && folderPath.isNotEmpty) {
       setState(() {
         _outputDir = folderPath;
@@ -1401,7 +1401,7 @@ class _BinMergerTabState extends State<_BinMergerTab> {
   }
 
   Future<void> _pickCueFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['cue'],
     );
@@ -1413,7 +1413,7 @@ class _BinMergerTabState extends State<_BinMergerTab> {
   }
 
   Future<void> _pickOutputDir() async {
-    final folderPath = await FilePicker().getDirectoryPath();
+    final folderPath = await FilePicker.getDirectoryPath();
     if (folderPath != null && folderPath.isNotEmpty) {
       setState(() {
         _outputDir = folderPath;
@@ -1750,7 +1750,7 @@ class _HeaderRemoverTabState extends State<_HeaderRemoverTab> {
   }
 
   Future<void> _pickRomFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
         'nes',
@@ -2043,7 +2043,7 @@ class _CueEditorTabState extends State<_CueEditorTab> {
   }
 
   Future<void> _pickCueFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['cue'],
     );
@@ -2172,7 +2172,7 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
   }
 
   Future<void> _importDat() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['dat', 'xml'],
     );
@@ -2192,7 +2192,7 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
   }
 
   Future<void> _pickFolder() async {
-    final path = await FilePicker().getDirectoryPath();
+    final path = await FilePicker.getDirectoryPath();
     if (path != null) setState(() => _romFolder = path);
   }
 
