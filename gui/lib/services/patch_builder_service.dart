@@ -10,6 +10,7 @@ import '../models/errors.dart';
 import '../patcher/aps_gba_builder.dart';
 import '../patcher/aps_n64_builder.dart';
 import '../patcher/bps_builder.dart';
+import '../patcher/dcp_builder.dart';
 import '../patcher/ebp_builder.dart';
 import '../patcher/ips32_builder.dart';
 import '../patcher/ips_builder.dart';
@@ -42,101 +43,120 @@ Future<PatchBuildReport> _buildPatchIsolate(Map<String, String> params) async {
   final modFile = File(modifiedPath);
   final outFile = File(outputPath);
 
-  if (!origFile.existsSync()) {
-    throw PatchException('Original ROM file not found: $originalPath');
-  }
-  if (!modFile.existsSync()) {
-    throw PatchException('Modified ROM file not found: $modifiedPath');
-  }
+  if (format == 'dcp') {
+    final origDir = Directory(originalPath);
+    final modDir = Directory(modifiedPath);
 
-  switch (format) {
-    case 'xdelta':
-      final builder = XdeltaBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+    if (!origDir.existsSync()) {
+      throw PatchException('Original directory not found: $originalPath');
+    }
+    if (!modDir.existsSync()) {
+      throw PatchException('Modified directory not found: $modifiedPath');
+    }
 
-    case 'ips':
-      final builder = IpsBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+    final builder = DcpBuilder(
+      originalDir: origDir,
+      modifiedDir: modDir,
+      outputFile: outFile,
+    );
+    await builder.build();
+  } else {
+    if (!origFile.existsSync()) {
+      throw PatchException('Original ROM file not found: $originalPath');
+    }
+    if (!modFile.existsSync()) {
+      throw PatchException('Modified ROM file not found: $modifiedPath');
+    }
 
-    case 'ips32':
-      final builder = IPS32Builder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+    switch (format) {
+      case 'xdelta':
+        final builder = XdeltaBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'bps':
-      final builder = BpsBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'ips':
+        final builder = IpsBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'ebp':
-      final builder = EbpBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'ips32':
+        final builder = IPS32Builder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'ups':
-      final builder = UpsBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'bps':
+        final builder = BpsBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'ppf':
-    case 'ppf3':
-      final builder = PpfBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'ebp':
+        final builder = EbpBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'aps_gba':
-    case 'aps (gba)':
-      final builder = ApsGbaBuilder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'ups':
+        final builder = UpsBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    case 'aps_n64':
-    case 'aps (n64)':
-    case 'aps':
-      final builder = ApsN64Builder(
-        originalFile: origFile,
-        modifiedFile: modFile,
-        outputFile: outFile,
-      );
-      await builder.build();
-      break;
+      case 'ppf':
+      case 'ppf3':
+        final builder = PpfBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
 
-    default:
-      throw PatchException('Unsupported output format: $format');
+      case 'aps_gba':
+      case 'aps (gba)':
+        final builder = ApsGbaBuilder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
+
+      case 'aps_n64':
+      case 'aps (n64)':
+      case 'aps':
+        final builder = ApsN64Builder(
+          originalFile: origFile,
+          modifiedFile: modFile,
+          outputFile: outFile,
+        );
+        await builder.build();
+        break;
+
+      default:
+        throw PatchException('Unsupported output format: $format');
+    }
   }
 
   if (!outFile.existsSync()) {
@@ -157,7 +177,7 @@ class PatchBuilderService {
     required String originalPath,
     required String modifiedPath,
     required String outputPath,
-    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp' | 'ppf3' | 'aps (gba)' | 'aps (n64)'
+    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp' | 'ppf3' | 'aps (gba)' | 'aps (n64)' | 'dcp'
   }) async {
     try {
       return await compute(_buildPatchIsolate, {

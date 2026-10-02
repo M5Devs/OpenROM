@@ -79,7 +79,7 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void pickFiles() async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker().pickFiles(
       allowMultiple: true,
       type: FileType.any,
     );

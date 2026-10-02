@@ -84,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _pickOutputDirectory() async {
     final String? selectedDirectory =
-        await FilePicker.getDirectoryPath();
+        await FilePicker().getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDestination = selectedDirectory;
