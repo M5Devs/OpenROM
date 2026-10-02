@@ -697,7 +697,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   bool _isBuilding = false;
   PatchBuildReport? _report;
 
-  final List<String> _formats = ['xdelta', 'IPS', 'IPS32', 'BPS', 'UPS', 'EBP', 'PPF3', 'APS (GBA)', 'APS (N64)'];
+  final List<String> _formats = ['xdelta', 'IPS', 'IPS32', 'BPS', 'UPS', 'EBP', 'PPF3', 'APS (GBA)', 'APS (N64)', 'DCP'];
 
   @override
   void initState() {
@@ -727,6 +727,8 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
       case 'aps_n64':
       case 'aps':
         return '.aps';
+      case 'dcp':
+        return '.dcp';
       case 'xdelta':
       default:
         return '.xdelta';

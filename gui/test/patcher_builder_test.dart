@@ -1,3 +1,6 @@
+import 'package:path/path.dart' as p;
+import 'package:gui/patcher/dcp_builder.dart';
+import 'package:openrom_core/openrom_core.dart' as core;
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
@@ -459,6 +462,54 @@ void main() {
 
       final outData = await outFile.readAsBytes();
       expect(outData, equals(modData));
+    });
+  });
+
+  group('DCP Builder Tests', () {
+    test('DCP Round-trip test', () async {
+      final origDir = Directory(p.join(tempDir.path, 'dcp_orig'))..createSync();
+      final modDir = Directory(p.join(tempDir.path, 'dcp_mod'))..createSync();
+      final outputDir = Directory(p.join(tempDir.path, 'dcp_out'))..createSync();
+      final dcpFile = File(p.join(tempDir.path, 'patch.dcp'));
+
+      File(p.join(origDir.path, 'bootsector', 'IP.BIN'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ORIG_IPBIN_123');
+      File(p.join(origDir.path, '1ST_READ.BIN'))
+        .writeAsStringSync('ORIG_1ST_READ');
+
+      File(p.join(modDir.path, 'bootsector', 'IP.BIN'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('MOD_IPBIN_456');
+      File(p.join(modDir.path, '1ST_READ.BIN'))
+        .writeAsStringSync('MOD_1ST_READ');
+
+      final builder = DcpBuilder(
+        originalDir: origDir,
+        modifiedDir: modDir,
+        outputFile: dcpFile,
+        useXdelta: false,
+      );
+      await builder.build();
+
+      expect(await dcpFile.exists(), isTrue);
+
+      final patcher = core.DcpPatcher();
+      final res = patcher.apply(
+        dcpPath: dcpFile.path,
+        discDir: origDir.path,
+        outputDir: outputDir.path,
+      );
+
+      expect(res['success'], isTrue);
+      expect(
+        File(p.join(outputDir.path, 'IP.BIN')).readAsStringSync(),
+        equals('MOD_IPBIN_456'),
+      );
+      expect(
+        File(p.join(outputDir.path, '1ST_READ.BIN')).readAsStringSync(),
+        equals('MOD_1ST_READ'),
+      );
     });
   });
 }
