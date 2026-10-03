@@ -403,47 +403,53 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
                         const SizedBox(height: 6),
 
                         // Same folder as ROM checkbox
-                        CheckboxListTile(
-                          value: _sameFolder,
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          activeColor: theme.accent,
-                          title: Text(
-                            l10n.patcherSameFolder,
-                            style: TextStyle(
-                              color: theme.textPrimary,
-                              fontSize: 14,
+                        Material(
+                          color: Colors.transparent,
+                          child: CheckboxListTile(
+                            value: _sameFolder,
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            activeColor: theme.accent,
+                            title: Text(
+                              l10n.patcherSameFolder,
+                              style: TextStyle(
+                                color: theme.textPrimary,
+                                fontSize: 14,
+                              ),
                             ),
+                            onChanged: (val) {
+                              setState(() {
+                                _sameFolder = val ?? true;
+                              });
+                              _updateOutputPath();
+                            },
                           ),
-                          onChanged: (val) {
-                            setState(() {
-                              _sameFolder = val ?? true;
-                            });
-                            _updateOutputPath();
-                          },
                         ),
                         const SizedBox(height: 4),
 
                         // Ignore checksum errors checkbox
-                        CheckboxListTile(
-                          value: _ignoreChecksum,
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          activeColor: theme.accent,
-                          title: Text(
-                            l10n.patcherIgnoreChecksum,
-                            style: TextStyle(
-                              color: theme.textPrimary,
-                              fontSize: 14,
+                        Material(
+                          color: Colors.transparent,
+                          child: CheckboxListTile(
+                            value: _ignoreChecksum,
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            activeColor: theme.accent,
+                            title: Text(
+                              l10n.patcherIgnoreChecksum,
+                              style: TextStyle(
+                                color: theme.textPrimary,
+                                fontSize: 14,
+                              ),
                             ),
+                            onChanged: (val) {
+                              setState(() {
+                                _ignoreChecksum = val ?? false;
+                              });
+                            },
                           ),
-                          onChanged: (val) {
-                            setState(() {
-                              _ignoreChecksum = val ?? false;
-                            });
-                          },
                         ),
                         const SizedBox(height: 24),
                       ],
