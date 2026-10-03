@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 String _sectorsToMsf(int sectors) {
@@ -52,9 +53,18 @@ List<CueTrack> parseCue(String cuePath) {
   final tracks = <CueTrack>[];
 
   String? currentFile;
-  final fileRegex = RegExp('FILE\\s+["\']?([^"\']+)["\']?\\s+BINARY', caseSensitive: false);
-  final trackRegex = RegExp('TRACK\\s+(\\d+)\\s+([^\\s]+)', caseSensitive: false);
-  final indexRegex = RegExp('INDEX\\s+(\\d+)\\s+(\\d{2}:\\d{2}:\\d{2})', caseSensitive: false);
+  final fileRegex = RegExp(
+    'FILE\\s+["\']?([^"\']+)["\']?\\s+BINARY',
+    caseSensitive: false,
+  );
+  final trackRegex = RegExp(
+    'TRACK\\s+(\\d+)\\s+([^\\s]+)',
+    caseSensitive: false,
+  );
+  final indexRegex = RegExp(
+    'INDEX\\s+(\\d+)\\s+(\\d{2}:\\d{2}:\\d{2})',
+    caseSensitive: false,
+  );
 
   final lines = File(cuePath).readAsLinesSync();
   for (final line in lines) {
@@ -70,13 +80,15 @@ List<CueTrack> parseCue(String cuePath) {
     if (tm != null) {
       final num = int.parse(tm.group(1)!);
       final mode = tm.group(2)!;
-      tracks.add(CueTrack(
-        trackNumber: num,
-        mode: mode,
-        file: currentFile,
-        relFile: currentFile != null ? p.basename(currentFile) : '',
-        indexes: [],
-      ));
+      tracks.add(
+        CueTrack(
+          trackNumber: num,
+          mode: mode,
+          file: currentFile,
+          relFile: currentFile != null ? p.basename(currentFile) : '',
+          indexes: [],
+        ),
+      );
       continue;
     }
 
@@ -108,7 +120,9 @@ BinMergeResult mergeBins(
   }
 
   final cueDir = p.dirname(p.canonicalize(cuePath));
-  final targetDir = (outputDir != null && outputDir.isNotEmpty) ? outputDir : cueDir;
+  final targetDir = (outputDir != null && outputDir.isNotEmpty)
+      ? outputDir
+      : cueDir;
   Directory(targetDir).createSync(recursive: true);
 
   final tracks = parseCue(cuePath);
@@ -119,7 +133,10 @@ BinMergeResult mergeBins(
   for (final t in tracks) {
     final binFile = t.file;
     if (binFile == null || !File(binFile).existsSync()) {
-      throw FileSystemException('Referenced BIN file not found: $binFile', binFile);
+      throw FileSystemException(
+        'Referenced BIN file not found: $binFile',
+        binFile,
+      );
     }
   }
 
@@ -165,16 +182,20 @@ BinMergeResult mergeBins(
             break;
           }
         }
-        final idx01Offset = idx01Entry != null ? _msfToSectors(idx01Entry.msf) : 0;
+        final idx01Offset = idx01Entry != null
+            ? _msfToSectors(idx01Entry.msf)
+            : 0;
 
         computedIndexes = [];
         for (final idxItem in parsedIndexes) {
           final idxOffset = _msfToSectors(idxItem.msf);
           final idxSectors = accumulatedSectors + (idxOffset - idx01Offset);
-          computedIndexes.add(CueTrackIndex(
-            number: idxItem.number,
-            msf: _sectorsToMsf(idxSectors),
-          ));
+          computedIndexes.add(
+            CueTrackIndex(
+              number: idxItem.number,
+              msf: _sectorsToMsf(idxSectors),
+            ),
+          );
         }
       } else {
         computedIndexes = [

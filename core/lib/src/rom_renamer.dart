@@ -3,8 +3,10 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:path/path.dart' as p;
 import 'package:xml/xml_events.dart';
+
 import 'config.dart' as config;
 
 final Uint32List _crc32Table = () {
@@ -162,7 +164,10 @@ String calcCrc32(String filepath, {void Function(double pct)? onProgress}) {
     raf.closeSync();
   }
 
-  final hex = (crc & 0xFFFFFFFF).toRadixString(16).toLowerCase().padLeft(8, '0');
+  final hex = (crc & 0xFFFFFFFF)
+      .toRadixString(16)
+      .toLowerCase()
+      .padLeft(8, '0');
   return hex;
 }
 
@@ -211,7 +216,9 @@ Map<String, Map<String, dynamic>> loadDatIndex(String datPath) {
         if (crc.isNotEmpty) {
           index[crc] = {
             'name': currentGameName,
-            'description': currentDesc.isNotEmpty ? currentDesc : currentGameName,
+            'description': currentDesc.isNotEmpty
+                ? currentDesc
+                : currentGameName,
             'rom_name': romName,
             'size': size,
             'md5': md5,
@@ -290,17 +297,44 @@ List<RomScanResult> scanFolder(
 
   for (final sk in skippedDats) {
     if (onProgress != null) {
-      onProgress('[WARN] Skipped unreadable DAT: ${sk['name']} (${sk['reason']})', 0.0);
+      onProgress(
+        '[WARN] Skipped unreadable DAT: ${sk['name']} (${sk['reason']})',
+        0.0,
+      );
     }
   }
 
   const extensions = {
-    '.smc', '.sfc', '.nes', '.gba', '.gb', '.gbc',
-    '.n64', '.z64', '.v64', '.ndd',
-    '.md', '.gen', '.sms', '.gg', '.32x',
-    '.pce', '.iso', '.bin', '.img', '.chd',
-    '.ws', '.wsc', '.ngp', '.ngc',
-    '.lnx', '.vb', '.vec', '.a26', '.a52', '.j64',
+    '.smc',
+    '.sfc',
+    '.nes',
+    '.gba',
+    '.gb',
+    '.gbc',
+    '.n64',
+    '.z64',
+    '.v64',
+    '.ndd',
+    '.md',
+    '.gen',
+    '.sms',
+    '.gg',
+    '.32x',
+    '.pce',
+    '.iso',
+    '.bin',
+    '.img',
+    '.chd',
+    '.ws',
+    '.wsc',
+    '.ngp',
+    '.ngc',
+    '.lnx',
+    '.vb',
+    '.vec',
+    '.a26',
+    '.a52',
+    '.j64',
   };
 
   final entries = dir.listSync();
@@ -322,9 +356,12 @@ List<RomScanResult> scanFolder(
     final result = RomScanResult(filepath: fpath, filename: fname);
 
     try {
-      result.crc32 = calcCrc32(fpath, onProgress: (pct) {
-        if (onProgress != null) onProgress(fname, pct);
-      });
+      result.crc32 = calcCrc32(
+        fpath,
+        onProgress: (pct) {
+          if (onProgress != null) onProgress(fname, pct);
+        },
+      );
 
       for (final datEntry in datIndexes) {
         final index = datEntry['index'] as Map<String, Map<String, dynamic>>;

@@ -61,8 +61,7 @@ class PatcherService {
     if (saturnPatcher == null || saturnPatcher.isEmpty) {
       throw OpenROMException(
         OpenROMError.toolFailed,
-        details:
-            'saturn-patcher binary not found. Please check your OpenROM installation.',
+        details: 'saturn-patcher binary not found. Please check your OpenROM installation.',
       );
     }
 

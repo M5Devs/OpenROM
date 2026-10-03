@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
 
@@ -14,7 +15,7 @@ const Set<String> excludedExtensions = {
   '.gz',
   '.zst',
   '.csz',
-  '.zso'
+  '.zso',
 };
 
 class CompressionJob {
@@ -36,8 +37,8 @@ class CompressionJob {
     this.status = 'Queued',
     this.progress = 0.0,
     this.error,
-  })  : format = format.toLowerCase(),
-        level = level.toLowerCase();
+  }) : format = format.toLowerCase(),
+       level = level.toLowerCase();
 }
 
 class Compressor {
@@ -79,7 +80,8 @@ class Compressor {
       return extract(job);
     }
 
-    if (!File(job.filepath).existsSync() && !Directory(job.filepath).existsSync()) {
+    if (!File(job.filepath).existsSync() &&
+        !Directory(job.filepath).existsSync()) {
       job.status = 'Failed';
       job.error = 'File or directory not found: ${job.filepath}';
       _log('[ERROR] ${job.error}');
@@ -90,7 +92,9 @@ class Compressor {
       job.status = 'Done';
       job.progress = 100.0;
       job.error = 'Skipped (already compressed)';
-      _log('[SKIP] ${p.basename(job.filepath)} is already compressed. Skipped.');
+      _log(
+        '[SKIP] ${p.basename(job.filepath)} is already compressed. Skipped.',
+      );
       _updateProgress(job, 100.0);
       return true;
     }
@@ -159,7 +163,9 @@ class Compressor {
   bool _compressZip(CompressionJob job) {
     final baseName = p.basenameWithoutExtension(job.filepath);
     final outPath = p.join(job.outputDir, '$baseName.zip');
-    _log('[ZIP] Compressing ${p.basename(job.filepath)} → ${p.basename(outPath)}');
+    _log(
+      '[ZIP] Compressing ${p.basename(job.filepath)} → ${p.basename(outPath)}',
+    );
 
     final encoder = ZipFileEncoder();
     encoder.create(outPath);
@@ -192,8 +198,11 @@ class Compressor {
       final destPath = p.normalize(p.join(basePath, file.name));
 
       // Zip-Slip security check
-      if (!destPath.startsWith(basePath + p.separator) && destPath != basePath) {
-        throw FormatException('Malicious archive entry (Zip Slip): ${file.name}');
+      if (!destPath.startsWith(basePath + p.separator) &&
+          destPath != basePath) {
+        throw FormatException(
+          'Malicious archive entry (Zip Slip): ${file.name}',
+        );
       }
 
       if (file.isFile) {

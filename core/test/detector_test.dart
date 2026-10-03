@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -21,17 +22,61 @@ void main() {
 
   test('detect_file_cases', () {
     final cases = [
-      ['tom_jerry.bin.ecm', 'ECM', ['ISO', 'BIN']],
-      ['game.iso', 'ISO', ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT']],
-      ['disc.bin', 'BIN', ['CHD', 'ECM']],
-      ['disc.cue', 'CUE', ['CHD']],
-      ['sonic.gdi', 'GDI', ['CHD']],
-      ['halo.chd', 'CHD', ['ISO', 'BIN/CUE']],
-      ['psp_game.cso', 'CSO', ['ISO']],
-      ['psp_game.zso', 'ZSO', ['ISO']],
-      ['xbox_iso.iso', 'ISO', ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT']],
-      ['game360.cci', 'CCI', ['ISO']],
-      ['game360.zar', 'ZAR', ['ISO']],
+      [
+        'tom_jerry.bin.ecm',
+        'ECM',
+        ['ISO', 'BIN'],
+      ],
+      [
+        'game.iso',
+        'ISO',
+        ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
+      ],
+      [
+        'disc.bin',
+        'BIN',
+        ['CHD', 'ECM'],
+      ],
+      [
+        'disc.cue',
+        'CUE',
+        ['CHD'],
+      ],
+      [
+        'sonic.gdi',
+        'GDI',
+        ['CHD'],
+      ],
+      [
+        'halo.chd',
+        'CHD',
+        ['ISO', 'BIN/CUE'],
+      ],
+      [
+        'psp_game.cso',
+        'CSO',
+        ['ISO'],
+      ],
+      [
+        'psp_game.zso',
+        'ZSO',
+        ['ISO'],
+      ],
+      [
+        'xbox_iso.iso',
+        'ISO',
+        ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
+      ],
+      [
+        'game360.cci',
+        'CCI',
+        ['ISO'],
+      ],
+      [
+        'game360.zar',
+        'ZAR',
+        ['ISO'],
+      ],
     ];
 
     final tmpDir = Directory.systemTemp.createTempSync('detector_test_');
@@ -47,8 +92,16 @@ void main() {
 
         final res = detectFile(filepath);
         expect(res.containsKey('error'), isFalse, reason: 'Error in $filename');
-        expect(res['format'], equals(expectedFmt), reason: 'Format mismatch for $filename');
-        expect(res['valid_targets'], equals(expectedTargets), reason: 'Targets mismatch for $filename');
+        expect(
+          res['format'],
+          equals(expectedFmt),
+          reason: 'Format mismatch for $filename',
+        );
+        expect(
+          res['valid_targets'],
+          equals(expectedTargets),
+          reason: 'Targets mismatch for $filename',
+        );
       }
     } finally {
       tmpDir.deleteSync(recursive: true);
@@ -83,7 +136,6 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     }
   });
-
 
   test('missing_tool_preflight_check', () {
     final tmpDir = Directory.systemTemp.createTempSync('missing_tool_test_');

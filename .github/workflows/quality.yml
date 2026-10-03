@@ -1,0 +1,65 @@
+name: Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dart-and-flutter:
+    name: Dart and Flutter checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check version consistency
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          test -n "$version"
+          grep -q "^version: $version$" core/pubspec.yaml
+          grep -q "^version: $version+1$" gui/pubspec.yaml
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install GUI dependencies
+        working-directory: gui
+        run: flutter pub get
+
+      - name: Check GUI formatting
+        working-directory: gui
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze GUI
+        working-directory: gui
+        run: flutter analyze
+
+      - name: Test GUI
+        working-directory: gui
+        run: flutter test
+
+      - name: Install core dependencies
+        working-directory: core
+        run: dart pub get
+
+      - name: Check core formatting
+        working-directory: core
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze core
+        working-directory: core
+        run: dart analyze
+
+      - name: Test core
+        working-directory: core
+        run: dart test

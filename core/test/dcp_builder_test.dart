@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
@@ -90,10 +91,14 @@ void main() {
 
     expect(result['success'], isTrue);
 
-    final patchedIpBin = File(p.join(outputDir.path, 'IP.BIN')).readAsStringSync();
-    final patched1stRead = File(p.join(outputDir.path, '1ST_READ.BIN')).readAsStringSync();
-    final patchedConfig = File(p.join(outputDir.path, 'DATA', 'CONFIG.TXT')).readAsStringSync();
-    final patchedNewFile = File(p.join(outputDir.path, 'DATA', 'NEWFILE.BIN')).readAsStringSync();
+    final patchedIpBin = File(p.join(outputDir.path, 'IP.BIN'))
+        .readAsStringSync();
+    final patched1stRead = File(p.join(outputDir.path, '1ST_READ.BIN'))
+        .readAsStringSync();
+    final patchedConfig = File(p.join(outputDir.path, 'DATA', 'CONFIG.TXT'))
+        .readAsStringSync();
+    final patchedNewFile = File(p.join(outputDir.path, 'DATA', 'NEWFILE.BIN'))
+        .readAsStringSync();
 
     expect(patchedIpBin, equals('MODIFIED_BOOTSECTOR_IPBIN_HEADER_67890'));
     expect(patched1stRead, equals('MODIFIED_GAME_CODE_XYZ123'));

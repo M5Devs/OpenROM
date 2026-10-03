@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 const String appName = 'OpenROM';
@@ -10,7 +11,10 @@ const String appName = 'OpenROM';
 String getDirectoryConfig() {
   String path;
   if (Platform.isWindows) {
-    final base = Platform.environment['APPDATA'] ?? Platform.environment['USERPROFILE'] ?? '';
+    final base =
+        Platform.environment['APPDATA'] ??
+        Platform.environment['USERPROFILE'] ??
+        '';
     path = p.join(base, appName);
   } else if (Platform.isMacOS) {
     final home = Platform.environment['HOME'] ?? '';
@@ -60,7 +64,8 @@ String getDefaultBundledPath(String tool) {
   }
 
   final String archFolder;
-  final archStr = '${Platform.version} ${Platform.operatingSystem}'.toLowerCase();
+  final archStr = '${Platform.version} ${Platform.operatingSystem}'
+      .toLowerCase();
   if (archStr.contains('aarch64') || archStr.contains('arm64')) {
     archFolder = 'arm64';
   } else {
@@ -174,7 +179,9 @@ Map<String, dynamic> loadConfig() {
 bool saveConfig(Map<String, dynamic> config) {
   try {
     final file = File(configFile);
-    file.writeAsStringSync(const JsonEncoder.withIndent('    ').convert(config));
+    file.writeAsStringSync(
+      const JsonEncoder.withIndent('    ').convert(config),
+    );
     _configCache = null;
     return true;
   } catch (e) {

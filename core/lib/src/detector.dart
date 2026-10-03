@@ -3,7 +3,9 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:path/path.dart' as p;
+
 import 'config.dart' as config;
 
 const Map<String, String> supportedInput = {
@@ -139,7 +141,16 @@ const Map<String, String> commandTemplates = {
 };
 
 // Magic bytes
-final Uint8List chdMagic = Uint8List.fromList([0x4D, 0x43, 0x6F, 0x6D, 0x70, 0x72, 0x48, 0x44]); // MComprHD
+final Uint8List chdMagic = Uint8List.fromList([
+  0x4D,
+  0x43,
+  0x6F,
+  0x6D,
+  0x70,
+  0x72,
+  0x48,
+  0x44,
+]); // MComprHD
 final Uint8List ps2Magic = Uint8List.fromList('PLAYSTATION'.codeUnits);
 final Uint8List ps1Magic = Uint8List.fromList('PlayStation'.codeUnits);
 const int gcMagic = 0xC2339F3D;
@@ -149,10 +160,14 @@ final Uint8List saturnMagic1 = Uint8List.fromList('SEGA SEGASATURN'.codeUnits);
 final Uint8List saturnMagic2 = Uint8List.fromList('SEGA SATURN '.codeUnits);
 final Uint8List segacdMagic1 = Uint8List.fromList('SEGADISCSYSTEM'.codeUnits);
 final Uint8List segacdMagic2 = Uint8List.fromList('SEGA_CD'.codeUnits);
-final Uint8List pcecdMagic = Uint8List.fromList('PC Engine CD-ROM SYSTEM'.codeUnits);
+final Uint8List pcecdMagic = Uint8List.fromList(
+  'PC Engine CD-ROM SYSTEM'.codeUnits,
+);
 final Uint8List neogeocdMagic = Uint8List.fromList('NEO-GEO CD'.codeUnits);
 
-final Uint8List xboxMagic = Uint8List.fromList('MICROSOFT*XBOX*MEDIA'.codeUnits);
+final Uint8List xboxMagic = Uint8List.fromList(
+  'MICROSOFT*XBOX*MEDIA'.codeUnits,
+);
 const int xboxOffset1 = 0x10000;
 const int xboxOffset2 = 0x2090000;
 
@@ -188,13 +203,20 @@ List<String> getValidTargets(String fmt) {
   return conversionMap[fmt.toUpperCase()] ?? [];
 }
 
-String getCommandPreview(String fmt, String target, [String filename = 'game.iso']) {
+String getCommandPreview(
+  String fmt,
+  String target, [
+  String filename = 'game.iso',
+]) {
   final key = '${fmt.toUpperCase()}->${target.toUpperCase()}';
   final template = commandTemplates[key];
   if (template == null) {
     return '$fmt -> $target';
   }
-  final outName = getOutputName(filename, target.toLowerCase().replaceAll('/cue', ''));
+  final outName = getOutputName(
+    filename,
+    target.toLowerCase().replaceAll('/cue', ''),
+  );
   final idx = filename.lastIndexOf('.');
   final base = idx != -1 ? filename.substring(0, idx) : filename;
   final cueName = '$base.cue';
@@ -483,7 +505,8 @@ String _chdTypeBySize(int size) {
 String? _findPair(String filepath, String targetExt) {
   final idx = filepath.lastIndexOf('.');
   final base = idx != -1 ? filepath.substring(0, idx) : filepath;
-  final candidate = base + (targetExt.startsWith('.') ? targetExt : '.$targetExt');
+  final candidate =
+      base + (targetExt.startsWith('.') ? targetExt : '.$targetExt');
   return File(candidate).existsSync() ? candidate : null;
 }
 

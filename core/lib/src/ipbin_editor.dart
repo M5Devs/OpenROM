@@ -44,13 +44,16 @@ Map<String, dynamic> readIpbin(String path) {
   final data = file.readAsBytesSync();
   if (data.length < ipbinSize) {
     throw FormatException(
-        'File too small to be IP.BIN: ${data.length} bytes (need $ipbinSize)');
+      'File too small to be IP.BIN: ${data.length} bytes (need $ipbinSize)',
+    );
   }
 
   final hardwareIdBytes = data.sublist(0x00, 0x10);
   final hardwareId = ascii.decode(hardwareIdBytes, allowInvalid: true).trim();
   if (!hardwareId.contains('SEGA')) {
-    throw FormatException('Not a valid Dreamcast IP.BIN (hardware_id: "$hardwareId")');
+    throw FormatException(
+      'Not a valid Dreamcast IP.BIN (hardware_id: "$hardwareId")',
+    );
   }
 
   final result = <String, dynamic>{
@@ -88,7 +91,9 @@ Map<String, dynamic> readIpbin(String path) {
 void writeIpbin(Map<String, dynamic> fields, String outputPath) {
   final raw = fields['_raw'] as Uint8List?;
   if (raw == null || raw.length < ipbinSize) {
-    throw ArgumentError('fields must contain valid _raw Uint8List buffer of 2048 bytes');
+    throw ArgumentError(
+      'fields must contain valid _raw Uint8List buffer of 2048 bytes',
+    );
   }
 
   final data = Uint8List.fromList(raw);

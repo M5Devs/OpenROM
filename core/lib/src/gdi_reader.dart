@@ -3,6 +3,7 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:path/path.dart' as p;
 
 class GdiTrack {
@@ -43,7 +44,10 @@ List<GdiTrack> parseGdi(String gdiPath) {
   final gdiDir = p.dirname(p.canonicalize(gdiPath));
   final tracks = <GdiTrack>[];
 
-  final lines = file.readAsLinesSync().where((l) => l.trim().isNotEmpty).toList();
+  final lines = file
+      .readAsLinesSync()
+      .where((l) => l.trim().isNotEmpty)
+      .toList();
   if (lines.isEmpty) return tracks;
 
   for (final line in lines.skip(1)) {
@@ -60,16 +64,20 @@ List<GdiTrack> parseGdi(String gdiPath) {
         filename = filename.substring(1, filename.length - 1);
       }
       final filepath = p.join(gdiDir, filename);
-      final filesize = File(filepath).existsSync() ? File(filepath).lengthSync() : 0;
+      final filesize = File(filepath).existsSync()
+          ? File(filepath).lengthSync()
+          : 0;
 
-      tracks.add(GdiTrack(
-        number: num,
-        lba: lba,
-        trackType: ttype,
-        sectorSize: sectorSize,
-        filename: filepath,
-        filesize: filesize,
-      ));
+      tracks.add(
+        GdiTrack(
+          number: num,
+          lba: lba,
+          trackType: ttype,
+          sectorSize: sectorSize,
+          filename: filepath,
+          filesize: filesize,
+        ),
+      );
     } catch (_) {}
   }
 
@@ -92,7 +100,10 @@ Uint8List extractIpbinFromGdi(String gdiPath) {
   final track = hdTracks.first;
   final trackFile = File(track.filename);
   if (!trackFile.existsSync()) {
-    throw FileSystemException('Track file not found: ${track.filename}', track.filename);
+    throw FileSystemException(
+      'Track file not found: ${track.filename}',
+      track.filename,
+    );
   }
 
   final raf = trackFile.openSync(mode: FileMode.read);

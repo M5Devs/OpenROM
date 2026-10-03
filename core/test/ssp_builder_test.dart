@@ -38,7 +38,8 @@ void main() {
       ecc.recalculateSector(sector);
 
       // Verify EDC non-zero
-      final edcVal = sector[0x810] |
+      final edcVal =
+          sector[0x810] |
           (sector[0x811] << 8) |
           (sector[0x812] << 16) |
           (sector[0x813] << 24);
@@ -86,38 +87,44 @@ void main() {
       } catch (_) {}
     });
 
-    test('SspBuilder generates valid .ssp ZIP archive with expected structure', () async {
-      final builder = SspBuilder(
-        originalBin: origBin,
-        modifiedBin: modBin,
-        outputFile: sspOutput,
-        version: '1.2.3',
-      );
+    test(
+      'SspBuilder generates valid .ssp ZIP archive with expected structure',
+      () async {
+        final builder = SspBuilder(
+          originalBin: origBin,
+          modifiedBin: modBin,
+          outputFile: sspOutput,
+          version: '1.2.3',
+        );
 
-      await builder.build();
+        await builder.build();
 
-      expect(sspOutput.existsSync(), isTrue);
+        expect(sspOutput.existsSync(), isTrue);
 
-      final archiveBytes = sspOutput.readAsBytesSync();
-      final archive = ZipDecoder().decodeBytes(archiveBytes);
+        final archiveBytes = sspOutput.readAsBytesSync();
+        final archive = ZipDecoder().decodeBytes(archiveBytes);
 
-      final fileNames = archive.map((f) => f.name).toList();
-      expect(fileNames, contains('changes.md5'));
-      expect(fileNames, contains('version.txt'));
-      expect(fileNames, contains('TEST.BIN._DFR'));
+        final fileNames = archive.map((f) => f.name).toList();
+        expect(fileNames, contains('changes.md5'));
+        expect(fileNames, contains('version.txt'));
+        expect(fileNames, contains('TEST.BIN._DFR'));
 
-      final changesFile = archive.firstWhere((f) => f.name == 'changes.md5');
-      final changesTxt = utf8.decode(changesFile.content as List<int>);
+        final changesFile = archive.firstWhere((f) => f.name == 'changes.md5');
+        final changesTxt = utf8.decode(changesFile.content as List<int>);
 
-      final origIsoContent = Iso9660Reader.readIsoFile(origBin, 18, 39);
-      final expectedMd5 = md5.convert(origIsoContent).toString().toUpperCase();
+        final origIsoContent = Iso9660Reader.readIsoFile(origBin, 18, 39);
+        final expectedMd5 = md5
+            .convert(origIsoContent)
+            .toString()
+            .toUpperCase();
 
-      expect(changesTxt, contains('TEST.BIN: $expectedMd5'));
+        expect(changesTxt, contains('TEST.BIN: $expectedMd5'));
 
-      final versionFile = archive.firstWhere((f) => f.name == 'version.txt');
-      final versionTxt = utf8.decode(versionFile.content as List<int>).trim();
-      expect(versionTxt, equals('1.2.3'));
-    });
+        final versionFile = archive.firstWhere((f) => f.name == 'version.txt');
+        final versionTxt = utf8.decode(versionFile.content as List<int>).trim();
+        expect(versionTxt, equals('1.2.3'));
+      },
+    );
 
     test('SspBuilder generated SSP can be applied with saturn-patcher CLI binary if available', () async {
       final builder = SspBuilder(
@@ -127,7 +134,9 @@ void main() {
       );
       await builder.build();
 
-      final saturnPatcherCli = File('/tmp/saturn-patcher-egui/target/debug/saturn-patcher');
+      final saturnPatcherCli = File(
+        '/tmp/saturn-patcher-egui/target/debug/saturn-patcher',
+      );
       if (!saturnPatcherCli.existsSync()) {
         return; // Skip Rust CLI test if binary isn't built
       }
@@ -140,10 +149,16 @@ void main() {
         sspOutput.path,
       ]);
 
-      expect(res.exitCode, equals(0), reason: 'saturn-patcher stderr: ${res.stderr}');
+      expect(
+        res.exitCode,
+        equals(0),
+        reason: 'saturn-patcher stderr: ${res.stderr}',
+      );
 
       final patchedIsoContent = Iso9660Reader.readIsoFile(targetBin, 18, 39);
-      final expectedModContent = ascii.encode('MODIFIED SATURN FILE CONTENT 1234567890');
+      final expectedModContent = ascii.encode(
+        'MODIFIED SATURN FILE CONTENT 1234567890',
+      );
       expect(patchedIsoContent, equals(expectedModContent));
     });
   });

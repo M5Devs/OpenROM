@@ -2,7 +2,9 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
+
 import 'config.dart';
 
 void log(String message) {

@@ -4,7 +4,9 @@ import 'config.dart' as config;
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
+
 import 'cue_generator.dart';
 import 'detector.dart' as detector;
 import 'logger.dart' as logger;
@@ -16,7 +18,7 @@ const List<String> cdPlatformKeywords = [
   'Saturn',
   'Sega CD',
   'PC-Engine CD',
-  'Neo Geo CD'
+  'Neo Geo CD',
 ];
 
 const Map<String, String> chdCdCompression = {
@@ -57,8 +59,8 @@ class ConversionJob {
     List<String>? logLines,
     this.error,
     List<String>? tempFiles,
-  })  : logLines = logLines ?? [],
-        tempFiles = tempFiles ?? [];
+  }) : logLines = logLines ?? [],
+       tempFiles = tempFiles ?? [];
 
   Map<String, dynamic> getFileInfo() {
     if (_fileInfo == null) {
@@ -112,8 +114,10 @@ class Converter {
     final src = job.filepath;
 
     if (job.forcePlatform != null && job.forcePlatform!.trim().isNotEmpty) {
-      _log("[INFO] Platform override: using '${job.forcePlatform}' "
-          "(auto-detected: ${info['platform'] ?? 'UNKNOWN'})");
+      _log(
+        "[INFO] Platform override: using '${job.forcePlatform}' "
+        "(auto-detected: ${info['platform'] ?? 'UNKNOWN'})",
+      );
     }
 
     if (info.containsKey('error')) {
@@ -131,7 +135,8 @@ class Converter {
 
     final valid = detector.getValidTargets(fmt);
     if (!valid.contains(tgt) && tgt != 'BIN/CUE' && tgt != 'FILES') {
-      final err = 'Cannot convert $fmt → $tgt. '
+      final err =
+          'Cannot convert $fmt → $tgt. '
           'Supported targets for $fmt: ${valid.isNotEmpty ? valid.join(', ') : 'none'}';
       _log('[ERROR] $err');
       job.error = err;
@@ -190,7 +195,11 @@ class Converter {
   }
 
   bool _toChd(
-      ConversionJob job, String src, String fmt, Map<String, dynamic> info) {
+    ConversionJob job,
+    String src,
+    String fmt,
+    Map<String, dynamic> info,
+  ) {
     final chdman = detector.getChdmanPath();
     final out = _outPath(job, src, '.chd');
 
@@ -206,8 +215,9 @@ class Converter {
       subCmd = 'createcd';
     }
 
-    final compressionMap =
-        subCmd == 'createcd' ? chdCdCompression : chdDvdCompression;
+    final compressionMap = subCmd == 'createcd'
+        ? chdCdCompression
+        : chdDvdCompression;
     final defaultCodec = subCmd == 'createcd' ? 'cdlz' : 'zlib';
     final cmd = [
       chdman,
@@ -217,7 +227,7 @@ class Converter {
       '-o',
       out,
       '--compression',
-      compressionMap[job.compression] ?? defaultCodec
+      compressionMap[job.compression] ?? defaultCodec,
     ];
 
     if (fmt == 'BIN') {
@@ -239,7 +249,11 @@ class Converter {
   }
 
   bool _fromChd(
-      ConversionJob job, String src, String tgt, Map<String, dynamic> info) {
+    ConversionJob job,
+    String src,
+    String tgt,
+    Map<String, dynamic> info,
+  ) {
     final chdman = detector.getChdmanPath();
     final chdType = info['chd_type'] as String? ?? 'cd';
 
@@ -252,7 +266,16 @@ class Converter {
         final out = _outPath(job, src, '.iso');
         cmd = [chdman, 'extractdvd', '-i', src, '-o', out];
       } else {
-        cmd = [chdman, 'extractcd', '-i', src, '-o', cueOut, '--outputbin', binOut];
+        cmd = [
+          chdman,
+          'extractcd',
+          '-i',
+          src,
+          '-o',
+          cueOut,
+          '--outputbin',
+          binOut,
+        ];
       }
     } else {
       final out = _outPath(job, src, '.iso');
@@ -337,7 +360,9 @@ class Converter {
     Directory(outDir).createSync(recursive: true);
     final cmd = [xiso, '-x', src, '-d', outDir];
     _log('[XISO→FILES] Extracting ${p.basename(src)} → $outDir/');
-    _log('[XISO→FILES] Output is a folder of extracted files, not a single ISO.');
+    _log(
+      '[XISO→FILES] Output is a folder of extracted files, not a single ISO.',
+    );
     return _run(cmd, job);
   }
 
@@ -396,7 +421,9 @@ class Converter {
       return false;
     }
 
-    _log('  cmd: ${cmd.asMap().entries.map((e) => e.key == 0 ? p.basename(e.value) : e.value).join(' ')}');
+    _log(
+      '  cmd: ${cmd.asMap().entries.map((e) => e.key == 0 ? p.basename(e.value) : e.value).join(' ')}',
+    );
     String lastLine = '';
 
     try {
@@ -500,20 +527,25 @@ class Converter {
 }
 
 double? _parseProgress(String line) {
-  if (RegExp(r'\b(?:cpu|memory|ram|disk|swap|usage|load)\b', caseSensitive: false)
-      .hasMatch(line)) {
+  if (RegExp(
+    r'\b(?:cpu|memory|ram|disk|swap|usage|load)\b',
+    caseSensitive: false,
+  ).hasMatch(line)) {
     return null;
   }
 
-  final m = RegExp(r'(?:progress|complete|done)?\s*(\d+(?:\.\d+)?)\s*%',
-          caseSensitive: false)
-      .firstMatch(line);
+  final m = RegExp(
+    r'(?:progress|complete|done)?\s*(\d+(?:\.\d+)?)\s*%',
+    caseSensitive: false,
+  ).firstMatch(line);
   if (m != null) {
     return double.tryParse(m.group(1)!);
   }
 
-  final mBytes = RegExp(r'Wrote\s+(\d+)\s+of\s+(\d+)\s+bytes', caseSensitive: false)
-      .firstMatch(line);
+  final mBytes = RegExp(
+    r'Wrote\s+(\d+)\s+of\s+(\d+)\s+bytes',
+    caseSensitive: false,
+  ).firstMatch(line);
   if (mBytes != null) {
     final written = int.parse(mBytes.group(1)!);
     final total = int.parse(mBytes.group(2)!);

@@ -50,14 +50,8 @@ class _PatcherScreenState extends State<PatcherScreen> {
                 labelColor: theme.accent,
                 unselectedLabelColor: theme.textSecondary,
                 tabs: const [
-                  Tab(
-                    icon: Icon(Icons.healing_outlined),
-                    text: 'Apply Patch',
-                  ),
-                  Tab(
-                    icon: Icon(Icons.build_outlined),
-                    text: 'Build Patch',
-                  ),
+                  Tab(icon: Icon(Icons.healing_outlined), text: 'Apply Patch'),
+                  Tab(icon: Icon(Icons.build_outlined), text: 'Build Patch'),
                 ],
               ),
             ),
@@ -272,7 +266,8 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final formatBadge = PatcherFactory.formatName(_patchPath);
-    final canApply = !_isPatching &&
+    final canApply =
+        !_isPatching &&
         _romPath.isNotEmpty &&
         _patchPath.isNotEmpty &&
         (_isSspPatch || _outputPath.isNotEmpty);
@@ -643,8 +638,9 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color:
-                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
+                    color: path.isEmpty
+                        ? theme.textSecondary
+                        : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,
@@ -697,13 +693,23 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   bool _isBuilding = false;
   PatchBuildReport? _report;
 
-  final List<String> _formats = ['xdelta', 'IPS', 'IPS32', 'BPS', 'UPS', 'EBP', 'PPF3', 'APS (GBA)', 'APS (N64)', 'DCP'];
+  final List<String> _formats = [
+    'xdelta',
+    'IPS',
+    'IPS32',
+    'BPS',
+    'UPS',
+    'EBP',
+    'PPF3',
+    'APS (GBA)',
+    'APS (N64)',
+    'DCP',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _patchBuilderService =
-        widget.patchBuilderService ?? PatchBuilderService();
+    _patchBuilderService = widget.patchBuilderService ?? PatchBuilderService();
   }
 
   String _getFormatExtension(String format) {
@@ -836,7 +842,8 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
-    final canBuild = !_isBuilding &&
+    final canBuild =
+        !_isBuilding &&
         _originalPath.isNotEmpty &&
         _modifiedPath.isNotEmpty &&
         _outputPath.isNotEmpty;
@@ -910,10 +917,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
                     dropdownColor: theme.surface,
                     style: TextStyle(color: theme.textPrimary, fontSize: 14),
                     items: _formats.map((f) {
-                      return DropdownMenuItem<String>(
-                        value: f,
-                        child: Text(f),
-                      );
+                      return DropdownMenuItem<String>(value: f, child: Text(f));
                     }).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -1080,8 +1084,9 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color:
-                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
+                    color: path.isEmpty
+                        ? theme.textSecondary
+                        : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,

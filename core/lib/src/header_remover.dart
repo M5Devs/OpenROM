@@ -3,25 +3,26 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:path/path.dart' as p;
 
 const Map<String, Map<String, dynamic>> supportedHeaders = {
   'NES': {
     'magic': [0x4E, 0x45, 0x53, 0x1A],
     'size': 16,
-    'ext': ['.nes']
+    'ext': ['.nes'],
   },
   'SNES': {
     'size': 512,
-    'ext': ['.smc', '.sfc', '.fig', '.swc']
+    'ext': ['.smc', '.sfc', '.fig', '.swc'],
   },
   'GB/GBC': {
     'size': 512,
-    'ext': ['.gb', '.gbc']
+    'ext': ['.gb', '.gbc'],
   },
   'GBA': {
     'size': 0,
-    'ext': ['.gba']
+    'ext': ['.gba'],
   },
 };
 
@@ -71,14 +72,14 @@ Map<String, dynamic>? detectHeader(String filepath) {
           'system': 'NES',
           'header_size': 16,
           'has_header': true,
-          'confidence': 'certain'
+          'confidence': 'certain',
         };
       } else {
         return {
           'system': 'NES',
           'header_size': 0,
           'has_header': false,
-          'confidence': 'certain'
+          'confidence': 'certain',
         };
       }
     } catch (_) {
@@ -93,24 +94,24 @@ Map<String, dynamic>? detectHeader(String filepath) {
 
       final hasCopierHeaderInternal =
           _verifySnesInternalHeader(headerData, 0x81C0) ||
-              _verifySnesInternalHeader(headerData, 0x101C0);
+          _verifySnesInternalHeader(headerData, 0x101C0);
       final hasCleanInternal =
           _verifySnesInternalHeader(headerData, 0x7FC0) ||
-              _verifySnesInternalHeader(headerData, 0xFFC0);
+          _verifySnesInternalHeader(headerData, 0xFFC0);
 
       if (hasCopierHeaderInternal) {
         return {
           'system': 'SNES',
           'header_size': 512,
           'has_header': true,
-          'confidence': 'certain'
+          'confidence': 'certain',
         };
       } else if (hasCleanInternal) {
         return {
           'system': 'SNES',
           'header_size': 0,
           'has_header': false,
-          'confidence': 'certain'
+          'confidence': 'certain',
         };
       }
     } catch (_) {}
@@ -120,21 +121,21 @@ Map<String, dynamic>? detectHeader(String filepath) {
         'system': 'SNES',
         'header_size': 512,
         'has_header': true,
-        'confidence': 'likely'
+        'confidence': 'likely',
       };
     } else if (rem == 0) {
       return {
         'system': 'SNES',
         'header_size': 0,
         'has_header': false,
-        'confidence': 'certain'
+        'confidence': 'certain',
       };
     } else {
       return {
         'system': 'SNES',
         'header_size': 0,
         'has_header': false,
-        'confidence': 'unlikely'
+        'confidence': 'unlikely',
       };
     }
   } else if (system == 'GB/GBC') {
@@ -144,21 +145,21 @@ Map<String, dynamic>? detectHeader(String filepath) {
         'system': 'GB/GBC',
         'header_size': 512,
         'has_header': true,
-        'confidence': 'certain'
+        'confidence': 'certain',
       };
     } else if (rem == 0) {
       return {
         'system': 'GB/GBC',
         'header_size': 0,
         'has_header': false,
-        'confidence': 'certain'
+        'confidence': 'certain',
       };
     } else {
       return {
         'system': 'GB/GBC',
         'header_size': 0,
         'has_header': false,
-        'confidence': 'likely'
+        'confidence': 'likely',
       };
     }
   } else if (system == 'GBA') {
@@ -166,18 +167,14 @@ Map<String, dynamic>? detectHeader(String filepath) {
       'system': 'GBA',
       'header_size': 0,
       'has_header': false,
-      'confidence': 'certain'
+      'confidence': 'certain',
     };
   }
 
   return null;
 }
 
-String removeHeader(
-  String filepath, {
-  String? outputDir,
-  bool backup = true,
-}) {
+String removeHeader(String filepath, {String? outputDir, bool backup = true}) {
   final file = File(filepath);
   if (!file.existsSync()) {
     throw FileSystemException('ROM file not found: $filepath', filepath);

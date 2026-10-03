@@ -23,7 +23,9 @@ class IpsBuilder {
     final modLen = await modifiedFile.length();
 
     if (origLen > _maxSize || modLen > _maxSize) {
-      throw PatchException('File too large for IPS format. Use xdelta instead.');
+      throw PatchException(
+        'File too large for IPS format. Use xdelta instead.',
+      );
     }
 
     final origBytes = await originalFile.readAsBytes();

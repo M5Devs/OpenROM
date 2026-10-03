@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
@@ -13,7 +14,8 @@ void main() {
       Directory(outputDir).createSync();
       Directory(discDir).createSync();
 
-      File(p.join(discDir, 'track01.bin')).writeAsStringSync('dummy track data');
+      File(p.join(discDir, 'track01.bin'))
+          .writeAsStringSync('dummy track data');
 
       final encoder = ZipFileEncoder();
       final maliciousDcp = p.join(tmpDir.path, 'malicious.dcp');
@@ -32,7 +34,33 @@ void main() {
       );
 
       expect(res['success'], isFalse);
-      expect(res['error'].toString(), contains('Malicious archive entry detected'));
+      expect(
+        res['error'].toString(),
+        contains('Malicious archive entry detected'),
+      );
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('rejects output directory inside source disc', () {
+    final tmpDir = Directory.systemTemp.createTempSync('dcp_output_test_');
+    try {
+      final discDir = Directory(p.join(tmpDir.path, 'disc'))..createSync();
+      final outputDir = p.join(discDir.path, 'patched');
+      final dcpPath = p.join(tmpDir.path, 'empty.dcp');
+      final encoder = ZipFileEncoder()..create(dcpPath);
+      encoder.close();
+
+      final result = DcpPatcher().apply(
+        dcpPath: dcpPath,
+        discDir: discDir.path,
+        outputDir: outputDir,
+      );
+
+      expect(result['success'], isFalse);
+      expect(result['error'], contains('outside the source disc'));
+      expect(Directory(outputDir).existsSync(), isFalse);
     } finally {
       tmpDir.deleteSync(recursive: true);
     }

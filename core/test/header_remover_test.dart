@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -8,7 +9,24 @@ void main() {
     final tmpDir = Directory.systemTemp.createTempSync('hdr_test_');
     try {
       final romPath = p.join(tmpDir.path, 'game.nes');
-      final header = [0x4E, 0x45, 0x53, 0x1A, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      final header = [
+        0x4E,
+        0x45,
+        0x53,
+        0x1A,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ];
       final body = List<int>.filled(100, 0xFF);
       File(romPath).writeAsBytesSync([...header, ...body]);
 

@@ -90,7 +90,7 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **CRC32 matching** — Identifies ROMs by hash, not filename.
 - **Dry run mode** — Preview renames before applying.
 - **DAT library** — Import multiple DATs and OpenROM stores them locally for reuse.
-- **Streaming XML parser** — Handles massive DAT files (hundreds of MB for PS2/MAME) without RAM spikes.
+- **Event-based XML parser** — Parses DAT metadata without building a full DOM tree; a streaming file decoder is planned for extremely large DAT files.
 - **100% offline** — No network requests, no API keys.
 
 ### 📊 Queue & Preview
