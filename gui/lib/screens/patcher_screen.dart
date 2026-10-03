@@ -1041,6 +1041,16 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
                           fontSize: 13,
                         ),
                       ),
+                      if (_report!.manifestPath != null) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Base ROM manifest: ${_report!.manifestPath}',
+                          style: TextStyle(
+                            color: theme.textSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
