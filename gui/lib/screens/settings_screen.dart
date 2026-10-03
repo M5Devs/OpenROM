@@ -215,37 +215,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Verification Switch
           _buildSectionTitle(l10n.postProcessing),
-          SwitchListTile(
-            title: Text(
-              l10n.verifyAfterConversion,
-              style: TextStyle(color: theme.textPrimary),
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              title: Text(
+                l10n.verifyAfterConversion,
+                style: TextStyle(color: theme.textPrimary),
+              ),
+              subtitle: Text(
+                'Runs chdman verify on newly created CHD files',
+                style: TextStyle(color: theme.textSecondary),
+              ),
+              value: _verifyAfterConversion,
+              activeThumbColor: theme.accent,
+              onChanged: (val) {
+                setState(() => _verifyAfterConversion = val);
+                _saveSettings();
+              },
             ),
-            subtitle: Text(
-              'Runs chdman verify on newly created CHD files',
-              style: TextStyle(color: theme.textSecondary),
-            ),
-            value: _verifyAfterConversion,
-            activeThumbColor: theme.accent,
-            onChanged: (val) {
-              setState(() => _verifyAfterConversion = val);
-              _saveSettings();
-            },
           ),
           const SizedBox(height: 24),
 
           // Output Folder
           _buildSectionTitle(l10n.outputDestination),
-          CheckboxListTile(
-            title: Text(
-              'Same folder as source file',
-              style: TextStyle(color: theme.textPrimary),
+          Material(
+            color: Colors.transparent,
+            child: CheckboxListTile(
+              title: Text(
+                'Same folder as source file',
+                style: TextStyle(color: theme.textPrimary),
+              ),
+              value: _sameFolderAsSource,
+              activeColor: theme.accent,
+              onChanged: (val) {
+                setState(() => _sameFolderAsSource = val ?? true);
+                _saveSettings();
+              },
             ),
-            value: _sameFolderAsSource,
-            activeColor: theme.accent,
-            onChanged: (val) {
-              setState(() => _sameFolderAsSource = val ?? true);
-              _saveSettings();
-            },
           ),
           if (!_sameFolderAsSource) ...[
             const SizedBox(height: 8),
