@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart' as crypto;
 
 import 'checksums.dart';
 import 'patcher.dart';
@@ -30,7 +30,7 @@ class RomIdentity {
       fileName: file.uri.pathSegments.last,
       sizeBytes: bytes.length,
       crc32: crc32Bytes(bytes).toRadixString(16).padLeft(8, '0'),
-      sha256: sha256.convert(bytes).toString(),
+      sha256: crypto.sha256.convert(bytes).toString(),
     );
   }
 
