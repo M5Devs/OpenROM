@@ -295,7 +295,7 @@ build_windows.bat
 - [x] Dreamcast DCP Patch Applier (v3.0.0)
 - [x] IP.BIN Editor — region, VGA, Shift-JIS (v3.0.0)
 - [x] GDI Track Inspector (v3.0.0)
-- [ ] DCP Patch Builder 🔨
+- [x] DCP Patch Builder 🔨
 - [x] maxcso ARM64 build
 - [ ] RetroAchievements hash verification
 
