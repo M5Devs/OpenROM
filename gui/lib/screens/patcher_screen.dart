@@ -130,7 +130,7 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
   }
 
   Future<void> _pickRomFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: _isSspPatch ? FileType.custom : FileType.any,
       allowedExtensions: _isSspPatch ? ['bin'] : null,
     );
@@ -144,7 +144,7 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
   }
 
   Future<void> _pickPatchFile() async {
-    final result = await FilePicker().pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: PatcherFactory.supportedExtensions.toList(),
     );
@@ -167,7 +167,7 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
       initialName = '${nameWithoutExt}_patched$ext';
     }
 
-    final savePath = await FilePicker().saveFile(
+    final savePath = await FilePicker.platform.saveFile(
       dialogTitle: 'Select Output File',
       fileName: initialName ?? 'patched_game',
       initialDirectory: initialDir,
@@ -747,7 +747,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   }
 
   Future<void> _pickOriginalFile() async {
-    final result = await FilePicker().pickFiles(type: FileType.any);
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result != null && result.files.single.path != null) {
       setState(() {
         _originalPath = result.files.single.path!;
@@ -758,7 +758,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   }
 
   Future<void> _pickModifiedFile() async {
-    final result = await FilePicker().pickFiles(type: FileType.any);
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result != null && result.files.single.path != null) {
       setState(() {
         _modifiedPath = result.files.single.path!;
@@ -777,7 +777,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
       initialName = '${nameWithoutExt}_patch$ext';
     }
 
-    final savePath = await FilePicker().saveFile(
+    final savePath = await FilePicker.platform.saveFile(
       dialogTitle: 'Select Patch Output File',
       fileName: initialName ?? 'patch',
       initialDirectory: initialDir,
