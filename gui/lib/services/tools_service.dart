@@ -81,9 +81,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(
-          result.stdout.toString(),
-        ).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -102,7 +102,8 @@ class ToolsService {
         details: err.isNotEmpty ? err : 'CUE generation failed',
       );
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 ||
+      final err =
+          (e.osError?.errorCode == 13 ||
               e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
@@ -152,33 +153,33 @@ class ToolsService {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((line) {
-        if (line.trim().isEmpty) return;
-        try {
-          final Map<String, dynamic> event = jsonDecode(line);
-          final type = event['type'];
-          if (type == 'progress') {
-            final double pct = (event['percent'] as num).toDouble();
-            onProgress?.call(pct);
-          } else if (type == 'done' && event['success'] == true) {
-            mergeResult = BinMergeResult(
-              mergedBinPath: event['merged_bin'] as String,
-              mergedCuePath: event['merged_cue'] as String,
-              tracksCount: (event['tracks_count'] as num?)?.toInt() ?? 0,
-            );
-          } else if (type == 'error') {
-            stderrLog.writeln(event['message'] ?? '');
-          }
-        } catch (_) {}
-      });
+            if (line.trim().isEmpty) return;
+            try {
+              final Map<String, dynamic> event = jsonDecode(line);
+              final type = event['type'];
+              if (type == 'progress') {
+                final double pct = (event['percent'] as num).toDouble();
+                onProgress?.call(pct);
+              } else if (type == 'done' && event['success'] == true) {
+                mergeResult = BinMergeResult(
+                  mergedBinPath: event['merged_bin'] as String,
+                  mergedCuePath: event['merged_cue'] as String,
+                  tracksCount: (event['tracks_count'] as num?)?.toInt() ?? 0,
+                );
+              } else if (type == 'error') {
+                stderrLog.writeln(event['message'] ?? '');
+              }
+            } catch (_) {}
+          });
 
       process.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((line) {
-        if (line.trim().isNotEmpty) {
-          stderrLog.writeln(line);
-        }
-      });
+            if (line.trim().isNotEmpty) {
+              stderrLog.writeln(line);
+            }
+          });
 
       final exitCode = await process.exitCode;
       if (exitCode == 0 && mergeResult != null) {
@@ -190,7 +191,8 @@ class ToolsService {
           : 'Process exited with code $exitCode';
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 ||
+      final err =
+          (e.osError?.errorCode == 13 ||
               e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
@@ -226,9 +228,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(
-          result.stdout.toString(),
-        ).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -240,7 +242,8 @@ class ToolsService {
       }
       return null;
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 ||
+      final err =
+          (e.osError?.errorCode == 13 ||
               e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
@@ -288,9 +291,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(
-          result.stdout.toString(),
-        ).where((l) => l.trim().isNotEmpty).toList();
+        final lines = LineSplitter.split(result.stdout.toString())
+            .where((l) => l.trim().isNotEmpty)
+            .toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -306,7 +309,8 @@ class ToolsService {
         details: err.isNotEmpty ? err : 'Header removal failed',
       );
     } on FileSystemException catch (e) {
-      final err = (e.osError?.errorCode == 13 ||
+      final err =
+          (e.osError?.errorCode == 13 ||
               e.message.toLowerCase().contains('permission'))
           ? OpenROMError.permissionDenied
           : OpenROMError.fileNotFound;
@@ -333,9 +337,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(
-        result.stdout.toString(),
-      ).where((l) => l.trim().isNotEmpty).toList();
+      final lines = LineSplitter.split(result.stdout.toString())
+          .where((l) => l.trim().isNotEmpty)
+          .toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -375,9 +379,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(
-        result.stdout.toString(),
-      ).where((l) => l.trim().isNotEmpty).toList();
+      final lines = LineSplitter.split(result.stdout.toString())
+          .where((l) => l.trim().isNotEmpty)
+          .toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -422,30 +426,30 @@ class ToolsService {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      if (line.trim().isEmpty) return;
-      try {
-        final Map<String, dynamic> event = jsonDecode(line);
-        if (event['type'] == 'result') {
-          results.add(Map<String, dynamic>.from(event));
-        } else if (event['type'] == 'progress' && onProgress != null) {
-          onProgress(
-            event['file'] as String? ?? '',
-            (event['percent'] as num?)?.toDouble() ?? 0,
-          );
-        } else if (event['type'] == 'error') {
-          stderrLog.writeln(event['message'] ?? '');
-        }
-      } catch (_) {}
-    });
+          if (line.trim().isEmpty) return;
+          try {
+            final Map<String, dynamic> event = jsonDecode(line);
+            if (event['type'] == 'result') {
+              results.add(Map<String, dynamic>.from(event));
+            } else if (event['type'] == 'progress' && onProgress != null) {
+              onProgress(
+                event['file'] as String? ?? '',
+                (event['percent'] as num?)?.toDouble() ?? 0,
+              );
+            } else if (event['type'] == 'error') {
+              stderrLog.writeln(event['message'] ?? '');
+            }
+          } catch (_) {}
+        });
 
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      if (line.trim().isNotEmpty) {
-        stderrLog.writeln(line);
-      }
-    });
+          if (line.trim().isNotEmpty) {
+            stderrLog.writeln(line);
+          }
+        });
 
     final exitCode = await process.exitCode;
     if (exitCode != 0 && results.isEmpty) {
@@ -483,25 +487,25 @@ class ToolsService {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      if (line.trim().isEmpty) return;
-      try {
-        final Map<String, dynamic> event = jsonDecode(line);
-        if (event['type'] == 'rename') {
-          results.add(Map<String, dynamic>.from(event));
-        } else if (event['type'] == 'error') {
-          stderrLog.writeln(event['message'] ?? '');
-        }
-      } catch (_) {}
-    });
+          if (line.trim().isEmpty) return;
+          try {
+            final Map<String, dynamic> event = jsonDecode(line);
+            if (event['type'] == 'rename') {
+              results.add(Map<String, dynamic>.from(event));
+            } else if (event['type'] == 'error') {
+              stderrLog.writeln(event['message'] ?? '');
+            }
+          } catch (_) {}
+        });
 
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      if (line.trim().isNotEmpty) {
-        stderrLog.writeln(line);
-      }
-    });
+          if (line.trim().isNotEmpty) {
+            stderrLog.writeln(line);
+          }
+        });
 
     final exitCode = await process.exitCode;
     if (exitCode != 0 && results.isEmpty) {

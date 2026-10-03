@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
@@ -12,7 +13,8 @@ final _progressStdout = stdout;
 void _renderProgress(String label, double pct, {int width = 28}) {
   final filled = (width * pct / 100).toInt();
   final bar = '█' * filled + '░' * (width - filled);
-  final line = '\r  \x1B[36m$bar\x1B[0m \x1B[33m${pct.toStringAsFixed(1).padLeft(5)}%\x1B[0m  \x1B[90m$label\x1B[0m';
+  final line =
+      '\r  \x1B[36m$bar\x1B[0m \x1B[33m${pct.toStringAsFixed(1).padLeft(5)}%\x1B[0m  \x1B[90m$label\x1B[0m';
   _progressStdout.write(line);
 }
 
@@ -27,50 +29,142 @@ void _jsonPrint(Map<String, dynamic> obj) {
 ArgParser buildParser() {
   final parser = ArgParser()
     ..addOption('input', abbr: 'i', help: 'single input ROM file')
-    ..addOption('folder', abbr: 'f', help: 'convert all supported ROMs in a folder')
+    ..addOption(
+      'folder',
+      abbr: 'f',
+      help: 'convert all supported ROMs in a folder',
+    )
     ..addOption('detect', help: 'detect file format and info')
     ..addOption('convert', help: 'single file to convert (alias for --input)')
-    ..addMultiOption('compress', help: 'file(s) to compress into ZIP/7Z', splitCommas: false)
-    ..addMultiOption('extract', help: 'file(s) to extract from ZIP/7Z', splitCommas: false)
-    ..addMultiOption('m3u', help: 'disc file(s) to generate an M3U playlist for', splitCommas: false)
+    ..addMultiOption(
+      'compress',
+      help: 'file(s) to compress into ZIP/7Z',
+      splitCommas: false,
+    )
+    ..addMultiOption(
+      'extract',
+      help: 'file(s) to extract from ZIP/7Z',
+      splitCommas: false,
+    )
+    ..addMultiOption(
+      'm3u',
+      help: 'disc file(s) to generate an M3U playlist for',
+      splitCommas: false,
+    )
     ..addOption('generate-cue', help: 'generate CUE file for a BIN file')
-    ..addOption('merge-bins', help: 'merge multi-track BIN files referenced by CUE')
+    ..addOption(
+      'merge-bins',
+      help: 'merge multi-track BIN files referenced by CUE',
+    )
     ..addOption('detect-header', help: 'detect copier header on ROM file')
     ..addOption('tool-path', help: 'get resolved path for a tool')
     ..addOption('remove-header', help: 'remove copier header from ROM file')
-    ..addOption('import-dat', help: 'import a No-Intro or Redump DAT file into OpenROM')
-    ..addOption('scan-roms', help: 'scan a ROM folder against imported DATs and show matches')
-    ..addOption('rename-roms', help: 'rename ROMs in a folder to canonical DAT names')
-
+    ..addOption(
+      'import-dat',
+      help: 'import a No-Intro or Redump DAT file into OpenROM',
+    )
+    ..addOption(
+      'scan-roms',
+      help: 'scan a ROM folder against imported DATs and show matches',
+    )
+    ..addOption(
+      'rename-roms',
+      help: 'rename ROMs in a folder to canonical DAT names',
+    )
     // Dreamcast DCP patch
-    ..addOption('dcp', help: 'apply a Dreamcast DCP patch (.dcp) to an extracted disc directory')
-    ..addOption('disc-dir', help: 'extracted Dreamcast disc directory (used with --dcp)')
-
+    ..addOption(
+      'dcp',
+      help: 'apply a Dreamcast DCP patch (.dcp) to an extracted disc directory',
+    )
+    ..addOption(
+      'disc-dir',
+      help: 'extracted Dreamcast disc directory (used with --dcp)',
+    )
     // IP.BIN editor
-    ..addOption('read-ipbin', help: 'read and display IP.BIN fields from a standalone IP.BIN or GDI')
+    ..addOption(
+      'read-ipbin',
+      help: 'read and display IP.BIN fields from a standalone IP.BIN or GDI',
+    )
     ..addOption('read-gdi', help: 'read and display GDI tracks')
     ..addOption('write-ipbin', help: 'IP.BIN file to modify')
     ..addOption('set-title', help: 'set game title in IP.BIN')
     ..addOption('set-region', help: 'set region code (e.g. JUE)')
     ..addFlag('set-vga', negatable: false, help: 'enable VGA in IP.BIN')
-    ..addFlag('region-free', negatable: false, help: 'enable all regions in IP.BIN')
-
+    ..addFlag(
+      'region-free',
+      negatable: false,
+      help: 'enable all regions in IP.BIN',
+    )
     // Options
-    ..addOption('format', abbr: 'F', help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z')
+    ..addOption(
+      'format',
+      abbr: 'F',
+      help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z',
+    )
     ..addOption('force-platform', help: 'override automatic platform detection')
-    ..addFlag('list-dats', negatable: false, help: 'list all imported DAT files')
-    ..addFlag('dry-run', negatable: false, help: 'simulate rename without actually renaming files')
-    ..addFlag('json', negatable: false, help: 'output results/progress in JSON format')
+    ..addFlag(
+      'list-dats',
+      negatable: false,
+      help: 'list all imported DAT files',
+    )
+    ..addFlag(
+      'dry-run',
+      negatable: false,
+      help: 'simulate rename without actually renaming files',
+    )
+    ..addFlag(
+      'json',
+      negatable: false,
+      help: 'output results/progress in JSON format',
+    )
     ..addOption('output', abbr: 'o', help: 'output directory or file path')
-    ..addOption('compression', abbr: 'c', defaultsTo: 'Normal', help: 'compression level: Normal | High | Max')
-    ..addOption('level', defaultsTo: 'normal', help: 'compression level for ZIP tools: fast | normal | ultra')
-    ..addFlag('delete-source', negatable: false, help: 'delete source file(s) after successful operation')
-    ..addFlag('no-backup', negatable: false, help: 'do not keep a .bak backup file when removing header')
-    ..addFlag('absolute', negatable: false, help: 'use absolute file paths in M3U playlist')
-    ..addFlag('verify', negatable: false, help: 'verify CHD integrity after conversion')
-    ..addFlag('verify-only', negatable: false, help: 'verify an existing CHD file without converting')
-    ..addFlag('list-formats', negatable: false, help: 'print supported conversion formats and exit')
-    ..addFlag('quiet', abbr: 'q', negatable: false, help: 'suppress per-job log output')
+    ..addOption(
+      'compression',
+      abbr: 'c',
+      defaultsTo: 'Normal',
+      help: 'compression level: Normal | High | Max',
+    )
+    ..addOption(
+      'level',
+      defaultsTo: 'normal',
+      help: 'compression level for ZIP tools: fast | normal | ultra',
+    )
+    ..addFlag(
+      'delete-source',
+      negatable: false,
+      help: 'delete source file(s) after successful operation',
+    )
+    ..addFlag(
+      'no-backup',
+      negatable: false,
+      help: 'do not keep a .bak backup file when removing header',
+    )
+    ..addFlag(
+      'absolute',
+      negatable: false,
+      help: 'use absolute file paths in M3U playlist',
+    )
+    ..addFlag(
+      'verify',
+      negatable: false,
+      help: 'verify CHD integrity after conversion',
+    )
+    ..addFlag(
+      'verify-only',
+      negatable: false,
+      help: 'verify an existing CHD file without converting',
+    )
+    ..addFlag(
+      'list-formats',
+      negatable: false,
+      help: 'print supported conversion formats and exit',
+    )
+    ..addFlag(
+      'quiet',
+      abbr: 'q',
+      negatable: false,
+      help: 'suppress per-job log output',
+    )
     ..addFlag('version', abbr: 'v', negatable: false, help: 'show version');
 
   return parser;
@@ -141,19 +235,25 @@ int main(List<String> args) {
     final file = (results['input'] ?? results['convert']) as String?;
     if (file == null) {
       if (isJson) {
-        _jsonPrint({'type': 'error', 'message': '--verify-only requires --input FILE'});
+        _jsonPrint({
+          'type': 'error',
+          'message': '--verify-only requires --input FILE',
+        });
       } else {
         print('Error: --verify-only requires --input FILE');
       }
       return 2;
     }
-    final ok = verifyChd(file, onLog: (msg) {
-      if (isJson) {
-        _jsonPrint({'type': 'log', 'message': msg});
-      } else {
-        print('  $msg');
-      }
-    });
+    final ok = verifyChd(
+      file,
+      onLog: (msg) {
+        if (isJson) {
+          _jsonPrint({'type': 'log', 'message': msg});
+        } else {
+          print('  $msg');
+        }
+      },
+    );
     if (isJson) {
       _jsonPrint({'type': 'done', 'success': ok});
     } else {
@@ -185,7 +285,11 @@ int main(List<String> args) {
         },
         onProgress: (j, pct) {
           if (isJson) {
-            _jsonPrint({'type': 'progress', 'file': p.basename(j.filepath), 'percent': pct});
+            _jsonPrint({
+              'type': 'progress',
+              'file': p.basename(j.filepath),
+              'percent': pct,
+            });
           } else {
             _renderProgress(p.basename(j.filepath), pct);
           }
@@ -198,7 +302,8 @@ int main(List<String> args) {
         if (isJson) _jsonPrint({'type': 'done', 'success': true});
       } else {
         failed++;
-        if (isJson) _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+        if (isJson)
+          _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
       }
     }
     return failed == 0 ? 0 : 1;
@@ -224,7 +329,11 @@ int main(List<String> args) {
         },
         onProgress: (j, pct) {
           if (isJson) {
-            _jsonPrint({'type': 'progress', 'file': p.basename(j.filepath), 'percent': pct});
+            _jsonPrint({
+              'type': 'progress',
+              'file': p.basename(j.filepath),
+              'percent': pct,
+            });
           } else {
             _renderProgress(p.basename(j.filepath), pct);
           }
@@ -237,7 +346,8 @@ int main(List<String> args) {
         if (isJson) _jsonPrint({'type': 'done', 'success': true});
       } else {
         failed++;
-        if (isJson) _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+        if (isJson)
+          _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
       }
     }
     return failed == 0 ? 0 : 1;
@@ -245,10 +355,16 @@ int main(List<String> args) {
 
   if ((results['m3u'] as List<String>).isNotEmpty) {
     final discFiles = results['m3u'] as List<String>;
-    final out = results['output'] as String? ?? p.dirname(p.canonicalize(discFiles.first));
+    final out =
+        results['output'] as String? ??
+        p.dirname(p.canonicalize(discFiles.first));
     final rel = results['absolute'] != true;
     try {
-      final m3uFile = generateM3u(discFiles: discFiles, outputPath: out, relative: rel);
+      final m3uFile = generateM3u(
+        discFiles: discFiles,
+        outputPath: out,
+        relative: rel,
+      );
       if (isJson) {
         _jsonPrint({'type': 'done', 'success': true, 'output': m3uFile});
       } else {
@@ -303,7 +419,11 @@ int main(List<String> args) {
         outputDir: out,
         onProgress: (pct) {
           if (isJson) {
-            _jsonPrint({'type': 'progress', 'file': p.basename(cue), 'percent': pct});
+            _jsonPrint({
+              'type': 'progress',
+              'file': p.basename(cue),
+              'percent': pct,
+            });
           } else {
             _renderProgress(p.basename(cue), pct);
           }
@@ -417,7 +537,9 @@ int main(List<String> args) {
       } else {
         print('Imported DATs:');
         for (final d in dats) {
-          print('  ${d['name']} (Source: ${d['source']}, Games: ${d['game_count']})');
+          print(
+            '  ${d['name']} (Source: ${d['source']}, Games: ${d['game_count']})',
+          );
         }
       }
     }
@@ -450,7 +572,12 @@ int main(List<String> args) {
         if (!isJson) _clearProgress();
         if (r.error.isNotEmpty) {
           if (isJson) {
-            _jsonPrint({'type': 'result', 'file': r.filename, 'matched': false, 'error': r.error});
+            _jsonPrint({
+              'type': 'result',
+              'file': r.filename,
+              'matched': false,
+              'error': r.error,
+            });
           } else {
             print('  ✗ ${r.filename} (${r.error})');
           }
@@ -469,7 +596,12 @@ int main(List<String> args) {
           }
         } else {
           if (isJson) {
-            _jsonPrint({'type': 'result', 'file': r.filename, 'matched': false, 'crc32': r.crc32});
+            _jsonPrint({
+              'type': 'result',
+              'file': r.filename,
+              'matched': false,
+              'crc32': r.crc32,
+            });
           } else {
             print('  ? ${r.filename} [${r.crc32}]');
           }
@@ -518,7 +650,10 @@ int main(List<String> args) {
     final discDir = results['disc-dir'] as String?;
     if (discDir == null) {
       if (isJson) {
-        _jsonPrint({'type': 'error', 'message': '--disc-dir is required with --dcp'});
+        _jsonPrint({
+          'type': 'error',
+          'message': '--disc-dir is required with --dcp',
+        });
       } else {
         stderr.writeln('--disc-dir is required with --dcp');
       }
@@ -543,7 +678,11 @@ int main(List<String> args) {
         'error': res['error'],
       });
     } else {
-      print(res['success'] == true ? '✅ DCP applied.' : '❌ DCP failed: ${res['error']}');
+      print(
+        res['success'] == true
+            ? '✅ DCP applied.'
+            : '❌ DCP failed: ${res['error']}',
+      );
     }
     return res['success'] == true ? 0 : 1;
   }
@@ -552,7 +691,8 @@ int main(List<String> args) {
     final file = results['read-ipbin'] as String;
     final fields = readIpbin(file);
     if (isJson) {
-      final clean = Map<String, dynamic>.from(fields)..removeWhere((k, v) => k.startsWith('_'));
+      final clean = Map<String, dynamic>.from(fields)
+        ..removeWhere((k, v) => k.startsWith('_'));
       _jsonPrint({'type': 'done', 'success': true, 'fields': clean});
     } else {
       fields.forEach((k, v) {
@@ -574,8 +714,12 @@ int main(List<String> args) {
     var fields = readIpbin(file);
     if (results['set-title'] != null) {
       final title = results['set-title'] as String;
-      fields['product_name'] = title.length > 16 ? title.substring(0, 16) : title;
-      fields['product_name_2'] = title.length > 16 ? title.substring(16, title.length > 32 ? 32 : title.length) : '';
+      fields['product_name'] = title.length > 16
+          ? title.substring(0, 16)
+          : title;
+      fields['product_name_2'] = title.length > 16
+          ? title.substring(16, title.length > 32 ? 32 : title.length)
+          : '';
     }
     if (results['set-region'] != null) {
       final reg = (results['set-region'] as String).toUpperCase();
@@ -606,7 +750,10 @@ int main(List<String> args) {
 
   if (inputFile == null && folder == null) {
     if (isJson) {
-      _jsonPrint({'type': 'error', 'message': 'Provide --input FILE or --folder DIR'});
+      _jsonPrint({
+        'type': 'error',
+        'message': 'Provide --input FILE or --folder DIR',
+      });
     } else {
       print('Error: Provide --input FILE or --folder DIR');
     }
@@ -676,7 +823,8 @@ int main(List<String> args) {
       if (isJson) _jsonPrint({'type': 'done', 'success': true});
     } else {
       failed++;
-      if (isJson) _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+      if (isJson)
+        _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
     }
   }
 

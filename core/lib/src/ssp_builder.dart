@@ -4,8 +4,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
+
 import 'logger.dart' as logger;
 
 /// Mode-1 EDC and ECC P/Q recalculation primitives (ported from ecmlib / Neill Corlett).
@@ -214,7 +216,9 @@ class BsdiffEncoder {
         }
 
         for (int i = 0; i < lenf; i++) {
-          diffBuf.addByte((newData[lastscan + i] - oldData[lastpos + i]) & 0xFF);
+          diffBuf.addByte(
+            (newData[lastscan + i] - oldData[lastpos + i]) & 0xFF,
+          );
         }
 
         for (int i = 0; i < (scan - lenb) - (lastscan + lenf); i++) {
@@ -337,11 +341,7 @@ class IsoDirEntry {
   final int lba;
   final int size;
 
-  IsoDirEntry({
-    required this.filename,
-    required this.lba,
-    required this.size,
-  });
+  IsoDirEntry({required this.filename, required this.lba, required this.size});
 }
 
 /// Helper class for reading ISO9660 root directory from raw 2352-byte sector BIN tracks.
@@ -361,7 +361,9 @@ class Iso9660Reader {
       // Check CD001 magic
       final magic = utf8.decode(pvdPayload.sublist(1, 6), allowMalformed: true);
       if (magic != 'CD001' || pvdPayload[0] != 0x01) {
-        throw FormatException('Not a valid ISO9660 image (missing CD001 PVD at LBA 16).');
+        throw FormatException(
+          'Not a valid ISO9660 image (missing CD001 PVD at LBA 16).',
+        );
       }
 
       final rootRec = pvdPayload.sublist(156, 156 + 34);
@@ -531,7 +533,9 @@ class SspBuilder {
       _updateProgress(pct);
 
       if (!origDirMap.containsKey(filename)) {
-        _log('[SSP Builder WARN] File $filename present in modified BIN but missing in original. Skipping.');
+        _log(
+          '[SSP Builder WARN] File $filename present in modified BIN but missing in original. Skipping.',
+        );
         continue;
       }
 
@@ -559,7 +563,9 @@ class SspBuilder {
         );
       }
 
-      _log('[SSP Builder] Encoding bsdiff diff for $filename (${origBytes.length} bytes)...');
+      _log(
+        '[SSP Builder] Encoding bsdiff diff for $filename (${origBytes.length} bytes)...',
+      );
 
       final origMd5 = md5.convert(origBytes).toString().toUpperCase();
       md5Lines.add('$filename: $origMd5');
@@ -567,26 +573,28 @@ class SspBuilder {
       final patchData = bsdiff.encode(origBytes, modBytes);
       final dfrFilename = '$filename._DFR';
 
-      archive.addFile(ArchiveFile(
-        dfrFilename,
-        patchData.length,
-        patchData,
-      ));
+      archive.addFile(ArchiveFile(dfrFilename, patchData.length, patchData));
 
       changedCount++;
     }
 
-    _log('[SSP Builder] Packaging SSP archive with $changedCount patch entries...');
+    _log(
+      '[SSP Builder] Packaging SSP archive with $changedCount patch entries...',
+    );
     _updateProgress(92.0);
 
     // changes.md5
     final changesMd5Content = '${md5Lines.join('\n')}\n';
     final changesBytes = utf8.encode(changesMd5Content);
-    archive.addFile(ArchiveFile('changes.md5', changesBytes.length, changesBytes));
+    archive.addFile(
+      ArchiveFile('changes.md5', changesBytes.length, changesBytes),
+    );
 
     // version.txt
     final versionBytes = utf8.encode('$version\n');
-    archive.addFile(ArchiveFile('version.txt', versionBytes.length, versionBytes));
+    archive.addFile(
+      ArchiveFile('version.txt', versionBytes.length, versionBytes),
+    );
 
     outputFile.parent.createSync(recursive: true);
     final zipData = ZipEncoder().encode(archive);
@@ -597,7 +605,9 @@ class SspBuilder {
     outputFile.writeAsBytesSync(zipData);
 
     _updateProgress(100.0);
-    _log('[SSP Builder] Complete. Generated .ssp with $changedCount modified files.');
+    _log(
+      '[SSP Builder] Complete. Generated .ssp with $changedCount modified files.',
+    );
   }
 
   bool _bytesEqual(List<int> a, List<int> b) {

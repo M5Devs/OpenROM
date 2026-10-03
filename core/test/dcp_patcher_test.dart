@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:openrom_core/openrom_core.dart';
 import 'package:path/path.dart' as p;
@@ -13,7 +14,8 @@ void main() {
       Directory(outputDir).createSync();
       Directory(discDir).createSync();
 
-      File(p.join(discDir, 'track01.bin')).writeAsStringSync('dummy track data');
+      File(p.join(discDir, 'track01.bin'))
+          .writeAsStringSync('dummy track data');
 
       final encoder = ZipFileEncoder();
       final maliciousDcp = p.join(tmpDir.path, 'malicious.dcp');
@@ -32,7 +34,10 @@ void main() {
       );
 
       expect(res['success'], isFalse);
-      expect(res['error'].toString(), contains('Malicious archive entry detected'));
+      expect(
+        res['error'].toString(),
+        contains('Malicious archive entry detected'),
+      );
     } finally {
       tmpDir.deleteSync(recursive: true);
     }

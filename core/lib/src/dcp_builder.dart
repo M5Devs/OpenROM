@@ -2,16 +2,18 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
+
 import 'config.dart' as config;
 import 'logger.dart' as logger;
 
 class _PendingEntry {
   final String archivePath;
   final File file;
-    _PendingEntry({required this.archivePath, required this.file});
+  _PendingEntry({required this.archivePath, required this.file});
 }
 
 /// Universal Dreamcast Patcher (DCP) builder.
@@ -53,10 +55,14 @@ class DcpBuilder {
 
   Future<void> build() async {
     if (!originalDir.existsSync()) {
-      throw FormatException('Original disc directory not found: ${originalDir.path}');
+      throw FormatException(
+        'Original disc directory not found: ${originalDir.path}',
+      );
     }
     if (!modifiedDir.existsSync()) {
-      throw FormatException('Modified disc directory not found: ${modifiedDir.path}');
+      throw FormatException(
+        'Modified disc directory not found: ${modifiedDir.path}',
+      );
     }
 
     _log('[DCP Builder] Scanning directory differences...');
@@ -76,7 +82,9 @@ class DcpBuilder {
       final bool canUseXdelta = useXdelta && File(xdelta3Path).existsSync();
 
       if (useXdelta && !canUseXdelta) {
-        _log('[DCP Builder WARN] xdelta3 tool not found at "$xdelta3Path". Falling back to verbatim files.');
+        _log(
+          '[DCP Builder WARN] xdelta3 tool not found at "$xdelta3Path". Falling back to verbatim files.',
+        );
       }
 
       for (int i = 0; i < modFiles.length; i++) {
@@ -84,12 +92,18 @@ class DcpBuilder {
         _updateProgress(pct);
 
         final modFile = modFiles[i];
-        final relPath = p.relative(modFile.path, from: modifiedDir.path).replaceAll('\\', '/');
+        final relPath = p
+            .relative(modFile.path, from: modifiedDir.path)
+            .replaceAll('\\', '/');
         final normRelLower = relPath.toLowerCase();
 
         // Bootsector / IP.BIN handling
         if (normRelLower == 'bootsector/ip.bin' || normRelLower == 'ip.bin') {
-          final origIpBinPath1 = p.join(originalDir.path, 'bootsector', 'IP.BIN');
+          final origIpBinPath1 = p.join(
+            originalDir.path,
+            'bootsector',
+            'IP.BIN',
+          );
           final origIpBinPath2 = p.join(originalDir.path, 'IP.BIN');
           File? origIpBin;
           if (File(origIpBinPath1).existsSync()) {
@@ -100,10 +114,9 @@ class DcpBuilder {
 
           if (origIpBin == null || !_filesEqual(origIpBin, modFile)) {
             _log('[DCP Builder] Adding bootsector/IP.BIN');
-            pendingEntries.add(_PendingEntry(
-              archivePath: 'bootsector/IP.BIN',
-              file: modFile,
-            ));
+            pendingEntries.add(
+              _PendingEntry(archivePath: 'bootsector/IP.BIN', file: modFile),
+            );
             ipbinAdded = true;
           }
           continue;
@@ -113,15 +126,16 @@ class DcpBuilder {
           continue;
         }
 
-        final origFile = File(p.join(originalDir.path, relPath.replaceAll('/', p.separator)));
+        final origFile = File(
+          p.join(originalDir.path, relPath.replaceAll('/', p.separator)),
+        );
 
         if (!origFile.existsSync()) {
           // New file added verbatim
           _log('[DCP Builder] Adding verbatim: $relPath');
-          pendingEntries.add(_PendingEntry(
-            archivePath: relPath,
-            file: modFile,
-          ));
+          pendingEntries.add(
+            _PendingEntry(archivePath: relPath, file: modFile),
+          );
           added++;
         } else {
           if (_filesEqual(origFile, modFile)) {
@@ -143,25 +157,27 @@ class DcpBuilder {
             );
 
             if (success && File(patchTmpPath).existsSync()) {
-              pendingEntries.add(_PendingEntry(
-                archivePath: xdeltaRelPath,
-                file: File(patchTmpPath),
-              ));
+              pendingEntries.add(
+                _PendingEntry(
+                  archivePath: xdeltaRelPath,
+                  file: File(patchTmpPath),
+                ),
+              );
               diffed++;
             } else {
-              _log('[DCP Builder WARN] xdelta encoding failed for $relPath. Including verbatim.');
-              pendingEntries.add(_PendingEntry(
-                archivePath: relPath,
-                file: modFile,
-              ));
+              _log(
+                '[DCP Builder WARN] xdelta encoding failed for $relPath. Including verbatim.',
+              );
+              pendingEntries.add(
+                _PendingEntry(archivePath: relPath, file: modFile),
+              );
               added++;
             }
           } else {
             _log('[DCP Builder] Adding changed file verbatim: $relPath');
-            pendingEntries.add(_PendingEntry(
-              archivePath: relPath,
-              file: modFile,
-            ));
+            pendingEntries.add(
+              _PendingEntry(archivePath: relPath, file: modFile),
+            );
             added++;
           }
         }
@@ -173,11 +189,7 @@ class DcpBuilder {
       final archive = Archive();
       for (final entry in pendingEntries) {
         final data = entry.file.readAsBytesSync();
-        archive.addFile(ArchiveFile(
-          entry.archivePath,
-          data.length,
-          data,
-        ));
+        archive.addFile(ArchiveFile(entry.archivePath, data.length, data));
       }
 
       _log('[DCP Builder] Writing DCP archive to ${outputFile.path}...');
@@ -191,7 +203,9 @@ class DcpBuilder {
       outputFile.writeAsBytesSync(zipData);
 
       _updateProgress(100.0);
-      _log('[DCP Builder] Complete. Added verbatim: $added, xdelta diffs: $diffed, IP.BIN included: $ipbinAdded');
+      _log(
+        '[DCP Builder] Complete. Added verbatim: $added, xdelta diffs: $diffed, IP.BIN included: $ipbinAdded',
+      );
     } finally {
       try {
         tempDir.deleteSync(recursive: true);

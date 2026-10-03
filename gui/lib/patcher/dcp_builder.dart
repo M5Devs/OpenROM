@@ -3,7 +3,9 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:openrom_core/openrom_core.dart' as core;
+
 import 'patcher.dart';
 
 /// DCP (Universal Dreamcast Patcher) patch builder.

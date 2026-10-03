@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 String generateM3u({
@@ -19,7 +20,9 @@ String generateM3u({
     }
   }
 
-  final targetDir = Directory(outputPath).existsSync() || !outputPath.toLowerCase().endsWith('.m3u')
+  final targetDir =
+      Directory(outputPath).existsSync() ||
+          !outputPath.toLowerCase().endsWith('.m3u')
       ? outputPath
       : p.dirname(outputPath);
 

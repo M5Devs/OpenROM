@@ -2,8 +2,10 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
+
 import 'config.dart' as config;
 import 'logger.dart' as logger;
 
@@ -62,7 +64,10 @@ class DcpPatcher {
     try {
       stagingDir.createSync(recursive: true);
     } catch (e) {
-      return {'success': false, 'error': 'Could not create staging directory: $e'};
+      return {
+        'success': false,
+        'error': 'Could not create staging directory: $e',
+      };
     }
 
     try {
@@ -102,8 +107,11 @@ class DcpPatcher {
         final name = file.name;
         final destPath = p.normalize(p.join(basePath, name));
 
-        if (!destPath.startsWith(basePath + p.separator) && destPath != basePath) {
-          throw FormatException('Malicious archive entry detected (Path Traversal): $name');
+        if (!destPath.startsWith(basePath + p.separator) &&
+            destPath != basePath) {
+          throw FormatException(
+            'Malicious archive entry detected (Path Traversal): $name',
+          );
         }
 
         if (name.toLowerCase() == 'bootsector/ip.bin') {
@@ -137,15 +145,18 @@ class DcpPatcher {
           ignoreChecksum,
         );
         result['xdelta_applied'] = xdeltaApplied;
-        result['files_patched'] = (result['files_patched'] as int) + xdeltaApplied;
+        result['files_patched'] =
+            (result['files_patched'] as int) + xdeltaApplied;
       }
 
       _updateProgress(100.0);
       _commitStaging(stagingDir, outputPath);
       result['success'] = true;
-      _log('[DCP] Done. Files patched: ${result["files_patched"]}, '
-          'xdelta: ${result["xdelta_applied"]}, '
-          'IP.BIN replaced: ${result["ipbin_replaced"]}');
+      _log(
+        '[DCP] Done. Files patched: ${result["files_patched"]}, '
+        'xdelta: ${result["xdelta_applied"]}, '
+        'IP.BIN replaced: ${result["ipbin_replaced"]}',
+      );
       return result;
     } catch (e) {
       result['error'] = e.toString();
@@ -181,14 +192,20 @@ class DcpPatcher {
 
         for (final ext in ['.xdelta3', '.xdelta', '.xd', '.vcdiff']) {
           if (targetName.toLowerCase().endsWith(ext)) {
-            targetName = targetName.substring(0, targetName.length - ext.length);
+            targetName = targetName.substring(
+              0,
+              targetName.length - ext.length,
+            );
             break;
           }
         }
 
         final destPath = p.normalize(p.join(basePath, targetName));
-        if (!destPath.startsWith(basePath + p.separator) && destPath != basePath) {
-          throw FormatException('Malicious archive entry detected (Path Traversal): ${entry.name}');
+        if (!destPath.startsWith(basePath + p.separator) &&
+            destPath != basePath) {
+          throw FormatException(
+            'Malicious archive entry detected (Path Traversal): ${entry.name}',
+          );
         }
 
         final patchTmp = p.join(tempDir.path, p.basename(relativePatchName));

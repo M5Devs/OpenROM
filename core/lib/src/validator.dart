@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'detector.dart' as detector;
 import 'logger.dart' as logger;
 

@@ -60,7 +60,11 @@ class ThemeService extends ChangeNotifier {
       final customFiles = Directory(dir.path)
           .listSync()
           .whereType<File>()
-          .where((f) => f.path.endsWith('.json') && f.uri.pathSegments.last.startsWith('custom_'));
+          .where(
+            (f) =>
+                f.path.endsWith('.json') &&
+                f.uri.pathSegments.last.startsWith('custom_'),
+          );
       for (final file in customFiles) {
         try {
           final content = await file.readAsString();
@@ -90,9 +94,10 @@ class ThemeService extends ChangeNotifier {
   Future<void> saveCustomTheme(ThemeConfig theme) async {
     try {
       final dir = await getApplicationSupportDirectory();
-      final safeName = theme.name
-          .toLowerCase()
-          .replaceAll(RegExp(r'[^a-z0-9_]'), '_');
+      final safeName = theme.name.toLowerCase().replaceAll(
+        RegExp(r'[^a-z0-9_]'),
+        '_',
+      );
       final file = File('${dir.path}/custom_$safeName.json');
       await file.writeAsString(jsonEncode(theme.toJson()));
 

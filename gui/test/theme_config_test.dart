@@ -8,7 +8,10 @@ void main() {
       final theme = ThemeConfig.defaultTheme();
       expect(theme.name, 'Gaming Dashboard');
 
-      final updated = theme.copyWith(name: 'New Custom Theme', accent: const Color(0xff00ff00));
+      final updated = theme.copyWith(
+        name: 'New Custom Theme',
+        accent: const Color(0xff00ff00),
+      );
       expect(updated.name, 'New Custom Theme');
       expect(updated.accent, const Color(0xff00ff00));
       expect(updated.background, theme.background);

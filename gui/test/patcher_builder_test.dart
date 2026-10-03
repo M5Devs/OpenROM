@@ -70,7 +70,10 @@ void main() {
 
       // Verify header magic "PATCH" and footer "EOF"
       final patchBytes = await patchFile.readAsBytes();
-      expect(patchBytes.sublist(0, 5), equals([0x50, 0x41, 0x54, 0x43, 0x48])); // PATCH
+      expect(
+        patchBytes.sublist(0, 5),
+        equals([0x50, 0x41, 0x54, 0x43, 0x48]),
+      ); // PATCH
       expect(
         patchBytes.sublist(patchBytes.length - 3),
         equals([0x45, 0x4F, 0x46]), // EOF
@@ -127,7 +130,9 @@ void main() {
       final patchFile = File('${tempDir.path}/patch.ips32');
       final outFile = File('${tempDir.path}/out.bin');
 
-      final origData = Uint8List.fromList(List.generate(1500, (i) => (i * 7) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(1500, (i) => (i * 7) % 256),
+      );
       final modData = Uint8List.fromList(List.from(origData));
       // Modify 15 bytes at offset 300
       for (int i = 0; i < 15; i++) {
@@ -148,7 +153,10 @@ void main() {
 
       // Verify header magic "IPS32" and footer "EEOF"
       final patchBytes = await patchFile.readAsBytes();
-      expect(patchBytes.sublist(0, 5), equals([0x49, 0x50, 0x53, 0x33, 0x32])); // IPS32
+      expect(
+        patchBytes.sublist(0, 5),
+        equals([0x49, 0x50, 0x53, 0x33, 0x32]),
+      ); // IPS32
       expect(
         patchBytes.sublist(patchBytes.length - 4),
         equals([0x45, 0x45, 0x4F, 0x46]), // EEOF
@@ -173,7 +181,9 @@ void main() {
       final patchFile = File('${tempDir.path}/patch.ebp');
       final outFile = File('${tempDir.path}/out.bin');
 
-      final origData = Uint8List.fromList(List.generate(800, (i) => (i * 11) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(800, (i) => (i * 11) % 256),
+      );
       final modData = Uint8List.fromList(List.from(origData));
       // Modify 8 bytes at offset 200
       for (int i = 0; i < 8; i++) {
@@ -214,7 +224,9 @@ void main() {
       final forwardOutFile = File('${tempDir.path}/forward_out.bin');
       final reverseOutFile = File('${tempDir.path}/reverse_out.bin');
 
-      final origData = Uint8List.fromList(List.generate(3000, (i) => (i * 13) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(3000, (i) => (i * 13) % 256),
+      );
       final modData = Uint8List.fromList(List.from(origData));
       // Modify 25 bytes at offset 1200
       for (int i = 0; i < 25; i++) {
@@ -266,7 +278,9 @@ void main() {
       final patchFile = File('${tempDir.path}/patch.bps');
       final outFile = File('${tempDir.path}/out.bin');
 
-      final origData = Uint8List.fromList(List.generate(2000, (i) => (i * 3) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(2000, (i) => (i * 3) % 256),
+      );
       final modData = Uint8List.fromList(List.from(origData));
       // Modify 20 bytes at offset 500
       for (int i = 0; i < 20; i++) {
@@ -390,7 +404,9 @@ void main() {
       final patchFile = File('${tempDir.path}/patch_gba.aps');
       final outFile = File('${tempDir.path}/out_aps_gba.bin');
 
-      final origData = Uint8List.fromList(List.generate(70000, (i) => (i * 3) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(70000, (i) => (i * 3) % 256),
+      );
       final modData = Uint8List.fromList(List.from(origData));
       for (int i = 0; i < 30; i++) {
         modData[1000 + i] = (modData[1000 + i] + 20) % 256;
@@ -428,7 +444,9 @@ void main() {
       final patchFile = File('${tempDir.path}/patch_n64.aps');
       final outFile = File('${tempDir.path}/out_aps_n64.z64');
 
-      final origData = Uint8List.fromList(List.generate(1024, (i) => (i * 17) % 256));
+      final origData = Uint8List.fromList(
+        List.generate(1024, (i) => (i * 17) % 256),
+      );
       // Set mock N64 header
       origData[0] = 0x80; // Big endian
       origData[0x3c] = 0x4e; // Cart ID
@@ -469,20 +487,21 @@ void main() {
     test('DCP Round-trip test', () async {
       final origDir = Directory(p.join(tempDir.path, 'dcp_orig'))..createSync();
       final modDir = Directory(p.join(tempDir.path, 'dcp_mod'))..createSync();
-      final outputDir = Directory(p.join(tempDir.path, 'dcp_out'))..createSync();
+      final outputDir = Directory(p.join(tempDir.path, 'dcp_out'))
+        ..createSync();
       final dcpFile = File(p.join(tempDir.path, 'patch.dcp'));
 
       File(p.join(origDir.path, 'bootsector', 'IP.BIN'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ORIG_IPBIN_123');
       File(p.join(origDir.path, '1ST_READ.BIN'))
-        .writeAsStringSync('ORIG_1ST_READ');
+          .writeAsStringSync('ORIG_1ST_READ');
 
       File(p.join(modDir.path, 'bootsector', 'IP.BIN'))
         ..createSync(recursive: true)
         ..writeAsStringSync('MOD_IPBIN_456');
       File(p.join(modDir.path, '1ST_READ.BIN'))
-        .writeAsStringSync('MOD_1ST_READ');
+          .writeAsStringSync('MOD_1ST_READ');
 
       final builder = DcpBuilder(
         originalDir: origDir,
