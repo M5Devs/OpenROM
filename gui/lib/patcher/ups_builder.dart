@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'checksums.dart';
-import 'patcher.dart';
 
 /// Pure Dart UPS (Universal Patch System) patch creator.
 class UpsBuilder {

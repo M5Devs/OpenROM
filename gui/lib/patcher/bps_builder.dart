@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'checksums.dart';
-import 'patcher.dart';
 
 /// Pure Dart BPS (Binary Patch System) patch creator.
 class BpsBuilder {

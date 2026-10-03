@@ -2,8 +2,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'patcher.dart';
-
 /// Pure Dart IPS32 patch creator.
 class IPS32Builder {
   final File originalFile;
