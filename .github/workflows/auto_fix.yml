@@ -16,17 +16,20 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: '3.47.6'
+          cache: true
 
       - name: Auto-Format Dart
         run: |
           if [ -d "gui" ]; then
             cd gui
+            flutter pub get
             dart format .
             cd ..
           fi
           if [ -d "core" ]; then
             cd core
+            dart pub get
             dart format .
             cd ..
           fi

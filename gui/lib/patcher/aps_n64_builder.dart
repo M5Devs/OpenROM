@@ -2,8 +2,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'patcher.dart';
-
 /// Pure Dart APS (N64 variant, magic "APS10") patch creator.
 class ApsN64Builder {
   final File originalFile;

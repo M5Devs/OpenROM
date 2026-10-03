@@ -20,8 +20,7 @@ String generateM3u({
     }
   }
 
-  final targetDir =
-      Directory(outputPath).existsSync() ||
+  final targetDir = Directory(outputPath).existsSync() ||
           !outputPath.toLowerCase().endsWith('.m3u')
       ? outputPath
       : p.dirname(outputPath);

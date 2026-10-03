@@ -355,8 +355,7 @@ int main(List<String> args) {
 
   if ((results['m3u'] as List<String>).isNotEmpty) {
     final discFiles = results['m3u'] as List<String>;
-    final out =
-        results['output'] as String? ??
+    final out = results['output'] as String? ??
         p.dirname(p.canonicalize(discFiles.first));
     final rel = results['absolute'] != true;
     try {
@@ -714,9 +713,8 @@ int main(List<String> args) {
     var fields = readIpbin(file);
     if (results['set-title'] != null) {
       final title = results['set-title'] as String;
-      fields['product_name'] = title.length > 16
-          ? title.substring(0, 16)
-          : title;
+      fields['product_name'] =
+          title.length > 16 ? title.substring(0, 16) : title;
       fields['product_name_2'] = title.length > 16
           ? title.substring(16, title.length > 32 ? 32 : title.length)
           : '';

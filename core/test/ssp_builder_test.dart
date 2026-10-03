@@ -38,8 +38,7 @@ void main() {
       ecc.recalculateSector(sector);
 
       // Verify EDC non-zero
-      final edcVal =
-          sector[0x810] |
+      final edcVal = sector[0x810] |
           (sector[0x811] << 8) |
           (sector[0x812] << 16) |
           (sector[0x813] << 24);
@@ -113,10 +112,8 @@ void main() {
         final changesTxt = utf8.decode(changesFile.content as List<int>);
 
         final origIsoContent = Iso9660Reader.readIsoFile(origBin, 18, 39);
-        final expectedMd5 = md5
-            .convert(origIsoContent)
-            .toString()
-            .toUpperCase();
+        final expectedMd5 =
+            md5.convert(origIsoContent).toString().toUpperCase();
 
         expect(changesTxt, contains('TEST.BIN: $expectedMd5'));
 
@@ -126,7 +123,9 @@ void main() {
       },
     );
 
-    test('SspBuilder generated SSP can be applied with saturn-patcher CLI binary if available', () async {
+    test(
+        'SspBuilder generated SSP can be applied with saturn-patcher CLI binary if available',
+        () async {
       final builder = SspBuilder(
         originalBin: origBin,
         modifiedBin: modBin,

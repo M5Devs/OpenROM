@@ -70,9 +70,8 @@ class TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           ElevatedButton(
-            onPressed: (fileCount > 0 && !isConverting)
-                ? onConvertPressed
-                : null,
+            onPressed:
+                (fileCount > 0 && !isConverting) ? onConvertPressed : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.accent,
               foregroundColor: Colors.white,

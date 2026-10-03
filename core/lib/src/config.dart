@@ -11,8 +11,7 @@ const String appName = 'OpenROM';
 String getDirectoryConfig() {
   String path;
   if (Platform.isWindows) {
-    final base =
-        Platform.environment['APPDATA'] ??
+    final base = Platform.environment['APPDATA'] ??
         Platform.environment['USERPROFILE'] ??
         '';
     path = p.join(base, appName);
@@ -64,8 +63,8 @@ String getDefaultBundledPath(String tool) {
   }
 
   final String archFolder;
-  final archStr = '${Platform.version} ${Platform.operatingSystem}'
-      .toLowerCase();
+  final archStr =
+      '${Platform.version} ${Platform.operatingSystem}'.toLowerCase();
   if (archStr.contains('aarch64') || archStr.contains('arm64')) {
     archFolder = 'arm64';
   } else {
@@ -136,9 +135,8 @@ String getDefaultBundledPath(String tool) {
     return bundled;
   }
 
-  final fallback = Platform.isWindows
-      ? (winNames[tool] ?? tool)
-      : (unixNames[tool] ?? tool);
+  final fallback =
+      Platform.isWindows ? (winNames[tool] ?? tool) : (unixNames[tool] ?? tool);
   ensureExecutable(fallback);
   return fallback;
 }

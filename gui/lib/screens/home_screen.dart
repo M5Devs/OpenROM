@@ -58,9 +58,8 @@ class HomeScreenState extends State<HomeScreen> {
       final roms = await FileDetector.detectPaths(paths);
       for (final rom in roms) {
         if (!_jobs.any((j) => j.romFile.filepath == rom.filepath)) {
-          final defaultTarget = rom.validTargets.isNotEmpty
-              ? rom.validTargets.first
-              : 'CHD';
+          final defaultTarget =
+              rom.validTargets.isNotEmpty ? rom.validTargets.first : 'CHD';
           setState(() {
             _jobs.add(
               ConversionJob(
@@ -238,9 +237,8 @@ class HomeScreenState extends State<HomeScreen> {
                   )
                 : ReorderableListView.builder(
                     itemCount: _jobs.length,
-                    onReorder: (oldIndex, newIndex) {
+                    onReorderItem: (oldIndex, newIndex) {
                       setState(() {
-                        if (newIndex > oldIndex) newIndex -= 1;
                         final job = _jobs.removeAt(oldIndex);
                         _jobs.insert(newIndex, job);
                       });

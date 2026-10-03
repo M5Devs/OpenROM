@@ -184,9 +184,8 @@ class DcpPatcher {
       final basePath = p.normalize(p.canonicalize(outputDir));
 
       for (final entry in xdeltaEntries) {
-        final archivePrefix = entry.name.startsWith('xdelta\\')
-            ? 'xdelta\\'
-            : 'xdelta/';
+        final archivePrefix =
+            entry.name.startsWith('xdelta\\') ? 'xdelta\\' : 'xdelta/';
         final relativePatchName = entry.name.substring(archivePrefix.length);
         String targetName = relativePatchName.replaceAll('\\', '/');
 

@@ -2,8 +2,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'patcher.dart';
-
 /// Pure Dart PPF3 (Playstation Patch Format v3) patch creator.
 class PpfBuilder {
   final File originalFile;

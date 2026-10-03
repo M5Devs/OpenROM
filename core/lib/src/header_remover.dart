@@ -94,9 +94,8 @@ Map<String, dynamic>? detectHeader(String filepath) {
 
       final hasCopierHeaderInternal =
           _verifySnesInternalHeader(headerData, 0x81C0) ||
-          _verifySnesInternalHeader(headerData, 0x101C0);
-      final hasCleanInternal =
-          _verifySnesInternalHeader(headerData, 0x7FC0) ||
+              _verifySnesInternalHeader(headerData, 0x101C0);
+      final hasCleanInternal = _verifySnesInternalHeader(headerData, 0x7FC0) ||
           _verifySnesInternalHeader(headerData, 0xFFC0);
 
       if (hasCopierHeaderInternal) {
