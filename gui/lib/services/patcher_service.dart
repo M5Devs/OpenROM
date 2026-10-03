@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../models/errors.dart';
+import '../patcher/patch_manifest.dart';
 import '../patcher/patcher.dart';
 import '../patcher/patcher_factory.dart';
 import '../patcher/dcp_patcher.dart';
@@ -18,13 +19,27 @@ Future<PatchReport> _applyPatchIsolate(Map<String, dynamic> params) async {
   final outputPath = params['outputPath'] as String;
   final ignoreChecksum = params['ignoreChecksum'] as bool;
 
+  final manifest = await PatchManifest.readForPatch(File(patchPath));
+  if (manifest != null && !ignoreChecksum) {
+    await manifest.validateBase(File(romPath));
+  }
+
   final patcher = PatcherFactory.create(
     patchFile: File(patchPath),
     romFile: File(romPath),
     outputFile: File(outputPath),
   );
 
-  return await patcher.apply(ignoreChecksum: ignoreChecksum);
+  final report = await patcher.apply(ignoreChecksum: ignoreChecksum);
+  if (manifest == null || ignoreChecksum) return report;
+
+  return PatchReport(
+    format: report.format,
+    checks: [
+      const PatchCheck('Base ROM (SHA-256 manifest)', CheckOutcome.passed),
+      ...report.checks,
+    ],
+  );
 }
 
 class PatcherService {

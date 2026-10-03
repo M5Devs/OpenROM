@@ -14,6 +14,7 @@ import '../patcher/dcp_builder.dart';
 import '../patcher/ebp_builder.dart';
 import '../patcher/ips32_builder.dart';
 import '../patcher/ips_builder.dart';
+import '../patcher/patch_manifest.dart';
 import '../patcher/patcher.dart';
 import '../patcher/ppf_builder.dart';
 import '../patcher/ups_builder.dart';
@@ -24,11 +25,13 @@ class PatchBuildReport {
   final String format;
   final int outputSizeBytes;
   final String outputPath;
+  final String? manifestPath;
 
   const PatchBuildReport({
     required this.format,
     required this.outputSizeBytes,
     required this.outputPath,
+    this.manifestPath,
   });
 }
 
@@ -163,12 +166,24 @@ Future<PatchBuildReport> _buildPatchIsolate(Map<String, String> params) async {
     throw PatchException('Patch file was not generated.');
   }
 
+  String? manifestPath;
+  if (format != 'dcp') {
+    final manifest = PatchManifest(
+      format: format.toUpperCase(),
+      baseRom: await RomIdentity.fromFile(origFile),
+      targetRom: await RomIdentity.fromFile(modFile),
+    );
+    await manifest.writeForPatch(outFile);
+    manifestPath = PatchManifest.sidecarPath(outputPath);
+  }
+
   final size = await outFile.length();
 
   return PatchBuildReport(
     format: format.toUpperCase(),
     outputSizeBytes: size,
     outputPath: outputPath,
+    manifestPath: manifestPath,
   );
 }
 
