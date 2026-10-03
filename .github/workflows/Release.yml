@@ -22,6 +22,7 @@ jobs:
       - name: Fetch binaries from OpenROM-bins
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           New-Item -ItemType Directory -Force -Path assets\windows
           Copy-Item -Path "bins\windows\x86_64\*" -Destination "assets\windows\" -Recurse
 
@@ -148,6 +149,7 @@ jobs:
       - name: Fetch binaries from OpenROM-bins
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           mkdir -p assets/linux/x86_64
           cp -r bins/linux/x86_64/. assets/linux/x86_64/
           chmod +x assets/linux/x86_64/*
@@ -271,6 +273,7 @@ jobs:
       - name: Fetch binaries from OpenROM-bins
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           mkdir -p assets/linux/arm64
           cp -r bins/linux/arm64/. assets/linux/arm64/
           chmod +x assets/linux/arm64/*
@@ -377,6 +380,7 @@ jobs:
       - name: Fetch binaries from OpenROM-bins
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           mkdir -p assets/macos/arm64 assets/macos/x86_64
           cp -r bins/macos/arm64/.  assets/macos/arm64/
           cp -r bins/macos/x86_64/. assets/macos/x86_64/
