@@ -43,11 +43,38 @@ class DcpPatcher {
       return {'success': false, 'error': 'Disc directory not found: $discDir'};
     }
 
-    Directory(outputDir).createSync(recursive: true);
+    final sourcePath = p.normalize(p.canonicalize(discDir));
+    final requestedOutputPath = p.normalize(p.canonicalize(outputDir));
+    if (requestedOutputPath == sourcePath ||
+        requestedOutputPath.startsWith('$sourcePath${p.separator}')) {
+      return {
+        'success': false,
+        'error': 'Output directory must be outside the source disc directory.',
+      };
+    }
 
-    _log('[DCP] Copying source disc to output directory...');
-    _copyDisc(discDir, outputDir);
-    _updateProgress(10.0);
+    // Patch a sibling staging directory first so the requested output remains
+    // untouched if archive decoding or patching fails halfway through.
+    final outputPath = p.normalize(p.absolute(outputDir));
+    final stagingDir = Directory(
+      '${outputPath}.openrom-staging-${DateTime.now().microsecondsSinceEpoch}',
+    );
+    try {
+      stagingDir.createSync(recursive: true);
+    } catch (e) {
+      return {'success': false, 'error': 'Could not create staging directory: $e'};
+    }
+
+    try {
+      _log('[DCP] Copying source disc to output directory...');
+      _copyDisc(discDir, stagingDir.path);
+      _updateProgress(10.0);
+    } catch (e) {
+      try {
+        stagingDir.deleteSync(recursive: true);
+      } catch (_) {}
+      return {'success': false, 'error': 'Could not stage source disc: $e'};
+    }
 
     final result = <String, dynamic>{
       'success': false,
@@ -64,7 +91,7 @@ class DcpPatcher {
       final total = archive.length == 0 ? 1 : archive.length;
       _log('[DCP] Archive contains $total entries.');
 
-      final basePath = p.normalize(p.canonicalize(outputDir));
+      final basePath = p.normalize(p.canonicalize(stagingDir.path));
       final xdeltaEntries = <ArchiveFile>[];
 
       for (int i = 0; i < archive.length; i++) {
@@ -81,7 +108,7 @@ class DcpPatcher {
 
         if (name.toLowerCase() == 'bootsector/ip.bin') {
           final ipbinData = file.content as List<int>;
-          File(p.join(outputDir, 'IP.BIN')).writeAsBytesSync(ipbinData);
+          File(p.join(stagingDir.path, 'IP.BIN')).writeAsBytesSync(ipbinData);
           result['ipbin_replaced'] = true;
           _log('[DCP] Replaced IP.BIN from patch.');
           continue;
@@ -106,7 +133,7 @@ class DcpPatcher {
       if (xdeltaEntries.isNotEmpty) {
         final xdeltaApplied = _applyXdeltaPatches(
           xdeltaEntries,
-          outputDir,
+          stagingDir.path,
           ignoreChecksum,
         );
         result['xdelta_applied'] = xdeltaApplied;
@@ -114,6 +141,7 @@ class DcpPatcher {
       }
 
       _updateProgress(100.0);
+      _commitStaging(stagingDir, outputPath);
       result['success'] = true;
       _log('[DCP] Done. Files patched: ${result["files_patched"]}, '
           'xdelta: ${result["xdelta_applied"]}, '
@@ -123,6 +151,12 @@ class DcpPatcher {
       result['error'] = e.toString();
       _log('[DCP ERROR] $e');
       return result;
+    } finally {
+      if (stagingDir.existsSync()) {
+        try {
+          stagingDir.deleteSync(recursive: true);
+        } catch (_) {}
+      }
     }
   }
 
@@ -139,12 +173,15 @@ class DcpPatcher {
       final basePath = p.normalize(p.canonicalize(outputDir));
 
       for (final entry in xdeltaEntries) {
-        final basename = p.basename(entry.name);
-        String targetName = basename;
+        final archivePrefix = entry.name.startsWith('xdelta\\')
+            ? 'xdelta\\'
+            : 'xdelta/';
+        final relativePatchName = entry.name.substring(archivePrefix.length);
+        String targetName = relativePatchName.replaceAll('\\', '/');
 
         for (final ext in ['.xdelta3', '.xdelta', '.xd', '.vcdiff']) {
-          if (basename.toLowerCase().endsWith(ext)) {
-            targetName = basename.substring(0, basename.length - ext.length);
+          if (targetName.toLowerCase().endsWith(ext)) {
+            targetName = targetName.substring(0, targetName.length - ext.length);
             break;
           }
         }
@@ -154,7 +191,7 @@ class DcpPatcher {
           throw FormatException('Malicious archive entry detected (Path Traversal): ${entry.name}');
         }
 
-        final patchTmp = p.join(tempDir.path, basename);
+        final patchTmp = p.join(tempDir.path, p.basename(relativePatchName));
         final sourcePath = destPath;
         final outputPath = '$destPath.patched';
 
@@ -205,6 +242,19 @@ class DcpPatcher {
           ..createSync(recursive: true)
           ..writeAsBytesSync(entity.readAsBytesSync());
       }
+    }
+  }
+
+  void _commitStaging(Directory stagingDir, String outputDir) {
+    final target = Directory(outputDir);
+    target.createSync(recursive: true);
+    for (final entity in stagingDir.listSync(recursive: true)) {
+      if (entity is! File) continue;
+      final rel = p.relative(entity.path, from: stagingDir.path);
+      final dest = File(p.join(outputDir, rel));
+      dest
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(entity.readAsBytesSync());
     }
   }
 }

@@ -1,6 +1,6 @@
 name: openrom_core
 description: OpenROM Pure Dart Backend Core & Toolkit Library
-version: 3.0.0
+version: 3.7.0
 publish_to: 'none'
 
 environment:

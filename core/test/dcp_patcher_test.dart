@@ -37,4 +37,27 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     }
   });
+
+  test('rejects output directory inside source disc', () {
+    final tmpDir = Directory.systemTemp.createTempSync('dcp_output_test_');
+    try {
+      final discDir = Directory(p.join(tmpDir.path, 'disc'))..createSync();
+      final outputDir = p.join(discDir.path, 'patched');
+      final dcpPath = p.join(tmpDir.path, 'empty.dcp');
+      final encoder = ZipFileEncoder()..create(dcpPath);
+      encoder.close();
+
+      final result = DcpPatcher().apply(
+        dcpPath: dcpPath,
+        discDir: discDir.path,
+        outputDir: outputDir,
+      );
+
+      expect(result['success'], isFalse);
+      expect(result['error'], contains('outside the source disc'));
+      expect(Directory(outputDir).existsSync(), isFalse);
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
 }
