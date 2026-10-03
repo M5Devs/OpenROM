@@ -177,7 +177,8 @@ class PatchBuilderService {
     required String originalPath,
     required String modifiedPath,
     required String outputPath,
-    required String format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp' | 'ppf3' | 'aps (gba)' | 'aps (n64)' | 'dcp'
+    required String
+        format, // 'xdelta' | 'ips' | 'ips32' | 'bps' | 'ups' | 'ebp' | 'ppf3' | 'aps (gba)' | 'aps (n64)' | 'dcp'
   }) async {
     try {
       return await compute(_buildPatchIsolate, {

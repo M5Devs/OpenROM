@@ -59,8 +59,8 @@ class ConversionJob {
     List<String>? logLines,
     this.error,
     List<String>? tempFiles,
-  }) : logLines = logLines ?? [],
-       tempFiles = tempFiles ?? [];
+  })  : logLines = logLines ?? [],
+        tempFiles = tempFiles ?? [];
 
   Map<String, dynamic> getFileInfo() {
     if (_fileInfo == null) {
@@ -135,8 +135,7 @@ class Converter {
 
     final valid = detector.getValidTargets(fmt);
     if (!valid.contains(tgt) && tgt != 'BIN/CUE' && tgt != 'FILES') {
-      final err =
-          'Cannot convert $fmt → $tgt. '
+      final err = 'Cannot convert $fmt → $tgt. '
           'Supported targets for $fmt: ${valid.isNotEmpty ? valid.join(', ') : 'none'}';
       _log('[ERROR] $err');
       job.error = err;
@@ -215,9 +214,8 @@ class Converter {
       subCmd = 'createcd';
     }
 
-    final compressionMap = subCmd == 'createcd'
-        ? chdCdCompression
-        : chdDvdCompression;
+    final compressionMap =
+        subCmd == 'createcd' ? chdCdCompression : chdDvdCompression;
     final defaultCodec = subCmd == 'createcd' ? 'cdlz' : 'zlib';
     final cmd = [
       chdman,
@@ -396,8 +394,7 @@ class Converter {
 
   bool _xboxConvert(ConversionJob job, String src, String fmt) {
     if (Platform.isMacOS) {
-      job.error =
-          'Xbox format conversion is not supported on macOS. '
+      job.error = 'Xbox format conversion is not supported on macOS. '
           'XGDTool does not currently provide a macOS build.';
       _log('  ❌ ${job.error}');
       return false;

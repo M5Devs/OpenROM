@@ -103,9 +103,8 @@ class UpsPatcher extends RomPatcher {
       final copyLen = offset - outPos;
       if (copyLen > 0) {
         final available = romLen - romCursor;
-        final n = copyLen <= available
-            ? copyLen
-            : (available > 0 ? available : 0);
+        final n =
+            copyLen <= available ? copyLen : (available > 0 ? available : 0);
         if (n > 0) {
           out.setRange(outPos, outPos + n, rom, romCursor);
           romCursor += n;

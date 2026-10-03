@@ -37,8 +37,8 @@ class CompressionJob {
     this.status = 'Queued',
     this.progress = 0.0,
     this.error,
-  }) : format = format.toLowerCase(),
-       level = level.toLowerCase();
+  })  : format = format.toLowerCase(),
+        level = level.toLowerCase();
 }
 
 class Compressor {

@@ -164,10 +164,8 @@ String calcCrc32(String filepath, {void Function(double pct)? onProgress}) {
     raf.closeSync();
   }
 
-  final hex = (crc & 0xFFFFFFFF)
-      .toRadixString(16)
-      .toLowerCase()
-      .padLeft(8, '0');
+  final hex =
+      (crc & 0xFFFFFFFF).toRadixString(16).toLowerCase().padLeft(8, '0');
   return hex;
 }
 
@@ -216,9 +214,8 @@ Map<String, Map<String, dynamic>> loadDatIndex(String datPath) {
         if (crc.isNotEmpty) {
           index[crc] = {
             'name': currentGameName,
-            'description': currentDesc.isNotEmpty
-                ? currentDesc
-                : currentGameName,
+            'description':
+                currentDesc.isNotEmpty ? currentDesc : currentGameName,
             'rom_name': romName,
             'size': size,
             'md5': md5,

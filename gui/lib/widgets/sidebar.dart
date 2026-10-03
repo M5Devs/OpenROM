@@ -63,9 +63,8 @@ class Sidebar extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: isSelected
-                                ? theme.accent
-                                : Colors.transparent,
+                            color:
+                                isSelected ? theme.accent : Colors.transparent,
                             width: 3,
                           ),
                         ),

@@ -120,9 +120,8 @@ BinMergeResult mergeBins(
   }
 
   final cueDir = p.dirname(p.canonicalize(cuePath));
-  final targetDir = (outputDir != null && outputDir.isNotEmpty)
-      ? outputDir
-      : cueDir;
+  final targetDir =
+      (outputDir != null && outputDir.isNotEmpty) ? outputDir : cueDir;
   Directory(targetDir).createSync(recursive: true);
 
   final tracks = parseCue(cuePath);
@@ -182,9 +181,8 @@ BinMergeResult mergeBins(
             break;
           }
         }
-        final idx01Offset = idx01Entry != null
-            ? _msfToSectors(idx01Entry.msf)
-            : 0;
+        final idx01Offset =
+            idx01Entry != null ? _msfToSectors(idx01Entry.msf) : 0;
 
         computedIndexes = [];
         for (final idxItem in parsedIndexes) {
