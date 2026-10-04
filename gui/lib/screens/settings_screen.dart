@@ -3,12 +3,15 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:openrom_core/openrom_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../providers/locale_provider.dart';
 import '../services/theme_service.dart';
+import '../services/update_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ThemeConfig theme;
@@ -41,13 +44,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _sameFolderAsSource = true;
   String _outputDestination = '';
 
+  // Online Features State
+  bool _autoUpdateEnabled = false;
+  String _currentVersion = 'unknown';
+  String _updateStatus = ''; // '', 'checking', 'up_to_date', 'available', 'error'
+  String _latestVersion = '';
+  String _releaseUrl = '';
+
+  bool _raEnabled = false;
+  String _raUsername = '';
+  String _raApiKey = '';
+  bool _obscureApiKey = true;
+
+  late TextEditingController _raUsernameController;
+  late TextEditingController _raApiKeyController;
+
   final List<String> _formats = ['CHD', 'CSO', 'ECM', 'RVZ', 'XISO'];
   final List<String> _compressionLevels = ['Normal', 'High', 'Max'];
 
   @override
   void initState() {
     super.initState();
+    _raUsernameController = TextEditingController();
+    _raApiKeyController = TextEditingController();
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    _raUsernameController.dispose();
+    _raApiKeyController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
@@ -58,6 +85,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _verifyAfterConversion = prefs.getBool('verify_conversion') ?? false;
       _sameFolderAsSource = prefs.getBool('same_folder') ?? true;
       _outputDestination = prefs.getString('output_dir') ?? '';
+
+      _autoUpdateEnabled = prefs.getBool(OnlinePrefs.autoUpdateEnabled) ?? false;
+      _currentVersion = readAppVersion();
+
+      _raEnabled = prefs.getBool(OnlinePrefs.raEnabled) ?? false;
+      _raUsername = prefs.getString(OnlinePrefs.raUsername) ?? '';
+      _raApiKey = prefs.getString(OnlinePrefs.raApiKey) ?? '';
+
+      _raUsernameController.text = _raUsername;
+      _raApiKeyController.text = _raApiKey;
     });
     _notifyParent();
   }
@@ -69,6 +106,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('verify_conversion', _verifyAfterConversion);
     await prefs.setBool('same_folder', _sameFolderAsSource);
     await prefs.setString('output_dir', _outputDestination);
+
+    await prefs.setBool(OnlinePrefs.autoUpdateEnabled, _autoUpdateEnabled);
+    await prefs.setBool(OnlinePrefs.raEnabled, _raEnabled);
+    await prefs.setString(OnlinePrefs.raUsername, _raUsernameController.text.trim());
+    await prefs.setString(OnlinePrefs.raApiKey, _raApiKeyController.text.trim());
+
     _notifyParent();
   }
 
@@ -91,6 +134,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _sameFolderAsSource = false;
       });
       _saveSettings();
+    }
+  }
+
+  Future<void> _checkForUpdateNow() async {
+    setState(() {
+      _updateStatus = 'checking';
+    });
+
+    final res = await UpdateService.checkForUpdate(_currentVersion);
+
+    if (!mounted) return;
+
+    if (res.error.isNotEmpty) {
+      setState(() {
+        _updateStatus = 'error';
+      });
+    } else if (res.hasUpdate) {
+      setState(() {
+        _updateStatus = 'available';
+        _latestVersion = res.latestVersion ?? '';
+        _releaseUrl = res.releaseUrl ?? '';
+      });
+    } else {
+      setState(() {
+        _updateStatus = 'up_to_date';
+      });
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 
@@ -347,6 +423,184 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+          const SizedBox(height: 32),
+
+          // Online Features Section
+          _buildSectionTitle(l10n.onlineFeaturesSection),
+          Text(
+            l10n.onlineFeaturesSub,
+            style: TextStyle(
+              color: theme.textSecondary,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sub-section A: Auto-Update
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              title: Text(
+                l10n.autoUpdateTitle,
+                style: TextStyle(color: theme.textPrimary),
+              ),
+              subtitle: Text(
+                l10n.autoUpdateSub,
+                style: TextStyle(color: theme.textSecondary),
+              ),
+              value: _autoUpdateEnabled,
+              activeThumbColor: theme.accent,
+              onChanged: (val) {
+                setState(() => _autoUpdateEnabled = val);
+                _saveSettings();
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                TextButton(
+                  onPressed: _checkForUpdateNow,
+                  child: Text(
+                    l10n.autoUpdateCheckNow,
+                    style: TextStyle(color: theme.accent),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (_updateStatus == 'checking')
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (_updateStatus == 'up_to_date')
+                  Text(
+                    l10n.autoUpdateUpToDate(_currentVersion),
+                    style: const TextStyle(color: Colors.greenAccent, fontSize: 13),
+                  )
+                else if (_updateStatus == 'available') ...[
+                  Text(
+                    l10n.autoUpdateAvailable(_latestVersion),
+                    style: TextStyle(color: theme.accent, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  if (_releaseUrl.isNotEmpty)
+                    ElevatedButton(
+                      onPressed: () => _launchUrl(_releaseUrl),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.accent,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      child: Text(
+                        l10n.autoUpdateDownload,
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                ] else if (_updateStatus == 'error')
+                  Text(
+                    'Error checking for updates',
+                    style: TextStyle(color: Colors.redAccent, fontSize: 13),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Sub-section B: RetroAchievements
+          _buildSectionTitle(l10n.raSection),
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              title: Text(
+                l10n.raEnabledTitle,
+                style: TextStyle(color: theme.textPrimary),
+              ),
+              subtitle: Text(
+                l10n.raEnabledSub,
+                style: TextStyle(color: theme.textSecondary),
+              ),
+              value: _raEnabled,
+              activeThumbColor: theme.accent,
+              onChanged: (val) {
+                setState(() => _raEnabled = val);
+                _saveSettings();
+              },
+            ),
+          ),
+          if (_raEnabled) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _raUsernameController,
+                    style: TextStyle(color: theme.textPrimary),
+                    decoration: InputDecoration(
+                      labelText: l10n.raUsername,
+                      labelStyle: TextStyle(color: theme.textSecondary),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: theme.surface),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: theme.accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _raApiKeyController,
+                    obscureText: _obscureApiKey,
+                    style: TextStyle(color: theme.textPrimary),
+                    decoration: InputDecoration(
+                      labelText: l10n.raApiKey,
+                      labelStyle: TextStyle(color: theme.textSecondary),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureApiKey ? Icons.visibility : Icons.visibility_off,
+                          color: theme.textSecondary,
+                        ),
+                        onPressed: () {
+                          setState(() => _obscureApiKey = !_obscureApiKey);
+                        },
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: theme.surface),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: theme.accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.raApiKeyHint,
+                    style: TextStyle(color: theme.textSecondary, fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _saveSettings();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('RetroAchievements credentials saved')),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.accent,
+                      ),
+                      child: Text(
+                        l10n.raSaveCredentials,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

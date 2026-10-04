@@ -173,5 +173,56 @@
   "dreamcastGdiAudio": "صوت",
   "dreamcastGdiData": "بيانات",
   "dreamcastSameFolder": "نفس مجلد المصدر",
-  "dreamcastBrowse": "استعراض"
+  "dreamcastBrowse": "استعراض",
+  "onlineFeaturesSection": "الميزات الإلكترونية",
+  "onlineFeaturesSub": "جميع الميزات اختيارية. لا يتم جمع أي بيانات بدون موافقتك.",
+  "autoUpdateTitle": "التحقق من التحديثات تلقائياً",
+  "autoUpdateSub": "يتحقق من GitHub عند بدء التشغيل للكشف عن إصدار أحدث",
+  "autoUpdateCheckNow": "تحقق الآن",
+  "autoUpdateUpToDate": "أنت تستخدم أحدث إصدار ({version})",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "تحديث متاح: v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "تنزيل",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "تفعيل فحص hash لـ RetroAchievements",
+  "raEnabledSub": "يتحقق من دعم ROM قبل تحميله",
+  "raUsername": "اسم المستخدم",
+  "raApiKey": "مفتاح API",
+  "raApiKeyHint": "احصل على مفتاحك من retroachievements.org/settings",
+  "raHashChecking": "جارٍ فحص الـ hash...",
+  "raHashFound": "✅ مدعوم — {title} ({count} إنجاز)",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ غير موجود على RetroAchievements",
+  "raHashError": "خطأ: {msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "عرض على RA",
+  "raSaveCredentials": "حفظ"
 }

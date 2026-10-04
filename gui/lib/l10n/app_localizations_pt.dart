@@ -405,4 +405,77 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dreamcastBrowse => 'Navegar';
+
+  @override
+  String get onlineFeaturesSection => 'Recursos online';
+
+  @override
+  String get onlineFeaturesSub =>
+      'Todos os recursos são opcionais. Nenhum dado é coletado sem o seu consentimento.';
+
+  @override
+  String get autoUpdateTitle => 'Verificar atualizações automaticamente';
+
+  @override
+  String get autoUpdateSub =>
+      'Verifica o GitHub na inicialização para uma versão mais recente';
+
+  @override
+  String get autoUpdateCheckNow => 'Verificar agora';
+
+  @override
+  String autoUpdateUpToDate(String version) {
+    return 'Você está atualizado ($version)';
+  }
+
+  @override
+  String autoUpdateAvailable(String version) {
+    return 'Atualização disponível: v$version';
+  }
+
+  @override
+  String get autoUpdateDownload => 'Baixar';
+
+  @override
+  String get raSection => 'RetroAchievements';
+
+  @override
+  String get raEnabledTitle =>
+      'Ativar verificação de hash do RetroAchievements';
+
+  @override
+  String get raEnabledSub =>
+      'Verifica se a sua ROM é suportada antes de carregar';
+
+  @override
+  String get raUsername => 'Nome de usuário';
+
+  @override
+  String get raApiKey => 'Chave de API';
+
+  @override
+  String get raApiKeyHint =>
+      'Obtenha sua chave em retroachievements.org/settings';
+
+  @override
+  String get raHashChecking => 'Verificando hash...';
+
+  @override
+  String raHashFound(String title, int count) {
+    return '✅ Suportado — $title ($count conquistas)';
+  }
+
+  @override
+  String get raHashNotFound => '⚠️ Não encontrado no RetroAchievements';
+
+  @override
+  String raHashError(String msg) {
+    return 'Erro: $msg';
+  }
+
+  @override
+  String get raViewGame => 'Ver no RA';
+
+  @override
+  String get raSaveCredentials => 'Salvar';
 }

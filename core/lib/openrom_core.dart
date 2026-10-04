@@ -17,3 +17,5 @@ export 'src/ipbin_editor.dart';
 export 'src/gdi_reader.dart';
 export 'src/validator.dart';
 export 'src/logger.dart';
+export 'src/online_prefs.dart';
+export 'src/version_reader.dart';

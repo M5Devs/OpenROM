@@ -894,7 +894,7 @@ class _M3uTabState extends State<_M3uTab> {
                       )
                     : ReorderableListView.builder(
                         itemCount: _discFiles.length,
-                        onReorderItem: (oldIndex, newIndex) {
+                        onReorder: (oldIndex, newIndex) {
                           setState(() {
                             final item = _discFiles.removeAt(oldIndex);
                             _discFiles.insert(newIndex, item);

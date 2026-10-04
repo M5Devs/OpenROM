@@ -173,5 +173,56 @@
   "dreamcastGdiAudio": "オーディオ",
   "dreamcastGdiData": "データ",
   "dreamcastSameFolder": "ソースと同じフォルダー",
-  "dreamcastBrowse": "参照"
+  "dreamcastBrowse": "参照",
+  "onlineFeaturesSection": "オンライン機能",
+  "onlineFeaturesSub": "すべての機能はオプトインです。同意なしにデータが収集されることはありません。",
+  "autoUpdateTitle": "自動的に更新を確認する",
+  "autoUpdateSub": "起動時にGitHubで新しいバージョンを確認します",
+  "autoUpdateCheckNow": "今すぐ確認",
+  "autoUpdateUpToDate": "最新バージョンです ({version})",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "利用可能なアップデート: v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "ダウンロード",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "RetroAchievements ハッシュチェックを有効化",
+  "raEnabledSub": "読み込む前にROMがサポートされているか確認します",
+  "raUsername": "ユーザー名",
+  "raApiKey": "APIキー",
+  "raApiKeyHint": "retroachievements.org/settings でキーを取得",
+  "raHashChecking": "ハッシュをチェック中...",
+  "raHashFound": "✅ サポート済み — {title} ({count} 実績)",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ RetroAchievements で見つかりません",
+  "raHashError": "エラー: {msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "RAで表示",
+  "raSaveCredentials": "保存"
 }

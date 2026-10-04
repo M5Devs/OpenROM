@@ -237,7 +237,7 @@ class HomeScreenState extends State<HomeScreen> {
                   )
                 : ReorderableListView.builder(
                     itemCount: _jobs.length,
-                    onReorderItem: (oldIndex, newIndex) {
+                    onReorder: (oldIndex, newIndex) {
                       setState(() {
                         final job = _jobs.removeAt(oldIndex);
                         _jobs.insert(newIndex, job);

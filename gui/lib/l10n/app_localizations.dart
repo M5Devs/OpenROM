@@ -865,6 +865,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Browse'**
   String get dreamcastBrowse;
+
+  /// No description provided for @onlineFeaturesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Features'**
+  String get onlineFeaturesSection;
+
+  /// No description provided for @onlineFeaturesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'All features are opt-in. No data is collected without your consent.'**
+  String get onlineFeaturesSub;
+
+  /// No description provided for @autoUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates automatically'**
+  String get autoUpdateTitle;
+
+  /// No description provided for @autoUpdateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks GitHub on startup for a newer version'**
+  String get autoUpdateSub;
+
+  /// No description provided for @autoUpdateCheckNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check now'**
+  String get autoUpdateCheckNow;
+
+  /// No description provided for @autoUpdateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re up to date ({version})'**
+  String autoUpdateUpToDate(String version);
+
+  /// No description provided for @autoUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available: v{version}'**
+  String autoUpdateAvailable(String version);
+
+  /// No description provided for @autoUpdateDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get autoUpdateDownload;
+
+  /// No description provided for @raSection.
+  ///
+  /// In en, this message translates to:
+  /// **'RetroAchievements'**
+  String get raSection;
+
+  /// No description provided for @raEnabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable RetroAchievements hash check'**
+  String get raEnabledTitle;
+
+  /// No description provided for @raEnabledSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks if your ROM is supported before loading'**
+  String get raEnabledSub;
+
+  /// No description provided for @raUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get raUsername;
+
+  /// No description provided for @raApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get raApiKey;
+
+  /// No description provided for @raApiKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your key at retroachievements.org/settings'**
+  String get raApiKeyHint;
+
+  /// No description provided for @raHashChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking hash...'**
+  String get raHashChecking;
+
+  /// No description provided for @raHashFound.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Supported — {title} ({count} achievements)'**
+  String raHashFound(String title, int count);
+
+  /// No description provided for @raHashNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Not found on RetroAchievements'**
+  String get raHashNotFound;
+
+  /// No description provided for @raHashError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {msg}'**
+  String raHashError(String msg);
+
+  /// No description provided for @raViewGame.
+  ///
+  /// In en, this message translates to:
+  /// **'View on RA'**
+  String get raViewGame;
+
+  /// No description provided for @raSaveCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get raSaveCredentials;
 }
 
 class _AppLocalizationsDelegate
