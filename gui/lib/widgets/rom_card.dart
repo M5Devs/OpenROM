@@ -2,12 +2,15 @@
 // M5 Dev | GPL v3
 
 import 'package:flutter/material.dart';
+import 'package:openrom_core/openrom_core.dart' hide ConversionJob;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'error_dialog.dart';
 import '../models/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/conversion_job.dart';
 import '../models/theme_config.dart';
+import '../services/retro_achievements_service.dart';
 
 class RomCard extends StatefulWidget {
   final ConversionJob job;
@@ -27,6 +30,47 @@ class RomCard extends StatefulWidget {
 
 class _RomCardState extends State<RomCard> {
   bool _isHovered = false;
+  bool _raChecking = false;
+  RaHashResult? _raResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRetroAchievements();
+  }
+
+  Future<void> _checkRetroAchievements() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raEnabled = prefs.getBool(OnlinePrefs.raEnabled) ?? false;
+      if (!raEnabled) return;
+
+      final username = prefs.getString(OnlinePrefs.raUsername) ?? '';
+      final apiKey = prefs.getString(OnlinePrefs.raApiKey) ?? '';
+      if (username.isEmpty || apiKey.isEmpty) return;
+
+      setState(() {
+        _raChecking = true;
+      });
+
+      final service =
+          RetroAchievementsService(username: username, apiKey: apiKey);
+      final result = await service.lookupHash(widget.job.romFile.filepath);
+
+      if (mounted) {
+        setState(() {
+          _raChecking = false;
+          _raResult = result;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _raChecking = false;
+        });
+      }
+    }
+  }
 
   LinearGradient _getPlatformGradient(String platform) {
     final p = platform.toUpperCase();
@@ -89,6 +133,54 @@ class _RomCardState extends State<RomCard> {
             ? widget.job.errorMessage
             : widget.job.logs.join('\n');
     showOpenROMError(context, err, details: details);
+  }
+
+  Widget _buildRaBadge(AppLocalizations l10n) {
+    if (_raChecking) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(strokeWidth: 1.5),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              l10n.raHashChecking,
+              style: TextStyle(color: widget.theme.textSecondary, fontSize: 11),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_raResult == null) return const SizedBox.shrink();
+
+    if (_raResult!.found) {
+      final title = _raResult!.gameTitle ?? widget.job.romFile.filename;
+      final count = _raResult!.achievementCount ?? 0;
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          l10n.raHashFound(title, count),
+          style: const TextStyle(color: Colors.greenAccent, fontSize: 11),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    } else if (_raResult!.error.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          l10n.raHashNotFound,
+          style: const TextStyle(color: Colors.amberAccent, fontSize: 11),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   @override
@@ -189,6 +281,7 @@ class _RomCardState extends State<RomCard> {
                                 fontSize: 13,
                               ),
                             ),
+                            _buildRaBadge(l10n),
                           ],
                         ),
                       ),

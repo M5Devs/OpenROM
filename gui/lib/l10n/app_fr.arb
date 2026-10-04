@@ -173,5 +173,56 @@
   "dreamcastGdiAudio": "Audio",
   "dreamcastGdiData": "Données",
   "dreamcastSameFolder": "Même dossier que la source",
-  "dreamcastBrowse": "Parcourir"
+  "dreamcastBrowse": "Parcourir",
+  "onlineFeaturesSection": "Fonctionnalités en ligne",
+  "onlineFeaturesSub": "Toutes les fonctionnalités sont optionnelles. Aucune donnée n'est collectée sans votre consentement.",
+  "autoUpdateTitle": "Vérifier les mises à jour automatiquement",
+  "autoUpdateSub": "Vérifie GitHub au démarrage pour une version plus récente",
+  "autoUpdateCheckNow": "Vérifier maintenant",
+  "autoUpdateUpToDate": "Vous êtes à jour ({version})",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "Mise à jour disponible : v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "Télécharger",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "Activer la vérification du hash RetroAchievements",
+  "raEnabledSub": "Vérifie si votre ROM est prise en charge avant le chargement",
+  "raUsername": "Nom d'utilisateur",
+  "raApiKey": "Clé API",
+  "raApiKeyHint": "Obtenez votre clé sur retroachievements.org/settings",
+  "raHashChecking": "Vérification du hash...",
+  "raHashFound": "✅ Pris en charge — {title} ({count} succès)",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ Non trouvé sur RetroAchievements",
+  "raHashError": "Erreur : {msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "Voir sur RA",
+  "raSaveCredentials": "Enregistrer"
 }

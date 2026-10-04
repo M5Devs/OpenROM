@@ -173,5 +173,56 @@
   "dreamcastGdiAudio": "Audio",
   "dreamcastGdiData": "Datos",
   "dreamcastSameFolder": "Misma carpeta que el origen",
-  "dreamcastBrowse": "Examinar"
+  "dreamcastBrowse": "Examinar",
+  "onlineFeaturesSection": "Funciones en línea",
+  "onlineFeaturesSub": "Todas las funciones son optativas. No se recopilan datos sin su consentimiento.",
+  "autoUpdateTitle": "Buscar actualizaciones automáticamente",
+  "autoUpdateSub": "Comprueba GitHub al iniciar si hay una versión más reciente",
+  "autoUpdateCheckNow": "Buscar ahora",
+  "autoUpdateUpToDate": "Está actualizado ({version})",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "Actualización disponible: v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "Descargar",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "Habilitar comprobación de hash de RetroAchievements",
+  "raEnabledSub": "Comprueba si su ROM es compatible antes de cargar",
+  "raUsername": "Nombre de usuario",
+  "raApiKey": "Clave API",
+  "raApiKeyHint": "Obtenga su clave en retroachievements.org/settings",
+  "raHashChecking": "Comprobando hash...",
+  "raHashFound": "✅ Compatible — {title} ({count} logros)",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ No encontrado en RetroAchievements",
+  "raHashError": "Error: {msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "Ver en RA",
+  "raSaveCredentials": "Guardar"
 }
