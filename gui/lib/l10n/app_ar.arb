@@ -174,12 +174,12 @@
   "dreamcastGdiData": "بيانات",
   "dreamcastSameFolder": "نفس مجلد المصدر",
   "dreamcastBrowse": "استعراض",
-  "onlineFeaturesSection": "الميزات الإلكترونية",
-  "onlineFeaturesSub": "جميع الميزات اختيارية. لا يتم جمع أي بيانات بدون موافقتك.",
-  "autoUpdateTitle": "التحقق من التحديثات تلقائياً",
-  "autoUpdateSub": "يتحقق من GitHub عند بدء التشغيل للكشف عن إصدار أحدث",
-  "autoUpdateCheckNow": "تحقق الآن",
-  "autoUpdateUpToDate": "أنت تستخدم أحدث إصدار ({version})",
+  "onlineFeaturesSection": "Online Features",
+  "onlineFeaturesSub": "All features are opt-in. No data is collected without your consent.",
+  "autoUpdateTitle": "Check for updates automatically",
+  "autoUpdateSub": "Checks GitHub on startup for a newer version",
+  "autoUpdateCheckNow": "Check now",
+  "autoUpdateUpToDate": "You're up to date ({version})",
   "@autoUpdateUpToDate": {
     "placeholders": {
       "version": {
@@ -187,7 +187,7 @@
       }
     }
   },
-  "autoUpdateAvailable": "تحديث متاح: v{version}",
+  "autoUpdateAvailable": "Update available: v{version}",
   "@autoUpdateAvailable": {
     "placeholders": {
       "version": {
@@ -195,15 +195,15 @@
       }
     }
   },
-  "autoUpdateDownload": "تنزيل",
+  "autoUpdateDownload": "Download",
   "raSection": "RetroAchievements",
-  "raEnabledTitle": "تفعيل فحص hash لـ RetroAchievements",
-  "raEnabledSub": "يتحقق من دعم ROM قبل تحميله",
-  "raUsername": "اسم المستخدم",
-  "raApiKey": "مفتاح API",
-  "raApiKeyHint": "احصل على مفتاحك من retroachievements.org/settings",
-  "raHashChecking": "جارٍ فحص الـ hash...",
-  "raHashFound": "✅ مدعوم — {title} ({count} إنجاز)",
+  "raEnabledTitle": "Enable RetroAchievements hash check",
+  "raEnabledSub": "Checks if your ROM is supported before loading",
+  "raUsername": "Username",
+  "raApiKey": "API Key",
+  "raApiKeyHint": "Get your key at retroachievements.org/settings",
+  "raHashChecking": "Checking hash...",
+  "raHashFound": "✅ Supported — {title} ({count} achievements)",
   "@raHashFound": {
     "placeholders": {
       "title": {
@@ -214,8 +214,8 @@
       }
     }
   },
-  "raHashNotFound": "⚠️ غير موجود على RetroAchievements",
-  "raHashError": "خطأ: {msg}",
+  "raHashNotFound": "⚠️ Not found on RetroAchievements",
+  "raHashError": "Error: {msg}",
   "@raHashError": {
     "placeholders": {
       "msg": {
@@ -223,6 +223,6 @@
       }
     }
   },
-  "raViewGame": "عرض على RA",
-  "raSaveCredentials": "حفظ"
+  "raViewGame": "View on RA",
+  "raSaveCredentials": "Save"
 }
