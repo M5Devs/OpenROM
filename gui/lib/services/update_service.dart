@@ -28,15 +28,12 @@ class UpdateService {
   /// Checks GitHub releases for a newer version.
   /// Returns UpdateCheckResult — never throws.
   /// [currentVersion] should be like "3.7.0" (no "v" prefix).
-  static Future<UpdateCheckResult> checkForUpdate(
-      String currentVersion) async {
+  static Future<UpdateCheckResult> checkForUpdate(String currentVersion) async {
     try {
-      final response = await http
-          .get(
-            Uri.parse(_repoApi),
-            headers: {'Accept': 'application/vnd.github+json'},
-          )
-          .timeout(_timeout);
+      final response = await http.get(
+        Uri.parse(_repoApi),
+        headers: {'Accept': 'application/vnd.github+json'},
+      ).timeout(_timeout);
 
       if (response.statusCode != 200) {
         return UpdateCheckResult(

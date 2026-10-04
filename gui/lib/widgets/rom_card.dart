@@ -53,7 +53,8 @@ class _RomCardState extends State<RomCard> {
         _raChecking = true;
       });
 
-      final service = RetroAchievementsService(username: username, apiKey: apiKey);
+      final service =
+          RetroAchievementsService(username: username, apiKey: apiKey);
       final result = await service.lookupHash(widget.job.romFile.filepath);
 
       if (mounted) {

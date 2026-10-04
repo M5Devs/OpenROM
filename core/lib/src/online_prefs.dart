@@ -8,7 +8,7 @@ abstract class OnlinePrefs {
   static const String autoUpdateEnabled = 'online_auto_update_enabled';
 
   // RetroAchievements
-  static const String raEnabled         = 'online_ra_enabled';
-  static const String raApiKey          = 'online_ra_api_key';
-  static const String raUsername        = 'online_ra_username';
+  static const String raEnabled = 'online_ra_enabled';
+  static const String raApiKey = 'online_ra_api_key';
+  static const String raUsername = 'online_ra_username';
 }

@@ -47,7 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Online Features State
   bool _autoUpdateEnabled = false;
   String _currentVersion = 'unknown';
-  String _updateStatus = ''; // '', 'checking', 'up_to_date', 'available', 'error'
+  String _updateStatus =
+      ''; // '', 'checking', 'up_to_date', 'available', 'error'
   String _latestVersion = '';
   String _releaseUrl = '';
 
@@ -86,7 +87,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _sameFolderAsSource = prefs.getBool('same_folder') ?? true;
       _outputDestination = prefs.getString('output_dir') ?? '';
 
-      _autoUpdateEnabled = prefs.getBool(OnlinePrefs.autoUpdateEnabled) ?? false;
+      _autoUpdateEnabled =
+          prefs.getBool(OnlinePrefs.autoUpdateEnabled) ?? false;
       _currentVersion = readAppVersion();
 
       _raEnabled = prefs.getBool(OnlinePrefs.raEnabled) ?? false;
@@ -109,8 +111,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await prefs.setBool(OnlinePrefs.autoUpdateEnabled, _autoUpdateEnabled);
     await prefs.setBool(OnlinePrefs.raEnabled, _raEnabled);
-    await prefs.setString(OnlinePrefs.raUsername, _raUsernameController.text.trim());
-    await prefs.setString(OnlinePrefs.raApiKey, _raApiKeyController.text.trim());
+    await prefs.setString(
+        OnlinePrefs.raUsername, _raUsernameController.text.trim());
+    await prefs.setString(
+        OnlinePrefs.raApiKey, _raApiKeyController.text.trim());
 
     _notifyParent();
   }
@@ -477,12 +481,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 else if (_updateStatus == 'up_to_date')
                   Text(
                     l10n.autoUpdateUpToDate(_currentVersion),
-                    style: const TextStyle(color: Colors.greenAccent, fontSize: 13),
+                    style: const TextStyle(
+                        color: Colors.greenAccent, fontSize: 13),
                   )
                 else if (_updateStatus == 'available') ...[
                   Text(
                     l10n.autoUpdateAvailable(_latestVersion),
-                    style: TextStyle(color: theme.accent, fontSize: 13, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: theme.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 8),
                   if (_releaseUrl.isNotEmpty)
@@ -490,11 +498,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () => _launchUrl(_releaseUrl),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.accent,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                       ),
                       child: Text(
                         l10n.autoUpdateDownload,
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
                 ] else if (_updateStatus == 'error')
@@ -558,7 +568,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       labelStyle: TextStyle(color: theme.textSecondary),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureApiKey ? Icons.visibility : Icons.visibility_off,
+                          _obscureApiKey
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: theme.textSecondary,
                         ),
                         onPressed: () {
@@ -585,7 +597,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () {
                         _saveSettings();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('RetroAchievements credentials saved')),
+                          const SnackBar(
+                              content:
+                                  Text('RetroAchievements credentials saved')),
                         );
                       },
                       style: ElevatedButton.styleFrom(
