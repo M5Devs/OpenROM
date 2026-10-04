@@ -174,12 +174,12 @@
   "dreamcastGdiData": "Données",
   "dreamcastSameFolder": "Même dossier que la source",
   "dreamcastBrowse": "Parcourir",
-  "onlineFeaturesSection": "Fonctionnalités en ligne",
-  "onlineFeaturesSub": "Toutes les fonctionnalités sont optionnelles. Aucune donnée n'est collectée sans votre consentement.",
-  "autoUpdateTitle": "Vérifier les mises à jour automatiquement",
-  "autoUpdateSub": "Vérifie GitHub au démarrage pour une version plus récente",
-  "autoUpdateCheckNow": "Vérifier maintenant",
-  "autoUpdateUpToDate": "Vous êtes à jour ({version})",
+  "onlineFeaturesSection": "Online Features",
+  "onlineFeaturesSub": "All features are opt-in. No data is collected without your consent.",
+  "autoUpdateTitle": "Check for updates automatically",
+  "autoUpdateSub": "Checks GitHub on startup for a newer version",
+  "autoUpdateCheckNow": "Check now",
+  "autoUpdateUpToDate": "You're up to date ({version})",
   "@autoUpdateUpToDate": {
     "placeholders": {
       "version": {
@@ -187,7 +187,7 @@
       }
     }
   },
-  "autoUpdateAvailable": "Mise à jour disponible : v{version}",
+  "autoUpdateAvailable": "Update available: v{version}",
   "@autoUpdateAvailable": {
     "placeholders": {
       "version": {
@@ -195,15 +195,15 @@
       }
     }
   },
-  "autoUpdateDownload": "Télécharger",
+  "autoUpdateDownload": "Download",
   "raSection": "RetroAchievements",
-  "raEnabledTitle": "Activer la vérification du hash RetroAchievements",
-  "raEnabledSub": "Vérifie si votre ROM est prise en charge avant le chargement",
-  "raUsername": "Nom d'utilisateur",
-  "raApiKey": "Clé API",
-  "raApiKeyHint": "Obtenez votre clé sur retroachievements.org/settings",
-  "raHashChecking": "Vérification du hash...",
-  "raHashFound": "✅ Pris en charge — {title} ({count} succès)",
+  "raEnabledTitle": "Enable RetroAchievements hash check",
+  "raEnabledSub": "Checks if your ROM is supported before loading",
+  "raUsername": "Username",
+  "raApiKey": "API Key",
+  "raApiKeyHint": "Get your key at retroachievements.org/settings",
+  "raHashChecking": "Checking hash...",
+  "raHashFound": "✅ Supported — {title} ({count} achievements)",
   "@raHashFound": {
     "placeholders": {
       "title": {
@@ -214,8 +214,8 @@
       }
     }
   },
-  "raHashNotFound": "⚠️ Non trouvé sur RetroAchievements",
-  "raHashError": "Erreur : {msg}",
+  "raHashNotFound": "⚠️ Not found on RetroAchievements",
+  "raHashError": "Error: {msg}",
   "@raHashError": {
     "placeholders": {
       "msg": {
@@ -223,6 +223,6 @@
       }
     }
   },
-  "raViewGame": "Voir sur RA",
-  "raSaveCredentials": "Enregistrer"
+  "raViewGame": "View on RA",
+  "raSaveCredentials": "Save"
 }
