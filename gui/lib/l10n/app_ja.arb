@@ -174,12 +174,12 @@
   "dreamcastGdiData": "データ",
   "dreamcastSameFolder": "ソースと同じフォルダー",
   "dreamcastBrowse": "参照",
-  "onlineFeaturesSection": "オンライン機能",
-  "onlineFeaturesSub": "すべての機能はオプトインです。同意なしにデータが収集されることはありません。",
-  "autoUpdateTitle": "自動的に更新を確認する",
-  "autoUpdateSub": "起動時にGitHubで新しいバージョンを確認します",
-  "autoUpdateCheckNow": "今すぐ確認",
-  "autoUpdateUpToDate": "最新バージョンです ({version})",
+  "onlineFeaturesSection": "Online Features",
+  "onlineFeaturesSub": "All features are opt-in. No data is collected without your consent.",
+  "autoUpdateTitle": "Check for updates automatically",
+  "autoUpdateSub": "Checks GitHub on startup for a newer version",
+  "autoUpdateCheckNow": "Check now",
+  "autoUpdateUpToDate": "You're up to date ({version})",
   "@autoUpdateUpToDate": {
     "placeholders": {
       "version": {
@@ -187,7 +187,7 @@
       }
     }
   },
-  "autoUpdateAvailable": "利用可能なアップデート: v{version}",
+  "autoUpdateAvailable": "Update available: v{version}",
   "@autoUpdateAvailable": {
     "placeholders": {
       "version": {
@@ -195,15 +195,15 @@
       }
     }
   },
-  "autoUpdateDownload": "ダウンロード",
+  "autoUpdateDownload": "Download",
   "raSection": "RetroAchievements",
-  "raEnabledTitle": "RetroAchievements ハッシュチェックを有効化",
-  "raEnabledSub": "読み込む前にROMがサポートされているか確認します",
-  "raUsername": "ユーザー名",
-  "raApiKey": "APIキー",
-  "raApiKeyHint": "retroachievements.org/settings でキーを取得",
-  "raHashChecking": "ハッシュをチェック中...",
-  "raHashFound": "✅ サポート済み — {title} ({count} 実績)",
+  "raEnabledTitle": "Enable RetroAchievements hash check",
+  "raEnabledSub": "Checks if your ROM is supported before loading",
+  "raUsername": "Username",
+  "raApiKey": "API Key",
+  "raApiKeyHint": "Get your key at retroachievements.org/settings",
+  "raHashChecking": "Checking hash...",
+  "raHashFound": "✅ Supported — {title} ({count} achievements)",
   "@raHashFound": {
     "placeholders": {
       "title": {
@@ -214,8 +214,8 @@
       }
     }
   },
-  "raHashNotFound": "⚠️ RetroAchievements で見つかりません",
-  "raHashError": "エラー: {msg}",
+  "raHashNotFound": "⚠️ Not found on RetroAchievements",
+  "raHashError": "Error: {msg}",
   "@raHashError": {
     "placeholders": {
       "msg": {
@@ -223,6 +223,6 @@
       }
     }
   },
-  "raViewGame": "RAで表示",
-  "raSaveCredentials": "保存"
+  "raViewGame": "View on RA",
+  "raSaveCredentials": "Save"
 }
