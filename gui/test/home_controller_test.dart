@@ -34,5 +34,6 @@ void main() {
       },
     );
     expect(controller.isConverting, isFalse);
+    expect(prompted, isFalse);
   });
 }
