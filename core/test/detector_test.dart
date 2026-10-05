@@ -249,7 +249,8 @@ void main() {
   });
 
   test('unmapped_custom_platform_conversion_without_media_fails_safely', () {
-    final tmpDir = Directory.systemTemp.createTempSync('unmapped_platform_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('unmapped_platform_test_');
     try {
       final isoPath = p.join(tmpDir.path, 'custom.iso');
       File(isoPath).writeAsBytesSync(List<int>.filled(2048, 0));
@@ -278,7 +279,8 @@ void main() {
   });
 
   test('unmapped_custom_platform_conversion_with_media_override_succeeds', () {
-    final tmpDir = Directory.systemTemp.createTempSync('unmapped_platform_override_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('unmapped_platform_override_');
     try {
       final isoPath = p.join(tmpDir.path, 'custom.iso');
       File(isoPath).writeAsBytesSync(List<int>.filled(2048, 0));
