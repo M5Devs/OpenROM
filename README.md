@@ -24,7 +24,7 @@
 
 > 🎮 Meet **ROMeo** — OpenROM's official mascot. Your friendly pixel-art cartridge companion for all things ROM.
 
-OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to replace every fragmented ROM tool out there. Convert, patch, compress, clean, and manage your ROM collection with a modern **Flutter desktop UI**, real-time terminal logging, smart platform detection, and a full headless CLI for automation — all running **100% offline**.
+OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to replace every fragmented ROM tool out there. Convert, patch, compress, clean, and manage your ROM collection with a modern **Flutter desktop UI**, real-time terminal logging, smart platform detection, and a full headless CLI for automation — with optional online features that are always opt-in.
 
 ---
 
@@ -104,7 +104,12 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **Drag & Drop** — Native drag and drop for files and folders.
 - **Full Headless CLI** — `openrom-core` for scripting, automation, and Flutter IPC.
 - **6 Languages** — English, Arabic, Spanish, French, Japanese, Portuguese.
-- **No Telemetry** — Zero network requests. No analytics. Runs 100% locally forever.
+- **Privacy-first** — No telemetry, no analytics, no accounts. Optional online features (update checks, RetroAchievements) are opt-in and clearly disclosed.
+
+### 🌐 Online Features (Optional)
+- **Auto-update check** — Checks GitHub on startup for a newer version. Disabled by default, enable in Settings.
+- **RetroAchievements hash check** — Verifies if your ROM is supported before converting. Requires a free retroachievements.org account. Disabled by default.
+- All online features are opt-in. No data is ever collected without explicit user consent.
 
 ---
 
@@ -297,7 +302,7 @@ build_windows.bat
 - [x] GDI Track Inspector (v3.0.0)
 - [x] DCP Patch Builder 🔨
 - [x] maxcso ARM64 build
-- [ ] RetroAchievements hash verification
+- [x] RetroAchievements hash verification (v3.8.0)
 
 ---
 

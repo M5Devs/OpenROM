@@ -28,7 +28,13 @@ You can delete these files at any time.
 - Temporary files are deleted automatically after each job
 
 ### Network Access
-OpenROM makes **zero network requests**. No update checker, no analytics, no telemetry, no cloud sync.
+OpenROM makes no network requests by default.
+Two optional online features exist, both disabled
+by default and requiring explicit user opt-in:
+- Auto-update check (GitHub releases API)
+- RetroAchievements hash lookup (retroachievements.org API)
+Neither feature collects personal data. No telemetry,
+no analytics, no cloud sync — ever.
 
 ---
 
@@ -47,8 +53,9 @@ All of these are normal behaviors for emulation and ROM tools — not indicators
 ### Verified Detection History
 | Release | VirusTotal Score | Notes |
 |---------|-----------------|-------|
-| v2.6.0 (PyInstaller) | 27/67 | PyInstaller heuristic pattern |
-| v2.6.1 (Nuitka) | 14/67 | Remaining flags from bundled tools only |
+| v2.6.0 (PyInstaller) | 27/67 | PyInstaller heuristic |
+| v2.6.1 (Nuitka) | 14/67 | Nuitka onefile heuristic |
+| v3.0.0+ (Dart) | 0-2/67 | Dart native binary — near zero flags |
 
 ### Which Tools Are Flagged and Why
 | Tool | Flagged By | Reason |
@@ -185,5 +192,5 @@ Each tool's license is also available at its source repository linked above.
 
 ---
 
-*Last updated: 2026-09-13*
+*Last updated: 2026-10-05*
 *M5 Dev — [github.com/M5Devs/OpenROM](https://github.com/M5Devs/OpenROM)*
