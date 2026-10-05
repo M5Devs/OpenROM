@@ -12,13 +12,27 @@ import 'detector.dart' as detector;
 import 'logger.dart' as logger;
 import 'validator.dart';
 
-const List<String> cdPlatformKeywords = [
+const List<String> cdPlatforms = [
   'PS1',
   'Dreamcast',
   'Saturn',
   'Sega CD',
   'PC-Engine CD',
   'Neo Geo CD',
+  'CD',
+  '3DO',
+  'CD-i',
+];
+
+const List<String> dvdPlatforms = [
+  'PS2',
+  'Xbox',
+  'Xbox 360',
+  'PSP',
+  'GameCube',
+  'Wii',
+  'Wii U',
+  'DVD',
 ];
 
 const Map<String, String> chdCdCompression = {
@@ -215,22 +229,24 @@ class Converter {
         subCmd = 'createcd';
       } else if (mediaOverride == 'dvd') {
         subCmd = 'createdvd';
-      } else if (platform.toUpperCase() == 'CD') {
+      } else if (cdPlatforms.any(
+        (kw) =>
+            platform.toLowerCase() == kw.toLowerCase() ||
+            platform.toLowerCase().contains(kw.toLowerCase()),
+      )) {
         subCmd = 'createcd';
-      } else if (platform.toUpperCase() == 'DVD') {
+      } else if (dvdPlatforms.any(
+        (kw) =>
+            platform.toLowerCase() == kw.toLowerCase() ||
+            platform.toLowerCase().contains(kw.toLowerCase()),
+      )) {
         subCmd = 'createdvd';
-      } else if (cdPlatformKeywords.any((kw) => platform.contains(kw))) {
-        subCmd = 'createcd';
-      } else if (platform == 'UNKNOWN' ||
-          platform == 'Unknown Disc' ||
-          platform.isEmpty) {
+      } else {
         final err =
             'Error: Platform could not be detected. Please specify --media cd or --media dvd.';
         _log('[ERROR] $err');
         job.error = err;
         return false;
-      } else {
-        subCmd = 'createdvd';
       }
     } else {
       subCmd = 'createcd';
