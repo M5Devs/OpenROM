@@ -237,6 +237,7 @@ class HomeScreenState extends State<HomeScreen> {
                   )
                 : ReorderableListView.builder(
                     itemCount: _jobs.length,
+                    // ignore: deprecated_member_use
                     onReorder: (oldIndex, newIndex) {
                       setState(() {
                         final job = _jobs.removeAt(oldIndex);

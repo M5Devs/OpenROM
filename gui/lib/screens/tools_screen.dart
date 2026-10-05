@@ -894,6 +894,7 @@ class _M3uTabState extends State<_M3uTab> {
                       )
                     : ReorderableListView.builder(
                         itemCount: _discFiles.length,
+                        // ignore: deprecated_member_use
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
                             final item = _discFiles.removeAt(oldIndex);
