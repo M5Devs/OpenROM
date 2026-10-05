@@ -278,7 +278,6 @@ class RomScanResult {
   }
 }
 
-
 Map<String, dynamic>? _findInIndex(
   Map<String, Map<String, dynamic>> indexMap,
   String crc32,

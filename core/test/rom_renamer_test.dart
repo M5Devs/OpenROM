@@ -135,7 +135,8 @@ void main() {
       File(mismatchPath).writeAsBytesSync(List<int>.filled(50, 0x31));
 
       final mismatchResults = await scanFolder(romDir, [datPath]);
-      final mismatchRes = mismatchResults.firstWhere((r) => r.filename == 'mismatch.gb');
+      final mismatchRes =
+          mismatchResults.firstWhere((r) => r.filename == 'mismatch.gb');
       expect(mismatchRes.matched, isFalse);
     } finally {
       tmpDir.deleteSync(recursive: true);

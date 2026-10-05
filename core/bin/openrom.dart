@@ -792,7 +792,7 @@ Future<int> main(List<String> args) async {
         compression: compLevel,
         verify: verifyVal,
         forcePlatform: forcePlat,
-      media: mediaVal,
+        media: mediaVal,
       );
       jobs.add(job);
     }
