@@ -1,6 +1,7 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -39,17 +40,20 @@ String getDatsDir() {
   return datsDir;
 }
 
-Map<String, dynamic> _readDatHeaderSync(String datPath) {
+Future<Map<String, dynamic>> _readDatHeader(String datPath) async {
   String datName = '';
   String datUrl = '';
   int gameCount = 0;
   bool headerFound = false;
 
-  final content = File(datPath).readAsStringSync();
-  final events = parseEvents(content);
+  final events = File(datPath)
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(XmlEventDecoder())
+      .expand((e) => e);
 
   String? currentTag;
-  for (final event in events) {
+  await for (final event in events) {
     if (event is XmlStartElementEvent) {
       currentTag = event.name;
       if (event.name == 'game') {
@@ -90,12 +94,12 @@ Map<String, dynamic> _readDatHeaderSync(String datPath) {
   };
 }
 
-Map<String, dynamic> importDat(String datPath) {
+Future<Map<String, dynamic>> importDat(String datPath) async {
   if (!File(datPath).existsSync()) {
     throw ArgumentError('File not found: $datPath');
   }
 
-  final headerInfo = _readDatHeaderSync(datPath);
+  final headerInfo = await _readDatHeader(datPath);
   final datName = headerInfo['name'] as String;
   final datUrl = headerInfo['url'] as String;
   final source = headerInfo['source'] as String;
@@ -103,7 +107,7 @@ Map<String, dynamic> importDat(String datPath) {
 
   final safeName = datName.replaceAll(RegExp(r'[^a-zA-Z0-9\ ._\-\(\)]'), '_');
   final storedPath = p.join(getDatsDir(), '$safeName.dat');
-  File(datPath).copySync(storedPath);
+  await File(datPath).copy(storedPath);
 
   return {
     'name': datName,
@@ -115,7 +119,7 @@ Map<String, dynamic> importDat(String datPath) {
   };
 }
 
-List<Map<String, dynamic>> listDats() {
+Future<List<Map<String, dynamic>>> listDats() async {
   final datsDir = getDatsDir();
   final dir = Directory(datsDir);
   final result = <Map<String, dynamic>>[];
@@ -125,7 +129,7 @@ List<Map<String, dynamic>> listDats() {
   for (final entry in entries) {
     if (entry is File && entry.path.endsWith('.dat')) {
       try {
-        final info = _readDatHeaderSync(entry.path);
+        final info = await _readDatHeader(entry.path);
         info['stored_path'] = entry.path;
         result.add(info);
       } catch (_) {}
@@ -169,16 +173,20 @@ String calcCrc32(String filepath, {void Function(double pct)? onProgress}) {
   return hex;
 }
 
-Map<String, Map<String, dynamic>> loadDatIndex(String datPath) {
+Future<Map<String, Map<String, dynamic>>> loadDatIndex(String datPath) async {
   final index = <String, Map<String, dynamic>>{};
-  final content = File(datPath).readAsStringSync();
-  final events = parseEvents(content);
+
+  final events = File(datPath)
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(XmlEventDecoder())
+      .expand((e) => e);
 
   String currentGameName = '';
   String currentDesc = '';
   String? currentTextTag;
 
-  for (final event in events) {
+  await for (final event in events) {
     if (event is XmlStartElementEvent) {
       if (event.name == 'game') {
         currentGameName = '';
@@ -264,28 +272,33 @@ class RomScanResult {
   }
 }
 
-List<RomScanResult> scanFolder(
+Future<List<RomScanResult>> scanFolder(
   String folder,
   List<String> datPaths, {
   void Function(String filename, double percent)? onProgress,
   void Function(RomScanResult result)? onResult,
-}) {
+}) async {
   final dir = Directory(folder);
   if (!dir.existsSync()) {
     throw ArgumentError('Folder not found: $folder');
   }
 
-  final datIndexes = <Map<String, dynamic>>[];
+  final globalIndex = <String, Map<String, dynamic>>{};
   final skippedDats = <Map<String, String>>[];
 
   for (final dp in datPaths) {
     try {
-      final header = _readDatHeaderSync(dp);
-      final index = loadDatIndex(dp);
-      datIndexes.add({
-        'index': index,
-        'name': header['name'],
-        'source': header['source'],
+      final header = await _readDatHeader(dp);
+      final index = await loadDatIndex(dp);
+      final datSource = header['source'] as String;
+
+      index.forEach((crc, item) {
+        if (!globalIndex.containsKey(crc)) {
+          globalIndex[crc] = {
+            ...item,
+            'source': datSource,
+          };
+        }
       });
     } catch (e) {
       skippedDats.add({'name': p.basename(dp), 'reason': e.toString()});
@@ -295,7 +308,7 @@ List<RomScanResult> scanFolder(
   for (final sk in skippedDats) {
     if (onProgress != null) {
       onProgress(
-        '[WARN] Skipped unreadable DAT: ${sk['name']} (${sk['reason']})',
+        '[WARN] Skipped unreadable DAT: ${sk["name"]} (${sk["reason"]})',
         0.0,
       );
     }
@@ -360,18 +373,12 @@ List<RomScanResult> scanFolder(
         },
       );
 
-      for (final datEntry in datIndexes) {
-        final index = datEntry['index'] as Map<String, Map<String, dynamic>>;
-        final datSource = datEntry['source'] as String;
-
-        if (index.containsKey(result.crc32)) {
-          final item = index[result.crc32]!;
-          result.matched = true;
-          result.canonicalName = item['name'] as String;
-          result.romName = item['rom_name'] as String;
-          result.datSource = datSource;
-          break;
-        }
+      if (globalIndex.containsKey(result.crc32)) {
+        final item = globalIndex[result.crc32]!;
+        result.matched = true;
+        result.canonicalName = item['name'] as String;
+        result.romName = item['rom_name'] as String;
+        result.datSource = item['source'] as String;
       }
     } catch (e) {
       result.error = e.toString();

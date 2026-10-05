@@ -5,6 +5,21 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
+  test('unknown_iso_platform_detection', () {
+    final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_test_');
+    try {
+      final isoPath = p.join(tmpDir.path, 'unidentified.iso');
+      final file = File(isoPath);
+      file.writeAsBytesSync(List<int>.filled(2048, 0));
+
+      final res = detectFile(isoPath);
+      expect(res['format'], equals('ISO'));
+      expect(res['platform'], equals('UNKNOWN'));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
   test('get_extension', () {
     expect(getExtension('tom_jerry.bin.ecm'), equals('ecm'));
     expect(getExtension('game.iso'), equals('iso'));

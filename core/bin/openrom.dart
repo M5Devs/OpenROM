@@ -170,7 +170,7 @@ ArgParser buildParser() {
   return parser;
 }
 
-int main(List<String> args) {
+Future<int> main(List<String> args) async {
   if (args.isEmpty) {
     print('OpenROM CLI — Universal ROM Toolkit\nUsage: openrom [options]');
     return 0;
@@ -509,7 +509,7 @@ int main(List<String> args) {
   if (results['import-dat'] != null) {
     final dat = results['import-dat'] as String;
     try {
-      final info = importDat(dat);
+      final info = await importDat(dat);
       if (isJson) {
         _jsonPrint({'type': 'done', 'success': true, ...info});
       } else {
@@ -527,7 +527,7 @@ int main(List<String> args) {
   }
 
   if (results['list-dats'] == true) {
-    final dats = listDats();
+    final dats = await listDats();
     if (isJson) {
       _jsonPrint({'type': 'done', 'success': true, 'dats': dats});
     } else {
@@ -547,7 +547,7 @@ int main(List<String> args) {
 
   if (results['scan-roms'] != null) {
     final folder = results['scan-roms'] as String;
-    final dats = listDats();
+    final dats = await listDats();
     if (dats.isEmpty) {
       if (isJson) {
         _jsonPrint({'type': 'error', 'message': 'No DATs imported.'});
@@ -557,7 +557,7 @@ int main(List<String> args) {
       return 2;
     }
     final datPaths = dats.map((d) => d['stored_path'] as String).toList();
-    scanFolder(
+    await scanFolder(
       folder,
       datPaths,
       onProgress: (fname, pct) {
@@ -613,7 +613,7 @@ int main(List<String> args) {
   if (results['rename-roms'] != null) {
     final folder = results['rename-roms'] as String;
     final dry = results['dry-run'] == true;
-    final dats = listDats();
+    final dats = await listDats();
     if (dats.isEmpty) {
       if (isJson) {
         _jsonPrint({'type': 'error', 'message': 'No DATs imported.'});
@@ -623,7 +623,7 @@ int main(List<String> args) {
       return 2;
     }
     final datPaths = dats.map((d) => d['stored_path'] as String).toList();
-    final scanResults = scanFolder(folder, datPaths);
+    final scanResults = await scanFolder(folder, datPaths);
     final renames = renameRoms(scanResults, dryRun: dry);
     for (final r in renames) {
       final oldF = p.basename(r.originalPath);

@@ -344,14 +344,7 @@ String _guessPlatform(String filepath, String fmt, int size, Uint8List header) {
     if (_headerHasPs2Magic(header)) return 'PS2';
     if (_headerHasPs1Magic(header)) return 'PS1';
 
-    final mb = size / (1024 * 1024);
-    if (mb < 700) {
-      return 'PS1';
-    } else if (mb < 8500) {
-      return 'PS2 / GC';
-    } else {
-      return 'PS2 / Xbox';
-    }
+    return 'UNKNOWN';
   }
 
   return platformMap[fmt] ?? 'ROM File';
