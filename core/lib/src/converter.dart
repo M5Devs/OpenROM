@@ -206,10 +206,18 @@ class Converter {
     if (['GDI', 'CUE', 'BIN', 'CDI'].contains(fmt)) {
       subCmd = 'createcd';
     } else if (fmt == 'ISO' || fmt == 'IMG') {
-      final platform = info['platform'] as String? ?? '';
-      subCmd = cdPlatformKeywords.any((kw) => platform.contains(kw))
-          ? 'createcd'
-          : 'createdvd';
+      final platform = info['platform'] as String? ?? 'UNKNOWN';
+      if (platform == 'UNKNOWN' ||
+          platform == 'Unknown Disc' ||
+          platform.isEmpty) {
+        _log(
+            '[WARN] Platform is UNKNOWN for . Defaulting safely to createdvd.');
+        subCmd = 'createdvd';
+      } else {
+        subCmd = cdPlatformKeywords.any((kw) => platform.contains(kw))
+            ? 'createcd'
+            : 'createdvd';
+      }
     } else {
       subCmd = 'createcd';
     }

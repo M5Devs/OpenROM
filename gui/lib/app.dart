@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'controllers/home_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
@@ -19,11 +20,13 @@ import 'widgets/top_bar.dart';
 class OpenROMApp extends StatefulWidget {
   final ThemeService themeService;
   final LocaleProvider localeProvider;
+  final HomeController? homeController;
 
   OpenROMApp({
     super.key,
     required this.themeService,
     LocaleProvider? localeProvider,
+    this.homeController,
   }) : localeProvider = localeProvider ?? LocaleProvider();
 
   @override
@@ -32,7 +35,7 @@ class OpenROMApp extends StatefulWidget {
 
 class _OpenROMAppState extends State<OpenROMApp> {
   int _selectedIndex = 0;
-  final GlobalKey<HomeScreenState> _homeKey = GlobalKey<HomeScreenState>();
+  late final HomeController _homeController;
 
   String _format = 'CHD';
   String _compression = 'Normal';
@@ -42,14 +45,20 @@ class _OpenROMAppState extends State<OpenROMApp> {
   @override
   void initState() {
     super.initState();
+    _homeController = widget.homeController ?? HomeController();
     widget.themeService.addListener(_onChanged);
     widget.localeProvider.addListener(_onChanged);
+    _homeController.addListener(_onChanged);
   }
 
   @override
   void dispose() {
     widget.themeService.removeListener(_onChanged);
     widget.localeProvider.removeListener(_onChanged);
+    _homeController.removeListener(_onChanged);
+    if (widget.homeController == null) {
+      _homeController.dispose();
+    }
     super.dispose();
   }
 
@@ -63,14 +72,12 @@ class _OpenROMAppState extends State<OpenROMApp> {
         _selectedIndex = 0;
       });
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _homeKey.currentState?.startConversion(
-        globalFormat: _format,
-        compression: _compression,
-        verify: _verify,
-        outputDir: _outputDir,
-      );
-    });
+    _homeController.startConversion(
+      globalFormat: _format,
+      compression: _compression,
+      verify: _verify,
+      outputDir: _outputDir,
+    );
   }
 
   void _onAddFilesPressed() {
@@ -79,17 +86,15 @@ class _OpenROMAppState extends State<OpenROMApp> {
         _selectedIndex = 0;
       });
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _homeKey.currentState?.pickFiles();
-    });
+    _homeController.pickFiles();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = widget.themeService.currentTheme;
 
-    final int fileCount = _homeKey.currentState?.fileCount ?? 0;
-    final bool isConverting = _homeKey.currentState?.isConverting ?? false;
+    final int fileCount = _homeController.fileCount;
+    final bool isConverting = _homeController.isConverting;
 
     final settingsWidget = SettingsScreen(
       theme: theme,
@@ -144,7 +149,10 @@ class _OpenROMAppState extends State<OpenROMApp> {
                     child: IndexedStack(
                       index: _selectedIndex,
                       children: [
-                        HomeScreen(key: _homeKey, theme: theme),
+                        HomeScreen(
+                          theme: theme,
+                          controller: _homeController,
+                        ),
                         PatcherScreen(theme: theme),
                         ToolsScreen(theme: theme),
                         DreamcastScreen(theme: theme),
