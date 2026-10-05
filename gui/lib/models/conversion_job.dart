@@ -12,6 +12,7 @@ class ConversionJob {
   String targetFormat;
   String compression;
   bool verify;
+  String? media;
   JobStatus status;
   double progress;
   List<String> logs;
@@ -25,6 +26,7 @@ class ConversionJob {
     required this.targetFormat,
     this.compression = 'Normal',
     this.verify = false,
+    this.media,
     this.status = JobStatus.queued,
     this.progress = 0.0,
     List<String>? logs,

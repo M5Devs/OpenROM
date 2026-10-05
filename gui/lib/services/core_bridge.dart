@@ -170,6 +170,10 @@ class CoreBridge {
         args.add('--verify');
       }
 
+      if (job.media != null && job.media!.isNotEmpty) {
+        args.addAll(['--media', job.media!]);
+      }
+
       if (outputDir.isNotEmpty) {
         args.addAll(['--output', outputDir]);
       }

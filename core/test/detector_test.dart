@@ -184,4 +184,66 @@ void main() {
     final xgdtoolPath = getToolPath('xgdtool');
     expect(xgdtoolPath, isNotEmpty);
   });
+  test('unknown_iso_conversion_without_media_fails_safely', () {
+    final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_conv_');
+    try {
+      final isoPath = p.join(tmpDir.path, 'unidentified.iso');
+      File(isoPath).writeAsBytesSync(List<int>.filled(2048, 0));
+
+      final job = ConversionJob(
+        filepath: isoPath,
+        outputDir: tmpDir.path,
+        targetFormat: 'CHD',
+      );
+
+      final converter = Converter();
+      final success = converter.convert(job);
+
+      expect(success, isFalse);
+      expect(job.status, equals('Failed'));
+      expect(
+        job.error,
+        equals(
+          'Error: Platform could not be detected. Please specify --media cd or --media dvd.',
+        ),
+      );
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('unknown_iso_conversion_with_media_override_routes_correctly', () {
+    final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_override_');
+    try {
+      final isoPath = p.join(tmpDir.path, 'unidentified.iso');
+      File(isoPath).writeAsBytesSync(List<int>.filled(2048, 0));
+
+      saveConfig({'chdman': p.join(tmpDir.path, 'missing_chdman')});
+
+      final jobCd = ConversionJob(
+        filepath: isoPath,
+        outputDir: tmpDir.path,
+        targetFormat: 'CHD',
+        media: 'cd',
+      );
+
+      final converter = Converter();
+      converter.convert(jobCd);
+      expect(jobCd.error, contains('Tool not found'));
+      expect(jobCd.error, isNot(contains('Platform could not be detected')));
+
+      final jobDvd = ConversionJob(
+        filepath: isoPath,
+        outputDir: tmpDir.path,
+        targetFormat: 'CHD',
+        media: 'dvd',
+      );
+      converter.convert(jobDvd);
+      expect(jobDvd.error, contains('Tool not found'));
+      expect(jobDvd.error, isNot(contains('Platform could not be detected')));
+    } finally {
+      saveConfig({});
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
 }

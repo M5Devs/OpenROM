@@ -102,6 +102,10 @@ ArgParser buildParser() {
       help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z',
     )
     ..addOption('force-platform', help: 'override automatic platform detection')
+    ..addOption(
+      'media',
+      help: 'media type override for CHD creation: cd or dvd',
+    )
     ..addFlag(
       'list-dats',
       negatable: false,
@@ -760,6 +764,7 @@ Future<int> main(List<String> args) async {
 
   final targetFmt = results['format'] as String?;
   final forcePlat = results['force-platform'] as String?;
+  final mediaVal = results['media'] as String?;
   final compLevel = results['compression'] as String;
   final verifyVal = results['verify'] == true;
   final outputDir = results['output'] as String?;
@@ -774,6 +779,7 @@ Future<int> main(List<String> args) async {
       compression: compLevel,
       verify: verifyVal,
       forcePlatform: forcePlat,
+      media: mediaVal,
     );
     jobs.add(job);
   } else if (folder != null) {
@@ -786,6 +792,7 @@ Future<int> main(List<String> args) async {
         compression: compLevel,
         verify: verifyVal,
         forcePlatform: forcePlat,
+        media: mediaVal,
       );
       jobs.add(job);
     }

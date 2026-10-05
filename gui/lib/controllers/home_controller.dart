@@ -76,6 +76,7 @@ class HomeController extends ChangeNotifier {
     String compression = 'Normal',
     bool verify = false,
     String outputDir = '',
+    Future<String?> Function(ConversionJob job)? onPromptMedia,
     void Function(OpenROMException e)? onError,
   }) async {
     if (_jobs.isEmpty || _isConverting) return;
@@ -99,6 +100,27 @@ class HomeController extends ChangeNotifier {
         job.targetFormat,
         job.compression,
       );
+
+      if (job.targetFormat.toUpperCase() == 'CHD' &&
+          (job.romFile.platform == 'UNKNOWN' ||
+              job.romFile.platform == 'Unknown Disc' ||
+              job.romFile.platform == 'ROM File') &&
+          (job.media == null || job.media!.isEmpty)) {
+        if (onPromptMedia != null) {
+          final choice = await onPromptMedia(job);
+          if (choice != null && choice.isNotEmpty) {
+            job.media = choice;
+          } else {
+            job.status = JobStatus.failed;
+            job.errorMessage =
+                'Error: Platform could not be detected. Please specify media type.';
+            job.error = OpenROMError.conversionFailed;
+            _logs.add('[ERROR] ${job.errorMessage}');
+            notifyListeners();
+            continue;
+          }
+        }
+      }
 
       job.status = JobStatus.converting;
       notifyListeners();

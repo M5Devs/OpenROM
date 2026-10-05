@@ -220,7 +220,7 @@ Future<Map<String, Map<String, dynamic>>> loadDatIndex(String datPath) async {
         }
 
         if (crc.isNotEmpty) {
-          index[crc] = {
+          final item = {
             'name': currentGameName,
             'description':
                 currentDesc.isNotEmpty ? currentDesc : currentGameName,
@@ -228,7 +228,13 @@ Future<Map<String, Map<String, dynamic>>> loadDatIndex(String datPath) async {
             'size': size,
             'md5': md5,
             'sha1': sha1,
+            'crc': crc,
           };
+          final compositeKey = '${crc}_$size';
+          index[compositeKey] = item;
+          if (!index.containsKey(crc)) {
+            index[crc] = item;
+          }
         }
       }
     } else if (event is XmlTextEvent) {
@@ -270,6 +276,29 @@ class RomScanResult {
     if (!matched || romName.isEmpty) return filename;
     return romName;
   }
+}
+
+Map<String, dynamic>? _findInIndex(
+  Map<String, Map<String, dynamic>> indexMap,
+  String crc32,
+  int fileSize,
+) {
+  final compositeKey = '${crc32}_$fileSize';
+  if (indexMap.containsKey(compositeKey)) {
+    return indexMap[compositeKey];
+  }
+  final zeroKey = '${crc32}_0';
+  if (indexMap.containsKey(zeroKey)) {
+    return indexMap[zeroKey];
+  }
+  if (indexMap.containsKey(crc32)) {
+    final item = indexMap[crc32]!;
+    final expectedSize = item['size'] as int? ?? 0;
+    if (expectedSize == 0 || expectedSize == fileSize) {
+      return item;
+    }
+  }
+  return null;
 }
 
 Future<List<RomScanResult>> scanFolder(
@@ -373,8 +402,10 @@ Future<List<RomScanResult>> scanFolder(
         },
       );
 
-      if (globalIndex.containsKey(result.crc32)) {
-        final item = globalIndex[result.crc32]!;
+      final fileSize = File(fpath).lengthSync();
+      final item = _findInIndex(globalIndex, result.crc32, fileSize);
+
+      if (item != null) {
         result.matched = true;
         result.canonicalName = item['name'] as String;
         result.romName = item['rom_name'] as String;

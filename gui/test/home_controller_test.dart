@@ -22,4 +22,18 @@ void main() {
     controller.toggleTerminal(false);
     expect(controller.showTerminal, isFalse);
   });
+  test(
+      'HomeController prompts for media type on UNKNOWN platform CHD conversion',
+      () async {
+    final controller = HomeController();
+    bool prompted = false;
+    controller.startConversion(
+      onPromptMedia: (j) async {
+        prompted = true;
+        return 'cd';
+      },
+    );
+    expect(controller.isConverting, isFalse);
+    expect(prompted, isFalse);
+  });
 }
