@@ -242,6 +242,7 @@ All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA
 | **xdelta3** | xdelta/VCDIFF patching | Apache 2.0 |
 | **nkit / nkds** | NKit GameCube/Wii/WiiU conversion | MIT |
 | **saturn-patcher** | Sega Saturn SSP patch applier | GPL v3 |
+| **xgdtool** | Xbox Game Disc (XGD) tooling | GPL v3 |
 
 ---
 
