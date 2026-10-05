@@ -133,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 : ReorderableListView.builder(
                     itemCount: jobs.length,
+                    // ignore: deprecated_member_use
                     onReorder: controller.reorderJobs,
                     itemBuilder: (context, index) {
                       final job = jobs[index];
