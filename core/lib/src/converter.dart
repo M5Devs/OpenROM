@@ -40,6 +40,7 @@ class ConversionJob {
   final String compression;
   final bool verify;
   final String? forcePlatform;
+  final String? media;
   String status;
   double progress;
   final List<String> logLines;
@@ -54,6 +55,7 @@ class ConversionJob {
     this.compression = 'Normal',
     this.verify = false,
     this.forcePlatform,
+    this.media,
     this.status = 'Queued',
     this.progress = 0.0,
     List<String>? logLines,
@@ -207,16 +209,28 @@ class Converter {
       subCmd = 'createcd';
     } else if (fmt == 'ISO' || fmt == 'IMG') {
       final platform = info['platform'] as String? ?? 'UNKNOWN';
-      if (platform == 'UNKNOWN' ||
+      final mediaOverride = job.media?.trim().toLowerCase();
+
+      if (mediaOverride == 'cd') {
+        subCmd = 'createcd';
+      } else if (mediaOverride == 'dvd') {
+        subCmd = 'createdvd';
+      } else if (platform.toUpperCase() == 'CD') {
+        subCmd = 'createcd';
+      } else if (platform.toUpperCase() == 'DVD') {
+        subCmd = 'createdvd';
+      } else if (cdPlatformKeywords.any((kw) => platform.contains(kw))) {
+        subCmd = 'createcd';
+      } else if (platform == 'UNKNOWN' ||
           platform == 'Unknown Disc' ||
           platform.isEmpty) {
-        _log(
-            '[WARN] Platform is UNKNOWN for . Defaulting safely to createdvd.');
-        subCmd = 'createdvd';
+        final err =
+            'Error: Platform could not be detected. Please specify --media cd or --media dvd.';
+        _log('[ERROR] $err');
+        job.error = err;
+        return false;
       } else {
-        subCmd = cdPlatformKeywords.any((kw) => platform.contains(kw))
-            ? 'createcd'
-            : 'createdvd';
+        subCmd = 'createdvd';
       }
     } else {
       subCmd = 'createcd';

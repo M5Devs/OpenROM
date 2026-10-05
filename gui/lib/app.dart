@@ -77,6 +77,27 @@ class _OpenROMAppState extends State<OpenROMApp> {
       compression: _compression,
       verify: _verify,
       outputDir: _outputDir,
+      onPromptMedia: (job) async {
+        return await showDialog<String>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Unrecognized Media Type'),
+            content: Text(
+              'Unrecognized Media Type: Is this game a CD or DVD?\n\nFile: ${job.romFile.filename}',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop('cd'),
+                child: const Text('CD'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop('dvd'),
+                child: const Text('DVD'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -69,7 +69,7 @@ void main() {
 	</header>
 	<game name="Super Mario Land">
 		<description>Super Mario Land</description>
-		<rom name="Super Mario Land.gb" size="65536" crc="cbf43926"/>
+		<rom name="Super Mario Land.gb" size="9" crc="cbf43926"/>
 	</game>
 </datafile>''');
 
@@ -95,6 +95,48 @@ void main() {
       expect(results.first.matched, isTrue);
       expect(results.first.canonicalName, equals('Super Mario Land'));
       expect(results.first.suggestedFilename, equals('Super Mario Land.gb'));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+  test('composite_dat_lookup_prevents_crc32_collisions', () async {
+    final tmpDir = Directory.systemTemp.createTempSync('collision_test_');
+    try {
+      final datPath = p.join(tmpDir.path, 'collision.dat');
+      final xmlContent = '''<?xml version="1.0"?>
+<datafile>
+	<header>
+		<name>Collision DAT</name>
+		<url>http://www.no-intro.org</url>
+	</header>
+	<game name="Game A">
+		<description>Game A</description>
+		<rom name="Game A.gb" size="9" crc="cbf43926"/>
+	</game>
+	<game name="Game B Collision">
+		<description>Game B Collision</description>
+		<rom name="Game B.gb" size="100" crc="cbf43926"/>
+	</game>
+</datafile>''';
+      File(datPath).writeAsStringSync(xmlContent);
+
+      final romDir = p.join(tmpDir.path, 'roms');
+      Directory(romDir).createSync();
+      final romPath = p.join(romDir, 'sample.gb');
+      File(romPath).writeAsStringSync('123456789');
+
+      final results = await scanFolder(romDir, [datPath]);
+      expect(results.length, equals(1));
+      expect(results.first.matched, isTrue);
+      expect(results.first.canonicalName, equals('Game A'));
+      expect(results.first.suggestedFilename, equals('Game A.gb'));
+
+      final mismatchPath = p.join(romDir, 'mismatch.gb');
+      File(mismatchPath).writeAsBytesSync(List<int>.filled(50, 0x31));
+
+      final mismatchResults = await scanFolder(romDir, [datPath]);
+      final mismatchRes = mismatchResults.firstWhere((r) => r.filename == 'mismatch.gb');
+      expect(mismatchRes.matched, isFalse);
     } finally {
       tmpDir.deleteSync(recursive: true);
     }
