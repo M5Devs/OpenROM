@@ -55,7 +55,7 @@ All of these are normal behaviors for emulation and ROM tools — not indicators
 |---------|-----------------|-------|
 | v2.6.0 (PyInstaller) | 27/67 | PyInstaller heuristic |
 | v2.6.1 (Nuitka) | 14/67 | Nuitka onefile heuristic |
-| v3.0.0+ (Dart) | 0-2/67 | Dart native binary — near zero flags |
+| v3.5.0+ (Dart) | 0-2/67 | Dart native binary — near zero flags |
 
 ### Which Tools Are Flagged and Why
 | Tool | Flagged By | Reason |
