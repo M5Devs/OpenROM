@@ -76,6 +76,7 @@ class HomeController extends ChangeNotifier {
     String compression = 'Normal',
     bool verify = false,
     String outputDir = '',
+    String audioCodec = 'flac',
     Future<String?> Function(ConversionJob job)? onPromptMedia,
     void Function(OpenROMException e)? onError,
   }) async {
@@ -95,6 +96,7 @@ class HomeController extends ChangeNotifier {
       }
       job.compression = compression;
       job.verify = verify;
+      job.audioCodec = audioCodec;
       job.estimatedOutputSize = ConversionJob.estimateSize(
         job.romFile.fileSizeBytes ?? 0,
         job.targetFormat,

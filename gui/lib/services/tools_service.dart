@@ -81,9 +81,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString())
-            .where((l) => l.trim().isNotEmpty)
-            .toList();
+        final lines = LineSplitter.split(
+          result.stdout.toString(),
+        ).where((l) => l.trim().isNotEmpty).toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -226,9 +226,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString())
-            .where((l) => l.trim().isNotEmpty)
-            .toList();
+        final lines = LineSplitter.split(
+          result.stdout.toString(),
+        ).where((l) => l.trim().isNotEmpty).toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -288,9 +288,9 @@ class ToolsService {
 
       final result = await Process.run(corePath, args);
       if (result.exitCode == 0) {
-        final lines = LineSplitter.split(result.stdout.toString())
-            .where((l) => l.trim().isNotEmpty)
-            .toList();
+        final lines = LineSplitter.split(
+          result.stdout.toString(),
+        ).where((l) => l.trim().isNotEmpty).toList();
         for (final line in lines.reversed) {
           try {
             final Map<String, dynamic> event = jsonDecode(line);
@@ -333,9 +333,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(result.stdout.toString())
-          .where((l) => l.trim().isNotEmpty)
-          .toList();
+      final lines = LineSplitter.split(
+        result.stdout.toString(),
+      ).where((l) => l.trim().isNotEmpty).toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -375,9 +375,9 @@ class ToolsService {
 
     final result = await Process.run(corePath, args);
     if (result.exitCode == 0) {
-      final lines = LineSplitter.split(result.stdout.toString())
-          .where((l) => l.trim().isNotEmpty)
-          .toList();
+      final lines = LineSplitter.split(
+        result.stdout.toString(),
+      ).where((l) => l.trim().isNotEmpty).toList();
       for (final line in lines.reversed) {
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -511,5 +511,48 @@ class ToolsService {
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     }
     return results;
+  }
+
+  /// Run 1G1R filter on a ROM collection folder.
+  Future<Map<String, dynamic>> filter1G1R({
+    required String folderPath,
+    List<String>? regionPriority,
+    bool dryRun = true,
+  }) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll(['--json', '--1g1r', folderPath]);
+    if (regionPriority != null && regionPriority.isNotEmpty) {
+      args.addAll(['--priority', regionPriority.join(',')]);
+    }
+    if (dryRun) {
+      args.add('--dry-run');
+    }
+
+    final result = await Process.run(corePath, args);
+    if (result.exitCode == 0) {
+      final lines = LineSplitter.split(
+        result.stdout.toString(),
+      ).where((l) => l.trim().isNotEmpty).toList();
+      for (final line in lines.reversed) {
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          if (event['type'] == 'done' && event['success'] == true) {
+            return event;
+          }
+        } catch (_) {}
+      }
+    }
+    final err = result.stderr.toString().trim();
+    throw OpenROMException(
+      OpenROMError.conversionFailed,
+      details: err.isNotEmpty ? err : '1G1R filter failed',
+    );
   }
 }
