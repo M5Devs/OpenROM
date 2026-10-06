@@ -23,6 +23,7 @@ class SettingsScreen extends StatefulWidget {
     bool verify,
     String outputDir,
     bool sameFolder,
+    String audioCodec,
   ) onSettingsChanged;
 
   const SettingsScreen({
@@ -40,6 +41,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedFormat = 'CHD';
   String _selectedCompression = 'Normal';
+  String _selectedAudioCodec = 'flac';
   bool _verifyAfterConversion = false;
   bool _sameFolderAsSource = true;
   String _outputDestination = '';
@@ -83,6 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _selectedFormat = prefs.getString('default_format') ?? 'CHD';
       _selectedCompression = prefs.getString('default_compression') ?? 'Normal';
+      _selectedAudioCodec = prefs.getString('cd_audio_codec') ?? 'flac';
       _verifyAfterConversion = prefs.getBool('verify_conversion') ?? false;
       _sameFolderAsSource = prefs.getBool('same_folder') ?? true;
       _outputDestination = prefs.getString('output_dir') ?? '';
@@ -105,6 +108,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('default_format', _selectedFormat);
     await prefs.setString('default_compression', _selectedCompression);
+    await prefs.setString('cd_audio_codec', _selectedAudioCodec);
     await prefs.setBool('verify_conversion', _verifyAfterConversion);
     await prefs.setBool('same_folder', _sameFolderAsSource);
     await prefs.setString('output_dir', _outputDestination);
@@ -126,6 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _verifyAfterConversion,
       _sameFolderAsSource ? '' : _outputDestination,
       _sameFolderAsSource,
+      _selectedAudioCodec,
     );
   }
 
@@ -290,6 +295,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               );
             }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // CD Audio Codec
+          _buildSectionTitle('CD Audio Codec (CHD)'),
+          Wrap(
+            spacing: 12,
+            children: [
+              ChoiceChip(
+                label: const Text('Lossless (FLAC) - Recommended'),
+                selected: _selectedAudioCodec == 'flac',
+                selectedColor: theme.accent,
+                backgroundColor: theme.surface,
+                labelStyle: TextStyle(
+                  color: _selectedAudioCodec == 'flac'
+                      ? Colors.white
+                      : theme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _selectedAudioCodec = 'flac');
+                    _saveSettings();
+                  }
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Maximum Compression (Vorbis)'),
+                selected: _selectedAudioCodec == 'vorbis',
+                selectedColor: theme.accent,
+                backgroundColor: theme.surface,
+                labelStyle: TextStyle(
+                  color: _selectedAudioCodec == 'vorbis'
+                      ? Colors.white
+                      : theme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _selectedAudioCodec = 'vorbis');
+                    _saveSettings();
+                  }
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 

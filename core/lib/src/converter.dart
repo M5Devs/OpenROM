@@ -55,6 +55,7 @@ class ConversionJob {
   final bool verify;
   final String? forcePlatform;
   final String? media;
+  final String? audioCodec;
   String status;
   double progress;
   final List<String> logLines;
@@ -70,6 +71,7 @@ class ConversionJob {
     this.verify = false,
     this.forcePlatform,
     this.media,
+    this.audioCodec,
     this.status = 'Queued',
     this.progress = 0.0,
     List<String>? logLines,
@@ -255,6 +257,21 @@ class Converter {
     final compressionMap =
         subCmd == 'createcd' ? chdCdCompression : chdDvdCompression;
     final defaultCodec = subCmd == 'createcd' ? 'cdlz' : 'zlib';
+
+    String compressionCodec;
+    if (subCmd == 'createcd') {
+      final codecOption = job.audioCodec?.trim().toLowerCase();
+      if (codecOption == 'vorbis') {
+        compressionCodec = 'cdlz,cdav';
+      } else if (codecOption == 'flac') {
+        compressionCodec = 'cdlz,cdfl';
+      } else {
+        compressionCodec = compressionMap[job.compression] ?? defaultCodec;
+      }
+    } else {
+      compressionCodec = compressionMap[job.compression] ?? defaultCodec;
+    }
+
     final cmd = [
       chdman,
       subCmd,
@@ -263,7 +280,7 @@ class Converter {
       '-o',
       out,
       '--compression',
-      compressionMap[job.compression] ?? defaultCodec,
+      compressionCodec,
     ];
 
     if (fmt == 'BIN') {

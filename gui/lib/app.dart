@@ -41,6 +41,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
   String _compression = 'Normal';
   bool _verify = false;
   String _outputDir = '';
+  String _audioCodec = 'flac';
 
   @override
   void initState() {
@@ -77,6 +78,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
       compression: _compression,
       verify: _verify,
       outputDir: _outputDir,
+      audioCodec: _audioCodec,
       onPromptMedia: (job) async {
         return await showDialog<String>(
           context: context,
@@ -121,12 +123,14 @@ class _OpenROMAppState extends State<OpenROMApp> {
       theme: theme,
       themeService: widget.themeService,
       localeProvider: widget.localeProvider,
-      onSettingsChanged: (format, compression, verify, outputDir, sameFolder) {
+      onSettingsChanged:
+          (format, compression, verify, outputDir, sameFolder, audioCodec) {
         setState(() {
           _format = format;
           _compression = compression;
           _verify = verify;
           _outputDir = outputDir;
+          _audioCodec = audioCodec;
         });
       },
     );

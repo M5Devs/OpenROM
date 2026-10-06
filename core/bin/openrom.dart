@@ -106,6 +106,17 @@ ArgParser buildParser() {
       'media',
       help: 'media type override for CHD creation: cd or dvd',
     )
+    ..addOption(
+      'audio-codec',
+      defaultsTo: 'flac',
+      help: 'CD audio codec for CHD: flac | vorbis',
+    )
+    ..addOption('1g1r', help: 'filter 1G1R duplicates in a folder')
+    ..addOption(
+      'priority',
+      defaultsTo: 'USA,Europe,Japan',
+      help: 'region priority order for 1G1R filter (comma-separated)',
+    )
     ..addFlag(
       'list-dats',
       negatable: false,
@@ -510,6 +521,44 @@ Future<int> main(List<String> args) async {
     }
   }
 
+  if (results['1g1r'] != null) {
+    final folder = results['1g1r'] as String;
+    final priorityStr = (results['priority'] as String?) ?? 'USA,Europe,Japan';
+    final priorityList = priorityStr.split(',').map((s) => s.trim()).toList();
+    final dry = results['dry-run'] == true;
+
+    try {
+      final summary = filter1G1R(
+        folderPath: folder,
+        regionPriority: priorityList,
+        dryRun: dry,
+      );
+      if (isJson) {
+        _jsonPrint({'type': 'done', 'success': true, ...summary.toJson()});
+      } else {
+        print('1G1R Filter ${dry ? "[DRY RUN] " : ""}Results for $folder:');
+        print('  Total Files: ${summary.totalFiles}');
+        print('  Kept: ${summary.keptCount}');
+        print('  Moved Duplicates: ${summary.movedCount}');
+        for (final r in summary.results) {
+          if (r.isWinner) {
+            print('  ✅ Kept: ${r.filename}');
+          } else {
+            print('  📁 Duplicate -> ${r.filename} (${r.reason})');
+          }
+        }
+      }
+      return 0;
+    } catch (e) {
+      if (isJson) {
+        _jsonPrint({'type': 'done', 'success': false, 'error': e.toString()});
+      } else {
+        print('❌ 1G1R filter failed: $e');
+      }
+      return 2;
+    }
+  }
+
   if (results['import-dat'] != null) {
     final dat = results['import-dat'] as String;
     try {
@@ -780,6 +829,7 @@ Future<int> main(List<String> args) async {
       verify: verifyVal,
       forcePlatform: forcePlat,
       media: mediaVal,
+      audioCodec: results['audio-codec'] as String? ?? 'flac',
     );
     jobs.add(job);
   } else if (folder != null) {
@@ -793,6 +843,7 @@ Future<int> main(List<String> args) async {
         verify: verifyVal,
         forcePlatform: forcePlat,
         media: mediaVal,
+        audioCodec: results['audio-codec'] as String? ?? 'flac',
       );
       jobs.add(job);
     }

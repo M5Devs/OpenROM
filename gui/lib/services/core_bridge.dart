@@ -174,6 +174,10 @@ class CoreBridge {
         args.addAll(['--media', job.media!]);
       }
 
+      if (job.audioCodec != null && job.audioCodec!.isNotEmpty) {
+        args.addAll(['--audio-codec', job.audioCodec!]);
+      }
+
       if (outputDir.isNotEmpty) {
         args.addAll(['--output', outputDir]);
       }

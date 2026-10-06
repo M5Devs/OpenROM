@@ -13,6 +13,7 @@ class ConversionJob {
   String compression;
   bool verify;
   String? media;
+  String? audioCodec;
   JobStatus status;
   double progress;
   List<String> logs;
@@ -27,6 +28,7 @@ class ConversionJob {
     this.compression = 'Normal',
     this.verify = false,
     this.media,
+    this.audioCodec = 'flac',
     this.status = JobStatus.queued,
     this.progress = 0.0,
     List<String>? logs,
