@@ -1,0 +1,27 @@
+{
+  "nkit": {
+    "version": "3.1.0",
+    "hashes": {
+      "windows/x86_64": {
+        "nkds.exe": "cc269146fbaa2779e18ef51f3ace9056dd865cf3988a3eafc0e99a661f34257c",
+        "nkit.exe": "ecb52b3d876b98e8bc69d76ca0ada1dd7c7f041bf0b627418c03ebe75c2319c1"
+      },
+      "linux/x86_64": {
+        "nkds": "bc9815b713dbdf48c199b5057a6aa7836aaedec1c681a790158fa18a7f5b47c1",
+        "nkit": "485f4d2061368f760336af6257cd5bcff97b2b4c7e3750e7800d935072f67a9a"
+      },
+      "linux/arm64": {
+        "nkit": "6327674e2ef96a7079ed3126fa2a9c19f402691ef42d44d2e0360479ccfc3251",
+        "nkds": "75d564a87d2f5574f75e3403967ff41928d56dd4357b36286bcd86201b673997"
+      },
+      "macos/arm64": {
+        "nkit": "02f754d19775b7e738dfb60455fc785726d8ed54e0348875c5ae60d4ba1d1037",
+        "nkds": "087cf119098a4eec85c09048e26f0ce9daee07315f59a5b1f9a7e726ed627402"
+      },
+      "macos/x86_64": {
+        "nkit": "6df4cdad172d198a5024b8bfb377eddaea296572c9c8dacc9de160e41ed764ab",
+        "nkds": "dc4663798ccf7a0f8e41ae7a1f304b324acc060acd5d7b25dd9846a1d200d209"
+      }
+    }
+  }
+}
