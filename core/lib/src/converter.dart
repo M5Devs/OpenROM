@@ -196,7 +196,8 @@ class Converter {
       return _toXiso(job, src);
     }
 
-    if ((['WUD', 'WUX', 'NKIT', 'WUA'].contains(fmt) && ['ISO', 'WUA', 'WUD'].contains(tgt)) ||
+    if ((['WUD', 'WUX', 'NKIT', 'WUA'].contains(fmt) &&
+            ['ISO', 'WUA', 'WUD'].contains(tgt)) ||
         (fmt == 'ISO' && tgt == 'NKIT')) {
       return _nkitConvert(job, src, tgt);
     }
