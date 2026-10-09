@@ -22,7 +22,7 @@ jobs:
       - name: Fetch binaries from OpenROM-bins
         shell: bash
         run: |
-          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git clone https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           cd bins && sha256sum -c checksums.sha256 && cd ..
 
@@ -153,7 +153,7 @@ jobs:
 
       - name: Fetch binaries from OpenROM-bins
         run: |
-          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git clone https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           cd bins && sha256sum -c checksums.sha256 && cd ..
           mkdir -p assets/linux/x86_64
@@ -278,7 +278,7 @@ jobs:
 
       - name: Fetch binaries from OpenROM-bins
         run: |
-          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git clone https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           cd bins && sha256sum -c checksums.sha256 && cd ..
           mkdir -p assets/linux/arm64
@@ -386,7 +386,7 @@ jobs:
 
       - name: Fetch binaries from OpenROM-bins
         run: |
-          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
+          git clone https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
           cd bins && (sha256sum -c checksums.sha256 || shasum -a 256 -c checksums.sha256) && cd ..
           mkdir -p assets/macos/arm64 assets/macos/x86_64
