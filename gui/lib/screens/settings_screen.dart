@@ -322,7 +322,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               ),
               ChoiceChip(
-                label: const Text('Maximum Compression (Vorbis)'),
+                label: const Text('Max Compression (Vorbis)'),
                 selected: _selectedAudioCodec == 'vorbis',
                 selectedColor: theme.accent,
                 backgroundColor: theme.surface,

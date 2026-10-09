@@ -67,6 +67,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
+          cd bins && sha256sum -c checksums.sha256 && cd ..
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

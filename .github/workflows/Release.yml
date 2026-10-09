@@ -20,9 +20,14 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Fetch binaries from OpenROM-bins
+        shell: bash
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
+          cd bins && sha256sum -c checksums.sha256 && cd ..
+
+      - name: Copy Windows binaries
+        run: |
           New-Item -ItemType Directory -Force -Path assets\windows
           Copy-Item -Path "bins\windows\x86_64\*" -Destination "assets\windows\" -Recurse
 
@@ -150,6 +155,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
+          cd bins && sha256sum -c checksums.sha256 && cd ..
           mkdir -p assets/linux/x86_64
           cp -r bins/linux/x86_64/. assets/linux/x86_64/
           chmod +x assets/linux/x86_64/*
@@ -274,6 +280,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
+          cd bins && sha256sum -c checksums.sha256 && cd ..
           mkdir -p assets/linux/arm64
           cp -r bins/linux/arm64/. assets/linux/arm64/
           chmod +x assets/linux/arm64/*
@@ -381,6 +388,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
           git -C bins checkout 586f7cc54df0facf9df9d3066c70e6b434b93753
+          cd bins && (sha256sum -c checksums.sha256 || shasum -a 256 -c checksums.sha256) && cd ..
           mkdir -p assets/macos/arm64 assets/macos/x86_64
           cp -r bins/macos/arm64/.  assets/macos/arm64/
           cp -r bins/macos/x86_64/. assets/macos/x86_64/

@@ -138,8 +138,9 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 | WBFS | ISO | nodtool | Wii |
 | GCZ | ISO | nodtool | GameCube / Wii |
 | NKit | ISO | nkit | GameCube / Wii |
-| WUD | ISO | nkit | Wii U |
-| WUX | ISO | nkit | Wii U (compressed) |
+| WUD | ISO, WUA | nkit | Wii U |
+| WUX | ISO, WUA | nkit | Wii U (compressed) |
+| WUA | ISO, WUD | nkit | Wii U (ZArchive) |
 | ISO | NKit | nkit | GameCube / Wii |
 
 ---
