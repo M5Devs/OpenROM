@@ -3,7 +3,7 @@ set -e
 
 if [ -d "bins" ]; then
   echo "=== Verifying OpenROM-bins checksums ==="
-  (cd bins && sha256sum -c checksums.sha256)
+  (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
 fi
 
 echo "=== Building OpenROM Core (Dart CLI) ==="
