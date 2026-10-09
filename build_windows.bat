@@ -1,10 +1,10 @@
 @echo off
 if exist bins (
     echo === Verifying OpenROM-bins checksums ===
-    cd bins
+    pushd bins
     powershell -Command "Get-Content checksums.sha256 | ForEach-Object { $line = $_; $parts = $line -split '  '; if ($parts.Length -eq 2) { $hash = $parts[0].Trim(); $file = $parts[1].Trim(); if (Test-Path $file) { $actual = (Get-FileHash -Algorithm SHA256 $file).Hash.ToLower(); if ($actual -ne $hash) { Write-Error 'Checksum mismatch'; throw 'Checksum error' } } } }"
+    popd
     if errorlevel 1 goto fail
-    cd ..
 )
 echo === Building OpenROM Core (Dart CLI) ===
 cd core
