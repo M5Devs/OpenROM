@@ -5,6 +5,24 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
+  test('wua_file_detection_and_targets', () {
+    final tmpDir = Directory.systemTemp.createTempSync('wua_test_');
+    try {
+      final wuaPath = p.join(tmpDir.path, 'game.wua');
+      File(wuaPath).writeAsBytesSync(List<int>.filled(100, 0));
+
+      final info = detectFile(wuaPath);
+      expect(info['format'], equals('WUA'));
+      expect(info['platform'], equals('Wii U (ZArchive)'));
+      expect(info['valid_targets'], equals(['ISO', 'WUD']));
+
+      final cmd = getCommandPreview('WUA', 'ISO', 'game.wua');
+      expect(cmd, equals('nkit convert -i "game.wua" -o "game.iso"'));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
   test('unknown_iso_platform_detection', () {
     final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_test_');
     try {
@@ -205,7 +223,7 @@ void main() {
       expect(
         job.error,
         equals(
-          'Error: Platform could not be detected. Please specify --media cd or --media dvd.',
+          "Unsupported or ambiguous media type for platform 'UNKNOWN'. Please specify --media cd or --media dvd.",
         ),
       );
     } finally {
@@ -270,7 +288,7 @@ void main() {
       expect(
         job.error,
         equals(
-          'Error: Platform could not be detected. Please specify --media cd or --media dvd.',
+          "Unsupported or ambiguous media type for platform 'CustomConsoleX'. Please specify --media cd or --media dvd.",
         ),
       );
     } finally {
