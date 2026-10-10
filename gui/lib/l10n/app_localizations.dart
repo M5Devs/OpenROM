@@ -16,6 +16,7 @@ import 'app_localizations_pt.dart';
 import 'app_localizations_ru.dart';
 import 'app_localizations_tr.dart';
 import 'app_localizations_zh.dart';
+import 'app_localizations_zh_TW.dart';
 
 // ignore_for_file: type=lint
 
@@ -113,7 +114,8 @@ abstract class AppLocalizations {
     Locale('pt'),
     Locale('ru'),
     Locale('tr'),
-    Locale('zh')
+    Locale('zh'),
+    Locale('zh_TW')
   ];
 
   /// No description provided for @appTitle.
@@ -1039,7 +1041,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     case 'tr':
       return AppLocalizationsTr();
     case 'zh':
+      if (locale.countryCode == 'TW' || locale.countryCode == 'HK' || locale.countryCode == 'MO') {
+        return AppLocalizationsZhTw();
+      }
       return AppLocalizationsZh();
+    case 'zh_TW':
+      return AppLocalizationsZhTw();
   }
 
   throw FlutterError(

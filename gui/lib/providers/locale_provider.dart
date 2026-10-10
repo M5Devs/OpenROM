@@ -14,11 +14,20 @@ class LocaleProvider extends ChangeNotifier {
     Locale('fr'),
     Locale('ja'),
     Locale('pt'),
+    Locale('zh'),
+    Locale('zh', 'TW'),
   ];
 
   Locale _locale = const Locale('en');
 
   Locale get locale => _locale;
+
+  String get _localeCode {
+    if (_locale.countryCode != null && _locale.countryCode!.isNotEmpty) {
+      return '${_locale.languageCode}_${_locale.countryCode}';
+    }
+    return _locale.languageCode;
+  }
 
   LocaleProvider() {
     _loadLocale();
@@ -31,6 +40,17 @@ class LocaleProvider extends ChangeNotifier {
       if (supportedLocales.any((l) => l.languageCode == code)) {
         _locale = Locale(code);
         notifyListeners();
+      } else if (code.contains('_')) {
+        final parts = code.split('_');
+        if (parts.length == 2) {
+          final locale = Locale(parts[0], parts[1]);
+          if (supportedLocales.any((l) =>
+              l.languageCode == locale.languageCode &&
+              l.countryCode == locale.countryCode)) {
+            _locale = locale;
+            notifyListeners();
+          }
+        }
       }
     }
   }
@@ -46,7 +66,7 @@ class LocaleProvider extends ChangeNotifier {
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKey, newLocale.languageCode);
+    await prefs.setString(_prefKey, _localeCode);
   }
 
   static String getNativeName(String code) {
@@ -61,6 +81,10 @@ class LocaleProvider extends ChangeNotifier {
         return '日本語';
       case 'pt':
         return 'Português';
+      case 'zh':
+        return '简体中文';
+      case 'zh_TW':
+        return '繁體中文';
       case 'en':
       default:
         return 'English';
