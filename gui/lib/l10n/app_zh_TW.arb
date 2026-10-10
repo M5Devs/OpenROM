@@ -1,0 +1,228 @@
+{
+  "@@locale": "zh_TW",
+  "appTitle": "OpenROM",
+  "appSubtitle": "萬用 ROM 轉換工具",
+  "convertButton": "轉換",
+  "convertButtonWithCount": "轉換（{count} 個檔案）",
+  "@convertButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dropZoneHint": "將 ROM 檔案拖曳至此",
+  "dropZoneSubHint": "或點擊瀏覽",
+  "settingsTitle": "轉換設定",
+  "outputFormat": "輸出格式",
+  "compressionLevel": "壓縮層級",
+  "compressionNormal": "標準",
+  "compressionHigh": "高",
+  "compressionMax": "最高",
+  "postProcessing": "後續處理",
+  "verifyAfterConversion": "轉換後驗證",
+  "outputDestination": "輸出目標",
+  "browse": "瀏覽",
+  "statusWaiting": "等待中...",
+  "statusConverting": "轉換中...",
+  "statusDone": "完成",
+  "statusFailed": "失敗",
+  "aboutTitle": "關於 OpenROM",
+  "settingsScreen": "設定",
+  "aboutScreen": "關於",
+  "themeScreen": "主題",
+  "errorCoreNotFound": "應用程式資料夾中缺少 openrom-core。",
+  "errorUnsupportedFormat": "此檔案格式無法使用選擇的輸出格式進行轉換。",
+  "errorDiskSpace": "可用空間不足以完成此次轉換。",
+  "errorToolFailed": "轉換工具（chdman/maxcso）未預期結束。",
+  "errorConversionFailed": "轉換在完成前停止。",
+  "errorFileNotFound": "輸入檔案已被移動或刪除。",
+  "errorOutputDirNotFound": "選擇的輸出資料夾已不存在。",
+  "errorPermissionDenied": "OpenROM 無法寫入輸出資料夾。",
+  "errorCorruptedFile": "檔案似乎已損毀或為 0 bytes。",
+  "errorUnknown": "發生錯誤。這可能是程式缺陷。",
+  "errorDetailsLabel": "詳細資料",
+  "retryButton": "重試",
+  "closeButton": "關閉",
+  "reportBugButton": "回報問題",
+  "clearQueue": "清除佇列",
+  "removeFile": "移除",
+  "openOutputFolder": "開啟輸出資料夾",
+  "patcherTitle": "ROM 修補器",
+  "patcherRomFile": "ROM 檔案",
+  "patcherPatchFile": "修補檔案",
+  "patcherOutputFile": "輸出檔案",
+  "patcherSameFolder": "與 ROM 相同資料夾",
+  "patcherIgnoreChecksum": "忽略總和檢查錯誤",
+  "patcherApplyButton": "套用修補",
+  "patcherSuccess": "修補成功！",
+  "patcherFormat": "格式",
+  "patcherChecksumPassed": "通過",
+  "patcherChecksumSkipped": "略過",
+  "patcherDropHint": "將 ROM 與修補檔案拖曳至此",
+  "toolsTitle": "工具",
+  "compressorTitle": "ROM 壓縮器",
+  "compressorAddFiles": "新增檔案",
+  "compressorAddFolder": "新增資料夾",
+  "compressorOutputFormat": "輸出格式",
+  "compressorLevel": "壓縮層級",
+  "compressorLevelFast": "快速",
+  "compressorLevelNormal": "標準",
+  "compressorLevelUltra": "極致",
+  "compressorDeleteSource": "完成後刪除來源",
+  "compressorSameFolder": "與來源相同資料夾",
+  "compressorButton": "壓縮（{count} 個檔案）",
+  "@compressorButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "compressorSkipped": "略過（已壓縮）",
+  "m3uTitle": "M3U 產生器",
+  "m3uDropHint": "將光碟檔案拖曳至此",
+  "m3uOutputLabel": "輸出資料夾",
+  "m3uButton": "產生 M3U",
+  "m3uSuccess": "已建立：{filename}",
+  "@m3uSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "cueGeneratorTitle": "CUE 產生器",
+  "cueGeneratorBinFile": "BIN 檔案",
+  "cueGeneratorDetectedMode": "偵測模式",
+  "cueGeneratorButton": "產生 CUE",
+  "cueGeneratorSuccess": "已建立：{filename}",
+  "@cueGeneratorSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "binMergerTitle": "BIN 合併器",
+  "binMergerCueFile": "CUE 檔案（多音軌）",
+  "binMergerDetected": "偵測到：{count} 個 BIN 檔案",
+  "@binMergerDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "binMergerButton": "合併 BIN",
+  "binMergerSuccess": "已合併：{filename}",
+  "@binMergerSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverTitle": "檔頭移除器",
+  "headerRemoverSystem": "系統",
+  "headerRemoverFound": "找到檔頭",
+  "headerRemoverNotFound": "找不到檔頭",
+  "headerRemoverConfidence": "信心度",
+  "headerRemoverBackup": "保留備份（.bak）",
+  "headerRemoverButton": "移除檔頭",
+  "headerRemoverSuccess": "乾淨的 ROM：{filename}",
+  "@headerRemoverSuccess": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "headerRemoverNoHeader": "未偵測到檔頭。",
+  "dreamcastTitle": "Dreamcast",
+  "dreamcastDcpTab": "套用 DCP",
+  "dreamcastIpbinTab": "IP.BIN 編輯器",
+  "dreamcastGdiTab": "GDI 資訊",
+  "dreamcastDiscDir": "光碟目錄",
+  "dreamcastDcpFile": "DCP 修補檔案",
+  "dreamcastOutputDir": "輸出目錄",
+  "dreamcastApplyButton": "套用 DCP 修補",
+  "dreamcastApplySuccess": "DCP 修補成功套用！",
+  "dreamcastIpbinFile": "IP.BIN 或 GDI 檔案",
+  "dreamcastIpbinLoad": "載入",
+  "dreamcastIpbinSave": "儲存變更",
+  "dreamcastIpbinTitle": "遊戲名稱",
+  "dreamcastIpbinProductNumber": "產品編號",
+  "dreamcastIpbinVersion": "版本",
+  "dreamcastIpbinDate": "發售日期",
+  "dreamcastIpbinRegion": "區域",
+  "dreamcastIpbinRegionJapan": "日本",
+  "dreamcastIpbinRegionUSA": "美國",
+  "dreamcastIpbinRegionEurope": "歐洲",
+  "dreamcastIpbinRegionFree": "全區",
+  "dreamcastIpbinVga": "啟用 VGA",
+  "dreamcastIpbinSaveSuccess": "IP.BIN 已成功儲存！",
+  "dreamcastGdiFile": "GDI 檔案",
+  "dreamcastGdiLoad": "載入 GDI",
+  "dreamcastGdiTracks": "軌道列表",
+  "dreamcastGdiTrackNum": "軌道",
+  "dreamcastGdiTrackLba": "LBA",
+  "dreamcastGdiTrackType": "類型",
+  "dreamcastGdiTrackSize": "磁區大小",
+  "dreamcastGdiTrackFile": "檔案",
+  "dreamcastGdiAudio": "音訊",
+  "dreamcastGdiData": "資料",
+  "dreamcastSameFolder": "與來源相同資料夾",
+  "dreamcastBrowse": "瀏覽",
+  "onlineFeaturesSection": "線上功能",
+  "onlineFeaturesSub": "所有功能均為選擇性啟用。未經您同意，不會收集任何資料。",
+  "autoUpdateTitle": "自動檢查更新",
+  "autoUpdateSub": "啟動時在 GitHub 上檢查新版本",
+  "autoUpdateCheckNow": "立即檢查",
+  "autoUpdateUpToDate": "已是最新版本（{version}）",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "有可用更新：v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "下載",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "啟用 RetroAchievements 雜湊檢查",
+  "raEnabledSub": "載入前檢查您的 ROM 是否受支援",
+  "raUsername": "使用者名稱",
+  "raApiKey": "API 金鑰",
+  "raApiKeyHint": "於 retroachievements.org/settings 取得您的金鑰",
+  "raHashChecking": "檢查雜湊中...",
+  "raHashFound": "✅ 已支援 — {title}（{count} 個成就）",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ 在 RetroAchievements 上找不到",
+  "raHashError": "錯誤：{msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "在 RA 上檢視",
+  "raSaveCredentials": "儲存"
+}
