@@ -39,8 +39,9 @@ class HomeController extends ChangeNotifier {
       final roms = await FileDetector.detectPaths(paths);
       for (final rom in roms) {
         if (!_jobs.any((j) => j.romFile.filepath == rom.filepath)) {
-          final defaultTarget =
-              rom.validTargets.isNotEmpty ? rom.validTargets.first : 'CHD';
+          final defaultTarget = rom.validTargets.isNotEmpty
+              ? rom.validTargets.first
+              : 'CHD';
           _jobs.add(
             ConversionJob(
               id: DateTime.now().microsecondsSinceEpoch.toString(),
@@ -58,9 +59,7 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  void pickFiles({
-    void Function(OpenROMException e)? onError,
-  }) async {
+  void pickFiles({void Function(OpenROMException e)? onError}) async {
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.any,
@@ -156,9 +155,7 @@ class HomeController extends ChangeNotifier {
         job.status = JobStatus.failed;
         job.error = e.error;
         job.errorMessage = e.details ?? e.error.message;
-        _logs.add(
-          '[ERROR] ${e.error.title}: ${e.details ?? e.error.message}',
-        );
+        _logs.add('[ERROR] ${e.error.title}: ${e.details ?? e.error.message}');
         notifyListeners();
         if (onError != null) {
           onError(e);

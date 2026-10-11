@@ -35,7 +35,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get outputFormat => '输出格式';
 
   @override
-  String get compressionLevel => '压缩级别';
+  String get compressionLevel => '压缩等级';
 
   @override
   String get compressionNormal => '标准';
@@ -53,7 +53,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get verifyAfterConversion => '转换后验证';
 
   @override
-  String get outputDestination => '输出目标';
+  String get outputDestination => '输出位置';
 
   @override
   String get browse => '浏览';
@@ -110,7 +110,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errorCorruptedFile => '文件似乎已损坏或为 0 字节。';
 
   @override
-  String get errorUnknown => '发生错误。这可能是程序缺陷。';
+  String get errorUnknown => '发生错误。这可能是 Bug。';
 
   @override
   String get errorDetailsLabel => '详细信息';
@@ -185,7 +185,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get compressorOutputFormat => '输出格式';
 
   @override
-  String get compressorLevel => '压缩级别';
+  String get compressorLevel => '压缩等级';
 
   @override
   String get compressorLevelFast => '快速';
@@ -465,4 +465,3 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get raSaveCredentials => '保存';
 }
-

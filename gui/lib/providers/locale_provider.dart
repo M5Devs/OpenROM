@@ -44,9 +44,11 @@ class LocaleProvider extends ChangeNotifier {
         final parts = code.split('_');
         if (parts.length == 2) {
           final locale = Locale(parts[0], parts[1]);
-          if (supportedLocales.any((l) =>
-              l.languageCode == locale.languageCode &&
-              l.countryCode == locale.countryCode)) {
+          if (supportedLocales.any(
+            (l) =>
+                l.languageCode == locale.languageCode &&
+                l.countryCode == locale.countryCode,
+          )) {
             _locale = locale;
             notifyListeners();
           }

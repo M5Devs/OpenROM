@@ -494,14 +494,16 @@ void main() {
       File(p.join(origDir.path, 'bootsector', 'IP.BIN'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ORIG_IPBIN_123');
-      File(p.join(origDir.path, '1ST_READ.BIN'))
-          .writeAsStringSync('ORIG_1ST_READ');
+      File(
+        p.join(origDir.path, '1ST_READ.BIN'),
+      ).writeAsStringSync('ORIG_1ST_READ');
 
       File(p.join(modDir.path, 'bootsector', 'IP.BIN'))
         ..createSync(recursive: true)
         ..writeAsStringSync('MOD_IPBIN_456');
-      File(p.join(modDir.path, '1ST_READ.BIN'))
-          .writeAsStringSync('MOD_1ST_READ');
+      File(
+        p.join(modDir.path, '1ST_READ.BIN'),
+      ).writeAsStringSync('MOD_1ST_READ');
 
       final builder = DcpBuilder(
         originalDir: origDir,

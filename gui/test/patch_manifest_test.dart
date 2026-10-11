@@ -56,9 +56,6 @@ void main() {
     await manifest.writeForPatch(patch);
     final loaded = await PatchManifest.readForPatch(patch);
 
-    expect(
-      () => loaded!.validateBase(wrong),
-      throwsA(isA<PatchException>()),
-    );
+    expect(() => loaded!.validateBase(wrong), throwsA(isA<PatchException>()));
   });
 }

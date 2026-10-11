@@ -35,7 +35,7 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get outputFormat => '輸出格式';
 
   @override
-  String get compressionLevel => '壓縮層級';
+  String get compressionLevel => '壓縮等級';
 
   @override
   String get compressionNormal => '標準';
@@ -53,7 +53,7 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get verifyAfterConversion => '轉換後驗證';
 
   @override
-  String get outputDestination => '輸出目標';
+  String get outputDestination => '輸出位置';
 
   @override
   String get browse => '瀏覽';
@@ -83,20 +83,16 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get themeScreen => '主題';
 
   @override
-  String get errorCoreNotFound =>
-      '應用程式資料夾中缺少 openrom-core。';
+  String get errorCoreNotFound => '應用程式資料夾中缺少 openrom-core。';
 
   @override
-  String get errorUnsupportedFormat =>
-      '此檔案格式無法使用選擇的輸出格式進行轉換。';
+  String get errorUnsupportedFormat => '此檔案格式無法使用選擇的輸出格式進行轉換。';
 
   @override
-  String get errorDiskSpace =>
-      '可用空間不足以完成此次轉換。';
+  String get errorDiskSpace => '可用空間不足以完成此次轉換。';
 
   @override
-  String get errorToolFailed =>
-      '轉換工具（chdman/maxcso）未預期結束。';
+  String get errorToolFailed => '轉換工具（chdman/maxcso）未預期結束。';
 
   @override
   String get errorConversionFailed => '轉換在完成前停止。';
@@ -105,19 +101,16 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get errorFileNotFound => '輸入檔案已被移動或刪除。';
 
   @override
-  String get errorOutputDirNotFound =>
-      '選擇的輸出資料夾已不存在。';
+  String get errorOutputDirNotFound => '選擇的輸出資料夾已不存在。';
 
   @override
-  String get errorPermissionDenied =>
-      'OpenROM 無法寫入輸出資料夾。';
+  String get errorPermissionDenied => 'OpenROM 無法寫入輸出資料夾。';
 
   @override
-  String get errorCorruptedFile =>
-      '檔案似乎已損毀或為 0 bytes。';
+  String get errorCorruptedFile => '檔案似乎已損毀或為 0 bytes。';
 
   @override
-  String get errorUnknown => '發生錯誤。這可能是程式缺陷。';
+  String get errorUnknown => '發生錯誤。這可能是 Bug。';
 
   @override
   String get errorDetailsLabel => '詳細資料';
@@ -192,7 +185,7 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get compressorOutputFormat => '輸出格式';
 
   @override
-  String get compressorLevel => '壓縮層級';
+  String get compressorLevel => '壓縮等級';
 
   @override
   String get compressorLevelFast => '快速';
@@ -408,8 +401,7 @@ class AppLocalizationsZhTw extends AppLocalizations {
   String get onlineFeaturesSection => '線上功能';
 
   @override
-  String get onlineFeaturesSub =>
-      '所有功能均為選擇性啟用。未經您同意，不會收集任何資料。';
+  String get onlineFeaturesSub => '所有功能均為選擇性啟用。未經您同意，不會收集任何資料。';
 
   @override
   String get autoUpdateTitle => '自動檢查更新';

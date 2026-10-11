@@ -18,11 +18,7 @@ class HomeScreen extends StatefulWidget {
   final ThemeConfig theme;
   final HomeController controller;
 
-  const HomeScreen({
-    super.key,
-    required this.theme,
-    required this.controller,
-  });
+  const HomeScreen({super.key, required this.theme, required this.controller});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -83,10 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return DropZone(
       theme: widget.theme,
-      onFilesDropped: (paths) => controller.addFilesFromPaths(
-        paths,
-        onError: _handleError,
-      ),
+      onFilesDropped: (paths) =>
+          controller.addFilesFromPaths(paths, onError: _handleError),
       child: Column(
         children: [
           if (jobs.any(

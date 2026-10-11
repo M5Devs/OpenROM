@@ -67,8 +67,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   1,
                   (v) {
                     setInner(() {
-                      temp =
-                          HSVColor.fromColor(temp).withSaturation(v).toColor();
+                      temp = HSVColor.fromColor(
+                        temp,
+                      ).withSaturation(v).toColor();
                     });
                   },
                   temp,
