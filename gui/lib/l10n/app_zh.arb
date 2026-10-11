@@ -1,9 +1,9 @@
 {
   "@@locale": "zh",
   "appTitle": "OpenROM",
-  "appSubtitle": "Universal ROM Conversion Suite",
-  "convertButton": "Convert",
-  "convertButtonWithCount": "Convert ({count} Files)",
+  "appSubtitle": "通用 ROM 转换套件",
+  "convertButton": "转换",
+  "convertButtonWithCount": "转换（{count} 个文件）",
   "@convertButtonWithCount": {
     "placeholders": {
       "count": {
@@ -11,67 +11,67 @@
       }
     }
   },
-  "dropZoneHint": "Drag & Drop ROM files here",
-  "dropZoneSubHint": "or Click to browse",
-  "settingsTitle": "Conversion Settings",
-  "outputFormat": "Output Format",
-  "compressionLevel": "Compression Level",
-  "compressionNormal": "Normal",
-  "compressionHigh": "High",
-  "compressionMax": "Max",
-  "postProcessing": "Post-Processing",
-  "verifyAfterConversion": "Verify after conversion",
-  "outputDestination": "Output Destination",
-  "browse": "Browse",
-  "statusWaiting": "Waiting...",
-  "statusConverting": "Converting...",
-  "statusDone": "Done",
-  "statusFailed": "Failed",
-  "aboutTitle": "About OpenROM",
-  "settingsScreen": "Settings",
-  "aboutScreen": "About",
-  "themeScreen": "Themes",
-  "errorCoreNotFound": "openrom-core is missing from the app folder.",
-  "errorUnsupportedFormat": "This file format cannot be converted with the selected output.",
-  "errorDiskSpace": "Not enough free space to complete this conversion.",
-  "errorToolFailed": "The conversion tool (chdman/maxcso) exited unexpectedly.",
-  "errorConversionFailed": "Conversion stopped before completing.",
-  "errorFileNotFound": "The input file was moved or deleted.",
-  "errorOutputDirNotFound": "The selected output folder no longer exists.",
-  "errorPermissionDenied": "OpenROM can't write to the output folder.",
-  "errorCorruptedFile": "The file appears to be corrupted or is 0 bytes.",
-  "errorUnknown": "Something went wrong. This might be a bug.",
-  "errorDetailsLabel": "Details",
-  "retryButton": "Retry",
-  "closeButton": "Close",
-  "reportBugButton": "Report Bug",
-  "clearQueue": "Clear Queue",
-  "removeFile": "Remove",
-  "openOutputFolder": "Open Output Folder",
-  "patcherTitle": "ROM Patcher",
-  "patcherRomFile": "ROM File",
-  "patcherPatchFile": "Patch File",
-  "patcherOutputFile": "Output File",
-  "patcherSameFolder": "Same folder as ROM",
-  "patcherIgnoreChecksum": "Ignore checksum errors",
-  "patcherApplyButton": "Apply Patch",
-  "patcherSuccess": "Patched successfully!",
-  "patcherFormat": "Format",
+  "dropZoneHint": "将 ROM 文件拖放到此处",
+  "dropZoneSubHint": "或点击浏览",
+  "settingsTitle": "转换设置",
+  "outputFormat": "输出格式",
+  "compressionLevel": "压缩级别",
+  "compressionNormal": "标准",
+  "compressionHigh": "高",
+  "compressionMax": "最大",
+  "postProcessing": "后处理",
+  "verifyAfterConversion": "转换后验证",
+  "outputDestination": "输出目标",
+  "browse": "浏览",
+  "statusWaiting": "等待中...",
+  "statusConverting": "转换中...",
+  "statusDone": "完成",
+  "statusFailed": "失败",
+  "aboutTitle": "关于 OpenROM",
+  "settingsScreen": "设置",
+  "aboutScreen": "关于",
+  "themeScreen": "主题",
+  "errorCoreNotFound": "应用程序文件夹中缺少 openrom-core。",
+  "errorUnsupportedFormat": "此文件格式无法使用所选输出进行转换。",
+  "errorDiskSpace": "可用空间不足以完成此转换。",
+  "errorToolFailed": "转换工具（chdman/maxcso）意外退出。",
+  "errorConversionFailed": "转换在完成前停止。",
+  "errorFileNotFound": "输入文件已被移动或删除。",
+  "errorOutputDirNotFound": "所选输出文件夹已不存在。",
+  "errorPermissionDenied": "OpenROM 无法写入输出文件夹。",
+  "errorCorruptedFile": "文件似乎已损坏或为 0 字节。",
+  "errorUnknown": "发生错误。这可能是程序缺陷。",
+  "errorDetailsLabel": "详细信息",
+  "retryButton": "重试",
+  "closeButton": "关闭",
+  "reportBugButton": "报告问题",
+  "clearQueue": "清除队列",
+  "removeFile": "移除",
+  "openOutputFolder": "打开输出文件夹",
+  "patcherTitle": "ROM 修补器",
+  "patcherRomFile": "ROM 文件",
+  "patcherPatchFile": "补丁文件",
+  "patcherOutputFile": "输出文件",
+  "patcherSameFolder": "与 ROM 相同文件夹",
+  "patcherIgnoreChecksum": "忽略校验和错误",
+  "patcherApplyButton": "应用补丁",
+  "patcherSuccess": "修补成功！",
+  "patcherFormat": "格式",
   "patcherChecksumPassed": "通过",
-  "patcherChecksumSkipped": "skipped",
-  "patcherDropHint": "Drop ROM + Patch files here",
-  "toolsTitle": "Tools",
-  "compressorTitle": "ROM Compressor",
-  "compressorAddFiles": "Add Files",
-  "compressorAddFolder": "Add Folder",
-  "compressorOutputFormat": "Output Format",
-  "compressorLevel": "Compression Level",
-  "compressorLevelFast": "Fast",
-  "compressorLevelNormal": "Normal",
-  "compressorLevelUltra": "Ultra",
-  "compressorDeleteSource": "Delete source after done",
-  "compressorSameFolder": "Same folder as source",
-  "compressorButton": "Compress ({count} Files)",
+  "patcherChecksumSkipped": "已跳过",
+  "patcherDropHint": "将 ROM 和补丁文件拖放到此处",
+  "toolsTitle": "工具",
+  "compressorTitle": "ROM 压缩器",
+  "compressorAddFiles": "添加文件",
+  "compressorAddFolder": "添加文件夹",
+  "compressorOutputFormat": "输出格式",
+  "compressorLevel": "压缩级别",
+  "compressorLevelFast": "快速",
+  "compressorLevelNormal": "标准",
+  "compressorLevelUltra": "极致",
+  "compressorDeleteSource": "完成后删除源文件",
+  "compressorSameFolder": "与源文件相同文件夹",
+  "compressorButton": "压缩（{count} 个文件）",
   "@compressorButton": {
     "placeholders": {
       "count": {
@@ -79,12 +79,12 @@
       }
     }
   },
-  "compressorSkipped": "Skipped (already compressed)",
-  "m3uTitle": "M3U Generator",
-  "m3uDropHint": "Drop disc files here",
-  "m3uOutputLabel": "Output folder",
-  "m3uButton": "Generate M3U",
-  "m3uSuccess": "Created: {filename}",
+  "compressorSkipped": "已跳过（已压缩）",
+  "m3uTitle": "M3U 生成器",
+  "m3uDropHint": "将光盘文件拖放到此处",
+  "m3uOutputLabel": "输出文件夹",
+  "m3uButton": "生成 M3U",
+  "m3uSuccess": "已创建：{filename}",
   "@m3uSuccess": {
     "placeholders": {
       "filename": {
@@ -92,11 +92,11 @@
       }
     }
   },
-  "cueGeneratorTitle": "CUE Generator",
-  "cueGeneratorBinFile": "BIN File",
-  "cueGeneratorDetectedMode": "Detected mode",
-  "cueGeneratorButton": "Generate CUE",
-  "cueGeneratorSuccess": "Created: {filename}",
+  "cueGeneratorTitle": "CUE 生成器",
+  "cueGeneratorBinFile": "BIN 文件",
+  "cueGeneratorDetectedMode": "检测模式",
+  "cueGeneratorButton": "生成 CUE",
+  "cueGeneratorSuccess": "已创建：{filename}",
   "@cueGeneratorSuccess": {
     "placeholders": {
       "filename": {
@@ -104,9 +104,9 @@
       }
     }
   },
-  "binMergerTitle": "BIN Merger",
-  "binMergerCueFile": "CUE File (multi-track)",
-  "binMergerDetected": "Detected: {count} BIN files",
+  "binMergerTitle": "BIN 合并器",
+  "binMergerCueFile": "CUE 文件（多轨道）",
+  "binMergerDetected": "检测到：{count} 个 BIN 文件",
   "@binMergerDetected": {
     "placeholders": {
       "count": {
@@ -114,8 +114,8 @@
       }
     }
   },
-  "binMergerButton": "Merge BINs",
-  "binMergerSuccess": "Merged: {filename}",
+  "binMergerButton": "合并 BIN",
+  "binMergerSuccess": "已合并：{filename}",
   "@binMergerSuccess": {
     "placeholders": {
       "filename": {
@@ -123,14 +123,14 @@
       }
     }
   },
-  "headerRemoverTitle": "Header Remover",
-  "headerRemoverSystem": "System",
-  "headerRemoverFound": "Header Found",
-  "headerRemoverNotFound": "No Header Found",
-  "headerRemoverConfidence": "Confidence",
-  "headerRemoverBackup": "Keep backup (.bak)",
-  "headerRemoverButton": "Remove Header",
-  "headerRemoverSuccess": "Clean ROM: {filename}",
+  "headerRemoverTitle": "文件头移除器",
+  "headerRemoverSystem": "系统",
+  "headerRemoverFound": "找到文件头",
+  "headerRemoverNotFound": "未找到文件头",
+  "headerRemoverConfidence": "置信度",
+  "headerRemoverBackup": "保留备份（.bak）",
+  "headerRemoverButton": "移除文件头",
+  "headerRemoverSuccess": "干净的 ROM：{filename}",
   "@headerRemoverSuccess": {
     "placeholders": {
       "filename": {
@@ -138,40 +138,91 @@
       }
     }
   },
-  "headerRemoverNoHeader": "No copier header detected.",
+  "headerRemoverNoHeader": "未检测到文件头。",
   "dreamcastTitle": "Dreamcast",
-  "dreamcastDcpTab": "Apply DCP",
-  "dreamcastIpbinTab": "IP.BIN Editor",
-  "dreamcastGdiTab": "GDI Info",
-  "dreamcastDiscDir": "Disc Directory",
-  "dreamcastDcpFile": "DCP Patch File",
-  "dreamcastOutputDir": "Output Directory",
-  "dreamcastApplyButton": "Apply DCP Patch",
-  "dreamcastApplySuccess": "DCP patch applied successfully!",
-  "dreamcastIpbinFile": "IP.BIN or GDI File",
-  "dreamcastIpbinLoad": "Load",
-  "dreamcastIpbinSave": "Save Changes",
-  "dreamcastIpbinTitle": "Game Title",
-  "dreamcastIpbinProductNumber": "Product Number",
-  "dreamcastIpbinVersion": "Version",
-  "dreamcastIpbinDate": "Release Date",
-  "dreamcastIpbinRegion": "Region",
-  "dreamcastIpbinRegionJapan": "Japan",
-  "dreamcastIpbinRegionUSA": "USA",
-  "dreamcastIpbinRegionEurope": "Europe",
-  "dreamcastIpbinRegionFree": "Region Free",
-  "dreamcastIpbinVga": "Enable VGA",
-  "dreamcastIpbinSaveSuccess": "IP.BIN saved successfully!",
-  "dreamcastGdiFile": "GDI File",
-  "dreamcastGdiLoad": "Load GDI",
+  "dreamcastDcpTab": "应用 DCP",
+  "dreamcastIpbinTab": "IP.BIN 编辑器",
+  "dreamcastGdiTab": "GDI 信息",
+  "dreamcastDiscDir": "光盘目录",
+  "dreamcastDcpFile": "DCP 补丁文件",
+  "dreamcastOutputDir": "输出目录",
+  "dreamcastApplyButton": "应用 DCP 补丁",
+  "dreamcastApplySuccess": "DCP 补丁应用成功！",
+  "dreamcastIpbinFile": "IP.BIN 或 GDI 文件",
+  "dreamcastIpbinLoad": "加载",
+  "dreamcastIpbinSave": "保存更改",
+  "dreamcastIpbinTitle": "游戏名称",
+  "dreamcastIpbinProductNumber": "产品编号",
+  "dreamcastIpbinVersion": "版本",
+  "dreamcastIpbinDate": "发行日期",
+  "dreamcastIpbinRegion": "区域",
+  "dreamcastIpbinRegionJapan": "日本",
+  "dreamcastIpbinRegionUSA": "美国",
+  "dreamcastIpbinRegionEurope": "欧洲",
+  "dreamcastIpbinRegionFree": "全区",
+  "dreamcastIpbinVga": "启用 VGA",
+  "dreamcastIpbinSaveSuccess": "IP.BIN 保存成功！",
+  "dreamcastGdiFile": "GDI 文件",
+  "dreamcastGdiLoad": "加载 GDI",
   "dreamcastGdiTracks": "轨道列表",
   "dreamcastGdiTrackNum": "轨道",
   "dreamcastGdiTrackLba": "LBA",
-  "dreamcastGdiTrackType": "Type",
-  "dreamcastGdiTrackSize": "Sector Size",
-  "dreamcastGdiTrackFile": "File",
-  "dreamcastGdiAudio": "Audio",
-  "dreamcastGdiData": "Data",
-  "dreamcastSameFolder": "Same folder as source",
-  "dreamcastBrowse": "浏览"
+  "dreamcastGdiTrackType": "类型",
+  "dreamcastGdiTrackSize": "扇区大小",
+  "dreamcastGdiTrackFile": "文件",
+  "dreamcastGdiAudio": "音频",
+  "dreamcastGdiData": "数据",
+  "dreamcastSameFolder": "与源文件相同文件夹",
+  "dreamcastBrowse": "浏览",
+  "onlineFeaturesSection": "在线功能",
+  "onlineFeaturesSub": "所有功能均为可选启用。未经您的同意，不会收集任何数据。",
+  "autoUpdateTitle": "自动检查更新",
+  "autoUpdateSub": "启动时在 GitHub 上检查新版本",
+  "autoUpdateCheckNow": "立即检查",
+  "autoUpdateUpToDate": "已是最新版本（{version}）",
+  "@autoUpdateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateAvailable": "有可用更新：v{version}",
+  "@autoUpdateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "autoUpdateDownload": "下载",
+  "raSection": "RetroAchievements",
+  "raEnabledTitle": "启用 RetroAchievements 哈希检查",
+  "raEnabledSub": "加载前检查您的 ROM 是否受支持",
+  "raUsername": "用户名",
+  "raApiKey": "API 密钥",
+  "raApiKeyHint": "在 retroachievements.org/settings 获取您的密钥",
+  "raHashChecking": "正在检查哈希值...",
+  "raHashFound": "✅ 已支持 — {title}（{count} 个成就）",
+  "@raHashFound": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raHashNotFound": "⚠️ 在 RetroAchievements 上未找到",
+  "raHashError": "错误：{msg}",
+  "@raHashError": {
+    "placeholders": {
+      "msg": {
+        "type": "String"
+      }
+    }
+  },
+  "raViewGame": "在 RA 上查看",
+  "raSaveCredentials": "保存"
 }
