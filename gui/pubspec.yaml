@@ -19,7 +19,7 @@ dependencies:
   desktop_drop: ^0.4.0
   file_picker: 8.1.2
   window_manager: ^0.5.2
-  shared_preferences: ^2.0.0
+  shared_preferences: ^2.5.6
   path_provider: ^2.0.0
   openrom_core:
     path: ../core
