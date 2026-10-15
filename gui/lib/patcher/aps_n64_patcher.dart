@@ -67,8 +67,7 @@ class ApsN64Patcher extends RomPatcher {
       if (patchType == _typeN64Patch) {
         validatesRomHeader = true;
         final endianness = await patch.readByte();
-        final cardId =
-            ((await patch.readByte() & 0xff) << 8) +
+        final cardId = ((await patch.readByte() & 0xff) << 8) +
             (await patch.readByte() & 0xff);
         final country = await patch.readByte();
         final crc = await patch.read(8);
@@ -181,12 +180,10 @@ class ApsN64Patcher extends RomPatcher {
       // Check cartridge ID.
       await rom.setPosition(0x3c);
       if (endianness == 1) {
-        val =
-            ((await rom.readByte() & 0xff) << 8) +
+        val = ((await rom.readByte() & 0xff) << 8) +
             (await rom.readByte() & 0xff);
       } else {
-        val =
-            (await rom.readByte() & 0xff) +
+        val = (await rom.readByte() & 0xff) +
             ((await rom.readByte() & 0xff) << 8);
       }
       if (cartId != val) return false;

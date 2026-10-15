@@ -45,16 +45,14 @@ class ApsGbaBuilder {
       final modChunk = Uint8List(_chunkSize);
 
       if (offset < origLen) {
-        final end = (offset + _chunkSize) < origLen
-            ? (offset + _chunkSize)
-            : origLen;
+        final end =
+            (offset + _chunkSize) < origLen ? (offset + _chunkSize) : origLen;
         origChunk.setRange(0, end - offset, origBytes.sublist(offset, end));
       }
 
       if (offset < modLen) {
-        final end = (offset + _chunkSize) < modLen
-            ? (offset + _chunkSize)
-            : modLen;
+        final end =
+            (offset + _chunkSize) < modLen ? (offset + _chunkSize) : modLen;
         modChunk.setRange(0, end - offset, modBytes.sublist(offset, end));
       }
 

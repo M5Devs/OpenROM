@@ -35,18 +35,18 @@ class RomIdentity {
   }
 
   Map<String, dynamic> toJson() => {
-    'fileName': fileName,
-    'sizeBytes': sizeBytes,
-    'crc32': crc32,
-    'sha256': sha256,
-  };
+        'fileName': fileName,
+        'sizeBytes': sizeBytes,
+        'crc32': crc32,
+        'sha256': sha256,
+      };
 
   factory RomIdentity.fromJson(Map<String, dynamic> json) => RomIdentity(
-    fileName: json['fileName'] as String? ?? '',
-    sizeBytes: json['sizeBytes'] as int,
-    crc32: json['crc32'] as String,
-    sha256: json['sha256'] as String,
-  );
+        fileName: json['fileName'] as String? ?? '',
+        sizeBytes: json['sizeBytes'] as int,
+        crc32: json['crc32'] as String,
+        sha256: json['sha256'] as String,
+      );
 }
 
 /// Sidecar metadata written next to generated patches.
@@ -68,11 +68,11 @@ class PatchManifest {
   });
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': schemaVersion,
-    'format': format,
-    'baseRom': baseRom.toJson(),
-    'targetRom': targetRom.toJson(),
-  };
+        'schemaVersion': schemaVersion,
+        'format': format,
+        'baseRom': baseRom.toJson(),
+        'targetRom': targetRom.toJson(),
+      };
 
   factory PatchManifest.fromJson(Map<String, dynamic> json) {
     if (json['schemaVersion'] != schemaVersion) {

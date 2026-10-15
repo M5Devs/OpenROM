@@ -125,14 +125,14 @@ class _OpenROMAppState extends State<OpenROMApp> {
       localeProvider: widget.localeProvider,
       onSettingsChanged:
           (format, compression, verify, outputDir, sameFolder, audioCodec) {
-            setState(() {
-              _format = format;
-              _compression = compression;
-              _verify = verify;
-              _outputDir = outputDir;
-              _audioCodec = audioCodec;
-            });
-          },
+        setState(() {
+          _format = format;
+          _compression = compression;
+          _verify = verify;
+          _outputDir = outputDir;
+          _audioCodec = audioCodec;
+        });
+      },
     );
 
     return MaterialApp(

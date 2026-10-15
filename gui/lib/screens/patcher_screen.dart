@@ -266,8 +266,7 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final formatBadge = PatcherFactory.formatName(_patchPath);
-    final canApply =
-        !_isPatching &&
+    final canApply = !_isPatching &&
         _romPath.isNotEmpty &&
         _patchPath.isNotEmpty &&
         (_isSspPatch || _outputPath.isNotEmpty);
@@ -644,9 +643,8 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color: path.isEmpty
-                        ? theme.textSecondary
-                        : theme.textPrimary,
+                    color:
+                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,
@@ -848,8 +846,7 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
-    final canBuild =
-        !_isBuilding &&
+    final canBuild = !_isBuilding &&
         _originalPath.isNotEmpty &&
         _modifiedPath.isNotEmpty &&
         _outputPath.isNotEmpty;
@@ -1100,9 +1097,8 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
                 child: Text(
                   path.isEmpty ? '...' : path,
                   style: TextStyle(
-                    color: path.isEmpty
-                        ? theme.textSecondary
-                        : theme.textPrimary,
+                    color:
+                        path.isEmpty ? theme.textSecondary : theme.textPrimary,
                     fontSize: 13,
                   ),
                   maxLines: 1,

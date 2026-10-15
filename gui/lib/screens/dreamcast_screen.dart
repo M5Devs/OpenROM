@@ -582,10 +582,9 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
 
           final regions =
               (fields['regions'] as List?)?.map((e) => e.toString()).toList() ??
-              [];
-          final peripheralsStr = (fields['peripherals'] ?? '')
-              .toString()
-              .trim();
+                  [];
+          final peripheralsStr =
+              (fields['peripherals'] ?? '').toString().trim();
           int peripFlags = 0;
           try {
             peripFlags = int.parse(peripheralsStr, radix: 16);
@@ -593,12 +592,12 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
 
           setState(() {
             _titleController.text = fullTitle;
-            _productNumberController.text = (fields['product_number'] ?? '')
-                .toString();
-            _versionController.text = (fields['product_version'] ?? '')
-                .toString();
-            _releaseDateController.text = (fields['release_date'] ?? '')
-                .toString();
+            _productNumberController.text =
+                (fields['product_number'] ?? '').toString();
+            _versionController.text =
+                (fields['product_version'] ?? '').toString();
+            _releaseDateController.text =
+                (fields['release_date'] ?? '').toString();
 
             _japan = regions.contains('Japan');
             _usa = regions.contains('USA');
@@ -1190,9 +1189,8 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
                         vertical: 14,
                       ),
                     ),
-                    onPressed: (_gdiPath.isNotEmpty && !_isLoading)
-                        ? _loadGdi
-                        : null,
+                    onPressed:
+                        (_gdiPath.isNotEmpty && !_isLoading) ? _loadGdi : null,
                     child: _isLoading
                         ? SizedBox(
                             width: 18,
