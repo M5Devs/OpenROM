@@ -1,0 +1,40 @@
+name: Deploy Website to SourceForge
+
+on:
+  release:
+    types: [published] # يشتغل أوتوماتيك أول ما تعمل Publish Release
+  workflow_dispatch:   # أو زرار يدوي تقدر تدوس عليه في أي وقت (Run Workflow)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OpenROM
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Generate Website HTML
+        run: python scripts/update_website.py
+
+      - name: Setup SSH Key for SourceForge
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SF_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H web.sourceforge.net >> ~/.ssh/known_hosts
+
+      - name: Deploy index.html via SFTP
+        run: |
+          sftp -o StrictHostKeyChecking=no m5dev@web.sourceforge.net <<EOF
+          cd /home/project-web/openrom/htdocs
+          put index.html
+          bye
+          EOF
+          echo "🎉 Website deployed successfully to https://openrom.sourceforge.io/"
