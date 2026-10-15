@@ -2,8 +2,8 @@ name: Deploy Website to SourceForge
 
 on:
   release:
-    types: [published] # يشتغل أوتوماتيك أول ما تعمل Publish Release
-  workflow_dispatch:   # أو زرار يدوي تقدر تدوس عليه في أي وقت (Run Workflow)
+    types: [published] # يشتغل تلقائي مع أي Release جديد
+  workflow_dispatch:   # أو زرار يدوي تقدر تدوس عليه في أي وقت
 
 jobs:
   deploy:
@@ -24,21 +24,26 @@ jobs:
         run: python scripts/update_website.py
 
       - name: Setup SSH Key for SourceForge
+        env:
+          SSH_KEY: ${{ secrets.SF_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SF_SSH_KEY }}" > ~/.ssh/id_ed25519
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          # كتابة المفتاح مع الحفاظ التام على الأسطر ونهاية الملف
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          
+          # فحص أمان سريع عشان نتأكد إن المفتاح متخزن صح
+          echo "🔍 Checking SSH Key file:"
+          echo "Total lines: $(wc -l < ~/.ssh/id_ed25519)"
+          echo "Header is: $(head -n 1 ~/.ssh/id_ed25519)"
+          echo "Footer is: $(tail -n 1 ~/.ssh/id_ed25519)"
+          
+          # تسجيل سيرفر سورس فورج في الأجهزة الموثوقة
           ssh-keyscan -H web.sourceforge.net >> ~/.ssh/known_hosts
 
-      - name: Deploy index.html via SFTP
+      - name: Deploy to SourceForge via SFTP
         run: |
-          # 1. نطبع المفتاح العام عشان تقارنه باللي في SourceForge بعينك
-          echo "🔑 Public key derived from Secret:"
-          ssh-keygen -y -f ~/.ssh/id_ed25519
-          
-          # 2. نحدد المفتاح صراحة للـ sftp
-          sftp -v -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no m5dev@web.sourceforge.net <<EOF
+          sftp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no m5dev@web.sourceforge.net <<EOF
           cd /home/project-web/openrom/htdocs
           put index.html
           bye
