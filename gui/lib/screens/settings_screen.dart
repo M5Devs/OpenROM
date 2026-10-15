@@ -24,7 +24,8 @@ class SettingsScreen extends StatefulWidget {
     String outputDir,
     bool sameFolder,
     String audioCodec,
-  ) onSettingsChanged;
+  )
+  onSettingsChanged;
 
   const SettingsScreen({
     super.key,
@@ -116,9 +117,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool(OnlinePrefs.autoUpdateEnabled, _autoUpdateEnabled);
     await prefs.setBool(OnlinePrefs.raEnabled, _raEnabled);
     await prefs.setString(
-        OnlinePrefs.raUsername, _raUsernameController.text.trim());
+      OnlinePrefs.raUsername,
+      _raUsernameController.text.trim(),
+    );
     await prefs.setString(
-        OnlinePrefs.raApiKey, _raApiKeyController.text.trim());
+      OnlinePrefs.raApiKey,
+      _raApiKeyController.text.trim(),
+    );
 
     _notifyParent();
   }
@@ -135,8 +140,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _pickOutputDirectory() async {
-    final String? selectedDirectory =
-        await FilePicker.platform.getDirectoryPath();
+    final String? selectedDirectory = await FilePicker.platform
+        .getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDestination = selectedDirectory;
@@ -483,10 +488,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle(l10n.onlineFeaturesSection),
           Text(
             l10n.onlineFeaturesSub,
-            style: TextStyle(
-              color: theme.textSecondary,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: theme.textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 16),
 
@@ -532,15 +534,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     l10n.autoUpdateUpToDate(_currentVersion),
                     style: const TextStyle(
-                        color: Colors.greenAccent, fontSize: 13),
+                      color: Colors.greenAccent,
+                      fontSize: 13,
+                    ),
                   )
                 else if (_updateStatus == 'available') ...[
                   Text(
                     l10n.autoUpdateAvailable(_latestVersion),
                     style: TextStyle(
-                        color: theme.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold),
+                      color: theme.accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   if (_releaseUrl.isNotEmpty)
@@ -549,12 +554,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.accent,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       child: Text(
                         l10n.autoUpdateDownload,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                 ] else if (_updateStatus == 'error')
@@ -648,8 +657,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _saveSettings();
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                                  Text('RetroAchievements credentials saved')),
+                            content: Text(
+                              'RetroAchievements credentials saved',
+                            ),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(

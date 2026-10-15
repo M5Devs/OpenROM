@@ -125,14 +125,14 @@ class _OpenROMAppState extends State<OpenROMApp> {
       localeProvider: widget.localeProvider,
       onSettingsChanged:
           (format, compression, verify, outputDir, sameFolder, audioCodec) {
-        setState(() {
-          _format = format;
-          _compression = compression;
-          _verify = verify;
-          _outputDir = outputDir;
-          _audioCodec = audioCodec;
-        });
-      },
+            setState(() {
+              _format = format;
+              _compression = compression;
+              _verify = verify;
+              _outputDir = outputDir;
+              _audioCodec = audioCodec;
+            });
+          },
     );
 
     return MaterialApp(
@@ -174,10 +174,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
                     child: IndexedStack(
                       index: _selectedIndex,
                       children: [
-                        HomeScreen(
-                          theme: theme,
-                          controller: _homeController,
-                        ),
+                        HomeScreen(theme: theme, controller: _homeController),
                         PatcherScreen(theme: theme),
                         ToolsScreen(theme: theme),
                         DreamcastScreen(theme: theme),

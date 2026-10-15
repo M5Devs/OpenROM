@@ -117,7 +117,7 @@ class _ToolsScreenState extends State<ToolsScreen>
 class _CompressorQueueItem {
   final String filepath;
   String
-      status; // "Queued", "Compressing", "Extracting", "Done", "Failed", "Skipped"
+  status; // "Queued", "Compressing", "Extracting", "Done", "Failed", "Skipped"
   double progress;
   String? error;
 
@@ -399,8 +399,9 @@ class _CompressorTabState extends State<_CompressorTab> {
                     backgroundColor: theme.surface,
                     labelStyle: TextStyle(
                       color: selected ? Colors.black : theme.textPrimary,
-                      fontWeight:
-                          selected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: selected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                     onSelected: (_) {
                       setState(() {
@@ -408,12 +409,14 @@ class _CompressorTabState extends State<_CompressorTab> {
                         for (final item in _queue) {
                           if (item.status == 'Skipped' ||
                               item.status == 'Queued') {
-                            final isSkipped = (_format != 'Extract') &&
+                            final isSkipped =
+                                (_format != 'Extract') &&
                                 _isAlreadyCompressed(item.filepath);
                             item.status = isSkipped ? 'Skipped' : 'Queued';
                             item.progress = isSkipped ? 100.0 : 0.0;
-                            item.error =
-                                isSkipped ? l10n.compressorSkipped : null;
+                            item.error = isSkipped
+                                ? l10n.compressorSkipped
+                                : null;
                           }
                         }
                       });
@@ -436,30 +439,32 @@ class _CompressorTabState extends State<_CompressorTab> {
               ),
               const SizedBox(height: 8),
               Row(
-                children: [
-                  MapEntry('Fast', l10n.compressorLevelFast),
-                  MapEntry('Normal', l10n.compressorLevelNormal),
-                  MapEntry('Ultra', l10n.compressorLevelUltra),
-                ].map((entry) {
-                  final key = entry.key;
-                  final label = entry.value;
-                  final selected = _level == key;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ChoiceChip(
-                      label: Text(label),
-                      selected: selected,
-                      selectedColor: theme.accent,
-                      backgroundColor: theme.surface,
-                      labelStyle: TextStyle(
-                        color: selected ? Colors.black : theme.textPrimary,
-                        fontWeight:
-                            selected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      onSelected: (_) => setState(() => _level = key),
-                    ),
-                  );
-                }).toList(),
+                children:
+                    [
+                      MapEntry('Fast', l10n.compressorLevelFast),
+                      MapEntry('Normal', l10n.compressorLevelNormal),
+                      MapEntry('Ultra', l10n.compressorLevelUltra),
+                    ].map((entry) {
+                      final key = entry.key;
+                      final label = entry.value;
+                      final selected = _level == key;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ChoiceChip(
+                          label: Text(label),
+                          selected: selected,
+                          selectedColor: theme.accent,
+                          backgroundColor: theme.surface,
+                          labelStyle: TextStyle(
+                            color: selected ? Colors.black : theme.textPrimary,
+                            fontWeight: selected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          onSelected: (_) => setState(() => _level = key),
+                        ),
+                      );
+                    }).toList(),
               ),
               const SizedBox(height: 16),
             ],
@@ -1612,8 +1617,9 @@ class _BinMergerTabState extends State<_BinMergerTab> {
               width: double.infinity,
               height: 46,
               child: ElevatedButton(
-                onPressed:
-                    (_cuePath.isNotEmpty && !_isProcessing) ? _mergeBins : null,
+                onPressed: (_cuePath.isNotEmpty && !_isProcessing)
+                    ? _mergeBins
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.accent,
                   foregroundColor: Colors.black,
@@ -2132,8 +2138,9 @@ class _CueEditorTabState extends State<_CueEditorTab> {
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(12),
                   border: InputBorder.none,
-                  hintText:
-                      _cuePath == null ? 'Open a .cue file to edit...' : null,
+                  hintText: _cuePath == null
+                      ? 'Open a .cue file to edit...'
+                      : null,
                   hintStyle: TextStyle(color: widget.theme.textSecondary),
                 ),
               ),
@@ -2371,8 +2378,8 @@ class _RomRenamerTabState extends State<_RomRenamerTab> {
               ElevatedButton.icon(
                 onPressed:
                     (_isRenaming || _scanResults.isEmpty || _romFolder == null)
-                        ? null
-                        : _rename,
+                    ? null
+                    : _rename,
                 icon: _isRenaming
                     ? const SizedBox(
                         width: 14,
@@ -2478,8 +2485,9 @@ class _OneGOneRCleanerTabState extends State<_OneGOneRCleanerTab> {
     if (_romFolder == null) return;
     setState(() {
       _isProcessing = true;
-      _statusMsg =
-          _dryRun ? 'Simulating 1G1R filter...' : 'Cleaning duplicates...';
+      _statusMsg = _dryRun
+          ? 'Simulating 1G1R filter...'
+          : 'Cleaning duplicates...';
       _results = null;
     });
     try {
@@ -2698,8 +2706,9 @@ class _OneGOneRCleanerTabState extends State<_OneGOneRCleanerTab> {
                       isWinner
                           ? Icons.check_circle
                           : Icons.drive_file_move_outlined,
-                      color:
-                          isWinner ? Colors.greenAccent : Colors.orangeAccent,
+                      color: isWinner
+                          ? Colors.greenAccent
+                          : Colors.orangeAccent,
                       size: 18,
                     ),
                     title: Text(
@@ -2707,8 +2716,9 @@ class _OneGOneRCleanerTabState extends State<_OneGOneRCleanerTab> {
                       style: TextStyle(
                         fontSize: 13,
                         color: theme.textPrimary,
-                        fontWeight:
-                            isWinner ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isWinner
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                     subtitle: Text(

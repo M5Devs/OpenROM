@@ -55,13 +55,9 @@ class RetroAchievementsService {
     final hash = await computeMd5(filePath);
 
     try {
-      final uri = Uri.parse('$_baseUrl/API_GetGameInfoByMD5.php').replace(
-        queryParameters: {
-          'z': username,
-          'y': apiKey,
-          'm': hash,
-        },
-      );
+      final uri = Uri.parse(
+        '$_baseUrl/API_GetGameInfoByMD5.php',
+      ).replace(queryParameters: {'z': username, 'y': apiKey, 'm': hash});
 
       final response = await http.get(uri).timeout(_timeout);
 
