@@ -1,6 +1,7 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'controllers/home_controller.dart';
@@ -42,6 +43,8 @@ class _OpenROMAppState extends State<OpenROMApp> {
   bool _verify = false;
   String _outputDir = '';
   String _audioCodec = 'flac';
+
+  static const List<int> _mobileScreenIndices = [0, 1, 2, 4];
 
   @override
   void initState() {
@@ -135,6 +138,19 @@ class _OpenROMAppState extends State<OpenROMApp> {
       },
     );
 
+    final screens = [
+      HomeScreen(theme: theme, controller: _homeController),
+      PatcherScreen(theme: theme),
+      ToolsScreen(theme: theme),
+      DreamcastScreen(theme: theme),
+      settingsWidget,
+      AboutScreen(theme: theme),
+      ThemeEditorScreen(
+        theme: theme,
+        themeService: widget.themeService,
+      ),
+    ];
+
     return MaterialApp(
       title: 'OpenROM',
       debugShowCheckedModeBanner: false,
@@ -149,49 +165,106 @@ class _OpenROMAppState extends State<OpenROMApp> {
           primary: theme.accent,
         ),
       ),
-      home: Scaffold(
-        backgroundColor: theme.background,
-        body: Row(
-          children: [
-            Sidebar(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) {
-                setState(() => _selectedIndex = index);
-              },
-              theme: theme,
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  TopBar(
-                    theme: theme,
-                    fileCount: fileCount,
-                    isConverting: isConverting,
-                    onConvertPressed: _onConvertPressed,
-                    onAddFilesPressed: _onAddFilesPressed,
+      home: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 650;
+          final isMobile = isNarrow ||
+              defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS;
+
+          if (isMobile) {
+            final mobileCurrentIndex =
+                _mobileScreenIndices.contains(_selectedIndex)
+                    ? _mobileScreenIndices.indexOf(_selectedIndex)
+                    : 0;
+
+            return Scaffold(
+              backgroundColor: theme.background,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(60),
+                child: TopBar(
+                  theme: theme,
+                  fileCount: fileCount,
+                  isConverting: isConverting,
+                  onConvertPressed: _onConvertPressed,
+                  onAddFilesPressed: _onAddFilesPressed,
+                ),
+              ),
+              body: IndexedStack(
+                index: _selectedIndex,
+                children: screens,
+              ),
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: mobileCurrentIndex,
+                onTap: (int index) {
+                  setState(() {
+                    _selectedIndex = _mobileScreenIndices[index];
+                  });
+                },
+                backgroundColor: theme.surface,
+                selectedItemColor: theme.accent,
+                unselectedItemColor: theme.textSecondary,
+                type: BottomNavigationBarType.fixed,
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.sync_alt_outlined),
+                    activeIcon: Icon(Icons.sync_alt),
+                    label: 'Convert',
                   ),
-                  Expanded(
-                    child: IndexedStack(
-                      index: _selectedIndex,
-                      children: [
-                        HomeScreen(theme: theme, controller: _homeController),
-                        PatcherScreen(theme: theme),
-                        ToolsScreen(theme: theme),
-                        DreamcastScreen(theme: theme),
-                        settingsWidget,
-                        AboutScreen(theme: theme),
-                        ThemeEditorScreen(
-                          theme: theme,
-                          themeService: widget.themeService,
-                        ),
-                      ],
-                    ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.healing_outlined),
+                    activeIcon: Icon(Icons.healing),
+                    label: 'Patch',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.construction_outlined),
+                    activeIcon: Icon(Icons.construction),
+                    label: 'Tools',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.settings_outlined),
+                    activeIcon: Icon(Icons.settings),
+                    label: 'Settings',
                   ),
                 ],
               ),
+            );
+          }
+
+          return Scaffold(
+            backgroundColor: theme.background,
+            body: Row(
+              children: [
+                Sidebar(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (index) {
+                    setState(() => _selectedIndex = index);
+                  },
+                  theme: theme,
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      TopBar(
+                        theme: theme,
+                        fileCount: fileCount,
+                        isConverting: isConverting,
+                        onConvertPressed: _onConvertPressed,
+                        onAddFilesPressed: _onAddFilesPressed,
+                      ),
+                      Expanded(
+                        child: IndexedStack(
+                          index: _selectedIndex,
+                          children: screens,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
