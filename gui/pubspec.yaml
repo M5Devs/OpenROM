@@ -36,3 +36,10 @@ flutter:
   generate: true
   assets:
     - themes/
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: false
+  image_path: "../assets/icons/icon.png"
+  adaptive_icon_background: "#090910"
+  adaptive_icon_foreground: "../assets/icons/icon.png"
