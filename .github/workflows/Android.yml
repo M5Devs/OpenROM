@@ -1,0 +1,56 @@
+name: Android APK Build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    name: Build Android APK (ARM64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch binaries from OpenROM-bins
+        run: |
+          git clone https://github.com/M5Devs/OpenROM-bins.git bins
+          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
+
+      - name: Prepare jniLibs
+        run: |
+          mkdir -p gui/android/app/src/main/jniLibs/arm64-v8a
+          for f in bins/android/arm64-v8a/*; do
+            if [ -f "$f" ]; then
+              b=$(basename "$f")
+              cp "$f" "gui/android/app/src/main/jniLibs/arm64-v8a/lib${b}.so"
+            fi
+          done
+          chmod +x gui/android/app/src/main/jniLibs/arm64-v8a/*
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Build APK
+        run: |
+          cd gui
+          flutter pub get
+          flutter build apk --release --target-platform android-arm64
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenROM-Android-arm64
+          path: gui/build/app/outputs/flutter-apk/app-release.apk
