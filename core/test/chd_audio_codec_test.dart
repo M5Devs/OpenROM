@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
-  test('chd_audio_codec_flac_default', () {
+  test('chd_audio_codec_flac_default', () async {
     final tmpDir = Directory.systemTemp.createTempSync('chd_codec_flac_');
     try {
       final cuePath = p.join(tmpDir.path, 'game.cue');
@@ -30,7 +30,7 @@ void main() {
 
       final logs = <String>[];
       final converter = Converter(onLogCb: (msg) => logs.add(msg));
-      converter.convert(job);
+      await converter.convert(job);
 
       expect(job.audioCodec, equals('flac'));
       final cmdLog =
@@ -42,7 +42,7 @@ void main() {
     }
   });
 
-  test('chd_audio_codec_vorbis', () {
+  test('chd_audio_codec_vorbis', () async {
     final tmpDir = Directory.systemTemp.createTempSync('chd_codec_vorbis_');
     try {
       final cuePath = p.join(tmpDir.path, 'game.cue');
@@ -67,7 +67,7 @@ void main() {
 
       final logs = <String>[];
       final converter = Converter(onLogCb: (msg) => logs.add(msg));
-      converter.convert(job);
+      await converter.convert(job);
 
       expect(job.audioCodec, equals('vorbis'));
       final cmdLog =

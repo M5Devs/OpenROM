@@ -24,6 +24,21 @@ class OpenROMException implements Exception {
   String toString() => 'OpenROMException($error, details: $details)';
 }
 
+Stream<String> splitStreamLines(Stream<List<int>> stream) async* {
+  String buffer = '';
+  await for (final chunk in stream.transform(utf8.decoder)) {
+    buffer += chunk;
+    final parts = buffer.split(RegExp(r'[\r\n]+'));
+    for (int i = 0; i < parts.length - 1; i++) {
+      yield parts[i];
+    }
+    buffer = parts.last;
+  }
+  if (buffer.isNotEmpty) {
+    yield buffer;
+  }
+}
+
 class CoreBridge {
   static String? _cachedCorePath;
 
@@ -185,10 +200,7 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stdout).listen((line) {
         if (line.trim().isEmpty) return;
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -213,10 +225,7 @@ class CoreBridge {
         }
       });
 
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stderr).listen((line) {
         if (line.trim().isNotEmpty) {
           onLog('[STDERR] $line');
           stderrLog.writeln(line);
@@ -304,10 +313,7 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stdout).listen((line) {
         if (line.trim().isEmpty) return;
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -332,10 +338,7 @@ class CoreBridge {
         }
       });
 
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stderr).listen((line) {
         if (line.trim().isNotEmpty) {
           onLog?.call('[STDERR] $line');
           stderrLog.writeln(line);
@@ -401,10 +404,7 @@ class CoreBridge {
       final process = await Process.start(corePath, args);
       final stderrLog = StringBuffer();
 
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stdout).listen((line) {
         if (line.trim().isEmpty) return;
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -429,10 +429,7 @@ class CoreBridge {
         }
       });
 
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      splitStreamLines(process.stderr).listen((line) {
         if (line.trim().isNotEmpty) {
           onLog?.call('[STDERR] $line');
           stderrLog.writeln(line);

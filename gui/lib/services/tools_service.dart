@@ -50,6 +50,21 @@ class BinMergeResult {
   });
 }
 
+Stream<String> _splitStreamLines(Stream<List<int>> stream) async* {
+  String buffer = '';
+  await for (final chunk in stream.transform(utf8.decoder)) {
+    buffer += chunk;
+    final parts = buffer.split(RegExp(r'[\r\n]+'));
+    for (int i = 0; i < parts.length - 1; i++) {
+      yield parts[i];
+    }
+    buffer = parts.last;
+  }
+  if (buffer.isNotEmpty) {
+    yield buffer;
+  }
+}
+
 class ToolsService {
   Future<CueResult> generateCue({
     required String binPath,
@@ -148,10 +163,7 @@ class ToolsService {
       final stderrLog = StringBuffer();
       BinMergeResult? mergeResult;
 
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      _splitStreamLines(process.stdout).listen((line) {
         if (line.trim().isEmpty) return;
         try {
           final Map<String, dynamic> event = jsonDecode(line);
@@ -171,10 +183,7 @@ class ToolsService {
         } catch (_) {}
       });
 
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
+      _splitStreamLines(process.stderr).listen((line) {
         if (line.trim().isNotEmpty) {
           stderrLog.writeln(line);
         }

@@ -170,7 +170,7 @@ void main() {
     }
   });
 
-  test('missing_tool_preflight_check', () {
+  test('missing_tool_preflight_check', () async {
     final tmpDir = Directory.systemTemp.createTempSync('missing_tool_test_');
     try {
       final dummyFile = p.join(tmpDir.path, 'dummy.cci');
@@ -186,7 +186,7 @@ void main() {
       );
 
       final converter = Converter();
-      final success = converter.convert(job);
+      final success = await converter.convert(job);
 
       expect(success, isFalse);
       expect(job.status, equals('Failed'));
@@ -203,7 +203,7 @@ void main() {
     expect(xgdtoolPath, isNotEmpty);
   });
 
-  test('unknown_iso_conversion_without_media_fails_safely', () {
+  test('unknown_iso_conversion_without_media_fails_safely', () async {
     final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_conv_');
     try {
       final isoPath = p.join(tmpDir.path, 'unidentified.iso');
@@ -216,7 +216,7 @@ void main() {
       );
 
       final converter = Converter();
-      final success = converter.convert(job);
+      final success = await converter.convert(job);
 
       expect(success, isFalse);
       expect(job.status, equals('Failed'));
@@ -231,7 +231,7 @@ void main() {
     }
   });
 
-  test('unknown_iso_conversion_with_media_override_routes_correctly', () {
+  test('unknown_iso_conversion_with_media_override_routes_correctly', () async {
     final tmpDir = Directory.systemTemp.createTempSync('unknown_iso_override_');
     try {
       final isoPath = p.join(tmpDir.path, 'unidentified.iso');
@@ -247,7 +247,7 @@ void main() {
       );
 
       final converter = Converter();
-      converter.convert(jobCd);
+      await converter.convert(jobCd);
       expect(jobCd.error, contains('Tool not found'));
       expect(jobCd.error, isNot(contains('Platform could not be detected')));
 
@@ -257,7 +257,7 @@ void main() {
         targetFormat: 'CHD',
         media: 'dvd',
       );
-      converter.convert(jobDvd);
+      await converter.convert(jobDvd);
       expect(jobDvd.error, contains('Tool not found'));
       expect(jobDvd.error, isNot(contains('Platform could not be detected')));
     } finally {
@@ -266,7 +266,8 @@ void main() {
     }
   });
 
-  test('unmapped_custom_platform_conversion_without_media_fails_safely', () {
+  test('unmapped_custom_platform_conversion_without_media_fails_safely',
+      () async {
     final tmpDir =
         Directory.systemTemp.createTempSync('unmapped_platform_test_');
     try {
@@ -281,7 +282,7 @@ void main() {
       );
 
       final converter = Converter();
-      final success = converter.convert(job);
+      final success = await converter.convert(job);
 
       expect(success, isFalse);
       expect(job.status, equals('Failed'));
@@ -296,7 +297,8 @@ void main() {
     }
   });
 
-  test('unmapped_custom_platform_conversion_with_media_override_succeeds', () {
+  test('unmapped_custom_platform_conversion_with_media_override_succeeds',
+      () async {
     final tmpDir =
         Directory.systemTemp.createTempSync('unmapped_platform_override_');
     try {
@@ -314,7 +316,7 @@ void main() {
       );
 
       final converter = Converter();
-      converter.convert(job);
+      await converter.convert(job);
 
       expect(job.error, contains('Tool not found'));
       expect(job.error, isNot(contains('Platform could not be detected')));

@@ -163,6 +163,12 @@ class HomeController extends ChangeNotifier {
         if (onError != null) {
           onError(e);
         }
+      } catch (e, stack) {
+        job.status = JobStatus.failed;
+        job.error = OpenROMError.unknownError;
+        job.errorMessage = e.toString();
+        _logs.add('[ERROR] Unhandled exception: $e\n$stack');
+        notifyListeners();
       }
     }
 
