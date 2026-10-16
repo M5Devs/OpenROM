@@ -873,7 +873,7 @@ Future<int> main(List<String> args) async {
   int failed = 0;
 
   for (final job in jobs) {
-    final ok = converter.convert(job);
+    final ok = await converter.convert(job);
     if (!isJson) _clearProgress();
     if (ok) {
       if (isJson) _jsonPrint({'type': 'done', 'success': true});

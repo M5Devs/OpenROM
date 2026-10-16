@@ -1,4 +1,3 @@
-import 'config.dart' as config;
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
@@ -7,6 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'config.dart' as config;
 import 'cue_generator.dart';
 import 'detector.dart' as detector;
 import 'logger.dart' as logger;
@@ -46,6 +46,65 @@ const Map<String, String> chdDvdCompression = {
   'High': 'zstd,zlib,huff',
   'Max': 'zstd,zlib,huff,flac',
 };
+
+List<String> cleanCommandArgs(List<String> args) {
+  return args.map((arg) {
+    var a = arg.trim();
+    if ((a.startsWith('"') && a.endsWith('"')) ||
+        (a.startsWith("'") && a.endsWith("'"))) {
+      if (a.length >= 2) {
+        a = a.substring(1, a.length - 1);
+      }
+    }
+    return a;
+  }).toList();
+}
+
+List<String> splitCommandArgs(String cmdLine) {
+  final List<String> result = [];
+  final StringBuffer current = StringBuffer();
+  bool inDoubleQuotes = false;
+  bool inSingleQuotes = false;
+
+  for (int i = 0; i < cmdLine.length; i++) {
+    final char = cmdLine[i];
+    if (char == '"' && !inSingleQuotes) {
+      inDoubleQuotes = !inDoubleQuotes;
+    } else if (char == "'" && !inDoubleQuotes) {
+      inSingleQuotes = !inSingleQuotes;
+    } else if (char == ' ' && !inDoubleQuotes && !inSingleQuotes) {
+      if (current.isNotEmpty) {
+        result.add(current.toString());
+        current.clear();
+      }
+    } else {
+      current.write(char);
+    }
+  }
+  if (current.isNotEmpty) {
+    result.add(current.toString());
+  }
+
+  return cleanCommandArgs(result);
+}
+
+Future<void> processStreamLines(
+  Stream<List<int>> stream,
+  void Function(String line) onLine,
+) async {
+  String buffer = '';
+  await for (final chunk in stream.transform(utf8.decoder)) {
+    buffer += chunk;
+    final parts = buffer.split(RegExp(r'[\r\n]+'));
+    for (int i = 0; i < parts.length - 1; i++) {
+      onLine(parts[i]);
+    }
+    buffer = parts.last;
+  }
+  if (buffer.isNotEmpty) {
+    onLine(buffer);
+  }
+}
 
 class ConversionJob {
   final String filepath;
@@ -102,10 +161,10 @@ class Converter {
     _stopped = true;
   }
 
-  bool convert(ConversionJob job) {
+  Future<bool> convert(ConversionJob job) async {
     job.status = 'Converting';
     try {
-      bool ok = _dispatch(job);
+      bool ok = await _dispatch(job);
       if (ok && job.verify && job.targetFormat.toUpperCase() == 'CHD') {
         final chdOut = _outPath(job, job.filepath, '.chd');
         if (File(chdOut).existsSync()) {
@@ -120,14 +179,14 @@ class Converter {
     } catch (e) {
       job.error = e.toString();
       job.status = 'Failed';
-      _log('[ERROR] $e');
+      _log('[ERROR] ');
       return false;
     } finally {
       _cleanup(job);
     }
   }
 
-  bool _dispatch(ConversionJob job) {
+  Future<bool> _dispatch(ConversionJob job) async {
     final info = job.getFileInfo();
     final src = job.filepath;
 
@@ -148,76 +207,76 @@ class Converter {
     final tgt = job.targetFormat.toUpperCase();
 
     if (fmt == 'ECM') {
-      return _fromEcm(job, src, tgt);
+      return await _fromEcm(job, src, tgt);
     }
 
     final valid = detector.getValidTargets(fmt);
     if (!valid.contains(tgt) && tgt != 'BIN/CUE' && tgt != 'FILES') {
-      final err = 'Cannot convert $fmt → $tgt. '
-          'Supported targets for $fmt: ${valid.isNotEmpty ? valid.join(', ') : 'none'}';
-      _log('[ERROR] $err');
+      final err = 'Cannot convert  → . '
+          'Supported targets for : ${valid.isNotEmpty ? valid.join(", ") : "none"}';
+      _log('[ERROR] ');
       job.error = err;
       return false;
     }
 
     if (tgt == 'CHD') {
-      return _toChd(job, src, fmt, info);
+      return await _toChd(job, src, fmt, info);
     }
 
     if (fmt == 'CHD' && (tgt == 'ISO' || tgt == 'BIN' || tgt == 'BIN/CUE')) {
-      return _fromChd(job, src, tgt, info);
+      return await _fromChd(job, src, tgt, info);
     }
 
     if (tgt == 'CSO') {
-      return _toCso(job, src);
+      return await _toCso(job, src);
     }
 
     if (tgt == 'RVZ') {
-      return _toRvz(job, src);
+      return await _toRvz(job, src);
     }
 
     if (['RVZ', 'WIA', 'WBFS', 'GCZ'].contains(fmt) && tgt == 'ISO') {
-      return _fromNodtool(job, src, tgt);
+      return await _fromNodtool(job, src, tgt);
     }
 
     if ((fmt == 'CSO' || fmt == 'ZSO') && tgt == 'ISO') {
-      return _csoToIso(job, src);
+      return await _csoToIso(job, src);
     }
 
     if (tgt == 'ECM') {
-      return _toEcm(job, src);
+      return await _toEcm(job, src);
     }
 
     if (fmt == 'XISO' && (tgt == 'ISO' || tgt == 'FILES')) {
-      return _xisoToFiles(job, src);
+      return await _xisoToFiles(job, src);
     }
 
     if (tgt == 'XISO') {
-      return _toXiso(job, src);
+      return await _toXiso(job, src);
     }
 
     if ((['WUD', 'WUX', 'NKIT', 'WUA'].contains(fmt) &&
             ['ISO', 'WUA', 'WUD'].contains(tgt)) ||
         (fmt == 'ISO' && tgt == 'NKIT')) {
-      return _nkitConvert(job, src, tgt);
+      return await _nkitConvert(job, src, tgt);
     }
 
     if ((fmt == 'CCI' || fmt == 'ZAR') && tgt == 'ISO') {
-      return _xboxConvert(job, src, fmt);
+      return await _xboxConvert(job, src, fmt);
     }
 
-    final err = 'Unhandled conversion route: $fmt → $tgt';
-    _log('[ERROR] $err');
+    final err = 'Unhandled conversion route:  → ';
+    _log('[ERROR] ');
     job.error = err;
     return false;
   }
 
-  bool _toChd(
+  Future<bool> _toChd(
     ConversionJob job,
     String src,
     String fmt,
     Map<String, dynamic> info,
-  ) {
+  ) async {
     final chdman = detector.getChdmanPath();
     final out = _outPath(job, src, '.chd');
 
@@ -247,7 +306,7 @@ class Converter {
       } else {
         final err =
             "Unsupported or ambiguous media type for platform '$platform'. Please specify --media cd or --media dvd.";
-        _log('[ERROR] $err');
+        _log('[ERROR] ');
         job.error = err;
         return false;
       }
@@ -299,15 +358,15 @@ class Converter {
     }
 
     _log('[CHD] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _fromChd(
+  Future<bool> _fromChd(
     ConversionJob job,
     String src,
     String tgt,
     Map<String, dynamic> info,
-  ) {
+  ) async {
     final chdman = detector.getChdmanPath();
     final chdType = info['chd_type'] as String? ?? 'cd';
 
@@ -340,11 +399,11 @@ class Converter {
       }
     }
 
-    _log('[CHD EXTRACT] ${p.basename(src)} → $tgt');
-    return _run(cmd, job);
+    _log('[CHD EXTRACT] ${p.basename(src)} → ');
+    return await _run(cmd, job);
   }
 
-  bool _toCso(ConversionJob job, String src) {
+  Future<bool> _toCso(ConversionJob job, String src) async {
     final maxcso = config.getToolPath('maxcso');
     final out = _outPath(job, src, '.cso');
     final threads = Platform.numberOfProcessors;
@@ -355,32 +414,32 @@ class Converter {
       cmd.insert(1, '--use-zlib');
     }
     _log('[CSO] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _csoToIso(ConversionJob job, String src) {
+  Future<bool> _csoToIso(ConversionJob job, String src) async {
     final maxcso = config.getToolPath('maxcso');
     final out = _outPath(job, src, '.iso');
     final cmd = [maxcso, '--decompress', src, '-o', out];
     _log('[CSO→ISO] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _toEcm(ConversionJob job, String src) {
+  Future<bool> _toEcm(ConversionJob job, String src) async {
     final ecm = config.getToolPath('ecm');
     final out = _outPath(job, src, 'ecm');
     final cmd = [ecm, src, out];
     _log('[ECM] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _fromEcm(ConversionJob job, String src, String tgt) {
+  Future<bool> _fromEcm(ConversionJob job, String src, String tgt) async {
     final unecm = config.getToolPath('unecm');
     final out = _outPath(job, src, tgt);
     final cmd = [unecm, src, out];
     _log('[UNECM] ${p.basename(src)} → ${p.basename(out)}');
 
-    final ok = _run(cmd, job);
+    final ok = await _run(cmd, job);
     if (ok && File(out).existsSync()) {
       final extFound = detector.getExtension(out);
       final targetExt = tgt.toLowerCase();
@@ -393,62 +452,62 @@ class Converter {
           File(out).renameSync(newOut);
           _log('[UNECM AUTO-DETECT] Renamed output to: ${p.basename(newOut)}');
         } catch (e) {
-          _log('[WARN] Failed to rename $out to $newOut: $e');
+          _log('[WARN] Failed to rename  to : ');
         }
       }
     }
     return ok;
   }
 
-  bool _toXiso(ConversionJob job, String src) {
+  Future<bool> _toXiso(ConversionJob job, String src) async {
     final xiso = config.getToolPath('extract-xiso');
     final cmd = [xiso, '-r', src];
     _log('[XISO] ${p.basename(src)} — repacking to XISO...');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _xisoToFiles(ConversionJob job, String src) {
+  Future<bool> _xisoToFiles(ConversionJob job, String src) async {
     final xiso = config.getToolPath('extract-xiso');
     final base = p.basenameWithoutExtension(src);
     final outDir = p.join(job.outputDir, '${base}_extracted');
     Directory(outDir).createSync(recursive: true);
     final cmd = [xiso, '-x', src, '-d', outDir];
-    _log('[XISO→FILES] Extracting ${p.basename(src)} → $outDir/');
+    _log('[XISO→FILES] Extracting ${p.basename(src)} → /');
     _log(
       '[XISO→FILES] Output is a folder of extracted files, not a single ISO.',
     );
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _toRvz(ConversionJob job, String src) {
+  Future<bool> _toRvz(ConversionJob job, String src) async {
     final nodtool = config.getToolPath('nodtool');
     final outName = detector.getOutputName(src, 'rvz');
     final out = p.join(job.outputDir, p.basename(outName));
     final cmd = [nodtool, 'convert', src, out];
     _log('[RVZ] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _fromNodtool(ConversionJob job, String src, String tgt) {
+  Future<bool> _fromNodtool(ConversionJob job, String src, String tgt) async {
     final nodtool = config.getToolPath('nodtool');
     final outName = detector.getOutputName(src, 'iso');
     final out = p.join(job.outputDir, p.basename(outName));
     final fmt = p.extension(src).toUpperCase().replaceAll('.', '');
     final cmd = [nodtool, 'convert', src, out];
     _log('[$fmt→ISO] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _nkitConvert(ConversionJob job, String src, String tgt) {
+  Future<bool> _nkitConvert(ConversionJob job, String src, String tgt) async {
     final nkit = config.getToolPath('nkit');
     final ext = tgt == 'NKIT' ? 'nkit.iso' : tgt.toLowerCase();
     final out = _outPath(job, src, ext);
     final cmd = [nkit, 'convert', '-i', src, '-o', out];
     _log('[NKIT] ${p.basename(src)} → ${p.basename(out)}');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _xboxConvert(ConversionJob job, String src, String fmt) {
+  Future<bool> _xboxConvert(ConversionJob job, String src, String fmt) async {
     if (Platform.isMacOS) {
       job.error = 'Xbox format conversion is not supported on macOS. '
           'XGDTool does not currently provide a macOS build.';
@@ -458,11 +517,12 @@ class Converter {
     final xgdtool = config.getToolPath('xgdtool');
     final cmd = [xgdtool, '--xiso', src, '--out', job.outputDir];
     _log('[Xbox→ISO] ${p.basename(src)} → ISO via XGDTool');
-    return _run(cmd, job);
+    return await _run(cmd, job);
   }
 
-  bool _run(List<String> cmd, ConversionJob job) {
-    final toolPath = cmd.first;
+  Future<bool> _run(List<String> cmd, ConversionJob job) async {
+    final cleanedCmd = cleanCommandArgs(cmd);
+    final toolPath = cleanedCmd.first;
     final isAbsolute = p.isAbsolute(toolPath);
     if (isAbsolute && !File(toolPath).existsSync()) {
       final toolName = p.basename(toolPath);
@@ -470,35 +530,32 @@ class Converter {
           'Tool not found: "$toolName" is missing from the assets folder. '
           'Please reinstall OpenROM or set the tool path manually in Settings.';
       job.error = err;
-      _log('  ❌ $err');
+      _log('  ❌ ');
       return false;
     }
 
     _log(
-      '  cmd: ${cmd.asMap().entries.map((e) => e.key == 0 ? p.basename(e.value) : e.value).join(' ')}',
+      '  cmd: ${cleanedCmd.asMap().entries.map((e) => e.key == 0 ? p.basename(e.value) : e.value).join(' ')}',
     );
     String lastLine = '';
+    final stderrBuffer = StringBuffer();
 
     try {
-      final process = Process.runSync(
-        cmd.first,
-        cmd.sublist(1),
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
+      final process = await Process.start(
+        cleanedCmd.first,
+        cleanedCmd.sublist(1),
       );
 
-      final combined = '${process.stdout}\n${process.stderr}';
-      final lines = const LineSplitter().convert(combined);
-
-      for (final line in lines) {
-        if (_stopped) {
-          job.error = 'Process terminated by user';
-          return false;
-        }
+      void handleLine(String line, {bool isStderr = false}) {
+        if (_stopped) return;
         final trimmed = line.trimRight();
         if (trimmed.isNotEmpty) {
           lastLine = trimmed;
-          _log('  $trimmed');
+          _log('  ');
+          if (isStderr) {
+            if (stderrBuffer.isNotEmpty) stderrBuffer.writeln();
+            stderrBuffer.write(trimmed);
+          }
           final pct = _parseProgress(trimmed);
           if (pct != null) {
             job.progress = pct;
@@ -507,15 +564,34 @@ class Converter {
         }
       }
 
-      if (process.exitCode == 0) {
+      final stdoutDone = processStreamLines(
+        process.stdout,
+        (line) => handleLine(line),
+      );
+      final stderrDone = processStreamLines(
+        process.stderr,
+        (line) => handleLine(line, isStderr: true),
+      );
+
+      await Future.wait([stdoutDone, stderrDone]);
+      final exitCode = await process.exitCode;
+
+      if (_stopped) {
+        job.error = 'Process terminated by user';
+        return false;
+      }
+
+      if (exitCode == 0) {
         _log('  ✅ Command executed successfully');
         job.progress = 100.0;
         if (onProgress != null) onProgress!(job, 100.0);
         return true;
       } else {
-        final err = lastLine.isNotEmpty
-            ? 'Process failed (code ${process.exitCode}): $lastLine'
-            : 'Process failed with exit code ${process.exitCode}';
+        final toolName = p.basename(toolPath);
+        final errDetails = stderrBuffer.isNotEmpty
+            ? stderrBuffer.toString().trim()
+            : (lastLine.isNotEmpty ? lastLine : 'Unknown error');
+        final err = '$toolName failed with exit code $exitCode: $errDetails';
         job.error = err;
         _log('  ❌ $err');
         return false;
@@ -581,7 +657,7 @@ class Converter {
 
 double? _parseProgress(String line) {
   if (RegExp(
-    r'\b(?:cpu|memory|ram|disk|swap|usage|load)\b',
+    r'(?:cpu|memory|ram|disk|swap|usage|load)',
     caseSensitive: false,
   ).hasMatch(line)) {
     return null;
