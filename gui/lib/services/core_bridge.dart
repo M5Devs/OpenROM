@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import '../models/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
+import '../utils/app_version.dart';
 
 typedef ProgressCallback = void Function(double percent);
 typedef LogCallback = void Function(String log);
@@ -559,9 +560,10 @@ class CoreBridge {
   }
 
   static Future<String> getVersion() async {
+    final fallback = 'OpenROM v${AppVersion.current}';
     try {
       if (!await coreExists()) {
-        return 'OpenROM v2.2.0';
+        return fallback;
       }
       final corePath = await getCoreExecutablePath();
       final List<String> args = [];
@@ -572,9 +574,9 @@ class CoreBridge {
       }
       final result = await Process.run(corePath, args);
       final out = result.stdout.toString().trim();
-      return out.isNotEmpty ? out : 'OpenROM v2.2.0';
+      return out.isNotEmpty ? out : fallback;
     } catch (_) {
-      return 'OpenROM v2.2.0';
+      return fallback;
     }
   }
 }

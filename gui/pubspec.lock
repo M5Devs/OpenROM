@@ -331,7 +331,7 @@ packages:
       path: "../core"
       relative: true
     source: path
-    version: "3.7.0"
+    version: "3.9.0"
   package_config:
     dependency: transitive
     description:

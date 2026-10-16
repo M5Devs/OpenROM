@@ -1,0 +1,15 @@
+{
+  "name": "RetroArch Ozone",
+  "background": "#16161e",
+  "surface": "#20202c",
+  "accent": "#00e5ff",
+  "text_primary": "#ffffff",
+  "text_secondary": "#a0a0b0",
+  "sidebar_bg": "#12121a",
+  "card_bg": "#20202c",
+  "terminal_bg": "#101018",
+  "terminal_text": "#76ff03",
+  "font_family": "Roboto",
+  "border_radius": 8,
+  "layout": "sidebar_left"
+}

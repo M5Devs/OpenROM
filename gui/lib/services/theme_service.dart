@@ -37,6 +37,7 @@ class ThemeService extends ChangeNotifier {
       'themes/cyberpunk.json',
       'themes/terminal.json',
       'themes/minimal.json',
+      'themes/retroarch.json',
     ];
 
     _availableThemes = [];

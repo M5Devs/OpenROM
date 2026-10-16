@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import "../utils/app_version.dart";
 import '../models/theme_config.dart';
 import '../providers/locale_provider.dart';
 import '../services/theme_service.dart';
@@ -92,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       _autoUpdateEnabled =
           prefs.getBool(OnlinePrefs.autoUpdateEnabled) ?? false;
-      _currentVersion = readAppVersion();
+      _currentVersion = AppVersion.current;
 
       _raEnabled = prefs.getBool(OnlinePrefs.raEnabled) ?? false;
       _raUsername = prefs.getString(OnlinePrefs.raUsername) ?? '';
@@ -203,6 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -433,7 +435,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 2.5,
+              childAspectRatio: 2.2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
@@ -454,6 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     borderRadius: BorderRadius.circular(t.borderRadius),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -600,6 +603,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
