@@ -8,6 +8,12 @@ import 'package:path/path.dart' as p;
 
 const String appName = 'OpenROM';
 
+String? _androidNativeLibDir;
+
+Future<void> initAndroid(String libDir) async {
+  _androidNativeLibDir = libDir;
+}
+
 String getDirectoryConfig() {
   String path;
   if (Platform.isWindows) {
@@ -34,7 +40,8 @@ String get configFile => p.join(getDirectoryConfig(), 'config.json');
 Map<String, dynamic>? _configCache;
 
 void ensureExecutable(String filePath) {
-  if ((Platform.isLinux || Platform.isMacOS) && File(filePath).existsSync()) {
+  if ((Platform.isLinux || Platform.isMacOS || Platform.isAndroid) &&
+      File(filePath).existsSync()) {
     try {
       Process.runSync('chmod', ['+x', filePath]);
     } catch (_) {}
@@ -189,6 +196,15 @@ bool saveConfig(Map<String, dynamic> config) {
 }
 
 String getToolPath(String tool) {
+  if (Platform.isAndroid) {
+    if (_androidNativeLibDir != null && _androidNativeLibDir!.isNotEmpty) {
+      final libPath = p.join(_androidNativeLibDir!, 'lib$tool.so');
+      ensureExecutable(libPath);
+      return libPath;
+    }
+    return 'lib$tool.so';
+  }
+
   final config = loadConfig();
   final val = config[tool] as String? ?? '';
   if (val.isNotEmpty && (File(val).existsSync() || p.isAbsolute(val))) {
