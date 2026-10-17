@@ -11,6 +11,7 @@ import 'screens/about_screen.dart';
 import 'screens/dreamcast_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/patcher_screen.dart';
+import 'screens/plugins_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/theme_editor_screen.dart';
 import 'screens/tools_screen.dart';
@@ -44,7 +45,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
   String _outputDir = '';
   String _audioCodec = 'flac';
 
-  static const List<int> _mobileScreenIndices = [0, 1, 2, 4];
+  static const List<int> _mobileScreenIndices = [0, 1, 2, 4, 5];
 
   @override
   void initState() {
@@ -143,6 +144,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
       PatcherScreen(theme: theme),
       ToolsScreen(theme: theme),
       DreamcastScreen(theme: theme),
+      PluginsScreen(theme: theme),
       settingsWidget,
       AboutScreen(theme: theme),
       ThemeEditorScreen(
@@ -220,6 +222,11 @@ class _OpenROMAppState extends State<OpenROMApp> {
                     icon: Icon(Icons.construction_outlined),
                     activeIcon: Icon(Icons.construction),
                     label: 'Tools',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.extension_outlined),
+                    activeIcon: Icon(Icons.extension),
+                    label: 'Plugins',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.settings_outlined),
