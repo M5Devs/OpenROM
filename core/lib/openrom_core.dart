@@ -20,3 +20,6 @@ export 'src/logger.dart';
 export 'src/online_prefs.dart';
 export 'src/version_reader.dart';
 export 'src/one_g_one_r.dart';
+export 'src/plugin/plugin_manifest.dart';
+export 'src/plugin/plugin_registry.dart';
+export 'src/plugin/plugin_manager.dart';
