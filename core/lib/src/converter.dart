@@ -10,6 +10,8 @@ import 'config.dart' as config;
 import 'cue_generator.dart';
 import 'detector.dart' as detector;
 import 'logger.dart' as logger;
+import 'plugin/plugin_manager.dart';
+import 'plugin/plugin_registry.dart';
 import 'validator.dart';
 
 const List<String> cdPlatforms = [
@@ -179,7 +181,7 @@ class Converter {
     } catch (e) {
       job.error = e.toString();
       job.status = 'Failed';
-      _log('[ERROR] ');
+      _log('[ERROR] $e');
       return false;
     } finally {
       _cleanup(job);
@@ -206,15 +208,21 @@ class Converter {
     final fmt = info['format'] as String? ?? 'UNKNOWN';
     final tgt = job.targetFormat.toUpperCase();
 
+    // Check for plugin-registered conversion route first
+    final pluginConv = PluginRegistry.instance.getConversion(fmt, tgt);
+    if (pluginConv != null) {
+      return await _pluginConvert(job, src, pluginConv);
+    }
+
     if (fmt == 'ECM') {
       return await _fromEcm(job, src, tgt);
     }
 
     final valid = detector.getValidTargets(fmt);
     if (!valid.contains(tgt) && tgt != 'BIN/CUE' && tgt != 'FILES') {
-      final err = 'Cannot convert  → . '
-          'Supported targets for : ${valid.isNotEmpty ? valid.join(", ") : "none"}';
-      _log('[ERROR] ');
+      final err = 'Cannot convert $fmt → $tgt. '
+          'Supported targets for $fmt: ${valid.isNotEmpty ? valid.join(", ") : "none"}';
+      _log('[ERROR] $err');
       job.error = err;
       return false;
     }
@@ -265,10 +273,49 @@ class Converter {
       return await _xboxConvert(job, src, fmt);
     }
 
-    final err = 'Unhandled conversion route:  → ';
-    _log('[ERROR] ');
+    final err = 'Unhandled conversion route: $fmt → $tgt';
+    _log('[ERROR] $err');
     job.error = err;
     return false;
+  }
+
+  Future<bool> _pluginConvert(
+    ConversionJob job,
+    String src,
+    RegisteredConversion conv,
+  ) async {
+    final pluginsDir = PluginManager.instance.pluginsDir;
+    final relBin = conv.executableRelPath ?? '';
+    final absBin =
+        relBin.isNotEmpty ? p.join(pluginsDir, conv.pluginId, relBin) : '';
+
+    if (relBin.isNotEmpty && !File(absBin).existsSync()) {
+      final err =
+          'Plugin executable not found for plugin "${conv.pluginId}": $absBin';
+      job.error = err;
+      _log('  ❌ $err');
+      return false;
+    }
+
+    final outName =
+        detector.getOutputName(p.basename(src), conv.to.toLowerCase());
+    final outPath = p.join(job.outputDir, outName);
+
+    final idx = src.lastIndexOf('.');
+    final base = idx != -1 ? src.substring(0, idx) : src;
+    final cueName = '$base.cue';
+
+    final cmdLine = conv.commandTemplate
+        .replaceAll('{bin}', absBin)
+        .replaceAll('{in}', src)
+        .replaceAll('{out}', outPath)
+        .replaceAll('{cue}', cueName)
+        .replaceAll('{out_cue}', cueName);
+
+    final cmdArgs = splitCommandArgs(cmdLine);
+    _log(
+        '[PLUGIN ${conv.pluginId}] ${p.basename(src)} → ${p.basename(outPath)}');
+    return await _run(cmdArgs, job);
   }
 
   Future<bool> _toChd(
@@ -306,7 +353,7 @@ class Converter {
       } else {
         final err =
             "Unsupported or ambiguous media type for platform '$platform'. Please specify --media cd or --media dvd.";
-        _log('[ERROR] ');
+        _log('[ERROR] $err');
         job.error = err;
         return false;
       }
@@ -399,7 +446,7 @@ class Converter {
       }
     }
 
-    _log('[CHD EXTRACT] ${p.basename(src)} → ');
+    _log('[CHD EXTRACT] ${p.basename(src)} → ${p.basename(cmd.last)}');
     return await _run(cmd, job);
   }
 
@@ -452,7 +499,7 @@ class Converter {
           File(out).renameSync(newOut);
           _log('[UNECM AUTO-DETECT] Renamed output to: ${p.basename(newOut)}');
         } catch (e) {
-          _log('[WARN] Failed to rename  to : ');
+          _log('[WARN] Failed to rename $out to $newOut: $e');
         }
       }
     }
@@ -472,7 +519,7 @@ class Converter {
     final outDir = p.join(job.outputDir, '${base}_extracted');
     Directory(outDir).createSync(recursive: true);
     final cmd = [xiso, '-x', src, '-d', outDir];
-    _log('[XISO→FILES] Extracting ${p.basename(src)} → /');
+    _log('[XISO→FILES] Extracting ${p.basename(src)} → $outDir');
     _log(
       '[XISO→FILES] Output is a folder of extracted files, not a single ISO.',
     );
@@ -530,7 +577,7 @@ class Converter {
           'Tool not found: "$toolName" is missing from the assets folder. '
           'Please reinstall OpenROM or set the tool path manually in Settings.';
       job.error = err;
-      _log('  ❌ ');
+      _log('  ❌ $err');
       return false;
     }
 
@@ -551,7 +598,7 @@ class Converter {
         final trimmed = line.trimRight();
         if (trimmed.isNotEmpty) {
           lastLine = trimmed;
-          _log('  ');
+          _log('  $trimmed');
           if (isStderr) {
             if (stderrBuffer.isNotEmpty) stderrBuffer.writeln();
             stderrBuffer.write(trimmed);

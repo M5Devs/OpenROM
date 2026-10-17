@@ -7,8 +7,9 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 
 import 'config.dart' as config;
+import 'plugin/plugin_registry.dart';
 
-const Map<String, String> supportedInput = {
+const Map<String, String> builtinSupportedInput = {
   '.iso': 'ISO',
   '.bin': 'BIN',
   '.cue': 'CUE',
@@ -31,7 +32,7 @@ const Map<String, String> supportedInput = {
   '.zar': 'ZAR',
 };
 
-const Map<String, String> platformMap = {
+const Map<String, String> builtinPlatformMap = {
   'ISO': 'ISO Image',
   'BIN': 'CD Image',
   'CUE': 'CD Cue Sheet',
@@ -59,7 +60,7 @@ const Map<String, String> platformMap = {
   'Neo Geo CD': 'Neo Geo CD',
 };
 
-const Map<String, String> formatColors = {
+const Map<String, String> builtinFormatColors = {
   'ISO': '#e94560',
   'BIN': '#f9a825',
   'CUE': '#f9a825',
@@ -88,7 +89,7 @@ const Map<String, String> formatColors = {
   'Neo Geo CD': '#b71c1c',
 };
 
-const Map<String, List<String>> conversionMap = {
+const Map<String, List<String>> builtinConversionMap = {
   'ISO': ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
   'BIN': ['CHD', 'ECM'],
   'CUE': ['CHD'],
@@ -112,7 +113,7 @@ const Map<String, List<String>> conversionMap = {
   'ZAR': ['ISO'],
 };
 
-const Map<String, String> commandTemplates = {
+const Map<String, String> builtinCommandTemplates = {
   'ISO->CHD': 'chdman createdvd -i "{in}" -o "{out}"',
   'ISO->CSO': 'maxcso "{in}" -o "{out}"',
   'ISO->ECM': 'ecm "{in}" "{out}"',
@@ -148,6 +149,50 @@ const Map<String, String> commandTemplates = {
   'ZAR->ISO': 'xgdtool --xiso "{in}" "{outdir}"',
 };
 
+// Merged dynamic getters
+Map<String, String> get supportedInput {
+  final map = Map<String, String>.from(builtinSupportedInput);
+  map.addAll(PluginRegistry.instance.supportedInput);
+  return map;
+}
+
+Map<String, String> get platformMap {
+  final map = Map<String, String>.from(builtinPlatformMap);
+  map.addAll(PluginRegistry.instance.platformMap);
+  return map;
+}
+
+Map<String, String> get formatColors {
+  final map = Map<String, String>.from(builtinFormatColors);
+  map.addAll(PluginRegistry.instance.formatColors);
+  return map;
+}
+
+Map<String, List<String>> get conversionMap {
+  final map = Map<String, List<String>>.from(
+    builtinConversionMap.map((k, v) => MapEntry(k, List<String>.from(v))),
+  );
+  final pluginConvs = PluginRegistry.instance.conversionMap;
+  pluginConvs.forEach((from, targets) {
+    final list = map.putIfAbsent(from, () => []);
+    for (final t in targets) {
+      if (!list.contains(t)) list.add(t);
+    }
+  });
+  return map;
+}
+
+Map<String, String> get commandTemplates {
+  final map = Map<String, String>.from(builtinCommandTemplates);
+  for (final plugin in PluginRegistry.instance.activePlugins) {
+    for (final conv in plugin.conversions) {
+      final routeKey = '${conv.from.toUpperCase()}->${conv.to.toUpperCase()}';
+      map[routeKey] = conv.command;
+    }
+  }
+  return map;
+}
+
 // Magic bytes
 final Uint8List chdMagic = Uint8List.fromList([
   0x4D,
@@ -181,9 +226,17 @@ const int xboxOffset2 = 0x2090000;
 
 String getExtension(String filename) {
   final nameLower = filename.toLowerCase();
-  if (nameLower.endsWith('.nkit.iso')) {
-    return 'nkit.iso';
+
+  // Check known longer extensions first (both built-in and plugin registered)
+  final allKnownExts = supportedInput.keys.toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+
+  for (final extKey in allKnownExts) {
+    if (nameLower.endsWith(extKey)) {
+      return extKey.startsWith('.') ? extKey.substring(1) : extKey;
+    }
   }
+
   final parts = nameLower.split('.');
   return parts.length > 1 ? parts.last : '';
 }
@@ -191,8 +244,11 @@ String getExtension(String filename) {
 String getOutputName(String inputFile, String newExt) {
   final cleanExt = newExt.startsWith('.') ? newExt.substring(1) : newExt;
   final String base;
-  if (inputFile.toLowerCase().endsWith('.nkit.iso')) {
-    base = inputFile.substring(0, inputFile.length - 9);
+  final currentExt = getExtension(inputFile);
+  final extWithDot = '.$currentExt';
+
+  if (inputFile.toLowerCase().endsWith(extWithDot.toLowerCase())) {
+    base = inputFile.substring(0, inputFile.length - extWithDot.length);
   } else {
     final idx = inputFile.lastIndexOf('.');
     base = idx != -1 ? inputFile.substring(0, idx) : inputFile;
@@ -243,13 +299,8 @@ Map<String, dynamic> detectFile(String filepath) {
   }
 
   final name = p.basename(filepath);
-  final nameLower = name.toLowerCase();
-  final String ext;
-  if (nameLower.endsWith('.nkit.iso')) {
-    ext = '.nkit.iso';
-  } else {
-    ext = p.extension(nameLower);
-  }
+  final rawExt = getExtension(name);
+  final ext = rawExt.startsWith('.') ? rawExt : '.$rawExt';
 
   final size = file.lengthSync();
   final fmt = supportedInput[ext] ?? 'UNKNOWN';
@@ -290,7 +341,8 @@ List<Map<String, dynamic>> detectFolder(String folderPath) {
   for (final entry in entries) {
     if (entry is File) {
       final fname = p.basename(entry.path);
-      final ext = '.${getExtension(fname)}';
+      final rawExt = getExtension(fname);
+      final ext = rawExt.startsWith('.') ? rawExt : '.$rawExt';
       if (supportedInput.containsKey(ext)) {
         final info = detectFile(entry.path);
         info['filepath'] = entry.path;

@@ -71,6 +71,11 @@ ArgParser buildParser() {
       'rename-roms',
       help: 'rename ROMs in a folder to canonical DAT names',
     )
+    // Plugin Management
+    ..addOption('install-plugin', help: 'install a plugin from a .orplug file')
+    ..addFlag('list-plugins',
+        negatable: false, help: 'list all installed plugins')
+    ..addOption('remove-plugin', help: 'uninstall a plugin by ID')
     // Dreamcast DCP patch
     ..addOption(
       'dcp',
@@ -191,6 +196,9 @@ Future<int> main(List<String> args) async {
     return 0;
   }
 
+  // Auto-load installed plugins
+  await PluginManager.instance.loadInstalledPlugins();
+
   final parser = buildParser();
   final ArgResults results;
   try {
@@ -211,6 +219,57 @@ Future<int> main(List<String> args) async {
   }
 
   final isJson = results['json'] == true;
+
+  if (results['install-plugin'] != null) {
+    final pluginPath = results['install-plugin'] as String;
+    final ok = await PluginManager.instance.installPlugin(pluginPath);
+    if (isJson) {
+      _jsonPrint({'type': 'done', 'success': ok});
+    } else {
+      print(ok
+          ? '✅ Plugin installed successfully.'
+          : '❌ Failed to install plugin.');
+    }
+    return ok ? 0 : 1;
+  }
+
+  if (results['list-plugins'] == true) {
+    final plugins = PluginManager.instance.installedPlugins;
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': true,
+        'plugins': plugins.map((p) => p.toJson()).toList(),
+      });
+    } else {
+      if (plugins.isEmpty) {
+        print('No plugins installed.');
+      } else {
+        print('Installed Plugins:');
+        for (final plug in plugins) {
+          print(
+              '  - ${plug.name} (${plug.id}) v${plug.version} by ${plug.author}');
+          if (plug.description.isNotEmpty) {
+            print('    ${plug.description}');
+          }
+        }
+      }
+    }
+    return 0;
+  }
+
+  if (results['remove-plugin'] != null) {
+    final pluginId = results['remove-plugin'] as String;
+    final ok = await PluginManager.instance.uninstallPlugin(pluginId);
+    if (isJson) {
+      _jsonPrint({'type': 'done', 'success': ok});
+    } else {
+      print(ok
+          ? '✅ Plugin "$pluginId" removed.'
+          : '❌ Failed to remove plugin "$pluginId".');
+    }
+    return ok ? 0 : 1;
+  }
 
   if (results['tool-path'] != null) {
     final pStr = getToolPath(results['tool-path'] as String);
