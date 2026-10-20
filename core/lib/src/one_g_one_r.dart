@@ -52,13 +52,67 @@ class OneGOneRSummary {
       };
 }
 
+
+const Set<String> _companionExtensions = {
+  '.cue',
+  '.m3u',
+  '.m3u8',
+  '.sav',
+  '.srm',
+  '.cht',
+  '.txt',
+  '.nfo',
+  '.jpg',
+  '.png',
+  '.jpeg',
+  '.xml',
+  '.dat',
+  '.bak',
+  '.ini',
+};
+
+bool isCompanionFile(String filepath) {
+  final fname = p.basename(filepath).toLowerCase();
+  final ext = p.extension(fname);
+
+  if (_companionExtensions.contains(ext)) {
+    return true;
+  }
+
+  // Save states (e.g. .state, .state1, .st0, .s01)
+  if (ext == '.state' ||
+      RegExp(r'^\.(?:st|state|s)\d+$', caseSensitive: false).hasMatch(ext)) {
+    return true;
+  }
+
+  // Multi-track binary files (e.g. Track 02.bin, Track 2.bin)
+  if (ext == '.bin' &&
+      RegExp(r'[\s\(\._-]track[\s\._-]*\d+', caseSensitive: false)
+          .hasMatch(fname)) {
+    return true;
+  }
+
+  return false;
+}
+
 String extractCleanTitle(String filename) {
   // Remove file extension
   String title = p.basenameWithoutExtension(filename);
-  // Remove parenthesized ( ... ) and bracketed [ ... ] tags
-  title = title.replaceAll(RegExp(r'[\(\[][^\)\]]*[\)\]]'), '');
-  // Trim extra spaces
-  return title.trim();
+
+  final discRegExp = RegExp(
+    r'^[\(\[]\s*(?:disc|cd|disk|tape|side)[\s\._-]*[a-z0-9\s_-]+\s*[\)\]]$',
+    caseSensitive: false,
+  );
+
+  title = title.replaceAllMapped(RegExp(r'[\(\[][^\)\]]*[\)\]]'), (match) {
+    final tag = match.group(0)!;
+    if (discRegExp.hasMatch(tag)) {
+      return tag;
+    }
+    return '';
+  });
+
+  return title.replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
 int _getRegionRank(String filename, List<String> regionPriority) {
@@ -135,6 +189,33 @@ int _getRevisionLevel(String filename) {
   return 0;
 }
 
+
+int _getPreReleasePenalty(String filename) {
+  final nameLower = filename.toLowerCase();
+  final tags = RegExp(
+    r'[\(\[][^\)\]]*[\)\]]',
+  ).allMatches(nameLower).map((m) => m.group(0)!).toList();
+
+  const preReleaseKeywords = [
+    'beta',
+    'proto',
+    'prototype',
+    'demo',
+    'sample',
+    'prerelease',
+    'pre-release',
+  ];
+
+  for (final tag in tags) {
+    for (final kw in preReleaseKeywords) {
+      if (tag.contains(kw)) {
+        return 1000;
+      }
+    }
+  }
+  return 0;
+}
+
 int _getDumpScore(String filename) {
   int score = 0;
   if (filename.contains('[!]')) score += 10;
@@ -145,7 +226,7 @@ int _getDumpScore(String filename) {
 OneGOneRSummary filter1G1R({
   required String folderPath,
   List<String> regionPriority = const ['USA', 'Europe', 'Japan'],
-  bool dryRun = false,
+  bool dryRun = true,
   bool moveDuplicates = true,
 }) {
   final dir = Directory(folderPath);
@@ -157,6 +238,7 @@ OneGOneRSummary filter1G1R({
       .listSync(recursive: false)
       .whereType<File>()
       .where((f) => !p.basename(f.path).startsWith('.'))
+      .where((f) => !isCompanionFile(f.path))
       .toList();
 
   final Map<String, List<File>> clusters = {};
@@ -181,6 +263,11 @@ OneGOneRSummary filter1G1R({
     fileList.sort((a, b) {
       final fnameA = p.basename(a.path);
       final fnameB = p.basename(b.path);
+
+      // 0. Pre-release penalty (lower penalty is better)
+      final preA = _getPreReleasePenalty(fnameA);
+      final preB = _getPreReleasePenalty(fnameB);
+      if (preA != preB) return preA.compareTo(preB);
 
       // 1. Region rank (lower index is better)
       final rankA = _getRegionRank(fnameA, regionPriority);

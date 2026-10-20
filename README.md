@@ -68,9 +68,9 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **GDI Track Inspector** — Load and inspect GDI disc image track structure — track number, LBA offset, type (Audio/Data), sector size, and filename.
 
 ### 🗜️ Compression & Extraction
-- **ZIP and 7Z support** — Compress ROMs or entire folders with fast / normal / ultra presets.
+- **ZIP support** — Compress ROMs or entire folders with fast / normal / ultra presets.
 - **Smart skip** — Already-compressed formats (CHD, CSO, RVZ, 7Z…) are automatically skipped.
-- **Batch extraction** — Extract ZIP and 7Z archives with progress tracking.
+- **Batch extraction** — Extract ZIP archives with progress tracking.
 - **Delete source option** — Auto-clean source files after successful compression.
 
 ### 🧹 ROM Header Removal
@@ -179,10 +179,10 @@ openrom-core --folder /roms/ --format CHD --compression Max
 openrom-core --input game.iso --format CHD --verify
 
 # Apply a patch
-openrom-core --patch game.sfc --patch-file hack.ips
-
 # Apply a Dreamcast DCP patch
 openrom-core --dcp patch.dcp --disc-dir /disc/ --output /out/
+
+# Generic ROM patching (IPS, BPS, UPS, etc.) is supported via the OpenROM GUI
 
 # Read IP.BIN fields
 openrom-core --read-ipbin IP.BIN
@@ -196,8 +196,8 @@ openrom-core --write-ipbin IP.BIN --set-title "MY GAME"
 # Inspect GDI track structure
 openrom-core --read-gdi disc.gdi
 
-# Compress to 7Z
-openrom-core --compress game.iso --format 7z --level ultra
+# Compress to ZIP
+openrom-core --compress game.iso --format zip --level ultra
 
 # Remove ROM header
 openrom-core --remove-header game.smc

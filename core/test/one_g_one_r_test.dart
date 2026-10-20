@@ -138,4 +138,100 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     }
   });
+
+  test('1G1R preserves multi-disc sets as distinct clusters', () {
+    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_disc_test_');
+    try {
+      final disc1 = p.join(tmpDir.path, 'Final Fantasy VII (USA) (Disc 1).chd');
+      final disc2 = p.join(tmpDir.path, 'Final Fantasy VII (USA) (Disc 2).chd');
+
+      File(disc1).writeAsBytesSync([1, 2, 3]);
+      File(disc2).writeAsBytesSync([1, 2, 3]);
+
+      final summary = filter1G1R(
+        folderPath: tmpDir.path,
+        regionPriority: ['USA'],
+        dryRun: true,
+      );
+
+      expect(summary.totalFiles, equals(2));
+      expect(summary.keptCount, equals(2));
+      expect(summary.movedCount, equals(0));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('1G1R prefers final release over pre-release builds (Beta/Proto)', () {
+    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_beta_test_');
+    try {
+      final finalFile = p.join(tmpDir.path, 'Game (USA).sfc');
+      final betaFile = p.join(tmpDir.path, 'Game (USA) (Beta).sfc');
+
+      File(finalFile).writeAsBytesSync([1, 2, 3]);
+      File(betaFile).writeAsBytesSync([1, 2, 3]);
+
+      final summary = filter1G1R(
+        folderPath: tmpDir.path,
+        regionPriority: ['USA'],
+        dryRun: true,
+      );
+
+      expect(summary.keptCount, equals(1));
+      expect(summary.movedCount, equals(1));
+
+      final winner = summary.results.firstWhere((r) => r.isWinner);
+      expect(winner.filename, equals('Game (USA).sfc'));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('1G1R ignores companion files (.cue, .m3u, .sav)', () {
+    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_companion_test_');
+    try {
+      final romFile = p.join(tmpDir.path, 'Game (USA).bin');
+      final cueFile = p.join(tmpDir.path, 'Game (USA).cue');
+      final savFile = p.join(tmpDir.path, 'Game (USA).sav');
+
+      File(romFile).writeAsBytesSync([1, 2, 3]);
+      File(cueFile).writeAsStringSync('FILE "Game (USA).bin" BINARY');
+      File(savFile).writeAsBytesSync([0, 0, 0]);
+
+      final summary = filter1G1R(
+        folderPath: tmpDir.path,
+        regionPriority: ['USA'],
+        dryRun: true,
+      );
+
+      expect(summary.totalFiles, equals(1));
+      expect(summary.keptCount, equals(1));
+      expect(summary.movedCount, equals(0));
+      expect(summary.results.first.filename, equals('Game (USA).bin'));
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('1G1R defaults to dryRun = true', () {
+    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_default_dry_test_');
+    try {
+      final usaFile = p.join(tmpDir.path, 'Game (USA).sfc');
+      final eurFile = p.join(tmpDir.path, 'Game (Europe).sfc');
+
+      File(usaFile).writeAsBytesSync([1, 2, 3]);
+      File(eurFile).writeAsBytesSync([1, 2, 3]);
+
+      final summary = filter1G1R(folderPath: tmpDir.path);
+
+      expect(summary.movedCount, equals(1));
+      expect(File(usaFile).existsSync(), isTrue);
+      expect(File(eurFile).existsSync(), isTrue);
+
+      final dupDir = Directory(p.join(tmpDir.path, '_duplicates'));
+      expect(dupDir.existsSync(), isFalse);
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
 }
