@@ -206,18 +206,52 @@ String removeHeader(String filepath, {String? outputDir, bool backup = true}) {
 
   final hdrSize = info['header_size'] as int;
 
-  final inRaf = file.openSync(mode: FileMode.read);
-  inRaf.setPositionSync(hdrSize);
+  final tempPath = '$cleanPath.tmp';
+  final tempFile = File(tempPath);
 
-  final outSink = File(cleanPath).openSync(mode: FileMode.write);
-  const chunkSize = 1024 * 1024;
-  while (true) {
-    final chunk = inRaf.readSync(chunkSize);
-    if (chunk.isEmpty) break;
-    outSink.writeFromSync(chunk);
+  RandomAccessFile? inRaf;
+  RandomAccessFile? outSink;
+
+  try {
+    inRaf = file.openSync(mode: FileMode.read);
+    inRaf.setPositionSync(hdrSize);
+
+    outSink = tempFile.openSync(mode: FileMode.write);
+    const chunkSize = 1024 * 1024;
+    while (true) {
+      final chunk = inRaf.readSync(chunkSize);
+      if (chunk.isEmpty) break;
+      outSink.writeFromSync(chunk);
+    }
+
+    inRaf.closeSync();
+    inRaf = null;
+
+    outSink.closeSync();
+    outSink = null;
+
+    try {
+      tempFile.renameSync(cleanPath);
+    } catch (_) {
+      tempFile.copySync(cleanPath);
+      if (tempFile.existsSync()) {
+        tempFile.deleteSync();
+      }
+    }
+  } catch (e) {
+    try {
+      inRaf?.closeSync();
+    } catch (_) {}
+    try {
+      outSink?.closeSync();
+    } catch (_) {}
+    if (tempFile.existsSync()) {
+      try {
+        tempFile.deleteSync();
+      } catch (_) {}
+    }
+    rethrow;
   }
-  inRaf.closeSync();
-  outSink.closeSync();
 
   return cleanPath;
 }

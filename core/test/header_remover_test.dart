@@ -45,4 +45,50 @@ void main() {
       tmpDir.deleteSync(recursive: true);
     }
   });
+
+  test('nes_in_place_header_removal_without_backup', () {
+    final tmpDir = Directory.systemTemp.createTempSync('hdr_inplace_test_');
+    try {
+      final romPath = p.join(tmpDir.path, 'game_inplace.nes');
+      final header = [
+        0x4E,
+        0x45,
+        0x53,
+        0x1A,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ];
+      final body = List<int>.generate(200, (i) => (i + 1) % 256);
+      File(romPath).writeAsBytesSync([...header, ...body]);
+
+      // Remove header in-place with backup: false (outputDir: null)
+      final cleanPath = removeHeader(romPath, outputDir: null, backup: false);
+      expect(cleanPath, equals(romPath));
+
+      final cleanFile = File(cleanPath);
+      expect(cleanFile.existsSync(), isTrue);
+
+      final cleanBytes = cleanFile.readAsBytesSync();
+      expect(cleanBytes.length, equals(200));
+      expect(cleanBytes.length, greaterThan(0));
+      expect(cleanBytes, equals(body));
+
+      // Ensure no backup file was created
+      expect(File('$romPath.bak').existsSync(), isFalse);
+      // Ensure no temp file remained
+      expect(File('$romPath.tmp').existsSync(), isFalse);
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
 }
