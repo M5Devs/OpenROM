@@ -38,12 +38,12 @@ ArgParser buildParser() {
     ..addOption('convert', help: 'single file to convert (alias for --input)')
     ..addMultiOption(
       'compress',
-      help: 'file(s) to compress into ZIP/7Z',
+      help: 'file(s) to compress into ZIP',
       splitCommas: false,
     )
     ..addMultiOption(
       'extract',
-      help: 'file(s) to extract from ZIP/7Z',
+      help: 'file(s) to extract from ZIP',
       splitCommas: false,
     )
     ..addMultiOption(
@@ -104,7 +104,7 @@ ArgParser buildParser() {
     ..addOption(
       'format',
       abbr: 'F',
-      help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP, 7Z',
+      help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP',
     )
     ..addOption('force-platform', help: 'override automatic platform detection')
     ..addOption(

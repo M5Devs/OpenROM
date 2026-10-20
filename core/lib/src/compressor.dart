@@ -76,6 +76,10 @@ class Compressor {
 
   bool compress(CompressionJob job) {
     _stopped = false;
+    if (job.format == '7z' || job.format == '.7z') {
+      throw UnsupportedError('7z format is currently not supported; use zip');
+    }
+
     if (job.format == 'extract') {
       return extract(job);
     }
@@ -127,6 +131,10 @@ class Compressor {
 
   bool extract(CompressionJob job) {
     _stopped = false;
+    if (p.extension(job.filepath).toLowerCase() == '.7z') {
+      throw UnsupportedError('7z format is currently not supported; use zip');
+    }
+
     if (!File(job.filepath).existsSync()) {
       job.status = 'Failed';
       job.error = 'Archive file not found: ${job.filepath}';
@@ -186,36 +194,46 @@ class Compressor {
   bool _extractZip(CompressionJob job) {
     _log('[UNZIP] Extracting ${p.basename(job.filepath)} → ${job.outputDir}');
 
-    final bytes = File(job.filepath).readAsBytesSync();
-    final archive = ZipDecoder().decodeBytes(bytes);
+    final inputStream = InputFileStream(job.filepath);
+    try {
+      final archive = ZipDecoder().decodeBuffer(inputStream);
 
-    final total = archive.length == 0 ? 1 : archive.length;
-    final basePath = p.normalize(p.canonicalize(job.outputDir));
+      final total = archive.length == 0 ? 1 : archive.length;
+      final basePath = p.normalize(p.canonicalize(job.outputDir));
 
-    for (int i = 0; i < archive.length; i++) {
-      if (_stopped) return false;
-      final file = archive[i];
-      final destPath = p.normalize(p.join(basePath, file.name));
+      for (int i = 0; i < archive.length; i++) {
+        if (_stopped) return false;
+        final file = archive[i];
+        final destPath = p.normalize(p.join(basePath, file.name));
 
-      // Zip-Slip security check
-      if (!destPath.startsWith(basePath + p.separator) &&
-          destPath != basePath) {
-        throw FormatException(
-          'Malicious archive entry (Zip Slip): ${file.name}',
-        );
+        // Zip-Slip security check
+        if (!destPath.startsWith(basePath + p.separator) &&
+            destPath != basePath) {
+          throw FormatException(
+            'Malicious archive entry (Zip Slip): ${file.name}',
+          );
+        }
+
+        if (file.isFile) {
+          final parentDir = Directory(p.dirname(destPath));
+          if (!parentDir.existsSync()) {
+            parentDir.createSync(recursive: true);
+          }
+          final outputStream = OutputFileStream(destPath);
+          try {
+            file.writeContent(outputStream);
+          } finally {
+            outputStream.close();
+          }
+        } else {
+          Directory(destPath).createSync(recursive: true);
+        }
+
+        final pct = ((i + 1) / total) * 100.0;
+        _updateProgress(job, pct);
       }
-
-      if (file.isFile) {
-        final data = file.content as List<int>;
-        File(destPath)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(data);
-      } else {
-        Directory(destPath).createSync(recursive: true);
-      }
-
-      final pct = ((i + 1) / total) * 100.0;
-      _updateProgress(job, pct);
+    } finally {
+      inputStream.close();
     }
 
     return true;
