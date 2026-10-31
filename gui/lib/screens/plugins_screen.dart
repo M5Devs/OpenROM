@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart';
 
 import '../controllers/plugin_controller.dart';
-import '../models/store_plugin.dart';
 import '../models/theme_config.dart';
 
 class PluginsScreen extends StatefulWidget {
@@ -606,7 +605,7 @@ class _PluginsScreenState extends State<PluginsScreen>
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () => _controller.pickAndInstallPlugin(),
+                  onPressed: () => _controller.installFromStore(storeItem),
                   icon: const Icon(Icons.download, size: 18),
                   label: const Text(
                     'Install',

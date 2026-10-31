@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:openrom_core/openrom_core.dart';
 
-import '../models/store_plugin.dart';
 import '../services/plugin_service.dart';
 
 class PluginController extends ChangeNotifier {
@@ -84,6 +83,33 @@ class PluginController extends ChangeNotifier {
             'Failed to install plugin. Check manifest and SHA256 integrity.';
         return false;
       }
+    } catch (e) {
+      _errorMessage = 'Error during plugin installation: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      _statusMessage = null;
+      notifyListeners();
+    }
+  }
+
+  /// Downloads and installs a plugin from the store registry, verifying the
+  /// artifact against its published SHA-256 before installation.
+  Future<bool> installFromStore(StorePlugin storePlugin) async {
+    _isLoading = true;
+    _statusMessage = 'Downloading ${storePlugin.name}...';
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final outcome = await _service.installFromStore(storePlugin);
+      if (outcome.success) {
+        _statusMessage = 'Plugin installed successfully!';
+        await loadInstalledPlugins();
+        return true;
+      }
+      _errorMessage = outcome.error ?? 'Failed to install plugin.';
+      return false;
     } catch (e) {
       _errorMessage = 'Error during plugin installation: $e';
       return false;
