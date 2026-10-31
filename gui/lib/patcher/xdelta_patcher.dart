@@ -4,6 +4,8 @@
 // Adapted for OpenROM by M5 Dev.
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 import '../utils/config.dart';
 import 'patcher.dart';
 
@@ -32,10 +34,10 @@ class XdeltaPatcher extends RomPatcher {
       throw PatchException('XDelta1 patches are not supported.');
     }
 
-    // Resolve xdelta3 binary next to the executable (same as chdman)
+    // Resolve xdelta3 via the standard bundled-tool logic (assets dir, then PATH)
     final binary = AppConfig.xdelta3Path;
 
-    if (!await File(binary).exists()) {
+    if (p.isAbsolute(binary) && !await File(binary).exists()) {
       throw PatchException(
         'xdelta3 binary not found. Please re-download the full ZIP.',
       );
