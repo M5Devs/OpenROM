@@ -3,22 +3,44 @@
 
 import 'plugin_manifest.dart';
 
+/// A plugin route that has been resolved against the current host.
+///
+/// Carries the owning manifest so the executor can read the structured
+/// `execution` descriptor (environments, args, exit codes) rather than a raw
+/// command string.
 class RegisteredConversion {
   final String pluginId;
   final String from;
   final String to;
-  final String commandTemplate;
-  final String? executableRelPath;
+
+  /// Whether this plugin route is allowed to shadow a built-in core route.
+  final bool override;
+
+  /// The full manifest that registered the route.
+  final PluginManifest manifest;
+
+  /// Relative path to the host-platform executable, or empty when the plugin
+  /// ships no build for this platform.
+  final String executableRelPath;
 
   RegisteredConversion({
     required this.pluginId,
     required this.from,
     required this.to,
-    required this.commandTemplate,
-    this.executableRelPath,
+    required this.manifest,
+    required this.executableRelPath,
+    this.override = false,
   });
+
+  String get key => '$from->$to';
 }
 
+/// In-memory registry of active plugins and the routes/formats they add.
+///
+/// Precedence is enforced by [resolveRoute]: a plugin route is only returned
+/// when the plugin explicitly opted in with `"override": true`, or when the
+/// core has no route for that pair. This prevents a plugin from silently
+/// hijacking a built-in conversion (e.g. `ISO -> CHD`).
 class PluginRegistry {
   static final PluginRegistry instance = PluginRegistry._internal();
 
@@ -26,15 +48,15 @@ class PluginRegistry {
 
   final List<PluginManifest> _activePlugins = [];
 
-  // Dynamic extension -> Format map
+  // Extension -> Format (e.g. '.cci' -> 'CCI')
   final Map<String, String> _pluginSupportedInput = {};
-  // Dynamic Format -> Platform display name map
+  // Format -> Platform display name
   final Map<String, String> _pluginPlatformMap = {};
-  // Dynamic Format -> Hex color badge map
+  // Format -> Hex color badge
   final Map<String, String> _pluginFormatColors = {};
-  // Dynamic Format -> List of Target Formats
+  // Format -> List of target formats
   final Map<String, List<String>> _pluginConversionMap = {};
-  // Dynamic "FROM->TO" -> RegisteredConversion details
+  // "FROM->TO" -> RegisteredConversion
   final Map<String, RegisteredConversion> _pluginConversions = {};
 
   void clear() {
@@ -46,12 +68,12 @@ class PluginRegistry {
     _pluginConversions.clear();
   }
 
+  /// Registers a validated manifest and all of its routes/formats.
   void registerPlugin(PluginManifest manifest) {
-    // Avoid duplicate registration
     _activePlugins.removeWhere((p) => p.id == manifest.id);
     _activePlugins.add(manifest);
 
-    final platformBin = manifest.currentPlatformBinary;
+    final platformBin = manifest.execution.currentEnvironment;
 
     for (final ext in manifest.extensions) {
       final cleanExt = ext.ext.startsWith('.')
@@ -64,9 +86,9 @@ class PluginRegistry {
       _pluginFormatColors[fmtUpper] = ext.color;
     }
 
-    for (final conv in manifest.conversions) {
-      final fromUpper = conv.from.toUpperCase();
-      final toUpper = conv.to.toUpperCase();
+    for (final route in manifest.routes) {
+      final fromUpper = route.from.toUpperCase();
+      final toUpper = route.to.toUpperCase();
       final routeKey = '$fromUpper->$toUpper';
 
       final targets = _pluginConversionMap.putIfAbsent(fromUpper, () => []);
@@ -78,8 +100,9 @@ class PluginRegistry {
         pluginId: manifest.id,
         from: fromUpper,
         to: toUpper,
-        commandTemplate: conv.command,
-        executableRelPath: platformBin?.executable,
+        override: route.override,
+        manifest: manifest,
+        executableRelPath: platformBin?.executable ?? '',
       );
     }
   }
@@ -104,10 +127,42 @@ class PluginRegistry {
   Map<String, List<String>> get conversionMap =>
       Map.unmodifiable(_pluginConversionMap);
 
+  /// Raw lookup with no precedence applied. Prefer [resolveRoute].
   RegisteredConversion? getConversion(String from, String to) {
     final key = '${from.toUpperCase()}->${to.toUpperCase()}';
     return _pluginConversions[key];
   }
 
+  /// Resolves a route honouring core precedence.
+  ///
+  /// [coreRoutes] is the set of `FROM->TO` keys the built-in engine handles.
+  /// Returns the plugin conversion when:
+  ///   * the plugin flagged the route `override: true`, or
+  ///   * the core does not handle the route.
+  /// Returns `null` otherwise (core wins), and when no plugin registered it.
+  RegisteredConversion? resolveRoute(
+    String from,
+    String to,
+    Set<String> coreRoutes,
+  ) {
+    final conv = getConversion(from, to);
+    if (conv == null) return null;
+    if (conv.override) return conv;
+    if (coreRoutes.contains(conv.key)) return null;
+    return conv;
+  }
+
+  /// True when a plugin has claimed `from`->`to` with an explicit override.
+  bool hasOverride(String from, String to) =>
+      getConversion(from, to)?.override ?? false;
+
   List<PluginManifest> get activePlugins => List.unmodifiable(_activePlugins);
+
+  /// The plugin that owns a given id, if installed.
+  PluginManifest? pluginById(String pluginId) {
+    for (final plugin in _activePlugins) {
+      if (plugin.id == pluginId) return plugin;
+    }
+    return null;
+  }
 }

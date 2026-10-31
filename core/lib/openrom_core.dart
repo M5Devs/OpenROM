@@ -23,3 +23,7 @@ export 'src/one_g_one_r.dart';
 export 'src/plugin/plugin_manifest.dart';
 export 'src/plugin/plugin_registry.dart';
 export 'src/plugin/plugin_manager.dart';
+export 'src/plugin/plugin_installer.dart';
+export 'src/plugin/plugin_executor.dart';
+export 'src/plugin/plugin_store.dart';
+export 'src/plugin/plugin_version.dart';

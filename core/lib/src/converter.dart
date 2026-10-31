@@ -49,6 +49,14 @@ const Map<String, String> chdDvdCompression = {
   'Max': 'zstd,zlib,huff,flac',
 };
 
+/// The set of `FROM->TO` routes the built-in engine handles natively. Used to
+/// enforce plugin route precedence: a plugin may not shadow any of these
+/// unless it declared `"override": true`.
+final Set<String> builtinRoutes = {
+  for (final entry in detector.builtinConversionMap.entries)
+    for (final to in entry.value) '${entry.key}->${to.toUpperCase()}',
+};
+
 List<String> cleanCommandArgs(List<String> args) {
   return args.map((arg) {
     var a = arg.trim();
@@ -208,8 +216,14 @@ class Converter {
     final fmt = info['format'] as String? ?? 'UNKNOWN';
     final tgt = job.targetFormat.toUpperCase();
 
-    // Check for plugin-registered conversion route first
-    final pluginConv = PluginRegistry.instance.getConversion(fmt, tgt);
+    // Plugin routes are resolved with core precedence: a plugin may only take
+    // over a built-in route when it explicitly set "override": true in its
+    // manifest. Otherwise the built-in converter wins.
+    final pluginConv = PluginRegistry.instance.resolveRoute(
+      fmt,
+      tgt,
+      builtinRoutes,
+    );
     if (pluginConv != null) {
       return await _pluginConvert(job, src, pluginConv);
     }
@@ -284,38 +298,41 @@ class Converter {
     String src,
     RegisteredConversion conv,
   ) async {
-    final pluginsDir = PluginManager.instance.pluginsDir;
-    final relBin = conv.executableRelPath ?? '';
-    final absBin =
-        relBin.isNotEmpty ? p.join(pluginsDir, conv.pluginId, relBin) : '';
-
-    if (relBin.isNotEmpty && !File(absBin).existsSync()) {
-      final err =
-          'Plugin executable not found for plugin "${conv.pluginId}": $absBin';
-      job.error = err;
-      _log('  ❌ $err');
-      return false;
-    }
-
     final outName =
         detector.getOutputName(p.basename(src), conv.to.toLowerCase());
     final outPath = p.join(job.outputDir, outName);
 
     final idx = src.lastIndexOf('.');
     final base = idx != -1 ? src.substring(0, idx) : src;
-    final cueName = '$base.cue';
+    final cuePath = '$base.cue';
 
-    final cmdLine = conv.commandTemplate
-        .replaceAll('{bin}', absBin)
-        .replaceAll('{in}', src)
-        .replaceAll('{out}', outPath)
-        .replaceAll('{cue}', cueName)
-        .replaceAll('{out_cue}', cueName);
-
-    final cmdArgs = splitCommandArgs(cmdLine);
     _log(
         '[PLUGIN ${conv.pluginId}] ${p.basename(src)} → ${p.basename(outPath)}');
-    return await _run(cmdArgs, job);
+
+    final result = await PluginManager.instance.executor.run(
+      conversion: conv,
+      inputPath: src,
+      outputPath: outPath,
+      outputDir: job.outputDir,
+      cuePath: File(cuePath).existsSync() ? cuePath : null,
+      onLog: _log,
+      onProgress: (pct) {
+        job.progress = pct;
+        onProgress?.call(job, pct);
+      },
+      parseProgress: _parseProgress,
+    );
+
+    if (result.success) {
+      job.progress = 100.0;
+      onProgress?.call(job, 100.0);
+      _log('  ✅ Command executed successfully');
+      return true;
+    }
+
+    job.error = result.error;
+    _log('  ❌ ${result.error}');
+    return false;
   }
 
   Future<bool> _toChd(

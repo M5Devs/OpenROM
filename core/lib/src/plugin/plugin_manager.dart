@@ -4,28 +4,43 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive/archive_io.dart';
-import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import '../logger.dart' as logger;
+import '../version_reader.dart';
+import 'plugin_executor.dart';
+import 'plugin_installer.dart';
 import 'plugin_manifest.dart';
 import 'plugin_registry.dart';
+import 'plugin_version.dart';
 
+/// High-level facade over discovery, installation, execution and the store.
+///
+/// This is the single entry point the GUI bridge talks to. It composes the
+/// focused collaborators ([PluginInstaller], [PluginExecutor]) and owns the
+/// in-memory [PluginRegistry].
 class PluginManager {
   static final PluginManager instance = PluginManager._internal();
 
   PluginManager._internal();
 
   String? _customPluginsDir;
+  SemVer? _coreVersionOverride;
 
+  /// Overrides the plugins directory (used by tests and the GUI settings).
   void setCustomPluginsDir(String? dirPath) {
     _customPluginsDir = dirPath;
   }
 
+  /// Overrides the detected core version (used by tests and by the GUI, which
+  /// already knows the app version).
+  void setCoreVersionOverride(SemVer? version) {
+    _coreVersionOverride = version;
+  }
+
   /// Resolves the user storage directory for plugins:
-  /// - Windows: %APPDATA%\OpenROM\plugins\
-  /// - Linux/macOS: ~/.local/share/openrom/plugins/ (fallback ~/.openrom/plugins/)
+  /// - Windows: `%APPDATA%\OpenROM\plugins\`
+  /// - Linux/macOS: `~/.local/share/openrom/plugins/` (fallback `~/.openrom/plugins/`)
   String get pluginsDir {
     if (_customPluginsDir != null && _customPluginsDir!.isNotEmpty) {
       return _customPluginsDir!;
@@ -59,204 +74,161 @@ class PluginManager {
     return p.join(Directory.current.path, 'plugins');
   }
 
+  /// The running core version, parsed from the bundled `VERSION` file (or the
+  /// explicit override set via [setCoreVersionOverride]).
+  SemVer get coreVersion =>
+      _coreVersionOverride ??
+      SemVer.tryParseLoose(readAppVersion()) ??
+      const SemVer(0, 0, 0);
+
   /// Scans the plugins directory, loads each subfolder containing `plugin.json`,
-  /// validates the schema, and registers active plugins in `PluginRegistry`.
+  /// validates the schema, and registers active plugins in [PluginRegistry].
+  ///
+  /// Rejects plugins whose `minCoreVersion` is newer than this build.
   Future<void> loadInstalledPlugins() async {
     PluginRegistry.instance.clear();
     final pDir = Directory(pluginsDir);
-    if (!pDir.existsSync()) {
-      return;
-    }
+    if (!pDir.existsSync()) return;
 
-    final entries = pDir.listSync();
+    final entries = pDir.listSync()..sort((a, b) => a.path.compareTo(b.path));
     for (final entry in entries) {
-      if (entry is Directory) {
-        final manifestFile = File(p.join(entry.path, 'plugin.json'));
-        if (manifestFile.existsSync()) {
-          try {
-            final jsonStr = manifestFile.readAsStringSync();
-            final jsonMap = jsonDecode(jsonStr) as Map<String, dynamic>;
-            final manifest = PluginManifest.fromJson(jsonMap);
-            final errors = manifest.validate();
-            if (errors.isEmpty) {
-              PluginRegistry.instance.registerPlugin(manifest);
-              logger.log(
-                  '[PLUGIN] Loaded plugin: ${manifest.name} (${manifest.id}) v${manifest.version}');
-            } else {
-              logger.log(
-                  '[PLUGIN WARN] Invalid plugin manifest in ${entry.path}: ${errors.join(", ")}');
-            }
-          } catch (e) {
-            logger.log(
-                '[PLUGIN ERROR] Failed to load plugin in ${entry.path}: $e');
-          }
+      if (entry is! Directory) continue;
+      final name = p.basename(entry.path);
+      // Skip our own scratch directories.
+      if (name.startsWith('.')) continue;
+
+      final manifestFile = File(p.join(entry.path, 'plugin.json'));
+      if (!manifestFile.existsSync()) continue;
+
+      try {
+        final jsonMap =
+            jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+        final manifest = PluginManifest.fromJson(jsonMap);
+
+        final errors = manifest.validate();
+        if (errors.isNotEmpty) {
+          logger.log('[PLUGIN WARN] Invalid manifest in ${entry.path}: '
+              '${errors.join(', ')}');
+          continue;
         }
+
+        final minCore = manifest.minCoreVersion;
+        if (minCore != null && coreVersion < minCore) {
+          logger.log('[PLUGIN WARN] Skipping ${manifest.id}: requires core '
+              '>= $minCore (this build is $coreVersion).');
+          continue;
+        }
+
+        PluginRegistry.instance.registerPlugin(manifest);
+        logger.log('[PLUGIN] Loaded plugin: ${manifest.name} '
+            '(${manifest.id}) v${manifest.version}');
+      } catch (e) {
+        logger.log('[PLUGIN ERROR] Failed to load plugin in ${entry.path}: $e');
       }
     }
   }
 
-  /// Installs a plugin from a `.orplug` archive file.
-  /// 1. Extracts the ZIP archive into `<plugins_dir>/<plugin_id>/`.
-  /// 2. Validates `plugin.json`.
-  /// 3. Verifies the SHA256 of the current platform binary (if included/specified).
-  /// 4. Sets executable permission on non-Windows platforms.
-  /// 5. Refuses installation if corrupted or manifest is invalid.
-  Future<bool> installPlugin(String orplugFilePath) async {
-    final file = File(orplugFilePath);
-    if (!file.existsSync()) {
-      logger
-          .log('[PLUGIN ERROR] Plugin archive file not found: $orplugFilePath');
-      return false;
-    }
+  /// Installs a `.orplug` archive from a local path.
+  ///
+  /// [expectedSha256] / [expectedId] / [expectedVersion] pin the archive to a
+  /// trusted registry entry; pass them when installing from the store.
+  Future<bool> installPlugin(
+    String orplugFilePath, {
+    String? expectedSha256,
+    String? expectedId,
+    SemVer? expectedVersion,
+  }) async {
+    final result = await installPluginDetailed(
+      orplugFilePath,
+      expectedSha256: expectedSha256,
+      expectedId: expectedId,
+      expectedVersion: expectedVersion,
+    );
+    return result.success;
+  }
 
-    final tempExtractDir =
-        Directory.systemTemp.createTempSync('openrom_plugin_extract_');
-    try {
-      final bytes = file.readAsBytesSync();
-      final archive = ZipDecoder().decodeBytes(bytes);
-
-      final basePath = p.normalize(p.canonicalize(tempExtractDir.path));
-
-      for (final archiveFile in archive) {
-        final destPath = p.normalize(p.join(basePath, archiveFile.name));
-        if (!destPath.startsWith(basePath + p.separator) &&
-            destPath != basePath) {
-          logger.log(
-              '[PLUGIN ERROR] Security error: Malicious zip entry in archive: ${archiveFile.name}');
-          return false;
-        }
-
-        if (archiveFile.isFile) {
-          final data = archiveFile.content as List<int>;
-          File(destPath)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(data);
-        } else {
-          Directory(destPath).createSync(recursive: true);
-        }
-      }
-
-      final manifestFile = File(p.join(tempExtractDir.path, 'plugin.json'));
-      if (!manifestFile.existsSync()) {
-        logger.log(
-            '[PLUGIN ERROR] Archive does not contain a valid "plugin.json" manifest.');
-        return false;
-      }
-
-      final jsonStr = manifestFile.readAsStringSync();
-      final jsonMap = jsonDecode(jsonStr) as Map<String, dynamic>;
-      final manifest = PluginManifest.fromJson(jsonMap);
-
-      final errors = manifest.validate();
-      if (errors.isNotEmpty) {
-        logger.log(
-            '[PLUGIN ERROR] Manifest validation failed: ${errors.join("; ")}');
-        return false;
-      }
-
-      // Verify SHA256 of current platform binary if specified
-      final platformBin = manifest.currentPlatformBinary;
-      if (platformBin != null && platformBin.executable.isNotEmpty) {
-        final binFile =
-            File(p.join(tempExtractDir.path, platformBin.executable));
-        if (!binFile.existsSync()) {
-          logger.log(
-              '[PLUGIN ERROR] Missing expected platform executable: ${platformBin.executable}');
-          return false;
-        }
-
-        if (platformBin.sha256.isNotEmpty) {
-          final binBytes = binFile.readAsBytesSync();
-          final computedDigest =
-              sha256.convert(binBytes).toString().toLowerCase();
-          final expectedDigest = platformBin.sha256.trim().toLowerCase();
-
-          if (computedDigest != expectedDigest) {
-            logger.log(
-              '[PLUGIN ERROR] SHA256 mismatch for ${platformBin.executable}. '
-              'Expected: $expectedDigest, Got: $computedDigest',
-            );
-            return false;
-          }
-        }
-
-        // Ensure executable permissions on Unix systems
-        if (!Platform.isWindows) {
-          try {
-            Process.runSync('chmod', ['+x', binFile.path]);
-          } catch (_) {}
-        }
-      }
-
-      final targetPluginDir = Directory(p.join(pluginsDir, manifest.id));
-      if (targetPluginDir.existsSync()) {
-        targetPluginDir.deleteSync(recursive: true);
-      }
-      targetPluginDir.createSync(recursive: true);
-
-      _copyDirectorySync(tempExtractDir, targetPluginDir);
-
-      // Reload installed plugins into registry
+  /// Like [installPlugin] but returns the full result (manifest or error),
+  /// for callers that want a precise failure reason (e.g. the store UI).
+  Future<PluginInstallResult> installPluginDetailed(
+    String orplugFilePath, {
+    String? expectedSha256,
+    String? expectedId,
+    SemVer? expectedVersion,
+  }) async {
+    Directory(pluginsDir).createSync(recursive: true);
+    final installer = PluginInstaller(
+      pluginsDir: pluginsDir,
+      coreVersion: coreVersion,
+      log: logger.log,
+    );
+    final result = await installer.installFromArchive(
+      orplugFilePath,
+      expectedSha256: expectedSha256,
+      expectedId: expectedId,
+      expectedVersion: expectedVersion,
+    );
+    if (result.success) {
       await loadInstalledPlugins();
-      logger.log(
-          '[PLUGIN] Successfully installed plugin "${manifest.name}" (${manifest.id})');
-      return true;
-    } catch (e) {
-      logger.log('[PLUGIN ERROR] Plugin installation failed: $e');
-      return false;
-    } finally {
-      try {
-        if (tempExtractDir.existsSync()) {
-          tempExtractDir.deleteSync(recursive: true);
-        }
-      } catch (_) {}
+    } else {
+      logger.log('[PLUGIN ERROR] Installation refused: ${result.error}');
     }
+    return result;
+  }
+
+  /// Installs a plugin from already-downloaded (and checksum-verified) bytes.
+  Future<PluginInstallResult> installPluginFromBytes(
+    List<int> bytes, {
+    String? expectedSha256,
+    String? expectedId,
+    SemVer? expectedVersion,
+  }) async {
+    Directory(pluginsDir).createSync(recursive: true);
+    final installer = PluginInstaller(
+      pluginsDir: pluginsDir,
+      coreVersion: coreVersion,
+      log: logger.log,
+    );
+    final result = await installer.installFromBytes(
+      bytes,
+      expectedSha256: expectedSha256,
+      expectedId: expectedId,
+      expectedVersion: expectedVersion,
+    );
+    if (result.success) {
+      await loadInstalledPlugins();
+    }
+    return result;
   }
 
   /// Safely removes the plugin directory and unregisters it.
   Future<bool> uninstallPlugin(String pluginId) async {
+    if (!kPluginIdPattern.hasMatch(pluginId)) {
+      logger.log('[PLUGIN ERROR] Refusing to uninstall unsafe id "$pluginId".');
+      return false;
+    }
+
     final targetPluginDir = Directory(p.join(pluginsDir, pluginId));
     if (!targetPluginDir.existsSync()) {
-      logger.log(
-          '[PLUGIN WARN] Cannot uninstall: Plugin directory not found for ID "$pluginId"');
+      logger.log('[PLUGIN WARN] Cannot uninstall: directory not found for '
+          'ID "$pluginId"');
       return false;
     }
 
     try {
       targetPluginDir.deleteSync(recursive: true);
       PluginRegistry.instance.unregisterPlugin(pluginId);
-      logger.log('[PLUGIN] Successfully uninstalled plugin "$pluginId"');
+      logger.log('[PLUGIN] Uninstalled plugin "$pluginId"');
       return true;
     } catch (e) {
-      logger.log('[PLUGIN ERROR] Failed to uninstall plugin "$pluginId": $e');
+      logger.log('[PLUGIN ERROR] Failed to uninstall "$pluginId": $e');
       return false;
     }
   }
 
-  /// Exposes currently installed/active plugins from registry.
+  /// A configured executor for the current plugins directory.
+  PluginExecutor get executor => PluginExecutor(pluginsDir: pluginsDir);
+
+  /// Currently installed/active plugins.
   List<PluginManifest> get installedPlugins =>
       PluginRegistry.instance.activePlugins;
-
-  void _copyDirectorySync(Directory source, Directory destination) {
-    for (final entity in source.listSync(recursive: false)) {
-      final name = p.basename(entity.path);
-      final destPath = p.join(destination.path, name);
-      if (entity is Directory) {
-        final newDir = Directory(destPath)..createSync(recursive: true);
-        _copyDirectorySync(entity, newDir);
-      } else if (entity is File) {
-        entity.copySync(destPath);
-        if (!Platform.isWindows) {
-          try {
-            final stat = entity.statSync();
-            final isExecutable = (stat.mode & 0x49) !=
-                0; // Check executable bits (S_IXUSR, S_IXGRP, S_IXOTH)
-            if (isExecutable) {
-              Process.runSync('chmod', ['+x', destPath]);
-            }
-          } catch (_) {}
-        }
-      }
-    }
-  }
 }

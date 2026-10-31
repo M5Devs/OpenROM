@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gui/controllers/plugin_controller.dart';
-import 'package:gui/models/store_plugin.dart';
 import 'package:gui/models/theme_config.dart';
 import 'package:gui/screens/plugins_screen.dart';
 import 'package:gui/services/plugin_service.dart';
@@ -20,20 +19,23 @@ class FakePluginService extends PluginService {
       StorePlugin(
         id: 'xgdtool_360',
         name: 'Xbox 360 XGDTool Engine',
-        version: '1.2.0',
-        author: 'M5 Dev',
         description: 'Xbox 360 compressed ISO conversion plugin.',
-        isVerified: true,
+        publisher: StorePublisher(id: 'm5dev', name: 'M5 Dev', verified: true),
         tags: ['.zar', '.cci'],
+        channels: {
+          'stable': StoreChannel(channel: 'stable', version: '1.2.0'),
+        },
       ),
       StorePlugin(
         id: 'ps2_gz_compressor',
         name: 'PS2 GZ ISO Tool',
-        version: '0.8.2',
-        author: 'RetroCommunity',
         description: 'PS2 ISO gzip tool.',
-        isVerified: false,
+        publisher: StorePublisher(
+            id: 'retrocommunity', name: 'RetroCommunity', verified: false),
         tags: ['.gz'],
+        channels: {
+          'stable': StoreChannel(channel: 'stable', version: '0.8.2'),
+        },
       ),
     ],
   });
@@ -67,12 +69,11 @@ void main() {
       final fakeManifest = PluginManifest(
         id: 'test_plugin',
         name: 'Test Plugin',
-        version: '1.0.0',
-        author: 'Test Author',
+        version: const SemVer(1, 0, 0),
+        minCoreVersion: const SemVer(3, 0, 0),
         description: 'A test plugin.',
-        minCoreVersion: '3.0.0',
-        binaries: {},
-        extensions: [
+        publisher: const PluginPublisher(id: 'tester', name: 'Test Author'),
+        extensions: const [
           PluginExtension(
             ext: '.test',
             format: 'TEST',
@@ -80,7 +81,6 @@ void main() {
             color: '#00e5ff',
           )
         ],
-        conversions: [],
       );
 
       final service = FakePluginService(installed: [fakeManifest]);
@@ -90,6 +90,7 @@ void main() {
 
       expect(controller.installedPlugins.length, 1);
       expect(controller.installedPlugins.first.name, 'Test Plugin');
+      expect(controller.installedPlugins.first.author, 'Test Author');
       expect(controller.isPluginInstalled('test_plugin'), isTrue);
       expect(controller.isPluginInstalled('non_existent'), isFalse);
     });

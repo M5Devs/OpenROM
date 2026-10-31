@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 
 import 'config.dart' as config;
+import 'plugin/plugin_manifest.dart';
 import 'plugin/plugin_registry.dart';
 
 const Map<String, String> builtinSupportedInput = {
@@ -185,12 +186,41 @@ Map<String, List<String>> get conversionMap {
 Map<String, String> get commandTemplates {
   final map = Map<String, String>.from(builtinCommandTemplates);
   for (final plugin in PluginRegistry.instance.activePlugins) {
-    for (final conv in plugin.conversions) {
-      final routeKey = '${conv.from.toUpperCase()}->${conv.to.toUpperCase()}';
-      map[routeKey] = conv.command;
+    for (final route in plugin.routes) {
+      final routeKey = '${route.from.toUpperCase()}->${route.to.toUpperCase()}';
+      // Preview-only rendering of the structured argument vector. This string
+      // is shown in the UI; it is never parsed or executed.
+      map[routeKey] = _renderArgsPreview(plugin.execution.args);
     }
   }
   return map;
+}
+
+/// Renders a plugin's structured argument vector into a human-readable
+/// placeholder string for command previews (display only).
+String _renderArgsPreview(List<PluginArg> args) {
+  String token(PluginArg arg) {
+    switch (arg.kind) {
+      case PluginArgKind.executable:
+        return '"{bin}"';
+      case PluginArgKind.input:
+        return '"{in}"';
+      case PluginArgKind.output:
+        return '"{out}"';
+      case PluginArgKind.outputDir:
+        return '"{outdir}"';
+      case PluginArgKind.cue:
+        return '"{cue}"';
+      case PluginArgKind.inputName:
+        return '"{in_name}"';
+      case PluginArgKind.outputName:
+        return '"{out_name}"';
+      case PluginArgKind.literal:
+        return arg.value.contains(' ') ? '"${arg.value}"' : arg.value;
+    }
+  }
+
+  return args.map(token).join(' ');
 }
 
 // Magic bytes
