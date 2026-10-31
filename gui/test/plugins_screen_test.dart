@@ -72,7 +72,7 @@ void main() {
         version: const SemVer(1, 0, 0),
         minCoreVersion: const SemVer(3, 0, 0),
         description: 'A test plugin.',
-        publisher: const StorePublisher(id: 'tester', name: 'Test Author'),
+        publisher: const PluginPublisher(id: 'tester', name: 'Test Author'),
         extensions: const [
           PluginExtension(
             ext: '.test',
