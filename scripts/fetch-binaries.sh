@@ -72,7 +72,8 @@ sha256_of() {
 }
 
 tmp_checksums="$(mktemp)"
-trap 'rm -f "$tmp_checksums"' EXIT
+tmp_entries="$(mktemp)"
+trap 'rm -f "$tmp_checksums" "$tmp_entries"' EXIT
 
 echo "Fetching checksums from $CHECKSUMS_URL"
 if ! download "$CHECKSUMS_URL" "$tmp_checksums"; then
@@ -86,18 +87,21 @@ mkdir -p "$DEST"
 arch_filter="[^/]+"
 [[ -n "$ARCH" ]] && arch_filter="$ARCH"
 
-mapfile -t entries < <(tr -d '\r' < "$tmp_checksums" \
+# Write matches to a temp file (avoids bash-4 `mapfile`, unavailable on macOS).
+tr -d '\r' < "$tmp_checksums" \
     | awk -v os="$OS" -v arch="$arch_filter" \
-      '$2 ~ "^"os"/"arch"/" { print $1" "$2 }')
+      '$2 ~ "^"os"/"arch"/" { print $1" "$2 }' > "$tmp_entries"
 
-if [[ ${#entries[@]} -eq 0 ]]; then
+count=$(wc -l < "$tmp_entries" | tr -d ' ')
+if [ "$count" -eq 0 ]; then
     echo "Error: no binaries found for $OS/${ARCH:-*}" >&2
     exit 2
 fi
 
-echo "Fetching ${#entries[@]} binaries for $OS/${ARCH:-*} into $DEST"
+echo "Fetching $count binaries for $OS/${ARCH:-*} into $DEST"
 
-for entry in "${entries[@]}"; do
+while IFS= read -r entry; do
+    [ -z "$entry" ] && continue
     expected_sha="${entry%% *}"
     rel_path="${entry##* }"
     filename="$(basename "$rel_path")"
@@ -124,6 +128,6 @@ for entry in "${entries[@]}"; do
         chmod +x "$out"
     fi
     echo "  ✓ $filename"
-done
+done < "$tmp_entries"
 
-echo "Done: ${#entries[@]} binaries verified in $DEST"
+echo "Done: $count binaries verified in $DEST"
