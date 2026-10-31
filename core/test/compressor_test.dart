@@ -25,7 +25,8 @@ void main() {
   });
 
   test('Compressor extracts zip archive using streams', () {
-    final tmpDir = Directory.systemTemp.createTempSync('compressor_extract_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('compressor_extract_test_');
     try {
       final sampleFile = p.join(tmpDir.path, 'test_game.iso');
       final testData = List<int>.generate(1024 * 100, (i) => i % 256);

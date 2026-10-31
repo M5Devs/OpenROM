@@ -52,7 +52,6 @@ class OneGOneRSummary {
       };
 }
 
-
 const Set<String> _companionExtensions = {
   '.cue',
   '.m3u',
@@ -188,7 +187,6 @@ int _getRevisionLevel(String filename) {
 
   return 0;
 }
-
 
 int _getPreReleasePenalty(String filename) {
   final nameLower = filename.toLowerCase();

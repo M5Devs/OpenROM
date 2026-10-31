@@ -140,7 +140,8 @@ void main() {
   });
 
   test('1G1R preserves multi-disc sets as distinct clusters', () {
-    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_disc_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('one_g_one_r_disc_test_');
     try {
       final disc1 = p.join(tmpDir.path, 'Final Fantasy VII (USA) (Disc 1).chd');
       final disc2 = p.join(tmpDir.path, 'Final Fantasy VII (USA) (Disc 2).chd');
@@ -163,7 +164,8 @@ void main() {
   });
 
   test('1G1R prefers final release over pre-release builds (Beta/Proto)', () {
-    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_beta_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('one_g_one_r_beta_test_');
     try {
       final finalFile = p.join(tmpDir.path, 'Game (USA).sfc');
       final betaFile = p.join(tmpDir.path, 'Game (USA) (Beta).sfc');
@@ -188,7 +190,8 @@ void main() {
   });
 
   test('1G1R ignores companion files (.cue, .m3u, .sav)', () {
-    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_companion_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('one_g_one_r_companion_test_');
     try {
       final romFile = p.join(tmpDir.path, 'Game (USA).bin');
       final cueFile = p.join(tmpDir.path, 'Game (USA).cue');
@@ -214,7 +217,8 @@ void main() {
   });
 
   test('1G1R defaults to dryRun = true', () {
-    final tmpDir = Directory.systemTemp.createTempSync('one_g_one_r_default_dry_test_');
+    final tmpDir =
+        Directory.systemTemp.createTempSync('one_g_one_r_default_dry_test_');
     try {
       final usaFile = p.join(tmpDir.path, 'Game (USA).sfc');
       final eurFile = p.join(tmpDir.path, 'Game (Europe).sfc');
