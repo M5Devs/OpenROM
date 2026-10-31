@@ -209,12 +209,8 @@ Future<int> main(List<String> args) async {
   }
 
   if (results['version'] == true) {
-    String ver = 'v3.0.0';
-    try {
-      final vf = File(p.join(Directory.current.path, 'VERSION'));
-      if (vf.existsSync()) ver = 'v${vf.readAsStringSync().trim()}';
-    } catch (_) {}
-    print('OpenROM $ver');
+    final version = readAppVersion();
+    print(version == 'unknown' ? 'OpenROM' : 'OpenROM v$version');
     return 0;
   }
 

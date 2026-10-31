@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 import '../utils/config.dart';
 import 'patcher.dart';
 
@@ -19,7 +21,7 @@ class XdeltaBuilder {
   Future<void> build() async {
     final binary = AppConfig.xdelta3Path;
 
-    if (!await File(binary).exists()) {
+    if (p.isAbsolute(binary) && !await File(binary).exists()) {
       throw PatchException(
         'xdelta3 binary not found. Please re-download the full ZIP.',
       );

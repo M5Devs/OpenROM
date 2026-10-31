@@ -122,7 +122,10 @@ String getDefaultBundledPath(String tool) {
   String bundled;
   if (Platform.isWindows) {
     final fname = winNames[tool] ?? '$tool.exe';
-    bundled = p.join(baseDir, 'assets', 'windows', fname);
+    bundled = p.join(baseDir, 'assets', 'windows', archFolder, fname);
+    if (!File(bundled).existsSync()) {
+      bundled = p.join(baseDir, 'assets', 'windows', fname);
+    }
   } else if (Platform.isMacOS) {
     final fname = unixNames[tool] ?? tool;
     bundled = p.join(baseDir, 'assets', 'macos', archFolder, fname);

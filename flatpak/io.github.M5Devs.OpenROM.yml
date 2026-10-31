@@ -26,6 +26,9 @@ modules:
 
       # Install the Dart core backend.
       - install -Dm755 flatpak-build/openrom-core /app/bin/openrom-core
+      - install -Dm644 VERSION /app/bin/VERSION
+      # Also place VERSION next to the GUI binary so the app can read its version.
+      - install -Dm644 VERSION /app/VERSION
 
       # Install conversion and patching tools.
       - install -Dm755 bins/linux/x86_64/chdman /app/bin/chdman
