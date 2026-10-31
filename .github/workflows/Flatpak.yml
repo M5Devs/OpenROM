@@ -63,10 +63,9 @@ jobs:
           sudo flatpak --system info org.freedesktop.Sdk//24.08
           sudo flatpak --system info org.freedesktop.Platform//24.08
 
-      - name: Clone OpenROM binaries repo
+      - name: Fetch binaries from SourceForge
         run: |
-          git clone --depth 1 https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
+          bash scripts/fetch-binaries.sh --os linux --arch x86_64 --dest assets/linux/x86_64
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -113,12 +112,10 @@ jobs:
             nodtool \
             xdelta3 \
             saturn-patcher; do
-            test -x "bins/linux/x86_64/$tool"
+            test -x "assets/linux/x86_64/$tool"
           done
 
-          test -x bins/linux/x86_64/nkit/nkit
-          test -x bins/linux/x86_64/nkit/nkds
-          test -d bins/linux/x86_64/nkit/defaults
+          test -x assets/linux/x86_64/nkit
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6

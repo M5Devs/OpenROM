@@ -91,6 +91,11 @@
   </screenshots>
 
   <releases>
+    <release version="3.9.5" date="2026-10-31">
+      <description>
+        <p>Hardened and rewrote the .orplug plugin subsystem with signature and manifest validation. Fixed xdelta3 resolution on Windows and made the application version fully dynamic. Split Linux releases into standalone AppImages and separate core-only CLI archives.</p>
+      </description>
+    </release>
     <release version="2.7.0" date="2026-09-13">
       <description>
         <p>Added Sega Saturn, Sega CD, PC-Engine CD, and Neo Geo CD platform detection. Expanded ROM toolkit scope with patching, compression, header removal, and M3U generation fully documented.</p>

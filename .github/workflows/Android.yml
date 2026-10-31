@@ -11,22 +11,24 @@ permissions:
 jobs:
   build-android:
     name: Build Android APK (Universal)
+    # Disabled for the v3.9.5 release: only build when dispatched manually, or
+    # when the repository variable ENABLE_ANDROID_RELEASE is set to 'true'.
+    if: github.event_name == 'workflow_dispatch' || vars.ENABLE_ANDROID_RELEASE == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Fetch binaries from OpenROM-bins
+      - name: Fetch binaries from SourceForge
         run: |
-          git clone https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
+          bash scripts/fetch-binaries.sh --os android --dest assets/android
 
       - name: Prepare jniLibs
         run: |
           for abi in arm64-v8a x86_64; do
             mkdir -p "gui/android/app/src/main/jniLibs/$abi"
-            if [ -d "bins/android/$abi" ]; then
-              for f in "bins/android/$abi"/*; do
+            if [ -d "assets/android/$abi" ]; then
+              for f in "assets/android/$abi"/*; do
                 if [ -f "$f" ]; then
                   b=$(basename "$f")
                   cp "$f" "gui/android/app/src/main/jniLibs/$abi/lib${b}.so"

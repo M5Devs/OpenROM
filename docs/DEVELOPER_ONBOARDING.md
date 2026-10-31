@@ -4,8 +4,8 @@
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
-Version at time of writing: **3.9.0** (`VERSION`, `core/pubspec.yaml`,
-`gui/pubspec.yaml`).
+Version at time of writing: **3.9.5** (`VERSION`, `core/pubspec.yaml`,
+`gui/pubspec.yaml` = `3.9.5+1`).
 
 ---
 
@@ -23,7 +23,7 @@ OpenROM/
 ├── crowdin.yml                 # localization sync config
 │
 ├── core/                       # ── BACKEND (pure Dart library + CLI) ──
-│   ├── bin/openrom.dart        # CLI entry point (947 lines) — arg parsing + JSON emitter
+│   ├── bin/openrom.dart        # CLI entry point — arg parsing + JSON emitter
 │   ├── lib/openrom_core.dart   # public library barrel (exports all src/*)
 │   └── lib/src/
 │       ├── config.dart         # ★ tool-path resolution, config dir, config.json
@@ -72,15 +72,16 @@ OpenROM/
 │
 ├── flatpak/                    # Flatpak manifest, .desktop, metainfo, wrapper
 ├── themes/                     # theme JSON (mirror of gui/themes)
+├── scripts/fetch-binaries.sh   # ★ download + SHA-256 verify native tools
 ├── scripts/update_website.py   # pushes docs/ to SourceForge
 ├── docs/                       # GitHub Pages site (index.html)
 └── .github/workflows/          # CI/CD (see §4)
 ```
 
 > **Third-party binaries are never committed.** `.gitignore` excludes
-> `assets/linux/`, `assets/macos/`, `assets/windows/`. They are cloned from the
-> companion repo **`github.com/M5Devs/OpenROM-bins`** and SHA-256 verified at build
-> time (see §4).
+> `assets/linux/`, `assets/macos/`, `assets/windows/`. They are downloaded from
+> the **OpenROM-bins SourceForge project** and SHA-256 verified at build time by
+> `scripts/fetch-binaries.sh` (see §4.1).
 
 ---
 
@@ -133,9 +134,14 @@ not to confuse them:
 static class exposing: `detectFile`, `runConversion`, `runCompress`, `runExtract`,
 `generateM3u`, `getToolPath`, `runCore`, `getVersion`, `coreExists`.
 
+**Process discovery.** `getCoreExecutablePath()` resolves the backend binary, in
+order: cached path → `<exeDir>/openrom-core[.exe]` → bare `openrom-core` on `PATH`
+→ legacy `main.py` via `python`/`python3` (dev fallback). The result is cached in
+`_cachedCorePath`.
+
 **Protocol: JSON-lines over stdout.** The GUI starts the process and reads stdout
-line-by-line (`splitStreamLines`), decoding each line as one JSON object with a
-`type` field:
+line-by-line (`splitStreamLines`, which splits on `\r\n`/`\n` and keeps a partial
+tail), decoding each line as one JSON object with a `type` field:
 
 | `type` | Payload | GUI action |
 |--------|---------|------------|
@@ -224,7 +230,7 @@ Trace: *user drops `game.bin` in the GUI and clicks Convert to CHD.*
           RVZ   → _toRvz()      → nodtool convert
           ECM   → _toEcm()/_fromEcm() → ecm / unecm
           XISO  → _toXiso()/_xisoToFiles() → extract-xiso
-          WUD…  → _nkitConvert() → nkit convert
+          WUD…  → _nkitConvert() → nkit convert -i … -o …
           CCI/ZAR → _xboxConvert() → XGDTool --xiso
           (BIN→CHD auto-generates a temp .cue via _autoCue())
 
@@ -286,11 +292,11 @@ getToolPath(tool)
 <baseDir>/assets/
    ├── windows/                     chdman.exe, ecm.exe, unecm.exe, maxcso.exe,
    │                                extract-xiso.exe, nodtool.exe, xdelta3.exe,
-   │                                nkit/nkit.exe, saturn-patcher.exe, XGDTool.exe
+   │                                nkit.exe, saturn-patcher.exe, XGDTool.exe
    ├── linux/
    │    ├── x86_64/                 chdman, ecm, unecm, maxcso, extract-xiso,
-   │    │                           nodtool, xdelta3, saturn-patcher, nkit/nkit
-   │    └── arm64/                  (light tools only: xdelta3, ecm, unecm + patchers)
+   │    │                           nodtool, xdelta3, saturn-patcher, XGDTool, nkit
+   │    └── arm64/                  (light tools only: xdelta3, ecm, unecm, saturn-patcher)
    └── macos/
         ├── arm64/  ┐
         └── x86_64/ ┘              (no XGDTool build on macOS)
@@ -304,6 +310,16 @@ getToolPath(tool)
 
 Architecture folder (`x86_64` vs `arm64`) is inferred from
 `'${Platform.version} ${Platform.operatingSystem}'` containing `aarch64`/`arm64`.
+
+Two naming special-cases:
+- **`nkit` is the only tool with a distinct bundled layout.** Windows looks for
+  `assets/windows/nkit.exe`; Linux/macOS look for
+  `assets/<os>/<arch>/nkit/nkit` first, then fall back to the flat
+  `assets/<os>/<arch>/nkit`. The published SourceForge layout is a **single
+  file** (`…/nkit`), which satisfies the flat fallback.
+- **Windows uses `<tool>.exe`, Linux/macOS use the bare name**, and `xgdtool`
+  maps to `XGDTool[.exe]` (capitalised). See the `winNames`/`unixNames` maps in
+  `config.dart`.
 
 `ensureExecutable()` runs `chmod +x` on Linux/macOS/Android paths.
 
@@ -326,6 +342,16 @@ Config directory (`getDirectoryConfig()`, also used by logger and DAT store):
 - **Logs:** `<configDir>/logs/` (`logger.dart`).
 - **DATs:** `<configDir>/dats/` (`rom_renamer.dart`).
 
+**Environment variables used by the build/fetch tooling** (not by the app at
+runtime):
+
+| Variable | Where | Meaning |
+|----------|-------|---------|
+| `OPENROM_BINS_BASE_URL` | `scripts/fetch-binaries.sh` | Override the SourceForge base URL (default `https://downloads.sourceforge.net/project/openrom-binaries`) |
+| `OPENROM_BINS_CHECKSUMS_URL` | `scripts/fetch-binaries.sh` | Override the checksums URL (default the raw `OpenROM-bins` GitHub `checksums.sha256`) |
+| `SF_USER`, `SF_SSH_PRIVATE_KEY` / `SF_SSH_KEY` | OpenROM-bins publish + `deploy_website_sf.yml` | SourceForge SSH upload credentials |
+| `GITHUB_TOKEN` | release workflows | Publishing the GitHub Release |
+
 ### 2.4 Tool → purpose map
 
 | Tool | Used for | Handler in `converter.dart` |
@@ -335,7 +361,7 @@ Config directory (`getDirectoryConfig()`, also used by logger and DAT store):
 | `ecm` / `unecm` | ISO/BIN ⇄ ECM | `_toEcm`, `_fromEcm` |
 | `extract-xiso` | XISO pack/unpack | `_toXiso`, `_xisoToFiles` |
 | `nodtool` | RVZ/WIA/WBFS/GCZ ⇄ ISO | `_toRvz`, `_fromNodtool` |
-| `nkit` (+ `nkds`, `defaults/`) | WUD/WUX/WUA/NKIT ⇄ ISO | `_nkitConvert` |
+| `nkit` | WUD/WUX/WUA/NKIT ⇄ ISO | `_nkitConvert` |
 | `XGDTool` | CCI/ZAR ⇄ ISO (not on macOS) | `_xboxConvert` |
 | `xdelta3` | xdelta/VCDIFF patches (GUI-side) | `gui/lib/patcher/xdelta_patcher.dart` |
 | `saturn-patcher` | Saturn SSP patches | SSP path |
@@ -387,11 +413,20 @@ All screens live in an `IndexedStack` (kept alive, not rebuilt).
 | 3 | Dreamcast | `dreamcast_screen.dart` | 3 tabs — DCP Apply, IP.BIN Editor, GDI Info |
 | 4 | Plugins | `plugins_screen.dart` | 2 tabs — installed plugins, plugin store; drag-drop `.orplug` install |
 | 5 | Settings | `settings_screen.dart` | Format/compression/verify/output/audio-codec (pushed up via `onSettingsChanged`), theme, locale, update check, online features |
-| 6 | About | `about_screen.dart` | version (from `CoreBridge.getVersion()`), links |
+| 6 | About | `about_screen.dart` | version (from `AppVersion.current` / `CoreBridge.getVersion()`), links |
 | 7 | Theme Editor | `theme_editor_screen.dart` | edit/save custom theme JSON (HSV picker) |
 
 Supporting widgets: `Sidebar`, `TopBar`, `TerminalPanel`, `RomCard`, `DropZone`,
 `ErrorDialog`.
+
+### 3.3 Dynamic application version
+
+`gui/lib/utils/app_version.dart` resolves the displayed version with this
+priority: `--dart-define=APP_VERSION` → `readAppVersion()` (reads `VERSION` next
+to the executable, or the repo root in dev) → the `AppVersion.fallback`
+constant. Release builds ship `VERSION` next to the binary, so the runtime value
+tracks the release; keep `AppVersion.fallback` in sync with `VERSION` so dev
+builds and `gui/test/app_version_test.dart` stay correct.
 
 ---
 
@@ -403,25 +438,30 @@ Workflows live in `.github/workflows/`:
 |----------|---------|---------|
 | `Release.yml` | `workflow_dispatch` (version input) | Build + publish all desktop release artifacts |
 | `Flatpak.yml` | `workflow_dispatch` (version input) | Build a `.flatpak` bundle and attach to the release |
-| `Android.yml` | `workflow_dispatch`, `release: published` | Build the universal Android APK artifact |
+| `Android.yml` | `workflow_dispatch`, `release: published` | Build the universal Android APK (gated off releases unless `ENABLE_ANDROID_RELEASE` repo var is `true`) |
 | `quality.yml` | PR/push to `main`, manual | Version consistency + format/analyze/test for `gui` and `core` |
 | `auto_fix.yml` | manual | `dart format` both packages and auto-commit |
 | `pages.yml` | push to `docs/**` | Deploy the docs site to GitHub Pages |
 | `deploy_website_sf.yml` | `release: published`, manual | Push the website to SourceForge |
 | `daily_code_review.yml` | cron `0 6 * * *` | Static analysis / health check, files issues |
 
-### 4.1 The shared binary-fetch step
+### 4.1 The shared binary-fetch step (`scripts/fetch-binaries.sh`)
 
-Every packaging job begins by cloning the companion **binary** repository and
-verifying it:
+Every packaging job downloads the native tools from **SourceForge** and verifies
+each file against the published `checksums.sha256`:
 
 ```bash
-git clone https://github.com/M5Devs/OpenROM-bins.git bins
-(cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)   # \r-strip for CRLF
+bash scripts/fetch-binaries.sh --os <linux|macos|windows> [--arch <x86_64|arm64>] --dest <dir>
 ```
 
-Then the platform folder is copied into `assets/<os>/…` (Windows/`x86_64` for
-Linux/macOS). This is why `assets/linux|macos|windows/` are gitignored.
+The script:
+1. downloads the checksum list (raw `OpenROM-bins` GitHub `checksums.sha256`),
+2. selects every `"<os>/<arch>/<file>"` entry (arch omitted → all arches),
+3. downloads each from `https://downloads.sourceforge.net/project/openrom-binaries/<os>/<arch>/<file>`,
+4. verifies SHA-256 (and `chmod +x` on Unix), aborting on any mismatch.
+
+Exit codes: `0` success, `1` bad args, `2` no match, `3` download failure,
+`4` checksum mismatch. This is why `assets/linux|macos|windows/` are gitignored.
 
 ### 4.2 `Release.yml` job graph
 
@@ -443,35 +483,42 @@ build-windows   build-linux   build-linux-arm64  build-macos (matrix:   │
 ```
 
 **Common build recipe in every job:**
-1. checkout → fetch `OpenROM-bins` + verify checksums
-2. copy binaries into `assets/<os>/`
-3. write `VERSION`, patch `gui/pubspec.yaml` version to `<version>+1`
-4. `dart-lang/setup-dart` → `cd core && dart pub get && dart compile exe bin/openrom.dart`
+1. checkout → `scripts/fetch-binaries.sh … --dest assets/<os>/[<arch>]`
+2. write `VERSION`, patch `gui/pubspec.yaml` version to `<version>+1`
+3. `dart-lang/setup-dart` → `cd core && dart pub get && dart compile exe bin/openrom.dart`
    → `dist/openrom-core[.exe]`  ← **the backend is a compiled native Dart exe**
-5. `subosito/flutter-action` → `cd gui && flutter pub get && flutter build <target>`
-6. bundle core + `themes/` + `assets/` next to the GUI
+4. `subosito/flutter-action` → `cd gui && flutter pub get && flutter build <target>`
+5. bundle core + `VERSION` + `themes/` + `assets/` next to the GUI
 
 **Per-platform packaging:**
 
-| Platform | Runner | GUI build | Core | Packaging | Artifact |
-|----------|--------|-----------|------|-----------|----------|
-| **Windows** | `windows-2022` | `flutter build windows` | `openrom-core.exe` | Copy core/themes/assets into `…/Release`, write `README.txt`; `Compress-Archive` → **ZIP**; install NSIS + EnVar plugin + ImageMagick, generate BMP/ICO, `makensis openrom.nsi` → **Setup.exe** | `OpenROM_Windows`, `OpenROM_Windows_Installer` |
-| **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → **AppImage**; also a **ZIP** containing AppImage + core + assets | `OpenROM_Linux` |
-| **Linux ARM64** | `ubuntu-24.04-arm` | `flutter build linux` (manual Flutter clone + `precache --linux`) | `openrom-core` | `ecm`/`unecm` **compiled from source** (`kidoz/ecm`), `xdelta3` from apt; ZIP with core + assets (**light tools only** — heavy conversions need x86_64) | `OpenROM_Linux_arm64` |
-| **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG**, then ZIP | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
+| Platform | Runner | GUI build | Core | Packaging | Artifact(s) |
+|----------|--------|-----------|------|-----------|-------------|
+| **Windows** | `windows-2022` | `flutter build windows` | `openrom-core.exe` | Copy core/VERSION/themes/assets into `…/Release`, write `README.txt`; `Compress-Archive` → **ZIP**; install NSIS + EnVar plugin + ImageMagick, generate BMP/ICO, `makensis openrom.nsi` → **Setup.exe** | `OpenROM_Windows`, `OpenROM_Windows_Installer` |
+| **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → standalone **AppImage**; plus a **Core CLI ZIP** (`openrom-core` + light tools: xdelta3, ecm, unecm, saturn-patcher) | `OpenROM_Linux` → `…_Linux_x86_64.AppImage`, `OpenROM-Core-…_Linux_x86_64.zip` |
+| **Linux ARM64** | `ubuntu-24.04-arm` | `flutter build linux` (manual Flutter clone + `precache --linux`) | `openrom-core` | Same as x86_64: standalone **AppImage** + **Core CLI ZIP** (light tools only — heavy conversions need x86_64) | `OpenROM_Linux_arm64` → `…_Linux_arm64.AppImage`, `OpenROM-Core-…_Linux_arm64.zip` |
+| **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/VERSION/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG**, then ZIP | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
 | **Android** (`Android.yml`) | `ubuntu-latest` | `flutter build apk --release` | core **compiled into the APK** via jniLibs (below) | **APK** | `OpenROM-Android-Universal` |
 | **Flatpak** (`Flatpak.yml`) | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Install bundle + core + tools into `/app`, `flatpak-builder` → **.flatpak** | attached to release |
 
 The final `release` job downloads all artifacts and publishes them to a GitHub
 Release tagged `v<version>` with the download table in the body.
 
+> **Linux split (Issue #174).** Linux releases no longer ship a redundant ZIP
+> that duplicates the AppImage. Each arch publishes two clean artifacts: the
+> **AppImage** (GUI + bundled engine, run directly) and a separate
+> **`OpenROM-Core-<version>_Linux_<arch>.zip`** (headless CLI + light tools) for
+> scripting. See the release body's "Linux notes".
+
 ### 4.3 Android specifics
 
-`Android.yml` prepares native tool libraries as **jniLibs**:
+`Android.yml` fetches the Android tool libraries from SourceForge and stages them
+as **jniLibs**:
 
 ```bash
+bash scripts/fetch-binaries.sh --os android --dest assets/android
 for abi in arm64-v8a x86_64; do
-  cp bins/android/$abi/<tool>  gui/android/app/src/main/jniLibs/$abi/lib<tool>.so
+  cp assets/android/$abi/<tool>  gui/android/app/src/main/jniLibs/$abi/lib<tool>.so
 done
 ```
 
@@ -481,6 +528,11 @@ At runtime, `main.dart` queries the native library directory over a
 `config.getToolPath()` returns `lib<tool>.so` inside that dir — this is the only
 platform where tools are shared libraries rather than executables.
 
+Android is **omitted from the v3.9.5 release**. The `build-android` job is guarded
+so the `release: published` trigger no longer fires it; re-enable by dispatching
+`Android.yml` manually or setting the repository variable
+`ENABLE_ANDROID_RELEASE=true`.
+
 ### 4.4 `quality.yml` gate
 
 On every PR/push to `main` it:
@@ -489,13 +541,21 @@ On every PR/push to `main` it:
 - `dart format --set-exit-if-changed`, `flutter analyze`, `flutter test` (gui),
 - `dart format`, `dart analyze`, `dart test` (core).
 
+> **Formatter gotcha.** The formatter style (short vs. tall) is decided by the
+> package *language version*, which comes from `.dart_tool/package_config.json`.
+> A package with no resolved `.dart_tool` is formatted in the **current** style.
+> Format a file with the package that owns it (`cd gui && dart format …`) so CI
+> agrees.
+
 ---
 
 ## 5. Quick reference for a new developer
 
 - **Run the GUI (dev):** `cd core && dart pub get && dart compile exe bin/openrom.dart -o ../openrom-core`, then `cd gui && flutter pub get && flutter run`. Place `openrom-core` next to the built `gui` binary (or on `PATH`).
 - **CLI only:** `dart run core/bin/openrom.dart --detect game.iso` / `--input game.iso --format CHD` / `--list-formats`.
+- **Fetch tools locally:** `bash scripts/fetch-binaries.sh --os linux --arch x86_64 --dest assets/linux/x86_64`.
 - **The contract between layers is the JSON-lines protocol in §1.2.** Change it in `core/bin/openrom.dart` (emit) and `CoreBridge` (consume) together.
 - **All tool discovery is `core/lib/src/config.dart`.** Change it there; both the CLI and the GUI pick it up.
 - **Adding a conversion route:** add the extension/format to `detector.dart` maps, add a handler in `converter.dart:_dispatch`, and a tool to `config.dart` `defaultConfig`. Plugins can add routes without touching core (`plugin_registry.dart`).
 - **Adding a screen:** create `gui/lib/screens/<x>_screen.dart`, add it to the `screens` list and nav items in `app.dart` (+ `sidebar.dart` icons, `_mobileScreenIndices` if mobile-visible).
+- **Releasing:** bump `VERSION` + both `pubspec.yaml` versions (and `AppVersion.fallback`), commit to `main`, then dispatch `Release.yml` and `Flatpak.yml` with the version input.

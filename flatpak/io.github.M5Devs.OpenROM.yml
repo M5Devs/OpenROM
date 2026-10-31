@@ -31,22 +31,17 @@ modules:
       - install -Dm644 VERSION /app/VERSION
 
       # Install conversion and patching tools.
-      - install -Dm755 bins/linux/x86_64/chdman /app/bin/chdman
-      - install -Dm755 bins/linux/x86_64/ecm /app/bin/ecm
-      - install -Dm755 bins/linux/x86_64/unecm /app/bin/unecm
-      - install -Dm755 bins/linux/x86_64/maxcso /app/bin/maxcso
-      - install -Dm755 bins/linux/x86_64/extract-xiso /app/bin/extract-xiso
-      - install -Dm755 bins/linux/x86_64/nodtool /app/bin/nodtool
-      - install -Dm755 bins/linux/x86_64/xdelta3 /app/bin/xdelta3
-      - install -Dm755 bins/linux/x86_64/saturn-patcher /app/bin/saturn-patcher
+      - install -Dm755 assets/linux/x86_64/chdman /app/bin/chdman
+      - install -Dm755 assets/linux/x86_64/ecm /app/bin/ecm
+      - install -Dm755 assets/linux/x86_64/unecm /app/bin/unecm
+      - install -Dm755 assets/linux/x86_64/maxcso /app/bin/maxcso
+      - install -Dm755 assets/linux/x86_64/extract-xiso /app/bin/extract-xiso
+      - install -Dm755 assets/linux/x86_64/nodtool /app/bin/nodtool
+      - install -Dm755 assets/linux/x86_64/xdelta3 /app/bin/xdelta3
+      - install -Dm755 assets/linux/x86_64/saturn-patcher /app/bin/saturn-patcher
 
-      # NKit requires additional files from its directory.
-      - mkdir -p /app/lib/openrom/nkit
-      - cp -a bins/linux/x86_64/nkit/. /app/lib/openrom/nkit/
-      - chmod 755 /app/lib/openrom/nkit/nkit
-      - chmod 755 /app/lib/openrom/nkit/nkds
-      - ln -sf /app/lib/openrom/nkit/nkit /app/bin/nkit
-      - ln -sf /app/lib/openrom/nkit/nkds /app/bin/nkds
+      # NKit ships as a single self-contained binary.
+      - install -Dm755 assets/linux/x86_64/nkit /app/bin/nkit
 
       # Install desktop integration files.
       - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop /app/share/applications/io.github.M5Devs.OpenROM.desktop

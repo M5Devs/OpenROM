@@ -19,16 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fetch binaries from OpenROM-bins
+      - name: Fetch binaries from SourceForge
         shell: bash
         run: |
-          git clone https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
-
-      - name: Copy Windows binaries
-        run: |
-          New-Item -ItemType Directory -Force -Path assets\windows
-          Copy-Item -Path "bins\windows\x86_64\*" -Destination "assets\windows\" -Recurse
+          bash scripts/fetch-binaries.sh --os windows --arch x86_64 --dest assets/windows
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
@@ -151,13 +145,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fetch binaries from OpenROM-bins
+      - name: Fetch binaries from SourceForge
         run: |
-          git clone https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
-          mkdir -p assets/linux/x86_64
-          cp -r bins/linux/x86_64/. assets/linux/x86_64/
-          chmod +x assets/linux/x86_64/*
+          bash scripts/fetch-binaries.sh --os linux --arch x86_64 --dest assets/linux/x86_64
 
       - name: Install system dependencies
         run: |
@@ -167,7 +157,7 @@ jobs:
                      /etc/apt/sources.list.d/github-cli.list
           sudo apt-get update -qq
           sudo apt-get install -y -q \
-            libfuse2 wget fuse \
+            libfuse2 wget fuse zip file \
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libglib2.0-dev libgdk-pixbuf2.0-dev \
@@ -248,28 +238,42 @@ jobs:
 
       - name: Build AppImage
         run: |
+          export APPIMAGE_EXTRACT_AND_RUN=1
           ARCH=x86_64 ./appimagetool AppDir \
             OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
           chmod +x OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
 
-      - name: Package ZIP
+      - name: Package Core CLI ZIP
         run: |
-          mkdir release
-          cp OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage release/
-          cp dist/openrom-core release/openrom-core
-          chmod +x release/openrom-core
-          cp VERSION release/VERSION
-          cp -r assets/ release/assets/
-          printf 'OpenROM - Linux\n======================================================\nRUN THIS: ./OpenROM-*.AppImage\n\nopenrom-core is the backend engine, do NOT run it directly.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
-            > release/README.txt
-          cd release
-          zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip .
+          set -e
+          VERSION="${{ github.event.inputs.version }}"
+          CORE="release-core"
+          rm -rf "$CORE"
+          mkdir -p "$CORE/assets/linux/x86_64"
 
-      - name: Upload artifact
+          cp dist/openrom-core "$CORE/openrom-core"
+          chmod +x "$CORE/openrom-core"
+          cp VERSION "$CORE/VERSION"
+
+          for tool in xdelta3 ecm unecm saturn-patcher; do
+            if [ -f "assets/linux/x86_64/$tool" ]; then
+              cp "assets/linux/x86_64/$tool" "$CORE/assets/linux/x86_64/$tool"
+              chmod +x "$CORE/assets/linux/x86_64/$tool"
+            fi
+          done
+
+          printf 'OpenROM Core CLI - Linux x86_64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_x86_64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm, saturn-patcher.\nFor CHD/CSO/RVZ/XISO conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
+            "$VERSION" > "$CORE/README.txt"
+
+          ( cd "$CORE" && zip -r "../OpenROM-Core-v${VERSION}_Linux_x86_64.zip" . )
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Linux
-          path: OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
+          path: |
+            OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
+            OpenROM-Core-v${{ github.event.inputs.version }}_Linux_x86_64.zip
 
   # ── Linux ARM64 ──────────────────────────────────────────
   build-linux-arm64:
@@ -277,22 +281,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fetch binaries from OpenROM-bins
+      - name: Fetch binaries from SourceForge
         run: |
-          git clone https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && tr -d '\r' < checksums.sha256 | sha256sum -c -)
-          mkdir -p assets/linux/arm64
-          cp -r bins/linux/arm64/. assets/linux/arm64/
-          chmod +x assets/linux/arm64/*
+          bash scripts/fetch-binaries.sh --os linux --arch arm64 --dest assets/linux/arm64
 
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -q \
+            wget zip file \
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libglib2.0-dev libgdk-pixbuf2.0-dev \
-            gcc make git xdelta3 \
+            gcc make git \
             patchelf ccache
 
       - name: Set version
@@ -302,25 +303,6 @@ jobs:
         run: |
           VERSION="${{ github.event.inputs.version }}"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
-
-      - name: Build ecm / unecm from source
-        run: |
-          git clone https://github.com/kidoz/ecm ecm_src
-          echo '#define ECM_VERSION "2.0.0"' > ecm_src/include/version.h
-          gcc -O2 -x c -Dnullptr=NULL -Wno-incompatible-pointer-types \
-              -o ecm ecm_src/src/ecm.c ecm_src/src/eccedc.c \
-              -I ecm_src/include -lm
-          gcc -O2 -x c -Dnullptr=NULL -Wno-incompatible-pointer-types \
-              -o unecm ecm_src/src/unecm.c ecm_src/src/eccedc.c \
-              -I ecm_src/include -lm
-
-      - name: Collect ARM64 binaries
-        run: |
-          mkdir -p assets/linux/arm64
-          cp $(which xdelta3) assets/linux/arm64/xdelta3
-          cp ./ecm            assets/linux/arm64/ecm
-          cp ./unecm          assets/linux/arm64/unecm
-          chmod +x assets/linux/arm64/*
 
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
@@ -353,24 +335,83 @@ jobs:
         working-directory: gui
         run: flutter build linux --release
 
-      - name: Package ZIP
+      - name: Download appimagetool
         run: |
-          mkdir release
-          cp -r gui/build/linux/arm64/release/bundle/. release/
-          cp dist/openrom-core release/openrom-core
-          chmod +x release/openrom-core
-          cp VERSION release/VERSION
-          cp -r assets/ release/assets/
-          printf 'OpenROM - Linux ARM64\n======================================================\nRUN THIS: ./gui\n\nNOTE: Light tools only on ARM64 (patching, header removal,\nM3U/CUE). Heavy conversions (CHD, CSO, RVZ) need x86_64 build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
-            > release/README.txt
-          cd release
-          zip -r ../OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip .
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage \
+            -O appimagetool
+          chmod +x appimagetool
 
-      - name: Upload artifact
+      - name: Create AppDir structure
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+          cp -r gui/build/linux/arm64/release/bundle/. AppDir/usr/bin/
+          cp dist/openrom-core AppDir/usr/bin/openrom-core
+          chmod +x AppDir/usr/bin/openrom-core
+          cp VERSION AppDir/usr/bin/VERSION
+          cp -r themes/ AppDir/usr/bin/themes/
+          cp -r assets/ AppDir/usr/bin/assets/
+          cp assets/icons/icon.png AppDir/openrom.png
+          cp assets/icons/icon.png \
+            AppDir/usr/share/icons/hicolor/256x256/apps/openrom.png
+
+          cat > AppDir/OpenROM.desktop << EOF
+          [Desktop Entry]
+          Name=OpenROM
+          Exec=gui
+          Icon=openrom
+          Type=Application
+          Categories=Utility;
+          Comment=Universal Retro Gaming Toolkit
+          EOF
+
+          cat > AppDir/AppRun << 'EOF'
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "${0}")")"
+          export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
+          exec "$HERE/usr/bin/gui" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+      - name: Build AppImage
+        run: |
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          ARCH=aarch64 ./appimagetool AppDir \
+            OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
+          chmod +x OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
+
+      - name: Package Core CLI ZIP
+        run: |
+          set -e
+          VERSION="${{ github.event.inputs.version }}"
+          CORE="release-core"
+          rm -rf "$CORE"
+          mkdir -p "$CORE/assets/linux/arm64"
+
+          cp dist/openrom-core "$CORE/openrom-core"
+          chmod +x "$CORE/openrom-core"
+          cp VERSION "$CORE/VERSION"
+
+          for tool in xdelta3 ecm unecm saturn-patcher; do
+            if [ -f "assets/linux/arm64/$tool" ]; then
+              cp "assets/linux/arm64/$tool" "$CORE/assets/linux/arm64/$tool"
+              chmod +x "$CORE/assets/linux/arm64/$tool"
+            fi
+          done
+
+          printf 'OpenROM Core CLI - Linux ARM64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_arm64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm, saturn-patcher.\nFor CHD/CSO/RVZ/XISO conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
+            "$VERSION" > "$CORE/README.txt"
+
+          ( cd "$CORE" && zip -r "../OpenROM-Core-v${VERSION}_Linux_arm64.zip" . )
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: OpenROM_Linux_arm64
-          path: OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
+          path: |
+            OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
+            OpenROM-Core-v${{ github.event.inputs.version }}_Linux_arm64.zip
 
   # ── macOS ────────────────────────────────────────────────
   build-macos:
@@ -385,14 +426,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fetch binaries from OpenROM-bins
+      - name: Fetch binaries from SourceForge
         run: |
-          git clone https://github.com/M5Devs/OpenROM-bins.git bins
-          (cd bins && (tr -d '\r' < checksums.sha256 | sha256sum -c - || tr -d '\r' < checksums.sha256 | shasum -a 256 -c -))
-          mkdir -p assets/macos/arm64 assets/macos/x86_64
-          cp -r bins/macos/arm64/.  assets/macos/arm64/
-          cp -r bins/macos/x86_64/. assets/macos/x86_64/
-          chmod +x assets/macos/arm64/* assets/macos/x86_64/*
+          bash scripts/fetch-binaries.sh --os macos --arch ${{ matrix.arch }} --dest assets/macos/${{ matrix.arch }}
 
       - name: Set version
         run: echo "${{ github.event.inputs.version }}" > VERSION
@@ -522,16 +558,24 @@ jobs:
             |----------|------|
             | 🪟 Windows (Portable) | `OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip` |
             | 🪟 Windows (Installer) | `OpenROM-v${{ github.event.inputs.version }}-Setup.exe` |
-            | 🐧 Linux x86_64 | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
-            | 🐧 Linux ARM64 | `OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip` |
+            | 🐧 Linux x86_64 (AppImage) | `OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage` |
+            | 🐧 Linux ARM64 (AppImage) | `OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage` |
+            | 🐧 Linux x86_64 (Core CLI) | `OpenROM-Core-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
+            | 🐧 Linux ARM64 (Core CLI) | `OpenROM-Core-v${{ github.event.inputs.version }}_Linux_arm64.zip` |
             | 🍎 macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip` |
             | 🍎 macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip` |
+
+            ### Linux notes
+            - **AppImage** — full GUI with the bundled `openrom-core` engine and all tools. Run it directly, no unzip needed.
+            - **Core CLI ZIP** — standalone `openrom-core` binary with light tools (xdelta3, ecm, unecm, saturn-patcher) for scripting and automation.
 
           files: |
             artifacts/OpenROM_Windows/OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
             artifacts/OpenROM_Windows_Installer/OpenROM-v${{ github.event.inputs.version }}-Setup.exe
-            artifacts/OpenROM_Linux/OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.zip
-            artifacts/OpenROM_Linux_arm64/OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.zip
+            artifacts/OpenROM_Linux/OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
+            artifacts/OpenROM_Linux/OpenROM-Core-v${{ github.event.inputs.version }}_Linux_x86_64.zip
+            artifacts/OpenROM_Linux_arm64/OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
+            artifacts/OpenROM_Linux_arm64/OpenROM-Core-v${{ github.event.inputs.version }}_Linux_arm64.zip
             artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip
             artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip
           draft: false

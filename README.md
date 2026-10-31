@@ -34,8 +34,8 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 |----------|---------------|-------------------|
 | 🪟 Windows (Installer) | [OpenROM-Windows-Setup.exe](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🪟 Windows (Portable) | [OpenROM_Windows_Portable.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🐧 Linux x86_64 | [OpenROM_Linux_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🐧 Linux ARM64 | [OpenROM_Linux_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🐧 Linux x86_64 | [OpenROM_Linux_x86_64.AppImage](https://github.com/M5Devs/OpenROM/releases/latest) · [Core CLI](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
+| 🐧 Linux ARM64 | [OpenROM_Linux_arm64.AppImage](https://github.com/M5Devs/OpenROM/releases/latest) · [Core CLI](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Intel | [OpenROM_macOS_x86_64.zip](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🤖 Android | 🚧 Coming soon via Termux | — |
