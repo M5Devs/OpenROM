@@ -29,7 +29,9 @@ class PluginStoreClient {
     final base = baseUrl ?? _baseUrl;
     if (base == null) return null;
     try {
-      final response = await _client.get(base.resolve('store_manifest.json')).timeout(timeout);
+      final response = await _client
+          .get(base.resolve('store_manifest.json'))
+          .timeout(timeout);
       if (response.statusCode != 200) return null;
       return StoreManifest.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>,
