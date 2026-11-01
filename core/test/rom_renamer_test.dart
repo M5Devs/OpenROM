@@ -223,7 +223,10 @@ void main() {
 
   group('renameRoms containment', () {
     test('a malicious DAT name cannot escape the folder', () {
-      final tmpDir = Directory.systemTemp.createTempSync('rename_safety_');
+      // Use a nested dir so that a stray ".." resolves inside the unique
+      // per-test base dir rather than the shared system temp dir.
+      final baseDir = Directory.systemTemp.createTempSync('rename_safety_');
+      final tmpDir = Directory(p.join(baseDir.path, 'folder'))..createSync();
       try {
         final romPath = p.join(tmpDir.path, 'evil.bin');
         File(romPath).writeAsStringSync('data');
@@ -247,7 +250,7 @@ void main() {
         expect(File(p.join(tmpDir.path, '..', 'escaped.bin')).existsSync(),
             isFalse);
       } finally {
-        tmpDir.deleteSync(recursive: true);
+        baseDir.deleteSync(recursive: true);
       }
     });
   });
