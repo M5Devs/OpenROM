@@ -56,7 +56,7 @@ jobs:
           flutter build apk --release
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: OpenROM-Android-Universal
           path: gui/build/app/outputs/flutter-apk/app-release.apk
