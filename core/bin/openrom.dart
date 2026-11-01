@@ -38,12 +38,12 @@ ArgParser buildParser() {
     ..addOption('convert', help: 'single file to convert (alias for --input)')
     ..addMultiOption(
       'compress',
-      help: 'file(s) to compress into ZIP',
+      help: 'file(s) to compress into ZIP or 7Z',
       splitCommas: false,
     )
     ..addMultiOption(
       'extract',
-      help: 'file(s) to extract from ZIP',
+      help: 'file(s) to extract from ZIP or 7Z',
       splitCommas: false,
     )
     ..addMultiOption(
@@ -190,7 +190,13 @@ ArgParser buildParser() {
   return parser;
 }
 
-Future<int> main(List<String> args) async {
+Future<void> main(List<String> args) async {
+  // The Dart VM ignores an `int` returned from `main` (both JIT and AOT), so
+  // propagate the exit code explicitly.
+  exitCode = await _runCli(args);
+}
+
+Future<int> _runCli(List<String> args) async {
   if (args.isEmpty) {
     print('OpenROM CLI — Universal ROM Toolkit\nUsage: openrom [options]');
     return 0;
@@ -372,8 +378,11 @@ Future<int> main(List<String> args) async {
         if (isJson) _jsonPrint({'type': 'done', 'success': true});
       } else {
         failed++;
-        if (isJson)
+        if (isJson) {
           _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+        } else {
+          print('❌ Compression failed: ${job.error ?? "unknown error"}');
+        }
       }
     }
     return failed == 0 ? 0 : 1;
@@ -416,8 +425,11 @@ Future<int> main(List<String> args) async {
         if (isJson) _jsonPrint({'type': 'done', 'success': true});
       } else {
         failed++;
-        if (isJson)
+        if (isJson) {
           _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+        } else {
+          print('❌ Extraction failed: ${job.error ?? "unknown error"}');
+        }
       }
     }
     return failed == 0 ? 0 : 1;

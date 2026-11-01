@@ -151,6 +151,21 @@ void main() {
       expect(errors.any((e) => e.contains('relative path')), isTrue);
     });
 
+    test('rejects an "executable" token anywhere but the first argument', () {
+      final manifest = _v2Manifest();
+      (manifest['execution'] as Map<String, dynamic>)['args'] = [
+        {'kind': 'input'},
+        {'kind': 'executable'},
+      ];
+      final parsed = PluginManifest.fromJson(manifest);
+      final errors = parsed.validate();
+      expect(
+        errors.any((e) => e.contains('"executable" token as its first')),
+        isTrue,
+        reason: errors.join('|'),
+      );
+    });
+
     test('normalises legacy v1 manifests (binaries + command template)', () {
       final legacy = PluginManifest.fromJson({
         'id': 'legacy-plugin',
@@ -416,6 +431,157 @@ void main() {
       expect(result.success, isTrue, reason: result.error);
       // The literal path must arrive intact as a single argv element.
       expect(logs.join('\n'), contains('a; rm -rf x;'));
+    });
+
+    test(r'drops the leading {executable} token so $1 is the first real arg',
+        () async {
+      if (Platform.isWindows) return; // uses a POSIX shell script
+
+      const script = '#!/bin/sh\nprintf "%s" "\$1"\nexit 0\n';
+      final manifest = _v2Manifest(
+        id: 'argv0',
+        from: 'EEEE',
+        to: 'FFFF',
+        executable: 'tool.sh',
+        binaryContent: script,
+      );
+      (manifest['execution'] as Map<String, dynamic>)['args'] = [
+        {'kind': 'executable'},
+        {'kind': 'input'},
+      ];
+
+      final archive = _writeOrplug(tempDir, 'argv0.orplug', {
+        'plugin.json': utf8.encode(jsonEncode(manifest)),
+        'tool.sh': utf8.encode(script),
+      });
+      final install =
+          await PluginManager.instance.installPluginDetailed(archive);
+      expect(install.success, isTrue, reason: install.error);
+
+      final input = File(p.join(tempDir.path, 'in.eeee'))
+        ..writeAsStringSync('data');
+      final conv = PluginRegistry.instance.getConversion('EEEE', 'FFFF')!;
+      final logs = <String>[];
+      final result = await PluginManager.instance.executor.run(
+        conversion: conv,
+        inputPath: input.path,
+        outputPath: p.join(tempDir.path, 'out.ffff'),
+        outputDir: tempDir.path,
+        onLog: logs.add,
+      );
+
+      expect(result.success, isTrue, reason: result.error);
+      // The script prints `$1`; it must be the input path, not the executable.
+      expect(logs.any((l) => l.trim() == input.path), isTrue,
+          reason: 'argv[0] leaked into the plugin: ${logs.join('|')}');
+    });
+
+    test('legacy v1 command plugin still passes the right argv', () async {
+      if (Platform.isWindows) return;
+
+      const script = '#!/bin/sh\nprintf "%s" "\$1"\nexit 0\n';
+      final manifest = <String, dynamic>{
+        'id': 'legacy-argv',
+        'name': 'Legacy Argv',
+        'version': '1.0.0',
+        'author': 'Legacy Author',
+        'minCoreVersion': '3.0.0',
+        'binaries': {
+          currentPlatformKey(): {
+            'executable': 'tool.sh',
+            'sha256': _sha256(script),
+          }
+        },
+        'extensions': [
+          {
+            'ext': '.gggg',
+            'format': 'GGGG',
+            'platform': 'Test',
+            'color': '#fff'
+          }
+        ],
+        'conversions': [
+          {
+            'from': 'HHHH',
+            'to': 'IIII',
+            'command': '{bin} "{in}"',
+          }
+        ],
+      };
+
+      final archive = _writeOrplug(tempDir, 'legacy.orplug', {
+        'plugin.json': utf8.encode(jsonEncode(manifest)),
+        'tool.sh': utf8.encode(script),
+      });
+      final install =
+          await PluginManager.instance.installPluginDetailed(archive);
+      expect(install.success, isTrue, reason: install.error);
+
+      final input = File(p.join(tempDir.path, 'in.hhhh'))
+        ..writeAsStringSync('data');
+      final conv = PluginRegistry.instance.getConversion('HHHH', 'IIII')!;
+      final logs = <String>[];
+      final result = await PluginManager.instance.executor.run(
+        conversion: conv,
+        inputPath: input.path,
+        outputPath: p.join(tempDir.path, 'out.iiii'),
+        outputDir: tempDir.path,
+        onLog: logs.add,
+      );
+
+      expect(result.success, isTrue, reason: result.error);
+      expect(logs.any((l) => l.trim() == input.path), isTrue,
+          reason: 'legacy argv[0] leaked: ${logs.join('|')}');
+    });
+
+    test('refuses a symlinked executable pointing outside the plugin dir',
+        () async {
+      if (Platform.isWindows) return; // needs symlink support
+
+      // The link target has the exact content the manifest declares, so the
+      // SHA-256 integrity check passes and only the containment check can
+      // reject it.
+      const script = '#!/bin/sh\necho PWNED\n';
+      final manifest = _v2Manifest(
+        id: 'linker',
+        from: 'JJJJ',
+        to: 'KKKK',
+        executable: 'tool.sh',
+        binaryContent: script,
+      );
+      final archive = _writeOrplug(tempDir, 'linker.orplug', {
+        'plugin.json': utf8.encode(jsonEncode(manifest)),
+        'tool.sh': utf8.encode(script),
+      });
+      final install =
+          await PluginManager.instance.installPluginDetailed(archive);
+      expect(install.success, isTrue, reason: install.error);
+
+      // Replace the installed binary with a link to an identical script
+      // outside the plugin directory.
+      final outside = File(p.join(tempDir.path, 'outside.sh'))
+        ..writeAsStringSync(script);
+      Process.runSync('chmod', ['+x', outside.path]);
+      final installed = File(
+        p.join(tempDir.path, 'plugins', 'linker', 'tool.sh'),
+      )..deleteSync();
+      Link(installed.path).createSync(outside.path);
+
+      final input = File(p.join(tempDir.path, 'in.jjjj'))
+        ..writeAsStringSync('data');
+      final conv = PluginRegistry.instance.getConversion('JJJJ', 'KKKK')!;
+      final logs = <String>[];
+      final result = await PluginManager.instance.executor.run(
+        conversion: conv,
+        inputPath: input.path,
+        outputPath: p.join(tempDir.path, 'out.kkkk'),
+        outputDir: tempDir.path,
+        onLog: logs.add,
+      );
+
+      expect(result.success, isFalse);
+      expect(result.error, contains('escapes the plugin directory'));
+      expect(logs.join('\n'), isNot(contains('PWNED')));
     });
   });
 }

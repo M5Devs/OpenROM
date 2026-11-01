@@ -68,10 +68,24 @@ Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (
 - **GDI Track Inspector** — Load and inspect GDI disc image track structure — track number, LBA offset, type (Audio/Data), sector size, and filename.
 
 ### 🗜️ Compression & Extraction
-- **ZIP support** — Compress ROMs or entire folders with fast / normal / ultra presets.
+- **ZIP support** — Compress ROMs or entire folders with fast / normal / ultra presets. Needs nothing installed.
+- **7Z support** — Compress and extract `.7z` archives (fast / normal / ultra) through an installed 7-Zip binary (`7zz`/`7z`), or one pointed to by `OPENROM_7Z`. Not bundled.
 - **Smart skip** — Already-compressed formats (CHD, CSO, RVZ, 7Z…) are automatically skipped.
-- **Batch extraction** — Extract ZIP archives with progress tracking.
+- **Batch extraction** — Extract ZIP and 7Z archives with progress tracking.
 - **Delete source option** — Auto-clean source files after successful compression.
+
+#### 7-Zip requirement
+ZIP compression and extraction work with no external tools. 7Z compression and
+extraction shell out to a 7-Zip binary:
+
+- **Linux** — `sudo apt-get install p7zip-full` (or your distro's `p7zip` / `7zip` package).
+- **macOS** — `brew install sevenzip` (provides `7zz`).
+- **Windows** — install 7-Zip, or rely on the default `%ProgramFiles%\7-Zip\7z.exe` lookup.
+
+The lookup order is `OPENROM_7Z` (an explicit path), then `7zz`, `7z`, `7za`,
+`7zr` on `PATH`, then the Windows Program Files locations. If no binary is found,
+7Z jobs fail with a clear message instead of throwing. Encrypted archives are
+not supported and fail fast.
 
 ### 🧹 ROM Header Removal
 - **Copier header detection and removal** for NES (iNES), SNES (SMC), Game Boy / GBC — with confidence rating (certain / likely).
@@ -290,7 +304,8 @@ build_windows.bat
 - [x] CHD header parsing
 - [x] Theme system
 - [x] ROM Patcher — IPS, BPS, UPS, xdelta3, PPF, SSP and more (v2.5.0)
-- [x] ZIP / 7Z compression & extraction
+- [x] ZIP compression & extraction (no external tools needed)
+- [x] 7Z compression & extraction (requires an installed 7-Zip — `7zz`/`7z`, or `OPENROM_7Z`; not bundled)
 - [x] ROM header removal — NES, SNES, GB/GBC
 - [x] M3U playlist generator
 - [x] NKit / WUD / WUX support (v2.8.0)

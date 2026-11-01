@@ -10,6 +10,72 @@ import 'package:xml/xml_events.dart';
 
 import 'config.dart' as config;
 
+/// Characters that are unsafe in a file name on at least one supported OS.
+final RegExp _unsafeFilenameChars = RegExp(r'[/\\:*?"<>|]');
+final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+final RegExp _windowsReserved = RegExp(
+  r'^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..*)?$',
+  caseSensitive: false,
+);
+
+/// Returns [name] as a single, safe file name component.
+///
+/// Separators, reserved characters and control characters become `_`; leading
+/// and trailing spaces and trailing dots are trimmed; Windows reserved device
+/// names are prefixed with `_`; the result is capped at 200 UTF-8 bytes (the
+/// extension is preserved). An empty result returns [fallback].
+String safeRomFilename(String name, {required String fallback}) {
+  var safe =
+      name.replaceAll(_unsafeFilenameChars, '_').replaceAll(_controlChars, '_');
+
+  safe = safe.trim();
+  safe = safe.replaceAll(RegExp(r'[. ]+$'), '');
+
+  // After the replacements a pure-dots name (e.g. "..") collapses to nothing.
+  if (safe.isEmpty) return fallback;
+
+  if (_windowsReserved.hasMatch(safe)) {
+    safe = '_$safe';
+  }
+
+  if (utf8.encode(safe).length > 200) {
+    safe = _truncateUtf8(safe, 200);
+  }
+
+  return safe.isEmpty ? fallback : safe;
+}
+
+/// Truncates [value] to at most [maxBytes] UTF-8 bytes, preserving the
+/// extension when one is present.
+String _truncateUtf8(String value, int maxBytes) {
+  final dot = value.lastIndexOf('.');
+  final hasExt = dot > 0 && dot < value.length - 1;
+  final ext = hasExt ? value.substring(dot) : '';
+  final stem = hasExt ? value.substring(0, dot) : value;
+
+  final extBytes = utf8.encode(ext).length;
+  final budget = maxBytes - extBytes;
+  if (budget <= 0) {
+    return _truncateToBytes(value, maxBytes);
+  }
+  return _truncateToBytes(stem, budget) + ext;
+}
+
+/// Truncates [value] so its UTF-8 encoding is at most [maxBytes] long, without
+/// splitting a multi-byte character.
+String _truncateToBytes(String value, int maxBytes) {
+  final out = StringBuffer();
+  var used = 0;
+  for (final rune in value.runes) {
+    final ch = String.fromCharCode(rune);
+    final len = utf8.encode(ch).length;
+    if (used + len > maxBytes) break;
+    out.write(ch);
+    used += len;
+  }
+  return out.toString();
+}
+
 final Uint32List _crc32Table = () {
   final table = Uint32List(256);
   for (int i = 0; i < 256; i++) {
@@ -274,7 +340,7 @@ class RomScanResult {
 
   String get suggestedFilename {
     if (!matched || romName.isEmpty) return filename;
-    return romName;
+    return safeRomFilename(romName, fallback: filename);
   }
 }
 
@@ -456,6 +522,22 @@ List<RenameResult> renameRoms(
       newPath: newPath,
       success: false,
     );
+
+    // Final guard: the resolved directory must be the folder itself.
+    try {
+      if (p.dirname(p.canonicalize(newPath)) != p.canonicalize(folder)) {
+        r.error = 'Refusing to rename outside the target folder: '
+            '${scan.suggestedFilename}';
+        renameResults.add(r);
+        if (onRenamed != null) onRenamed(r);
+        continue;
+      }
+    } catch (e) {
+      r.error = e.toString();
+      renameResults.add(r);
+      if (onRenamed != null) onRenamed(r);
+      continue;
+    }
 
     try {
       if (!dryRun) {

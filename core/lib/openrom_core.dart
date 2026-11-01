@@ -5,6 +5,7 @@ export 'src/config.dart';
 export 'src/detector.dart';
 export 'src/converter.dart';
 export 'src/compressor.dart';
+export 'src/seven_zip.dart';
 export 'src/cue_generator.dart';
 export 'src/bin_merger.dart';
 export 'src/header_remover.dart';

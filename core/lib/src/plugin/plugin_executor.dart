@@ -83,7 +83,7 @@ class PluginExecutor {
 
     // Resolve the executable strictly inside the plugin directory.
     final pluginDir = p.normalize(p.absolute(p.join(pluginsDir, manifest.id)));
-    final executable = _resolveContainedPath(pluginDir, env.executable);
+    final executable = _joinUnder(pluginDir, env.executable);
     if (executable == null) {
       return PluginRunResult.failure(
         'Plugin "${manifest.id}" executable path "${env.executable}" escapes '
@@ -95,6 +95,26 @@ class PluginExecutor {
     if (!exeFile.existsSync()) {
       return PluginRunResult.failure(
         'Plugin "${manifest.id}" executable not found: $executable',
+      );
+    }
+
+    // Containment by *real* path: resolves `..` and symlinks, so a link inside
+    // the plugin directory pointing outside is refused.
+    final String realPluginDir;
+    final String realExecutable;
+    try {
+      realPluginDir = Directory(pluginDir).resolveSymbolicLinksSync();
+      realExecutable = exeFile.resolveSymbolicLinksSync();
+    } on FileSystemException catch (e) {
+      return PluginRunResult.failure(
+        'Plugin "${manifest.id}" executable could not be resolved: '
+        '${e.message}',
+      );
+    }
+    if (!_isInside(realPluginDir, realExecutable)) {
+      return PluginRunResult.failure(
+        'Plugin "${manifest.id}" executable path "${env.executable}" escapes '
+        'the plugin directory.',
       );
     }
 
@@ -131,12 +151,14 @@ class PluginExecutor {
           'resolved for this job.',
         );
       }
+      // The `executable` token names the program itself. `Process.start`
+      // already receives it as its own argument, so it must not also appear in
+      // the argv handed to the tool (Dart's `arguments` exclude argv[0]).
+      if (arg.kind == PluginArgKind.executable) continue;
       argv.add(resolved);
     }
 
-    onLog(
-      '  cmd: ${[p.basename(executable), ...argv.skip(1)].join(' ')}',
-    );
+    onLog('  cmd: ${[p.basename(executable), ...argv].join(' ')}');
 
     final successCodes = manifest.execution.successExitCodes;
     final timeout = manifest.execution.timeout;
@@ -229,9 +251,12 @@ class PluginExecutor {
     if (buffer.isNotEmpty) onLine(buffer);
   }
 
-  /// Returns the absolute path of [relative] resolved under [root], or `null`
-  /// when it would escape the root (zip-slip / `..` / absolute path).
-  static String? _resolveContainedPath(String root, String relative) {
+  /// Returns the absolute path of [relative] resolved lexically under [root],
+  /// or `null` when it would escape the root (zip-slip / `..` / absolute path).
+  ///
+  /// This is a *lexical* check only. Callers that guard execution must also
+  /// verify the real path via [_isInside] after resolving symbolic links.
+  static String? _joinUnder(String root, String relative) {
     if (relative.trim().isEmpty) return null;
     if (p.isAbsolute(relative)) return null;
     final resolved = p.normalize(p.absolute(p.join(root, relative)));
@@ -241,6 +266,14 @@ class PluginExecutor {
       return null;
     }
     return resolved;
+  }
+
+  /// Whether the real path [realChild] lies strictly inside [realRoot].
+  static bool _isInside(String realRoot, String realChild) {
+    if (realChild == realRoot) return true;
+    return realChild.startsWith(
+      realRoot.endsWith(p.separator) ? realRoot : realRoot + p.separator,
+    );
   }
 
   static void _ensureExecutable(String path) {

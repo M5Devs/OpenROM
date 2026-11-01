@@ -595,9 +595,14 @@ class PluginManifest {
               'Plugin binary for "$key" has a malformed "sha256" (expected 64 hex chars).');
         }
       });
-      for (final arg in execution.args) {
+      for (var i = 0; i < execution.args.length; i++) {
+        final arg = execution.args[i];
         if (arg.kind == PluginArgKind.literal && arg.value.isEmpty) {
           errors.add('Plugin "execution.args" contains an empty literal.');
+        }
+        if (arg.kind == PluginArgKind.executable && i != 0) {
+          errors.add(
+              'Plugin "execution.args" may only use the "executable" token as its first argument.');
         }
       }
     }

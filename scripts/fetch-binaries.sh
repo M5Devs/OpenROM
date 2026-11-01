@@ -9,6 +9,12 @@
 #   --arch  x86_64 | arm64 | arm64-v8a   (omit to fetch every arch published for the OS)
 #   --dest  destination directory (files are placed flat, by basename)
 #
+# Environment:
+#   OPENROM_BINS_BASE_URL        override the binary download base URL
+#   OPENROM_BINS_REF             OpenROM-bins ref for the default checksums URL
+#                                (default: main)
+#   OPENROM_BINS_CHECKSUMS_URL   override the checksums URL entirely (wins)
+#
 # Examples:
 #   scripts/fetch-binaries.sh --os windows --arch x86_64 --dest assets/windows
 #   scripts/fetch-binaries.sh --os linux   --arch arm64  --dest assets/linux/arm64
@@ -16,7 +22,7 @@
 #
 # Exit codes:
 #   0 success
-#   1 bad arguments / missing dependency
+#   1 bad arguments / missing dependency / ambiguous arch
 #   2 no matching binaries in checksums.sha256
 #   3 download failed
 #   4 checksum verification mismatch
@@ -24,14 +30,20 @@
 set -euo pipefail
 
 BASE_URL="${OPENROM_BINS_BASE_URL:-https://downloads.sourceforge.net/project/openrom-binaries}"
-CHECKSUMS_URL="${OPENROM_BINS_CHECKSUMS_URL:-https://raw.githubusercontent.com/M5Devs/OpenROM-bins/main/checksums.sha256}"
+
+BINS_REF="${OPENROM_BINS_REF:-main}"
+if [[ ! "$BINS_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]]; then
+    echo "Error: invalid OPENROM_BINS_REF: $BINS_REF" >&2
+    exit 1
+fi
+CHECKSUMS_URL="${OPENROM_BINS_CHECKSUMS_URL:-https://raw.githubusercontent.com/M5Devs/OpenROM-bins/${BINS_REF}/checksums.sha256}"
 
 OS=""
 ARCH=""
 DEST=""
 
 usage() {
-    sed -n '2,23p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit 1
 }
 
@@ -96,6 +108,20 @@ count=$(wc -l < "$tmp_entries" | tr -d ' ')
 if [ "$count" -eq 0 ]; then
     echo "Error: no binaries found for $OS/${ARCH:-*}" >&2
     exit 2
+fi
+
+# Without --arch, a destination holds files flat by basename. Fetching two
+# architectures at once would silently overwrite same-named files, so refuse.
+if [ -z "$ARCH" ]; then
+    arch_count=$(awk '{ n=split($2, parts, "/"); print parts[2] }' "$tmp_entries" \
+        | sort -u | wc -l | tr -d ' ')
+    if [ "$arch_count" -gt 1 ]; then
+        arch_list=$(awk '{ n=split($2, parts, "/"); print parts[2] }' "$tmp_entries" \
+            | sort -u | paste -sd ', ' -)
+        echo "Error: $OS publishes $arch_count architectures ($arch_list);" >&2
+        echo "       pass --arch <arch> to choose one (they share a flat dest)." >&2
+        exit 1
+    fi
 fi
 
 echo "Fetching $count binaries for $OS/${ARCH:-*} into $DEST"
