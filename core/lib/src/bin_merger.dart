@@ -25,6 +25,18 @@ int _getSectorSize(String mode) {
   return 2352;
 }
 
+/// Removes one pair of matching surrounding quotes (`"` or `'`) if present.
+String _stripSurroundingQuotes(String value) {
+  if (value.length >= 2) {
+    final first = value[0];
+    final last = value[value.length - 1];
+    if ((first == '"' && last == '"') || (first == "'" && last == "'")) {
+      return value.substring(1, value.length - 1);
+    }
+  }
+  return value;
+}
+
 class CueTrackIndex {
   final int number;
   final String msf;
@@ -53,8 +65,10 @@ List<CueTrack> parseCue(String cuePath) {
   final tracks = <CueTrack>[];
 
   String? currentFile;
+  // Group 1 is the raw name; group 2 the file type. The name is non-greedy and
+  // anchored to the end so apostrophes, parentheses and spaces all survive.
   final fileRegex = RegExp(
-    'FILE\\s+["\']?([^"\']+)["\']?\\s+BINARY',
+    r'^\s*FILE\s+(.+?)\s+(BINARY|WAVE|MP3|AIFF|MOTOROLA)\s*$',
     caseSensitive: false,
   );
   final trackRegex = RegExp(
@@ -66,13 +80,24 @@ List<CueTrack> parseCue(String cuePath) {
     caseSensitive: false,
   );
 
-  final lines = File(cuePath).readAsLinesSync();
+  var content = File(cuePath).readAsStringSync();
+  if (content.startsWith('\uFEFF')) {
+    content = content.substring(1);
+  }
+  final lines = content.split(RegExp(r'\r\n|\r|\n'));
   for (final line in lines) {
     final lineStr = line.trim();
     final fm = fileRegex.firstMatch(lineStr);
     if (fm != null) {
-      final relFile = fm.group(1)!;
-      currentFile = p.join(cueDir, relFile);
+      final rawName = _stripSurroundingQuotes(fm.group(1)!.trim());
+      final fileType = fm.group(2)!.toUpperCase();
+      if (fileType != 'BINARY') {
+        throw FormatException(
+          'Unsupported FILE type "$fileType" in CUE (only BINARY is '
+          'supported): $cuePath',
+        );
+      }
+      currentFile = p.join(cueDir, rawName);
       continue;
     }
 
