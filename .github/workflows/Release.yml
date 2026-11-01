@@ -7,6 +7,10 @@ on:
         description: 'Version (e.g., 3.5.0)'
         required: true
         default: '3.5.0'
+      bins_ref:
+        description: 'OpenROM-bins ref used for the default checksums URL'
+        required: false
+        default: 'main'
 
 permissions:
   contents: write
@@ -16,7 +20,18 @@ jobs:
   # ── Windows — Flutter GUI + Dart CLI ────────────────────
   build-windows:
     runs-on: windows-2022
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+      OPENROM_BINS_REF: ${{ github.event.inputs.bins_ref }}
     steps:
+      - name: Validate release version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.]+)?$ ]]; then
+            echo "Error: invalid version '$RELEASE_VERSION' (expected e.g. 3.5.0)" >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
 
       - name: Fetch binaries from SourceForge
@@ -34,11 +49,11 @@ jobs:
             -y --no-progress
 
       - name: Set version
-        run: echo "${{ github.event.inputs.version }}" | Out-File -FilePath VERSION -Encoding utf8 -NoNewline
+        run: echo "$env:RELEASE_VERSION" | Out-File -FilePath VERSION -Encoding utf8 -NoNewline
 
       - name: Patch pubspec version
         run: |
-          $version = "${{ github.event.inputs.version }}"
+          $version = "$env:RELEASE_VERSION"
           (Get-Content gui/pubspec.yaml) `
             -replace '^version: .*', "version: $version+1" |
             Set-Content gui/pubspec.yaml
@@ -77,7 +92,7 @@ jobs:
           Copy-Item -Recurse -Force "themes/" "$releaseDir/themes/"
           Copy-Item -Recurse -Force "assets/" "$releaseDir/assets/"
 
-          $version = "${{ github.event.inputs.version }}"
+          $version = "$env:RELEASE_VERSION"
           $readme = "OpenROM v$version - Windows`n======================================================`nRUN THIS: gui.exe`n`nopenrom-core.exe is the backend engine, do NOT run it directly.`n`nDocs: https://github.com/M5Devs/OpenROM"
           Set-Content -Path "$releaseDir/README.txt" -Value $readme
 
@@ -91,7 +106,7 @@ jobs:
         run: |
           $releaseDir = "gui/build/windows/x64/runner/Release"
           Compress-Archive -Path "$releaseDir/*" `
-            -DestinationPath OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip
+            -DestinationPath OpenROM-v${env:RELEASE_VERSION}_Windows_Portable.zip
 
       - name: Install NSIS and dependencies
         run: |
@@ -124,7 +139,7 @@ jobs:
 
       - name: Build Windows installer
         run: |
-          $version = "${{ github.event.inputs.version }}"
+          $version = "$env:RELEASE_VERSION"
           makensis /DAPP_VERSION=$version openrom.nsi
 
       - name: Upload ZIP artifact
@@ -142,7 +157,18 @@ jobs:
   # ── Linux — Flutter AppImage + Dart CLI ─────────────────
   build-linux:
     runs-on: ubuntu-22.04
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+      OPENROM_BINS_REF: ${{ github.event.inputs.bins_ref }}
     steps:
+      - name: Validate release version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.]+)?$ ]]; then
+            echo "Error: invalid version '$RELEASE_VERSION' (expected e.g. 3.5.0)" >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
 
       - name: Fetch binaries from SourceForge
@@ -164,11 +190,11 @@ jobs:
             patchelf ccache
 
       - name: Set version
-        run: echo "${{ github.event.inputs.version }}" > VERSION
+        run: echo "$RELEASE_VERSION" > VERSION
 
       - name: Patch pubspec version
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Setup Dart SDK
@@ -240,13 +266,13 @@ jobs:
         run: |
           export APPIMAGE_EXTRACT_AND_RUN=1
           ARCH=x86_64 ./appimagetool AppDir \
-            OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
-          chmod +x OpenROM-v${{ github.event.inputs.version }}_Linux_x86_64.AppImage
+            "OpenROM-v${RELEASE_VERSION}_Linux_x86_64.AppImage"
+          chmod +x "OpenROM-v${RELEASE_VERSION}_Linux_x86_64.AppImage"
 
       - name: Package Core CLI ZIP
         run: |
           set -e
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           CORE="release-core"
           rm -rf "$CORE"
           mkdir -p "$CORE/assets/linux/x86_64"
@@ -278,7 +304,18 @@ jobs:
   # ── Linux ARM64 ──────────────────────────────────────────
   build-linux-arm64:
     runs-on: ubuntu-24.04-arm
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+      OPENROM_BINS_REF: ${{ github.event.inputs.bins_ref }}
     steps:
+      - name: Validate release version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.]+)?$ ]]; then
+            echo "Error: invalid version '$RELEASE_VERSION' (expected e.g. 3.5.0)" >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
 
       - name: Fetch binaries from SourceForge
@@ -297,11 +334,11 @@ jobs:
             patchelf ccache
 
       - name: Set version
-        run: echo "${{ github.event.inputs.version }}" > VERSION
+        run: echo "$RELEASE_VERSION" > VERSION
 
       - name: Patch pubspec version
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           sed -i "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Setup Dart SDK
@@ -378,13 +415,13 @@ jobs:
         run: |
           export APPIMAGE_EXTRACT_AND_RUN=1
           ARCH=aarch64 ./appimagetool AppDir \
-            OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
-          chmod +x OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
+            "OpenROM-v${RELEASE_VERSION}_Linux_arm64.AppImage"
+          chmod +x "OpenROM-v${RELEASE_VERSION}_Linux_arm64.AppImage"
 
       - name: Package Core CLI ZIP
         run: |
           set -e
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           CORE="release-core"
           rm -rf "$CORE"
           mkdir -p "$CORE/assets/linux/arm64"
@@ -423,19 +460,31 @@ jobs:
           - os: macos-15-intel
             arch: x86_64
     runs-on: ${{ matrix.os }}
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+      OPENROM_BINS_REF: ${{ github.event.inputs.bins_ref }}
+      MATRIX_ARCH: ${{ matrix.arch }}
     steps:
+      - name: Validate release version
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.]+)?$ ]]; then
+            echo "Error: invalid version '$RELEASE_VERSION' (expected e.g. 3.5.0)" >&2
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
 
       - name: Fetch binaries from SourceForge
         run: |
-          bash scripts/fetch-binaries.sh --os macos --arch ${{ matrix.arch }} --dest assets/macos/${{ matrix.arch }}
+          bash scripts/fetch-binaries.sh --os macos --arch "$MATRIX_ARCH" --dest "assets/macos/$MATRIX_ARCH"
 
       - name: Set version
-        run: echo "${{ github.event.inputs.version }}" > VERSION
+        run: echo "$RELEASE_VERSION" > VERSION
 
       - name: Patch pubspec version
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           sed -i "" "s/^version: .*/version: ${VERSION}+1/" gui/pubspec.yaml
 
       - name: Setup Dart SDK
@@ -498,16 +547,16 @@ jobs:
             -srcfolder dmg_contents \
             -ov \
             -format UDZO \
-            OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg
+            "OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.dmg"
 
       - name: Package ZIP
         run: |
           mkdir release
-          cp OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg release/
+          cp "OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.dmg" release/
           printf 'OpenROM - macOS\n======================================================\nRUN THIS: Open the .dmg and drag OpenROM to Applications.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             > release/README.txt
           cd release
-          zip -r ../OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip .
+          zip -r "../OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.zip" .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
