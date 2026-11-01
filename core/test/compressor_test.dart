@@ -5,10 +5,10 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
-  test('Compressor throws UnsupportedError when 7z format is requested', () {
+  test('Compressor skips an already-7z file instead of throwing', () {
     final tmpDir = Directory.systemTemp.createTempSync('compressor_7z_test_');
     try {
-      final sampleFile = p.join(tmpDir.path, 'sample.rom');
+      final sampleFile = p.join(tmpDir.path, 'sample.7z');
       File(sampleFile).writeAsBytesSync([1, 2, 3, 4, 5]);
 
       final compressor = Compressor();
@@ -18,7 +18,10 @@ void main() {
         format: '7z',
       );
 
-      expect(() => compressor.compress(job), throwsA(isA<UnsupportedError>()));
+      final ok = compressor.compress(job);
+      expect(ok, isTrue);
+      expect(job.status, 'Done');
+      expect(job.error, contains('already compressed'));
     } finally {
       tmpDir.deleteSync(recursive: true);
     }

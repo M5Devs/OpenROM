@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
 
+import 'seven_zip.dart';
+
 const Set<String> excludedExtensions = {
   '.chd',
   '.cso',
@@ -44,9 +46,28 @@ class CompressionJob {
 class Compressor {
   final void Function(String msg)? onLog;
   final void Function(CompressionJob job, double pct)? onProgress;
+  final SevenZip? _injectedSevenZip;
+  SevenZip? _resolvedSevenZip;
   bool _stopped = false;
 
-  Compressor({this.onLog, this.onProgress});
+  Compressor({this.onLog, this.onProgress, SevenZip? sevenZip})
+      : _injectedSevenZip = sevenZip;
+
+  /// The 7-Zip wrapper to use, located lazily on first need.
+  SevenZip? get _sevenZip {
+    if (_injectedSevenZip != null) return _injectedSevenZip;
+    return _resolvedSevenZip ??= _locateSevenZip();
+  }
+
+  SevenZip? _locateSevenZip() {
+    final exe = SevenZip.locate(onLog: _log);
+    if (exe == null) {
+      _log('[7Z] No 7-Zip executable found (looked for 7zz/7z/7za/7zr and '
+          'OPENROM_7Z).');
+      return null;
+    }
+    return SevenZip(exe, onLog: _log);
+  }
 
   void stop() {
     _stopped = true;
@@ -76,9 +97,6 @@ class Compressor {
 
   bool compress(CompressionJob job) {
     _stopped = false;
-    if (job.format == '7z' || job.format == '.7z') {
-      throw UnsupportedError('7z format is currently not supported; use zip');
-    }
 
     if (job.format == 'extract') {
       return extract(job);
@@ -103,12 +121,14 @@ class Compressor {
       return true;
     }
 
+    final is7z = job.format == '7z' || job.format == '.7z';
+
     job.status = 'Compressing';
     _updateProgress(job, 0.0);
     Directory(job.outputDir).createSync(recursive: true);
 
     try {
-      final success = _compressZip(job);
+      final success = is7z ? _compress7z(job) : _compressZip(job);
       if (success) {
         job.status = 'Done';
         job.progress = 100.0;
@@ -131,9 +151,6 @@ class Compressor {
 
   bool extract(CompressionJob job) {
     _stopped = false;
-    if (p.extension(job.filepath).toLowerCase() == '.7z') {
-      throw UnsupportedError('7z format is currently not supported; use zip');
-    }
 
     if (!File(job.filepath).existsSync()) {
       job.status = 'Failed';
@@ -142,12 +159,14 @@ class Compressor {
       return false;
     }
 
+    final is7z = p.extension(job.filepath).toLowerCase() == '.7z';
+
     job.status = 'Extracting';
     _updateProgress(job, 0.0);
     Directory(job.outputDir).createSync(recursive: true);
 
     try {
-      final success = _extractZip(job);
+      final success = is7z ? _extract7z(job) : _extractZip(job);
       if (success) {
         job.status = 'Done';
         job.progress = 100.0;
@@ -166,6 +185,66 @@ class Compressor {
       _log('[ERROR] Extraction failed: $e');
       return false;
     }
+  }
+
+  /// 7z compression via the external 7-Zip binary.
+  ///
+  /// `Process.runSync` cannot stream, so progress only moves 0 -> 100 around
+  /// the single blocking invocation rather than tracking the archive as it is
+  /// written. (Documented limitation; a streamed variant is a later task.)
+  bool _compress7z(CompressionJob job) {
+    final sevenZip = _sevenZip;
+    if (sevenZip == null) {
+      job.error = sevenZipNotFoundMessage;
+      _log('[ERROR] ${job.error}');
+      return false;
+    }
+
+    final baseName = p.basename(job.filepath);
+    _log('[7Z] Compressing $baseName -> ${baseName}.7z (level ${job.level})');
+
+    final error = sevenZip.compress(
+      source: job.filepath,
+      outputDir: job.outputDir,
+      level: job.level,
+    );
+
+    if (error != null) {
+      job.error = error;
+      _log('[ERROR] $error');
+      return false;
+    }
+
+    _updateProgress(job, 100.0);
+    return true;
+  }
+
+  /// 7z extraction via the external 7-Zip binary.
+  bool _extract7z(CompressionJob job) {
+    final sevenZip = _sevenZip;
+    if (sevenZip == null) {
+      job.error = sevenZipNotFoundMessage;
+      _log('[ERROR] ${job.error}');
+      return false;
+    }
+
+    _log(
+      '[7Z] Extracting ${p.basename(job.filepath)} -> ${job.outputDir}',
+    );
+
+    final error = sevenZip.extract(
+      archive: job.filepath,
+      outputDir: job.outputDir,
+    );
+
+    if (error != null) {
+      job.error = error;
+      _log('[ERROR] $error');
+      return false;
+    }
+
+    _updateProgress(job, 100.0);
+    return true;
   }
 
   bool _compressZip(CompressionJob job) {
