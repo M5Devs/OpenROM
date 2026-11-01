@@ -16,6 +16,8 @@
   <a href="SECURITY.md">
   <img src="https://img.shields.io/badge/Security-Policy-green.svg" alt="Security Policy">
   <a href="https://deepwiki.com/M5Devs/OpenROM"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+    <a href="https://discord.gg/FYEjpcFYXc" target="_blank">
+  <img src="https://img.shields.io/badge/Discord-M5%20Dev-5865F2?style=flat&logo=discord&logoColor=white" alt="M5 Dev Discord" />
 </a>
 
 </p>
