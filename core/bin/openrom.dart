@@ -185,9 +185,24 @@ ArgParser buildParser() {
       negatable: false,
       help: 'suppress per-job log output',
     )
+    ..addFlag(
+      'help',
+      abbr: 'h',
+      negatable: false,
+      help: 'show this help message',
+    )
     ..addFlag('version', abbr: 'v', negatable: false, help: 'show version');
 
   return parser;
+}
+
+void printUsage(ArgParser parser, {bool toStderr = false}) {
+  final out = toStderr ? stderr : stdout;
+  out.writeln('OpenROM CLI — Universal ROM Compression Suite');
+  out.writeln();
+  out.writeln('Usage: openrom-core [options]');
+  out.writeln();
+  out.writeln(parser.usage);
 }
 
 Future<void> main(List<String> args) async {
@@ -197,21 +212,27 @@ Future<void> main(List<String> args) async {
 }
 
 Future<int> _runCli(List<String> args) async {
+  final parser = buildParser();
+
   if (args.isEmpty) {
-    print('OpenROM CLI — Universal ROM Toolkit\nUsage: openrom [options]');
+    printUsage(parser);
     return 0;
   }
 
-  // Auto-load installed plugins
-  await PluginManager.instance.loadInstalledPlugins();
-
-  final parser = buildParser();
   final ArgResults results;
   try {
     results = parser.parse(args);
   } catch (e) {
     stderr.writeln('Error parsing arguments: $e');
+    printUsage(parser, toStderr: true);
     return 2;
+  }
+
+  // `--help` and `--version` exit before any side effects (e.g. loading
+  // installed plugins) so their output stays clean.
+  if (results['help'] == true) {
+    printUsage(parser);
+    return 0;
   }
 
   if (results['version'] == true) {
@@ -219,6 +240,9 @@ Future<int> _runCli(List<String> args) async {
     print(version == 'unknown' ? 'OpenROM' : 'OpenROM v$version');
     return 0;
   }
+
+  // Auto-load installed plugins
+  await PluginManager.instance.loadInstalledPlugins();
 
   final isJson = results['json'] == true;
 

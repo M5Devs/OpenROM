@@ -4,8 +4,8 @@
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
-Version at time of writing: **3.9.7** (`VERSION`, `core/pubspec.yaml`,
-`gui/pubspec.yaml` = `3.9.7+1`).
+Version at time of writing: **3.9.8** (`VERSION`, `core/pubspec.yaml`,
+`gui/pubspec.yaml` = `3.9.8+1`).
 
 ---
 
@@ -528,7 +528,7 @@ At runtime, `main.dart` queries the native library directory over a
 `config.getToolPath()` returns `lib<tool>.so` inside that dir — this is the only
 platform where tools are shared libraries rather than executables.
 
-Android is **omitted from the v3.9.7 release**. The `build-android` job is guarded
+Android is **omitted from the v3.9.8 release**. The `build-android` job is guarded
 so the `release: published` trigger no longer fires it; re-enable by dispatching
 `Android.yml` manually or setting the repository variable
 `ENABLE_ANDROID_RELEASE=true`.

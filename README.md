@@ -184,6 +184,9 @@ not supported and fail fast.
 ## 💻 CLI Usage
 
 ```bash
+# Show all options
+openrom-core --help
+
 # Detect file format and platform
 openrom-core --detect game.iso
 
