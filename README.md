@@ -32,6 +32,8 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 
 ## ⬇️ Download
 
+[![OpenROM | AlternativeTo](https://alternativeto.net/static/badges/badge-compact-dark.svg)](https://alternativeto.net/software/openrom/about/?utm_source=badge&utm_medium=referral)
+
 | Platform | GitHub Release | SourceForge Mirror |
 |----------|---------------|-------------------|
 | 🪟 Windows (Installer) | [OpenROM-Windows-Setup.exe](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
