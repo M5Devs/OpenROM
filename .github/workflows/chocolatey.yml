@@ -1,0 +1,48 @@
+name: Publish to Chocolatey
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 3.9.5)'
+        required: true
+        default: '3.9.5'
+
+jobs:
+  choco-deploy:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Chocolatey Package
+        shell: pwsh
+        run: |
+          $ver = "${{ inputs.version }}"
+          $setupUrl = "https://github.com/M5Devs/OpenROM/releases/download/v$ver/OpenROM-v$ver-Setup.exe"
+          
+          Write-Host "Downloading Setup.exe to calculate SHA256: $setupUrl"
+          Invoke-WebRequest -Uri $setupUrl -OutFile "setup.exe"
+          $hash = (Get-FileHash -Algorithm SHA256 setup.exe).Hash
+          Write-Host "Calculated Hash: $hash"
+
+          # Update version in nuspec
+          $nuspecPath = "packaging/chocolatey/openrom.nuspec"
+          (Get-Content $nuspecPath) -replace '<version>.*?</version>', "<version>$ver</version>" | Set-Content $nuspecPath
+
+          # Update URL and Hash in install script
+          $scriptPath = "packaging/chocolatey/tools/chocolateyInstall.ps1"
+          (Get-Content $scriptPath) `
+            -replace "v3.9.5", "v$ver" `
+            -replace "AUTO_CHECKSUM_REPLACED_BY_ACTION", "$hash" | Set-Content $scriptPath
+
+      - name: Pack and Push to Chocolatey
+        shell: pwsh
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
+        run: |
+          cd packaging/chocolatey
+          choco pack openrom.nuspec
+          
+          # Upload package to official Chocolatey repository
+          choco push "openrom.${{ inputs.version }}.nupkg" --api-key "$env:CHOCO_API_KEY" --source "https://push.chocolatey.org/"
