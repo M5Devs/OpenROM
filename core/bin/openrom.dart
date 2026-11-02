@@ -228,19 +228,21 @@ Future<int> _runCli(List<String> args) async {
     return 2;
   }
 
+  // `--help` and `--version` exit before any side effects (e.g. loading
+  // installed plugins) so their output stays clean.
   if (results['help'] == true) {
     printUsage(parser);
     return 0;
   }
-
-  // Auto-load installed plugins
-  await PluginManager.instance.loadInstalledPlugins();
 
   if (results['version'] == true) {
     final version = readAppVersion();
     print(version == 'unknown' ? 'OpenROM' : 'OpenROM v$version');
     return 0;
   }
+
+  // Auto-load installed plugins
+  await PluginManager.instance.loadInstalledPlugins();
 
   final isJson = results['json'] == true;
 

@@ -40,10 +40,14 @@ void main() {
       expect(r.stderr as String, contains('Usage: openrom-core [options]'));
     });
 
-    test('--version still exits 0', () {
+    test('--version exits 0 and prints only the version line', () {
       final r = _runCli(['--version']);
       expect(r.exitCode, 0);
-      expect(r.stdout as String, startsWith('OpenROM'));
+      // Plugin loading must not run for `--version`, so nothing may precede it.
+      expect(
+        (r.stdout as String).trim(),
+        matches(RegExp(r'^OpenROM( v[0-9][0-9.]*)?$')),
+      );
     });
   });
 }
