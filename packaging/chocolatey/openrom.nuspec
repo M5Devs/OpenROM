@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>openrom</id>
+    <version>3.9.5</version>
+    <title>OpenROM</title>
+    <authors>M5 Dev</authors>
+    <projectUrl>https://github.com/M5Devs/OpenROM</projectUrl>
+    <licenseUrl>https://github.com/M5Devs/OpenROM/blob/main/LICENSE</licenseUrl>
+    <tags>openrom retro gaming emulation rom chd cso rvz patcher</tags>
+    <summary>Universal Retro Gaming and ROM Management Toolkit</summary>
+    <description>Universal cross-platform toolkit to convert, compress, patch, and manage ROMs for emulators.</description>
+  </metadata>
+</package>
