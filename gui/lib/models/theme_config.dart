@@ -19,6 +19,48 @@ class ThemeConfig {
   final String layout;
   Color get border => textSecondary.withValues(alpha: 0.2);
 
+  /// Whether this palette is a light theme (light background, dark text).
+  bool get isLight => background.computeLuminance() > 0.5;
+
+  /// Returns a light-mode variant of this palette that keeps the same [name],
+  /// accent and geometry so theme selection and persistence stay stable.
+  ThemeConfig toLight() {
+    return ThemeConfig(
+      name: name,
+      background: const Color(0xfff4f5f7),
+      surface: const Color(0xffffffff),
+      accent: accent,
+      textPrimary: const Color(0xff1a1a1f),
+      textSecondary: const Color(0xff5c5c66),
+      sidebarBg: const Color(0xffe9eaee),
+      cardBg: const Color(0xffffffff),
+      terminalBg: const Color(0xff1c1f26),
+      terminalText: const Color(0xff4ade80),
+      fontFamily: fontFamily,
+      borderRadius: borderRadius,
+      layout: layout,
+    );
+  }
+
+  /// Returns a dark-mode variant of this palette that keeps the same [name].
+  ThemeConfig toDark() {
+    return ThemeConfig(
+      name: name,
+      background: const Color(0xff0d0d0d),
+      surface: const Color(0xff1a1a1a),
+      accent: accent,
+      textPrimary: const Color(0xffffffff),
+      textSecondary: const Color(0xffa0a0b0),
+      sidebarBg: const Color(0xff111111),
+      cardBg: const Color(0xff1e1e1e),
+      terminalBg: const Color(0xff0a0a0a),
+      terminalText: const Color(0xff00e676),
+      fontFamily: fontFamily,
+      borderRadius: borderRadius,
+      layout: layout,
+    );
+  }
+
   ThemeConfig({
     required this.name,
     required this.background,

@@ -101,7 +101,19 @@ class HomeController extends ChangeNotifier {
         job.compression,
       );
 
-      if (job.targetFormat.toUpperCase() == 'CHD' &&
+      // CD-based disc images always map to `createcd`; only ISO/IMG need the
+      // user to disambiguate CD vs DVD when the platform is unknown.
+      final isCdImage = const ['CUE', 'BIN', 'GDI', 'CDI']
+          .contains(job.romFile.format.toUpperCase());
+
+      if (isCdImage &&
+          job.targetFormat.toUpperCase() == 'CHD' &&
+          (job.media == null || job.media!.isEmpty)) {
+        job.media = 'cd';
+      }
+
+      if (!isCdImage &&
+          job.targetFormat.toUpperCase() == 'CHD' &&
           (job.romFile.platform == 'UNKNOWN' ||
               job.romFile.platform == 'Unknown Disc' ||
               job.romFile.platform == 'ROM File') &&

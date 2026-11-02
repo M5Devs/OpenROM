@@ -917,6 +917,15 @@ Future<int> _runCli(List<String> args) async {
   }
 
   if (jobs.isEmpty) {
+    const msg =
+        'No convertible input found (provide --input FILE or --folder DIR '
+        'containing a supported format).';
+    if (isJson) {
+      _jsonPrint({'type': 'error', 'message': msg});
+      _jsonPrint({'type': 'done', 'success': false, 'error': msg});
+    } else {
+      print('Error: $msg');
+    }
     return 2;
   }
 
@@ -946,8 +955,11 @@ Future<int> _runCli(List<String> args) async {
       if (isJson) _jsonPrint({'type': 'done', 'success': true});
     } else {
       failed++;
-      if (isJson)
-        _jsonPrint({'type': 'done', 'success': false, 'error': job.error});
+      if (isJson) {
+        final err = job.error ?? 'Conversion failed';
+        _jsonPrint({'type': 'error', 'message': err});
+        _jsonPrint({'type': 'done', 'success': false, 'error': err});
+      }
     }
   }
 

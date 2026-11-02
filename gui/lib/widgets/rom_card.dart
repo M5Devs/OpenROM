@@ -75,6 +75,13 @@ class _RomCardState extends State<RomCard> {
   }
 
   LinearGradient _getPlatformGradient(String platform) {
+    // In light mode the platform gradients are too dark for the dark text the
+    // light palette uses, so fall back to the palette's own surfaces.
+    if (widget.theme.isLight) {
+      return LinearGradient(
+        colors: [widget.theme.cardBg, widget.theme.surface],
+      );
+    }
     final p = platform.toUpperCase();
     if (p.contains('PS1')) {
       return const LinearGradient(
@@ -233,7 +240,9 @@ class _RomCardState extends State<RomCard> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.4),
+                          color: widget.theme.isLight
+                              ? widget.theme.sidebarBg
+                              : Colors.black.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -336,9 +345,9 @@ class _RomCardState extends State<RomCard> {
                       // Delete button on hover
                       if (_isHovered)
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.close,
-                            color: Colors.white70,
+                            color: widget.theme.textSecondary,
                             size: 20,
                           ),
                           onPressed: widget.onDelete,
@@ -353,7 +362,7 @@ class _RomCardState extends State<RomCard> {
                 if (widget.job.status == JobStatus.converting)
                   LinearProgressIndicator(
                     value: widget.job.progress / 100.0,
-                    backgroundColor: Colors.black26,
+                    backgroundColor: widget.theme.border.withValues(alpha: 0.4),
                     color: widget.theme.accent,
                     minHeight: 4,
                   )

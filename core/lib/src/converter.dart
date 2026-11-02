@@ -344,18 +344,21 @@ class Converter {
     final chdman = detector.getChdmanPath();
     final out = _outPath(job, src, '.chd');
 
+    final platform = info['platform'] as String? ?? 'UNKNOWN';
+    final mediaOverride = job.media?.trim().toLowerCase();
+
+    // A CD-based disc image (CUE/BIN/GDI/CDI) has no DVD variant, so it always
+    // maps to `createcd` unless the caller explicitly forces `--media dvd`.
+    // Leaving the media type unassigned must never block dispatch.
     String subCmd;
-    if (['GDI', 'CUE', 'BIN', 'CDI'].contains(fmt)) {
+    if (mediaOverride == 'dvd') {
+      subCmd = 'createdvd';
+    } else if (mediaOverride == 'cd') {
+      subCmd = 'createcd';
+    } else if (['GDI', 'CUE', 'BIN', 'CDI'].contains(fmt)) {
       subCmd = 'createcd';
     } else if (fmt == 'ISO' || fmt == 'IMG') {
-      final platform = info['platform'] as String? ?? 'UNKNOWN';
-      final mediaOverride = job.media?.trim().toLowerCase();
-
-      if (mediaOverride == 'cd') {
-        subCmd = 'createcd';
-      } else if (mediaOverride == 'dvd') {
-        subCmd = 'createdvd';
-      } else if (cdPlatforms.any(
+      if (cdPlatforms.any(
         (kw) =>
             platform.toLowerCase() == kw.toLowerCase() ||
             platform.toLowerCase().contains(kw.toLowerCase()),
@@ -375,6 +378,7 @@ class Converter {
         return false;
       }
     } else {
+      // Any other disc-image format defaults to CD.
       subCmd = 'createcd';
     }
 

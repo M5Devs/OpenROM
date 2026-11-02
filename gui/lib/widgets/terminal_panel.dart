@@ -48,7 +48,7 @@ class TerminalPanel extends StatelessWidget {
                 Text(
                   'Execution Logs',
                   style: TextStyle(
-                    color: theme.textPrimary,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -56,13 +56,13 @@ class TerminalPanel extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.clear_all, size: 18),
-                  color: theme.textSecondary,
+                  color: Colors.white70,
                   onPressed: onClear,
                   tooltip: l10n.clearQueue,
                 ),
                 IconButton(
                   icon: const Icon(Icons.keyboard_arrow_down, size: 20),
-                  color: theme.textSecondary,
+                  color: Colors.white70,
                   onPressed: onClose,
                   tooltip: l10n.closeButton,
                 ),

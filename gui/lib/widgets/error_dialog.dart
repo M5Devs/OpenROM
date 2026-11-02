@@ -129,77 +129,90 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
       content: SingleChildScrollView(
         child: SizedBox(
           width: 480,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              Text(
-                _getLocalizedMessage(l10n),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                widget.error.action,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              if (widget.details != null &&
-                  widget.details!.trim().isNotEmpty) ...[
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isDetailsExpanded = !_isDetailsExpanded;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        _isDetailsExpanded
-                            ? Icons.arrow_drop_down
-                            : Icons.arrow_right,
-                        size: 20,
-                        color: Colors.grey,
+          child: Builder(
+            builder: (context) {
+              final scheme = Theme.of(context).colorScheme;
+              final isLight = Theme.of(context).brightness == Brightness.light;
+              final mutedColor = isLight ? Colors.black54 : Colors.grey;
+              final detailsBg = isLight
+                  ? Colors.black.withValues(alpha: 0.05)
+                  : Colors.black26;
+              final detailsFg = isLight ? Colors.black87 : Colors.white70;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    _getLocalizedMessage(l10n),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.error.action,
+                    style: TextStyle(fontSize: 12, color: mutedColor),
+                  ),
+                  if (widget.details != null &&
+                      widget.details!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _isDetailsExpanded = !_isDetailsExpanded;
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isDetailsExpanded
+                                ? Icons.arrow_drop_down
+                                : Icons.arrow_right,
+                            size: 20,
+                            color: mutedColor,
+                          ),
+                          Text(
+                            l10n.errorDetailsLabel,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: mutedColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        l10n.errorDetailsLabel,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                    ),
+                    if (_isDetailsExpanded) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(maxHeight: 180),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: detailsBg,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: scheme.onSurface.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: SingleChildScrollView(
+                          child: SelectableText(
+                            widget.details!.trim(),
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 11,
+                              color: detailsFg,
+                            ),
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-                if (_isDetailsExpanded) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxHeight: 180),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.black26,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: SingleChildScrollView(
-                      child: SelectableText(
-                        widget.details!.trim(),
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 11,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
-              ],
-            ],
+              );
+            },
           ),
         ),
       ),

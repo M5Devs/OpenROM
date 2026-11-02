@@ -4,8 +4,8 @@
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
-Version at time of writing: **3.9.5** (`VERSION`, `core/pubspec.yaml`,
-`gui/pubspec.yaml` = `3.9.5+1`).
+Version at time of writing: **3.9.7** (`VERSION`, `core/pubspec.yaml`,
+`gui/pubspec.yaml` = `3.9.7+1`).
 
 ---
 
@@ -497,7 +497,7 @@ build-windows   build-linux   build-linux-arm64  build-macos (matrix:   │
 | **Windows** | `windows-2022` | `flutter build windows` | `openrom-core.exe` | Copy core/VERSION/themes/assets into `…/Release`, write `README.txt`; `Compress-Archive` → **ZIP**; install NSIS + EnVar plugin + ImageMagick, generate BMP/ICO, `makensis openrom.nsi` → **Setup.exe** | `OpenROM_Windows`, `OpenROM_Windows_Installer` |
 | **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → standalone **AppImage**; plus a **Core CLI ZIP** (`openrom-core` + light tools: xdelta3, ecm, unecm, saturn-patcher) | `OpenROM_Linux` → `…_Linux_x86_64.AppImage`, `OpenROM-Core-…_Linux_x86_64.zip` |
 | **Linux ARM64** | `ubuntu-24.04-arm` | `flutter build linux` (manual Flutter clone + `precache --linux`) | `openrom-core` | Same as x86_64: standalone **AppImage** + **Core CLI ZIP** (light tools only — heavy conversions need x86_64) | `OpenROM_Linux_arm64` → `…_Linux_arm64.AppImage`, `OpenROM-Core-…_Linux_arm64.zip` |
-| **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/VERSION/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG**, then ZIP | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
+| **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/VERSION/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG** (published directly) | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
 | **Android** (`Android.yml`) | `ubuntu-latest` | `flutter build apk --release` | core **compiled into the APK** via jniLibs (below) | **APK** | `OpenROM-Android-Universal` |
 | **Flatpak** (`Flatpak.yml`) | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Install bundle + core + tools into `/app`, `flatpak-builder` → **.flatpak** | attached to release |
 
@@ -528,7 +528,7 @@ At runtime, `main.dart` queries the native library directory over a
 `config.getToolPath()` returns `lib<tool>.so` inside that dir — this is the only
 platform where tools are shared libraries rather than executables.
 
-Android is **omitted from the v3.9.5 release**. The `build-android` job is guarded
+Android is **omitted from the v3.9.7 release**. The `build-android` job is guarded
 so the `release: published` trigger no longer fires it; re-enable by dispatching
 `Android.yml` manually or setting the repository variable
 `ENABLE_ANDROID_RELEASE=true`.

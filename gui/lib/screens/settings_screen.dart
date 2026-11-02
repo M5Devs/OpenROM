@@ -427,9 +427,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
           const SizedBox(height: 32),
 
-          // Themes Preview Section
+          // Appearance (Light / Dark / System)
           _buildSectionTitle(l10n.themeScreen),
           const SizedBox(height: 12),
+          SegmentedButton<ThemeMode>(
+            segments: const [
+              ButtonSegment(
+                value: ThemeMode.system,
+                label: Text('System'),
+                icon: Icon(Icons.brightness_auto),
+              ),
+              ButtonSegment(
+                value: ThemeMode.light,
+                label: Text('Light'),
+                icon: Icon(Icons.light_mode),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                label: Text('Dark'),
+                icon: Icon(Icons.dark_mode),
+              ),
+            ],
+            selected: {widget.themeService.themeMode},
+            onSelectionChanged: (selection) {
+              widget.themeService.setThemeMode(selection.first);
+            },
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: theme.accent,
+              selectedForegroundColor: Colors.white,
+              foregroundColor: theme.textPrimary,
+              side: BorderSide(color: theme.border),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Themes Preview Section
+          const SizedBox(height: 8),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

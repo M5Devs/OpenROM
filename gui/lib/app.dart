@@ -118,7 +118,22 @@ class _OpenROMAppState extends State<OpenROMApp> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = widget.themeService.currentTheme;
+    // Prefer the ambient MediaQuery (reactive to OS changes); fall back to the
+    // platform dispatcher so this never throws above a MaterialApp.
+    final brightness = MediaQuery.maybePlatformBrightnessOf(context) ??
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final theme = widget.themeService.resolvedTheme(brightness);
+
+    final lightColorScheme = ColorScheme.fromSeed(
+      seedColor: theme.accent,
+      brightness: Brightness.light,
+      surface: theme.surface,
+    );
+    final darkColorScheme = ColorScheme.fromSeed(
+      seedColor: theme.accent,
+      brightness: Brightness.dark,
+      surface: theme.surface,
+    );
 
     final int fileCount = _homeController.fileCount;
     final bool isConverting = _homeController.isConverting;
@@ -159,13 +174,16 @@ class _OpenROMAppState extends State<OpenROMApp> {
       locale: widget.localeProvider.locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      themeMode: widget.themeService.themeMode,
       theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: theme.background,
+        colorScheme: lightColorScheme,
+      ),
+      darkTheme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: theme.background,
-        colorScheme: ColorScheme.dark(
-          surface: theme.surface,
-          primary: theme.accent,
-        ),
+        colorScheme: darkColorScheme,
       ),
       home: LayoutBuilder(
         builder: (context, constraints) {

@@ -236,11 +236,15 @@ final Uint8List chdMagic = Uint8List.fromList([
 ]); // MComprHD
 final Uint8List ps2Magic = Uint8List.fromList('PLAYSTATION'.codeUnits);
 final Uint8List ps1Magic = Uint8List.fromList('PlayStation'.codeUnits);
+final Uint8List ps1MagicUpper = Uint8List.fromList('PLAYSTATION'.codeUnits);
 const int gcMagic = 0xC2339F3D;
 const int wiiMagic = 0x5D1C9EA3;
 
 final Uint8List saturnMagic1 = Uint8List.fromList('SEGA SEGASATURN'.codeUnits);
 final Uint8List saturnMagic2 = Uint8List.fromList('SEGA SATURN '.codeUnits);
+final Uint8List dreamcastMagic = Uint8List.fromList(
+  'SEGA SEGAKATANA'.codeUnits,
+);
 final Uint8List segacdMagic1 = Uint8List.fromList('SEGADISCSYSTEM'.codeUnits);
 final Uint8List segacdMagic2 = Uint8List.fromList('SEGA_CD'.codeUnits);
 final Uint8List pcecdMagic = Uint8List.fromList(
@@ -408,7 +412,12 @@ String _guessPlatform(String filepath, String fmt, int size, Uint8List header) {
   }
   if (fmt == 'XISO') return 'Xbox';
 
-  if (fmt == 'ISO' || fmt == 'BIN' || fmt == 'IMG' || fmt == 'CUE') {
+  // A CUE sheet carries no platform data of its own: the referenced BIN does.
+  if (fmt == 'CUE') {
+    return _guessCuePlatform(filepath) ?? 'UNKNOWN';
+  }
+
+  if (fmt == 'ISO' || fmt == 'BIN' || fmt == 'IMG') {
     if (fmt == 'ISO' || fmt == 'IMG') {
       if (_headerHasXboxMagic(header) || _fileHasXboxMagicSlow(filepath)) {
         return 'Xbox';
@@ -438,6 +447,65 @@ String _guessPlatform(String filepath, String fmt, int size, Uint8List header) {
   }
 
   return platformMap[fmt] ?? 'ROM File';
+}
+
+/// Reads the `FILE` entry from a CUE sheet, resolving the referenced image
+/// relative to the directory containing the CUE. Returns `null` when no
+/// readable image is referenced.
+String? _cueReferencedImage(String cuePath) {
+  try {
+    final cueDir = p.dirname(p.canonicalize(cuePath));
+    var content = File(cuePath).readAsStringSync();
+    if (content.startsWith('\uFEFF')) content = content.substring(1);
+
+    // Non-greedy name anchored to the trailing file type so quotes, spaces and
+    // apostrophes (e.g. "Tony Hawk's Pro Skater.bin") are preserved.
+    final fileRegex = RegExp(
+      r'^\s*FILE\s+(.+?)\s+(BINARY|WAVE|MP3|AIFF|MOTOROLA)\s*$',
+      caseSensitive: false,
+    );
+
+    for (final line in content.split(RegExp(r'\r\n|\r|\n'))) {
+      final match = fileRegex.firstMatch(line.trim());
+      if (match == null) continue;
+      var name = match.group(1)!.trim();
+      if (name.length >= 2) {
+        final first = name[0];
+        final last = name[name.length - 1];
+        if ((first == '"' && last == '"') || (first == "'" && last == "'")) {
+          name = name.substring(1, name.length - 1);
+        }
+      }
+      if (name.isEmpty) continue;
+      final resolved = p.join(cueDir, name);
+      if (File(resolved).existsSync()) return resolved;
+    }
+  } catch (_) {
+    // Unreadable CUE or image — fall back to unknown rather than throwing.
+  }
+  return null;
+}
+
+/// Detects the platform of a CUE sheet by reading magic bytes from its
+/// referenced BIN image. Returns `null` when the image cannot be read.
+String? _guessCuePlatform(String cuePath) {
+  final binPath = _cueReferencedImage(cuePath);
+  if (binPath == null) return null;
+
+  // Disc images use 2352-byte raw sectors, so the volume descriptor sits
+  // within the first few sectors; a 64 KiB window is comfortably enough.
+  final header = _readHeader(binPath, 0x10000);
+  if (header.isEmpty) return null;
+
+  if (_headerHasDreamcastMagic(header)) return 'Dreamcast';
+  if (_headerHasSaturnMagic(header)) return 'Saturn';
+  if (_headerHasSegacdMagic(header)) return 'Sega CD';
+  if (_headerHasPcecdMagic(header)) return 'PC-Engine CD';
+  if (_headerHasNeogeocdMagic(header)) return 'Neo Geo CD';
+  if (_headerHasPs2Magic(header)) return 'PS2';
+  if (_headerHasPs1Magic(header)) return 'PS1';
+
+  return null;
 }
 
 bool _containsSublist(Uint8List list, Uint8List sublist) {
@@ -516,7 +584,14 @@ bool _headerHasPs2Magic(Uint8List header) {
 bool _headerHasPs1Magic(Uint8List header) {
   final sliceLen = header.length < 65536 ? header.length : 65536;
   final slice = Uint8List.sublistView(header, 0, sliceLen);
-  return _containsSublist(slice, ps1Magic);
+  return _containsSublist(slice, ps1Magic) ||
+      _containsSublist(slice, ps1MagicUpper);
+}
+
+bool _headerHasDreamcastMagic(Uint8List header) {
+  final sliceLen = header.length < 65536 ? header.length : 65536;
+  final slice = Uint8List.sublistView(header, 0, sliceLen);
+  return _containsSublist(slice, dreamcastMagic);
 }
 
 bool _headerHasSaturnMagic(Uint8List header) {

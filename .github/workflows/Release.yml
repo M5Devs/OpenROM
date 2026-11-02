@@ -549,20 +549,11 @@ jobs:
             -format UDZO \
             "OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.dmg"
 
-      - name: Package ZIP
-        run: |
-          mkdir release
-          cp "OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.dmg" release/
-          printf 'OpenROM - macOS\n======================================================\nRUN THIS: Open the .dmg and drag OpenROM to Applications.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
-            > release/README.txt
-          cd release
-          zip -r "../OpenROM-v${RELEASE_VERSION}_macOS_$MATRIX_ARCH.zip" .
-
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: OpenROM_macOS_${{ matrix.arch }}
-          path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.zip
+          path: OpenROM-v${{ github.event.inputs.version }}_macOS_${{ matrix.arch }}.dmg
 
   # ── GitHub Release ───────────────────────────────────────
   release:
@@ -611,8 +602,8 @@ jobs:
             | 🐧 Linux ARM64 (AppImage) | `OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage` |
             | 🐧 Linux x86_64 (Core CLI) | `OpenROM-Core-v${{ github.event.inputs.version }}_Linux_x86_64.zip` |
             | 🐧 Linux ARM64 (Core CLI) | `OpenROM-Core-v${{ github.event.inputs.version }}_Linux_arm64.zip` |
-            | 🍎 macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip` |
-            | 🍎 macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip` |
+            | 🍎 macOS Apple Silicon | `OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.dmg` |
+            | 🍎 macOS Intel | `OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.dmg` |
 
             ### Linux notes
             - **AppImage** — full GUI with the bundled `openrom-core` engine and all tools. Run it directly, no unzip needed.
@@ -625,8 +616,8 @@ jobs:
             artifacts/OpenROM_Linux/OpenROM-Core-v${{ github.event.inputs.version }}_Linux_x86_64.zip
             artifacts/OpenROM_Linux_arm64/OpenROM-v${{ github.event.inputs.version }}_Linux_arm64.AppImage
             artifacts/OpenROM_Linux_arm64/OpenROM-Core-v${{ github.event.inputs.version }}_Linux_arm64.zip
-            artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.zip
-            artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.zip
+            artifacts/OpenROM_macOS_arm64/OpenROM-v${{ github.event.inputs.version }}_macOS_arm64.dmg
+            artifacts/OpenROM_macOS_x86_64/OpenROM-v${{ github.event.inputs.version }}_macOS_x86_64.dmg
           draft: false
           prerelease: false
         env:
