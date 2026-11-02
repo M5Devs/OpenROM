@@ -6,9 +6,18 @@
     <title>OpenROM</title>
     <authors>M5 Dev</authors>
     <projectUrl>https://github.com/M5Devs/OpenROM</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/M5Devs/OpenROM/main/assets/icons/icon.png</iconUrl>
     <licenseUrl>https://github.com/M5Devs/OpenROM/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/M5Devs/OpenROM</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/M5Devs/OpenROM/issues</bugTrackerUrl>
     <tags>openrom retro gaming emulation rom chd cso rvz patcher</tags>
     <summary>Universal Retro Gaming and ROM Management Toolkit</summary>
-    <description>Universal cross-platform toolkit to convert, compress, patch, and manage ROMs for emulators.</description>
+    <description><![CDATA[OpenROM is a free, open-source universal toolkit to convert, compress, and patch ROMs.
+Features include batch conversion (ISO to CHD/CSO/RVZ), M3U playlist generation, BIN track merging, and support for 9 ROM patch formats (IPS, BPS, UPS, xdelta3, etc.).]]></description>
+    <releaseNotes>https://github.com/M5Devs/OpenROM/releases/tag/v3.9.5</releaseNotes>
   </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
 </package>
