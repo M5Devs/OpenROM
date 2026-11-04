@@ -229,6 +229,15 @@ openrom-core --m3u /roms/Metal\ Gear\ Solid/
 # Verify a CHD
 openrom-core --input game.chd --verify-only
 
+# Hash a ROM (CRC32 / MD5 / SHA-1 / SHA-256)
+openrom-core --hash game.iso
+openrom-core --json --hash game.iso
+
+# Plugin developer tooling (orplug-builder)
+openrom-core --plugin-init ./my-tool --name "My Tool" --id my-tool
+openrom-core --plugin-validate ./my-tool
+openrom-core --plugin-pack ./my-tool --out ./my-tool-1.0.0.orplug
+
 # JSON output (for scripting / Flutter IPC)
 openrom-core --json --detect game.iso
 ```

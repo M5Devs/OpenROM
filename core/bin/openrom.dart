@@ -26,6 +26,16 @@ void _jsonPrint(Map<String, dynamic> obj) {
   print(jsonEncode(obj));
 }
 
+OrplugBuilder _builder(bool isJson) => OrplugBuilder(
+      log: (msg) {
+        if (isJson) {
+          _jsonPrint({'type': 'log', 'message': msg});
+        } else {
+          print(msg);
+        }
+      },
+    );
+
 ArgParser buildParser() {
   final parser = ArgParser()
     ..addOption('input', abbr: 'i', help: 'single input ROM file')
@@ -35,6 +45,10 @@ ArgParser buildParser() {
       help: 'convert all supported ROMs in a folder',
     )
     ..addOption('detect', help: 'detect file format and info')
+    ..addOption(
+      'hash',
+      help: 'compute CRC32/MD5/SHA-1/SHA-256 checksums for a ROM file',
+    )
     ..addOption('convert', help: 'single file to convert (alias for --input)')
     ..addMultiOption(
       'compress',
@@ -76,6 +90,22 @@ ArgParser buildParser() {
     ..addFlag('list-plugins',
         negatable: false, help: 'list all installed plugins')
     ..addOption('remove-plugin', help: 'uninstall a plugin by ID')
+    // Plugin developer tooling (orplug-builder)
+    ..addOption(
+      'plugin-init',
+      help: 'scaffold a new plugin folder at the given directory',
+    )
+    ..addOption(
+      'plugin-validate',
+      help: 'validate a plugin folder or .orplug archive',
+    )
+    ..addOption(
+      'plugin-pack',
+      help: 'package a plugin folder into a .orplug archive',
+    )
+    ..addOption('name', help: 'plugin display name (used with --plugin-init)')
+    ..addOption('id', help: 'plugin id (used with --plugin-init)')
+    ..addOption('out', help: 'output path for --plugin-pack (.orplug)')
     // Dreamcast DCP patch
     ..addOption(
       'dcp',
@@ -297,12 +327,148 @@ Future<int> _runCli(List<String> args) async {
     return ok ? 0 : 1;
   }
 
+  if (results['plugin-init'] != null) {
+    final target = results['plugin-init'] as String;
+    final builder = _builder(isJson);
+    final res = builder.init(
+      target,
+      name: results['name'] as String?,
+      id: results['id'] as String?,
+    );
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': res.success,
+        if (res.error != null) 'error': res.error,
+        if (res.outputPath != null) 'path': res.outputPath,
+        'warnings': res.warnings,
+      });
+    } else if (res.success) {
+      print('✅ Scaffolded plugin at ${res.outputPath}');
+      for (final w in res.warnings) {
+        print('  • $w');
+      }
+    } else {
+      print('❌ ${res.error}');
+    }
+    return res.success ? 0 : 1;
+  }
+
+  if (results['plugin-validate'] != null) {
+    final target = results['plugin-validate'] as String;
+    final builder = _builder(isJson);
+    final res = builder.validate(target);
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': res.success,
+        'errors': res.errors,
+        'warnings': res.warnings,
+      });
+    } else if (res.success) {
+      print('✅ Plugin is valid.');
+      for (final w in res.warnings) {
+        print('  ⚠ $w');
+      }
+    } else {
+      print('❌ Plugin validation failed:');
+      for (final e in res.errors) {
+        print('  • $e');
+      }
+      for (final w in res.warnings) {
+        print('  ⚠ $w');
+      }
+    }
+    return res.success ? 0 : 1;
+  }
+
+  if (results['plugin-pack'] != null) {
+    final source = results['plugin-pack'] as String;
+    final builder = _builder(isJson);
+    final res = builder.pack(source, outputPath: results['out'] as String?);
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': res.success,
+        if (res.error != null) 'error': res.error,
+        if (res.outputPath != null) 'output': res.outputPath,
+        if (res.archiveSha256 != null) 'sha256': res.archiveSha256,
+        'size': res.archiveSize,
+        'warnings': res.warnings,
+        if (res.marketplaceEntry != null) 'marketplace': res.marketplaceEntry,
+      });
+    } else if (res.success) {
+      print('✅ Packed: ${res.outputPath}');
+      print('  SHA-256: ${res.archiveSha256}');
+      print('  Size: ${res.archiveSize} bytes');
+      for (final w in res.warnings) {
+        print('  ⚠ $w');
+      }
+      print('');
+      print('Marketplace entry (paste into store_manifest.json):');
+      print(const JsonEncoder.withIndent('  ').convert(res.marketplaceEntry));
+    } else {
+      print('❌ ${res.error}');
+      for (final w in res.warnings) {
+        print('  ⚠ $w');
+      }
+    }
+    return res.success ? 0 : 1;
+  }
+
   if (results['tool-path'] != null) {
     final pStr = getToolPath(results['tool-path'] as String);
     if (isJson) {
       _jsonPrint({'path': pStr});
     } else {
       print(pStr);
+    }
+    return 0;
+  }
+
+  if (results['hash'] != null) {
+    final target = results['hash'] as String;
+    final hasher = RomHasher();
+    final res = await hasher.hashFile(
+      target,
+      onProgress: (pct) {
+        if (isJson) {
+          _jsonPrint({
+            'type': 'progress',
+            'file': p.basename(target),
+            'percent': pct,
+          });
+        } else {
+          _renderProgress(p.basename(target), pct);
+        }
+      },
+    );
+    if (!isJson) _clearProgress();
+    if (res == null) {
+      if (isJson) {
+        _jsonPrint({
+          'type': 'error',
+          'message': 'File not found: $target',
+        });
+      } else {
+        print('Error: File not found: $target');
+      }
+      return 2;
+    }
+    if (isJson) {
+      _jsonPrint({
+        'type': 'result',
+        'action': 'hash',
+        'file': target,
+        ...res.toJson(),
+      });
+    } else {
+      print('File:   $target');
+      print('Size:   ${res.size} bytes (${res.sizeHuman})');
+      print('CRC32:  ${res.crc32}');
+      print('MD5:    ${res.md5}');
+      print('SHA-1:  ${res.sha1}');
+      print('SHA-256:${res.sha256}');
     }
     return 0;
   }

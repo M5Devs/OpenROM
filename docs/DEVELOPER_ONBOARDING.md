@@ -4,8 +4,8 @@
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
-Version at time of writing: **3.9.8** (`VERSION`, `core/pubspec.yaml`,
-`gui/pubspec.yaml` = `3.9.8+1`).
+Version at time of writing: **3.9.9** (`VERSION`, `core/pubspec.yaml`,
+`gui/pubspec.yaml` = `3.9.9+1`).
 
 ---
 

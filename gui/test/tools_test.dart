@@ -69,6 +69,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Remove Header'), findsOneWidget);
       expect(find.text('Keep backup (.bak)'), findsOneWidget);
+
+      final hasherTabFinder = find.widgetWithText(Tab, 'ROM Hasher');
+      expect(hasherTabFinder, findsOneWidget);
+      await tester.tap(hasherTabFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Compute Hashes'), findsOneWidget);
+      expect(
+        find.text('Compute CRC32, MD5, SHA-1 and SHA-256 in a single '
+            'streaming pass.'),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -50,6 +50,39 @@ class BinMergeResult {
   });
 }
 
+/// Result of hashing a ROM file.
+class HashResult {
+  final String filePath;
+  final int size;
+  final String sizeHuman;
+  final String crc32;
+  final String md5;
+  final String sha1;
+  final String sha256;
+
+  HashResult({
+    required this.filePath,
+    required this.size,
+    required this.sizeHuman,
+    required this.crc32,
+    required this.md5,
+    required this.sha1,
+    required this.sha256,
+  });
+
+  factory HashResult.fromJson(String filePath, Map<String, dynamic> json) {
+    return HashResult(
+      filePath: filePath,
+      size: (json['size'] as num?)?.toInt() ?? 0,
+      sizeHuman: json['size_human'] as String? ?? '0 B',
+      crc32: json['crc32'] as String? ?? '',
+      md5: json['md5'] as String? ?? '',
+      sha1: json['sha1'] as String? ?? '',
+      sha256: json['sha256'] as String? ?? '',
+    );
+  }
+}
+
 Stream<String> _splitStreamLines(Stream<List<int>> stream) async* {
   String buffer = '';
   await for (final chunk in stream.transform(utf8.decoder)) {
@@ -197,6 +230,77 @@ class ToolsService {
       final details = stderrLog.isNotEmpty
           ? stderrLog.toString().trim()
           : 'Process exited with code $exitCode';
+      throw OpenROMException(OpenROMError.conversionFailed, details: details);
+    } on FileSystemException catch (e) {
+      final err = (e.osError?.errorCode == 13 ||
+              e.message.toLowerCase().contains('permission'))
+          ? OpenROMError.permissionDenied
+          : OpenROMError.fileNotFound;
+      throw OpenROMException(err, details: e.toString());
+    } on ProcessException catch (e) {
+      throw OpenROMException(OpenROMError.toolFailed, details: e.toString());
+    } catch (e) {
+      if (e is OpenROMException) rethrow;
+      throw OpenROMException(OpenROMError.unknownError, details: e.toString());
+    }
+  }
+
+  /// Hash a ROM file (CRC32/MD5/SHA-1/SHA-256) via the core CLI.
+  Future<HashResult> hashRom(
+    String romPath, {
+    ProgressCallback? onProgress,
+  }) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    if (!File(romPath).existsSync()) {
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'ROM file not found: $romPath',
+      );
+    }
+
+    try {
+      final corePath = await CoreBridge.getCoreExecutablePath();
+      final List<String> args = [];
+
+      if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+        args.add('main.py');
+      }
+
+      args.addAll(['--json', '--hash', romPath]);
+
+      final process = await Process.start(corePath, args);
+      final stderrLog = StringBuffer();
+      HashResult? hashResult;
+
+      _splitStreamLines(process.stdout).listen((line) {
+        if (line.trim().isEmpty) return;
+        try {
+          final Map<String, dynamic> event = jsonDecode(line);
+          final type = event['type'];
+          if (type == 'progress') {
+            onProgress?.call((event['percent'] as num?)?.toDouble() ?? 0);
+          } else if (type == 'result') {
+            hashResult = HashResult.fromJson(romPath, event);
+          } else if (type == 'error') {
+            stderrLog.writeln(event['message'] ?? '');
+          }
+        } catch (_) {}
+      });
+
+      _splitStreamLines(process.stderr).listen((line) {
+        if (line.trim().isNotEmpty) stderrLog.writeln(line);
+      });
+
+      final exitCode = await process.exitCode;
+      if (exitCode == 0 && hashResult != null) {
+        return hashResult!;
+      }
+
+      final details = stderrLog.isNotEmpty
+          ? stderrLog.toString().trim()
+          : 'Hashing failed with code $exitCode';
       throw OpenROMException(OpenROMError.conversionFailed, details: details);
     } on FileSystemException catch (e) {
       final err = (e.osError?.errorCode == 13 ||
