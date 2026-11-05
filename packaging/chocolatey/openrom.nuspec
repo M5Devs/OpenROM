@@ -5,11 +5,14 @@
     <version>3.9.5</version>
     <title>OpenROM</title>
     <authors>M5 Dev</authors>
+    <owners>clausvalcatd</owners>
     <projectUrl>https://github.com/M5Devs/OpenROM</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/M5Devs/OpenROM/main/assets/icons/icon.png</iconUrl>
+    <projectSourceUrl>https://github.com/M5Devs/OpenROM</projectSourceUrl>
+    <packageSourceUrl>https://github.com/M5Devs/OpenROM/tree/main/packaging/chocolatey</packageSourceUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/M5Devs/OpenROM@887328aeb42f322e26162de148c4ed9dd29ef1ec/assets/icons/icon.png</iconUrl>
     <licenseUrl>https://github.com/M5Devs/OpenROM/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectSourceUrl>https://github.com/M5Devs/OpenROM</projectSourceUrl>
+    <copyright>Copyright (c) 2026 M5 Dev</copyright>
     <bugTrackerUrl>https://github.com/M5Devs/OpenROM/issues</bugTrackerUrl>
     <tags>openrom retro gaming emulation rom chd cso rvz patcher</tags>
     <summary>Universal Retro Gaming and ROM Management Toolkit</summary>
