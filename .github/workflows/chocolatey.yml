@@ -1,10 +1,12 @@
 name: Publish to Chocolatey
 
 on:
+  release:
+    types: [published] # يشتغل لوحده أوتوماتيك أول ما تعمل ريليس جديد على جيت هاب!
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g. 3.9.5)'
+        description: 'Version to publish (without v, e.g. 3.9.5)'
         required: true
         default: '3.9.5'
 
@@ -15,10 +17,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Determine Target Version
+        id: get_version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $ver = "${{ inputs.version }}"
+          } else {
+            # بيشيل حرف v لو التاج اسمه v3.9.9 مثلاً
+            $ver = "${{ github.event.release.tag_name }}".TrimStart("v")
+          }
+          Write-Host "Publishing version: $ver"
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+
       - name: Prepare Chocolatey Package
         shell: pwsh
         run: |
-          $ver = "${{ inputs.version }}"
+          $ver = "${{ steps.get_version.outputs.VERSION }}"
           $setupUrl = "https://github.com/M5Devs/OpenROM/releases/download/v$ver/OpenROM-v$ver-Setup.exe"
           
           Write-Host "Downloading Setup.exe to calculate SHA256: $setupUrl"
@@ -26,23 +41,25 @@ jobs:
           $hash = (Get-FileHash -Algorithm SHA256 setup.exe).Hash
           Write-Host "Calculated Hash: $hash"
 
-          # Update version in nuspec
+          # 1. Update version in nuspec
           $nuspecPath = "packaging/chocolatey/openrom.nuspec"
           (Get-Content $nuspecPath) -replace '<version>.*?</version>', "<version>$ver</version>" | Set-Content $nuspecPath
+          (Get-Content $nuspecPath) -replace 'tag/v.*?</releaseNotes>', "tag/v$ver</releaseNotes>" | Set-Content $nuspecPath
 
-          # Update URL and Hash in install script
+          # 2. Update URL and Hash in install script
           $scriptPath = "packaging/chocolatey/tools/chocolateyInstall.ps1"
           (Get-Content $scriptPath) `
-            -replace "v3.9.5", "v$ver" `
-            -replace "AUTO_CHECKSUM_REPLACED_BY_ACTION", "$hash" | Set-Content $scriptPath
+            -replace "v[0-9]+\.[0-9]+\.[0-9]+", "v$ver" `
+            -replace "checksum64\s*=\s*'.*?'", "checksum64     = '$hash'" | Set-Content $scriptPath
 
       - name: Pack and Push to Chocolatey
         shell: pwsh
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
         run: |
+          $ver = "${{ steps.get_version.outputs.VERSION }}"
           cd packaging/chocolatey
           choco pack openrom.nuspec
           
-          # Upload package to official Chocolatey repository
-          choco push "openrom.${{ inputs.version }}.nupkg" --api-key "$env:CHOCO_API_KEY" --source "https://push.chocolatey.org/"
+          # Upload package to Chocolatey community repository
+          choco push "openrom.$ver.nupkg" --api-key "$env:CHOCO_API_KEY" --source "https://push.chocolatey.org/"
