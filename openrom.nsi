@@ -151,12 +151,28 @@ Section "File Associations" SecFileAssoc
     (0x08000000, 0, 0, 0)'
 SectionEnd
 
+; ── openrom:// URL protocol ───────────────────────────────────────────────────
+Section "openrom:// Protocol" SecProtocol
+  ; Register the URL scheme so storefront "Install" links launch OpenROM.
+  WriteRegStr HKCR "openrom" "" "URL:OpenROM Protocol"
+  WriteRegStr HKCR "openrom" "URL Protocol" ""
+  WriteRegStr HKCR "openrom\DefaultIcon" "" "$INSTDIR\${APP_EXE},0"
+  WriteRegStr HKCR "openrom\shell\open\command" "" '"$INSTDIR\${APP_EXE}" "%1"'
+  ; Mirror under HKCU so the scheme also resolves for the installing user
+  ; without requiring an elevated shell.
+  WriteRegStr HKCU "Software\Classes\openrom" "" "URL:OpenROM Protocol"
+  WriteRegStr HKCU "Software\Classes\openrom" "URL Protocol" ""
+  WriteRegStr HKCU "Software\Classes\openrom\DefaultIcon" "" "$INSTDIR\${APP_EXE},0"
+  WriteRegStr HKCU "Software\Classes\openrom\shell\open\command" "" '"$INSTDIR\${APP_EXE}" "%1"'
+SectionEnd
+
 ; Section descriptions (shown on components page)
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI}       "OpenROM desktop application and all bundled tools. Required."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Create shortcuts on the Desktop and in the Start Menu."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPATH}      "Add openrom-core to system PATH so you can run it from any terminal or script."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecFileAssoc} "Associate .chd, .cue, .gdi, and .cso files with OpenROM."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecProtocol}  "Register the openrom:// link protocol so store links open directly in OpenROM."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; ── Uninstall ─────────────────────────────────────────────────────────────────
@@ -182,6 +198,10 @@ Section "Uninstall"
   DeleteRegKey HKCR "OpenROM.GDIFile"
   DeleteRegKey HKCR "OpenROM.CHDFile"
   DeleteRegKey HKCR "OpenROM.CSOFile"
+
+  ; Remove the openrom:// URL protocol registration
+  DeleteRegKey HKCR "openrom"
+  DeleteRegKey HKCU "Software\Classes\openrom"
 
   ; Refresh shell
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v \

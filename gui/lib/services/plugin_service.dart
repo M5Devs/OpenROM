@@ -26,6 +26,10 @@ class PluginService {
   static const String defaultRegistryUrl =
       'https://plugins.openrom.dev/registry';
 
+  /// The live storefront catalogue API (Cloudflare Pages + D1).
+  static const String defaultStoreApiUrl =
+      'https://openrom-store.pages.dev/api/plugins.json';
+
   PluginService({
     PluginManager? pluginManager,
     PluginStoreClient? storeClient,
@@ -72,6 +76,22 @@ class PluginService {
       return manifest.plugins;
     }
     return _defaultStoreCatalog;
+  }
+
+  /// Fetches the live storefront catalogue. Returns `null` when the API is
+  /// unreachable so the caller can fall back to a cached copy.
+  Future<({List<StoreListing> listings, String raw})?> fetchLiveStore({
+    String? endpointUrl,
+  }) async {
+    final url = (endpointUrl != null && endpointUrl.isNotEmpty)
+        ? Uri.tryParse(endpointUrl)
+        : Uri.tryParse(defaultStoreApiUrl);
+    return _storeClient.fetchLiveListings(url: url);
+  }
+
+  /// Installs a live storefront listing (download → verify → install).
+  Future<StoreInstallOutcome> installFromListing(StoreListing listing) {
+    return installFromStore(listing.toStorePlugin());
   }
 
   /// Downloads and installs a plugin listed in the store.

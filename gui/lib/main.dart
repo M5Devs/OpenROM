@@ -9,11 +9,17 @@ import 'package:openrom_core/openrom_core.dart' as core;
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
+import 'controllers/plugin_builder_controller.dart';
 import 'providers/locale_provider.dart';
+import 'services/deeplink_service.dart';
 import 'services/theme_service.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // `openrom://` links arrive either as a process argument (cold start) or via
+  // the native host after launch (warm start). The service unifies both.
+  final deepLinkService = DeepLinkService();
 
   if (Platform.isAndroid) {
     try {
@@ -48,7 +54,15 @@ void main() async {
 
   final themeService = ThemeService();
   final localeProvider = LocaleProvider();
+  final builderController = PluginBuilderController();
+  await deepLinkService.start(launchArgs: args);
+
   runApp(
-    OpenROMApp(themeService: themeService, localeProvider: localeProvider),
+    OpenROMApp(
+      themeService: themeService,
+      localeProvider: localeProvider,
+      builderController: builderController,
+      deepLinkService: deepLinkService,
+    ),
   );
 }

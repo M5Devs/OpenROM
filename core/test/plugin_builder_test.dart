@@ -192,15 +192,17 @@ void main() {
       expect((envs['macos_arm64'] as Map<String, dynamic>)['sha256'],
           sha256Hex(mac.readAsBytesSync()));
 
-      // Marketplace entry is well-formed.
+      // Marketplace entry matches the live storefront shape.
       final entry = res.marketplaceEntry!;
       expect(entry['id'], 'e2e-tool');
       expect(entry['publisherId'], 'your-publisher-id');
-      final stable =
-          (entry['channels'] as Map<String, dynamic>)['stable'] as Map;
-      final artifacts = stable['artifacts'] as Map;
-      expect(artifacts.keys, containsAll(['linux_x64', 'windows_x64']));
-      expect((artifacts['linux_x64'] as Map)['sha256'], res.archiveSha256);
+      expect(entry['version'], '1.0.0');
+      expect(entry['sha256'], res.archiveSha256);
+      expect(entry['category'], 'Patchers');
+      expect(entry['routes'], contains('ISO->MYFMT'));
+      expect(entry['platforms'], containsAll(['Windows', 'Linux', 'macOS']));
+      expect(entry['downloadUrl'], contains('e2e-tool-1.0.0.orplug'));
+      expect(entry['downloadUrl'], contains('downloads.sourceforge.net'));
 
       // The archive itself validates cleanly.
       final validation = builder.validate(res.outputPath!);

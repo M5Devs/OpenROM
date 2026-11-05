@@ -105,7 +105,16 @@ ArgParser buildParser() {
     )
     ..addOption('name', help: 'plugin display name (used with --plugin-init)')
     ..addOption('id', help: 'plugin id (used with --plugin-init)')
+    ..addOption(
+      'category',
+      help: 'storefront category (Nintendo, Sega, PlayStation, Xbox, '
+          'Utility, Patchers)',
+    )
     ..addOption('out', help: 'output path for --plugin-pack (.orplug)')
+    ..addOption(
+      'deeplink',
+      help: 'resolve an openrom:// URL (e.g. openrom://install/<id>)',
+    )
     // Dreamcast DCP patch
     ..addOption(
       'dcp',
@@ -334,6 +343,7 @@ Future<int> _runCli(List<String> args) async {
       target,
       name: results['name'] as String?,
       id: results['id'] as String?,
+      category: results['category'] as String?,
     );
     if (isJson) {
       _jsonPrint({
@@ -414,6 +424,23 @@ Future<int> _runCli(List<String> args) async {
       }
     }
     return res.success ? 0 : 1;
+  }
+
+  if (results['deeplink'] != null) {
+    final target = DeepLink.parse(results['deeplink'] as String);
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': target != null,
+        if (target != null) 'action': target.action.name,
+        if (target != null) 'id': target.id,
+      });
+    } else if (target != null) {
+      print('${target.action.name}: ${target.id}');
+    } else {
+      print('❌ Not a valid openrom:// link.');
+    }
+    return target != null ? 0 : 1;
   }
 
   if (results['tool-path'] != null) {

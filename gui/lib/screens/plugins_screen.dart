@@ -1,21 +1,32 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'dart:async';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart';
 
+import '../controllers/plugin_builder_controller.dart';
 import '../controllers/plugin_controller.dart';
 import '../models/theme_config.dart';
+import '../services/deeplink_service.dart';
+import '../widgets/deep_link_dialog.dart';
+import '../widgets/orplug_builder_studio.dart';
+import '../widgets/storefront_view.dart';
 
 class PluginsScreen extends StatefulWidget {
   final ThemeConfig theme;
   final PluginController? controller;
+  final PluginBuilderController? builderController;
+  final DeepLinkService? deepLinkService;
 
   const PluginsScreen({
     super.key,
     required this.theme,
     this.controller,
+    this.builderController,
+    this.deepLinkService,
   });
 
   @override
@@ -26,26 +37,96 @@ class _PluginsScreenState extends State<PluginsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   late final PluginController _controller;
+  StreamSubscription<DeepLinkTarget>? _deepLinkSub;
   bool _isDragging = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _controller = widget.controller ?? PluginController();
     _controller.addListener(_onControllerChanged);
     _controller.loadInstalledPlugins();
-    _controller.fetchStoreCatalog();
+    _controller.fetchLiveStore();
+    _initDeepLinks();
   }
 
   @override
   void dispose() {
+    _deepLinkSub?.cancel();
     _tabController.dispose();
     _controller.removeListener(_onControllerChanged);
     if (widget.controller == null) {
       _controller.dispose();
     }
     super.dispose();
+  }
+
+  /// Handles `openrom://` links by resolving them against the catalogue and
+  /// asking the user to confirm before anything is downloaded.
+  void _initDeepLinks() {
+    final service = widget.deepLinkService;
+    if (service == null) return;
+    _deepLinkSub = service.links.listen(_onDeepLink);
+    final pending = service.pending;
+    if (pending != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onDeepLink(pending));
+    }
+  }
+
+  Future<void> _onDeepLink(DeepLinkTarget target) async {
+    final service = widget.deepLinkService;
+    await service?.consume(target);
+    if (!mounted) return;
+
+    // Make sure the catalogue is loaded before resolving the id.
+    if (!_controller.storeFetchAttempted || _controller.storeListings.isEmpty) {
+      await _controller.fetchLiveStore();
+      if (!mounted) return;
+    }
+
+    final listing = _controller.storeListings
+        .where((l) => l.id == target.id)
+        .cast<StoreListing?>()
+        .firstWhere((_) => true, orElse: () => null);
+
+    // Bring the store tab forward so the result is visible either way.
+    if (_tabController.index != 1) {
+      _tabController.animateTo(1);
+    }
+
+    if (listing == null) {
+      await showDeepLinkNotFoundDialog(
+        context: context,
+        theme: widget.theme,
+        target: target,
+      );
+      return;
+    }
+
+    if (_controller.isPluginInstalled(listing.id)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${listing.name} is already installed')),
+      );
+      return;
+    }
+
+    final confirmed = await showDeepLinkInstallDialog(
+      context: context,
+      theme: widget.theme,
+      listing: listing,
+    );
+    if (!confirmed || !mounted) return;
+
+    final ok = await _controller.installListing(listing);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok
+            ? '${listing.name} installed'
+            : _controller.errorMessage ?? 'Install failed'),
+      ),
+    );
   }
 
   void _onControllerChanged() {
@@ -94,6 +175,10 @@ class _PluginsScreenState extends State<PluginsScreen>
                 icon: Icon(Icons.storefront_outlined),
                 text: 'Plugin Store 🌐🛒',
               ),
+              Tab(
+                icon: Icon(Icons.handyman_outlined),
+                text: 'Create / Studio 🛠️',
+              ),
             ],
           ),
         ),
@@ -124,7 +209,14 @@ class _PluginsScreenState extends State<PluginsScreen>
             controller: _tabController,
             children: [
               _buildInstalledTab(theme),
-              _buildStoreTab(theme),
+              StorefrontView(
+                theme: theme,
+                controller: _controller,
+              ),
+              OrplugBuilderStudio(
+                theme: theme,
+                controller: widget.builderController,
+              ),
             ],
           ),
         ),
@@ -436,218 +528,6 @@ class _PluginsScreenState extends State<PluginsScreen>
             },
             child: const Text('Uninstall'),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStoreTab(ThemeConfig theme) {
-    final storeCatalog = _controller.storeCatalog;
-
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.explore,
-              color: theme.accent,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Community & Official Plugins',
-              style: TextStyle(
-                color: theme.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Discover plugins created by official developers and the retro community.',
-          style: TextStyle(
-            color: theme.textSecondary,
-            fontSize: 13,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...storeCatalog.map(
-          (item) => _buildStoreCard(item, theme),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStoreCard(StorePlugin storeItem, ThemeConfig theme) {
-    final isInstalled = _controller.isPluginInstalled(storeItem.id);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: theme.cardBg,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            storeItem.name,
-                            style: TextStyle(
-                              color: theme.textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.cardBg,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'v${storeItem.version}',
-                            style: TextStyle(
-                              color: theme.textSecondary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          'by ${storeItem.author}',
-                          style: TextStyle(
-                            color: theme.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                        if (storeItem.isVerified ||
-                            storeItem.author == 'M5 Dev') ...[
-                          const SizedBox(width: 4),
-                          Tooltip(
-                            message: 'Verified Publisher 💙',
-                            child: Icon(
-                              Icons.verified,
-                              color: const Color(0xFF00E5FF),
-                              size: 16,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              if (isInstalled)
-                Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: theme.accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.accent.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: theme.accent,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Installed',
-                        style: TextStyle(
-                          color: theme.accent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.accent,
-                    foregroundColor: Colors.black,
-                    minimumSize: const Size(110, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () => _controller.installFromStore(storeItem),
-                  icon: const Icon(Icons.download, size: 18),
-                  label: const Text(
-                    'Install',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            storeItem.description,
-            style: TextStyle(
-              color: theme.textPrimary.withValues(alpha: 0.9),
-              fontSize: 13,
-            ),
-          ),
-          if (storeItem.tags.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: storeItem.tags.map((tag) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.cardBg,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    tag,
-                    style: TextStyle(
-                      color: theme.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
         ],
       ),
     );

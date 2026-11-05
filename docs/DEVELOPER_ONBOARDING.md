@@ -4,8 +4,8 @@
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
-Version at time of writing: **3.9.9** (`VERSION`, `core/pubspec.yaml`,
-`gui/pubspec.yaml` = `3.9.9+1`).
+Version at time of writing: **4.0.0** (`VERSION`, `core/pubspec.yaml`,
+`gui/pubspec.yaml` = `4.0.0+1`).
 
 ---
 
@@ -409,9 +409,9 @@ All screens live in an `IndexedStack` (kept alive, not rebuilt).
 |---|--------|------|----------|
 | 0 | Home / Convert | `home_screen.dart` | ROM queue, drop zone, ROM cards, progress, terminal panel, core-presence check on startup |
 | 1 | Patcher | `patcher_screen.dart` | 2 tabs — **Apply Patch**, **Build Patch** (IPS/IPS32/UPS/BPS/PPF/APS/EBP/DPS/xdelta/SSP/DCP) |
-| 2 | Tools | `tools_screen.dart` | 8 tabs — Compressor, M3U, CUE Generator, BIN Merger, Header Remover, CUE Editor, ROM Renamer, 1G1R Cleaner |
+| 2 | Tools | `tools_screen.dart` | 9 tabs — Compressor, M3U, CUE Generator, BIN Merger, Header Remover, CUE Editor, ROM Renamer, 1G1R Cleaner, ROM Hasher |
 | 3 | Dreamcast | `dreamcast_screen.dart` | 3 tabs — DCP Apply, IP.BIN Editor, GDI Info |
-| 4 | Plugins | `plugins_screen.dart` | 2 tabs — installed plugins, plugin store; drag-drop `.orplug` install |
+| 4 | Plugins | `plugins_screen.dart` | 3 tabs — installed plugins, live storefront, and the visual `.orplug` Builder Studio; drag-drop `.orplug` install; handles `openrom://` links |
 | 5 | Settings | `settings_screen.dart` | Format/compression/verify/output/audio-codec (pushed up via `onSettingsChanged`), theme, locale, update check, online features |
 | 6 | About | `about_screen.dart` | version (from `AppVersion.current` / `CoreBridge.getVersion()`), links |
 | 7 | Theme Editor | `theme_editor_screen.dart` | edit/save custom theme JSON (HSV picker) |

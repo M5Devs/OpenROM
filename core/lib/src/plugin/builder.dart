@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 
 import 'plugin_manifest.dart';
 import 'plugin_version.dart';
+import 'store_listing.dart';
 
 /// Maps a `bin/<os>/<arch>/…` executable path to the manifest platform key
 /// (`windows_x64`, `linux_x64`, `macos_arm64`, …). Returns `null` when the path
@@ -143,6 +144,7 @@ class OrplugBuilder {
     String targetDir, {
     String? name,
     String? id,
+    String? category,
   }) {
     final dir = Directory(targetDir);
     final manifestPath = p.join(dir.path, 'plugin.json');
@@ -163,6 +165,11 @@ class OrplugBuilder {
       );
     }
 
+    final resolvedCategory =
+        (category != null && kStoreCategories.contains(category))
+            ? category
+            : kStoreCategories.last;
+
     final manifest = <String, dynamic>{
       'schemaVersion': kPluginSchemaVersion,
       'id': slug,
@@ -170,7 +177,7 @@ class OrplugBuilder {
       'version': '1.0.0',
       'minCoreVersion': '${coreVersion.major}.${coreVersion.minor}.0',
       'publisher': {'id': 'your-publisher-id', 'name': 'Your Publisher Name'},
-      'category': 'Utility',
+      'category': resolvedCategory,
       'description': 'Short description of the plugin.',
       'routes': <dynamic>[
         {'from': 'ISO', 'to': 'MYFMT'},
@@ -570,7 +577,8 @@ class OrplugBuilder {
     );
   }
 
-  /// Builds the marketplace snippet (matching `store_manifest.json`).
+  /// Builds the marketplace snippet (matching the live storefront shape served
+  /// by `https://openrom-store.pages.dev/api/plugins.json`).
   Map<String, dynamic> _marketplaceEntry(
     PluginManifest manifest,
     String sha256Hex,
@@ -579,7 +587,8 @@ class OrplugBuilder {
     final artifacts = <String, dynamic>{};
     manifest.execution.environments.forEach((key, env) {
       artifacts[key] = {
-        'url': 'https://plugins.openrom.dev/artifacts/'
+        'url': 'https://downloads.sourceforge.net/project/openrom-plugins/'
+            '${manifest.publisher.id}/${manifest.id}/${manifest.version}/'
             '${manifest.id}-${manifest.version}.orplug',
         'sha256': sha256Hex,
         'size': size,
@@ -589,17 +598,42 @@ class OrplugBuilder {
     return {
       'id': manifest.id,
       'name': manifest.name,
-      'description': manifest.description,
+      'version': manifest.version.toString(),
+      'minCoreVersion': manifest.minCoreVersion?.toString() ?? '',
       'publisherId': manifest.publisher.id,
-      'tags': <String>[],
-      'channels': {
-        'stable': {
-          'version': manifest.version.toString(),
-          'minCoreVersion': manifest.minCoreVersion?.toString() ?? '',
-          'artifacts': artifacts,
-        },
-      },
+      'publisherName': manifest.publisher.name,
+      'publisherVerified': manifest.publisher.verified,
+      'category': manifest.category,
+      'description': manifest.description,
+      'routes': manifest.routes.map((r) => r.key).toList(),
+      'platforms': _platformLabels(manifest),
+      'downloadUrl': artifacts.isEmpty
+          ? ''
+          : (artifacts.values.first as Map<String, dynamic>)['url'],
+      'sha256': sha256Hex,
+      'downloads': 0,
     };
+  }
+
+  /// Human-readable platform labels for the storefront (Windows/Linux/macOS).
+  static List<String> _platformLabels(PluginManifest manifest) {
+    final labels = <String>{};
+    for (final key in manifest.execution.environments.keys) {
+      final os = key.split('_').first;
+      switch (os) {
+        case 'windows':
+          labels.add('Windows');
+          break;
+        case 'linux':
+          labels.add('Linux');
+          break;
+        case 'macos':
+          labels.add('macOS');
+          break;
+      }
+    }
+    final ordered = ['Windows', 'Linux', 'macOS'];
+    return ordered.where(labels.contains).toList();
   }
 
   static void _checkSemVer(

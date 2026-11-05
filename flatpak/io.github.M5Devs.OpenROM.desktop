@@ -2,10 +2,11 @@
 Name=OpenROM
 GenericName=ROM Converter
 Comment=Universal ROM Compression Suite for retro gaming
-Exec=gui
+Exec=gui %u
 Icon=io.github.M5Devs.OpenROM
 Terminal=false
 Type=Application
 Categories=Utility;Game;
 Keywords=ROM;CHD;ISO;PSP;PS1;PS2;GameCube;Wii;Xbox;retro;emulation;
 StartupNotify=true
+MimeType=x-scheme-handler/openrom;

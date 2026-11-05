@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'controllers/home_controller.dart';
+import 'controllers/plugin_builder_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
@@ -15,6 +16,7 @@ import 'screens/plugins_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/theme_editor_screen.dart';
 import 'screens/tools_screen.dart';
+import 'services/deeplink_service.dart';
 import 'services/theme_service.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/top_bar.dart';
@@ -23,12 +25,16 @@ class OpenROMApp extends StatefulWidget {
   final ThemeService themeService;
   final LocaleProvider localeProvider;
   final HomeController? homeController;
+  final PluginBuilderController? builderController;
+  final DeepLinkService? deepLinkService;
 
   OpenROMApp({
     super.key,
     required this.themeService,
     LocaleProvider? localeProvider,
     this.homeController,
+    this.builderController,
+    this.deepLinkService,
   }) : localeProvider = localeProvider ?? LocaleProvider();
 
   @override
@@ -159,7 +165,11 @@ class _OpenROMAppState extends State<OpenROMApp> {
       PatcherScreen(theme: theme),
       ToolsScreen(theme: theme),
       DreamcastScreen(theme: theme),
-      PluginsScreen(theme: theme),
+      PluginsScreen(
+        theme: theme,
+        builderController: widget.builderController,
+        deepLinkService: widget.deepLinkService,
+      ),
       settingsWidget,
       AboutScreen(theme: theme),
       ThemeEditorScreen(

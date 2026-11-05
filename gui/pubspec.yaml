@@ -1,7 +1,7 @@
 name: gui
 description: OpenROM — Universal ROM Compression Suite Desktop App
 publish_to: 'none'
-version: 3.9.9+1
+version: 4.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -23,7 +23,7 @@ dependencies:
   path_provider: ^2.0.0
   openrom_core:
     path: ../core
-    version: 3.9.9
+    version: 4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +37,7 @@ flutter:
   generate: true
   assets:
     - themes/
+    - assets/images/
 
 flutter_launcher_icons:
   android: "ic_launcher"

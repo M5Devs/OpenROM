@@ -41,6 +41,28 @@ class PluginStoreClient {
     }
   }
 
+  /// Fetches the live storefront catalogue (`/api/plugins.json`).
+  ///
+  /// Returns the raw listings *and* the decoded JSON body so callers can cache
+  /// the payload verbatim. Returns `null` on any failure (offline, non-200,
+  /// malformed JSON) so the caller can fall back to a cached copy.
+  Future<({List<StoreListing> listings, String raw})?> fetchLiveListings({
+    Uri? url,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final target = url ?? _baseUrl;
+    if (target == null) return null;
+    try {
+      final response = await _client.get(target).timeout(timeout);
+      if (response.statusCode != 200) return null;
+      final listings = StoreListing.listFromJson(jsonDecode(response.body));
+      if (listings.isEmpty) return null;
+      return (listings: listings, raw: response.body);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Downloads a plugin artifact and verifies its SHA-256 against the digest
   /// published in the registry. Returns `null` when the download fails or the
   /// digest mismatches — callers must treat `null` as a hard failure and never

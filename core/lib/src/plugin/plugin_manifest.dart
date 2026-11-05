@@ -353,6 +353,11 @@ class PluginManifest {
   final PluginExecution execution;
   final List<PluginExtension> extensions;
 
+  /// Storefront category (e.g. `Nintendo`, `Utility`). Free-form: the store
+  /// filters on a fixed set but a manifest is never rejected for an unknown
+  /// value, so third-party categories keep loading.
+  final String category;
+
   const PluginManifest({
     this.schemaVersion = kPluginSchemaVersion,
     required this.id,
@@ -364,6 +369,7 @@ class PluginManifest {
     this.routes = const [],
     this.execution = const PluginExecution(),
     this.extensions = const [],
+    this.category = '',
   });
 
   /// Builds a manifest from JSON, accepting both the current schema and the
@@ -404,6 +410,7 @@ class PluginManifest {
             ? PluginExecution.fromJson(rawExecution)
             : const PluginExecution(),
         extensions: extensions,
+        category: json['category'] as String? ?? '',
       );
     }
 
@@ -465,6 +472,7 @@ class PluginManifest {
         args: legacyArgs,
       ),
       extensions: extensions,
+      category: json['category'] as String? ?? '',
     );
   }
 
@@ -523,6 +531,7 @@ class PluginManifest {
         'routes': routes.map((r) => r.toJson()).toList(),
         'execution': execution.toJson(),
         'extensions': extensions.map((e) => e.toJson()).toList(),
+        if (category.isNotEmpty) 'category': category,
       };
 
   /// Publisher display name; kept for UI code that predates the publisher model.

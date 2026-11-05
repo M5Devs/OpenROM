@@ -234,13 +234,33 @@ openrom-core --hash game.iso
 openrom-core --json --hash game.iso
 
 # Plugin developer tooling (orplug-builder)
-openrom-core --plugin-init ./my-tool --name "My Tool" --id my-tool
+openrom-core --plugin-init ./my-tool --name "My Tool" --id my-tool --category Utility
 openrom-core --plugin-validate ./my-tool
 openrom-core --plugin-pack ./my-tool --out ./my-tool-1.0.0.orplug
+
+# Resolve an openrom:// deep link (store install links)
+openrom-core --deeplink "openrom://install/my-tool"
 
 # JSON output (for scripting / Flutter IPC)
 openrom-core --json --detect game.iso
 ```
+
+### 🛠️ Visual Plugin Builder (GUI)
+
+The Plugins screen ships a **Create / Studio** tab that wraps the same
+`orplug-builder` engine: scaffold a plugin, fill in the manifest, attach a
+binary per platform (SHA-256 is computed automatically), validate, then pack
+to `.orplug` and copy the marketplace JSON entry — all without leaving the app.
+Projects are plain folders, so a plugin started in the GUI can be finished
+from the CLI (and vice versa).
+
+### 🔗 `openrom://` links
+
+OpenROM registers the `openrom://` URL scheme on Windows (NSIS registry),
+Linux (Flatpak `.desktop` `x-scheme-handler`), and macOS (`CFBundleURLTypes`).
+`openrom://install/<plugin-id>` opens the storefront with a confirmation
+dialog; the download is still verified against the published SHA-256 before
+anything is installed.
 
 ---
 
