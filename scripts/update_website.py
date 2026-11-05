@@ -422,10 +422,10 @@ footer a:hover {{ color: var(--text); }}
           <tr><td>ISO / BIN / CUE / IMG</td><td><code>CHD</code></td><td>PS1, PS2, Dreamcast, Saturn, Sega CD</td><td>chdman (FLAC / Vorbis)</td></tr>
           <tr><td>GDI</td><td><code>CHD</code></td><td>Dreamcast</td><td>chdman</td></tr>
           <tr><td>ISO / GCZ</td><td><code>RVZ / WIA</code></td><td>GameCube, Wii</td><td>nodtool</td></tr>
-          <tr><td>WUD / WUX</td><td><code>WUA / ISO</code></td><td>Wii U (ZArchive)</td><td>nkit v3.1</td></tr>
           <tr><td>ISO</td><td><code>CSO / ZSO</code></td><td>PSP, PS2</td><td>maxcso</td></tr>
-          <tr><td>ISO</td><td><code>XISO / Folders</code></td><td>Original Xbox</td><td>extract-xiso</td></tr>
-          <tr><td>CCI / ZAR</td><td><code>ISO</code></td><td>Xbox 360</td><td>xgdtool</td></tr>
+          <tr><td>WUD / WUX</td><td><code>WUA / ISO</code></td><td>Wii U (ZArchive)</td><td>community extension</td></tr>
+          <tr><td>ISO</td><td><code>XISO / Folders</code></td><td>Original Xbox</td><td>community extension</td></tr>
+          <tr><td>CCI / ZAR</td><td><code>ISO</code></td><td>Xbox 360</td><td>community extension</td></tr>
           <tr><td>CHD</td><td><code>ISO / BIN+CUE</code></td><td>All supported CD/DVD discs</td><td>chdman extract</td></tr>
           <tr><td>CSO / ZSO</td><td><code>ISO</code></td><td>PSP, PS2</td><td>maxcso decompress</td></tr>
           <tr><td>RVZ / WIA / WBFS</td><td><code>ISO</code></td><td>GameCube, Wii</td><td>nodtool convert</td></tr>

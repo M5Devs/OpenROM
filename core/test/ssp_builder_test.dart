@@ -124,7 +124,7 @@ void main() {
     );
 
     test(
-        'SspBuilder generated SSP can be applied with saturn-patcher CLI binary if available',
+        'SspBuilder generated SSP can be applied with the saturn-patcher extension if available',
         () async {
       final builder = SspBuilder(
         originalBin: origBin,
@@ -133,11 +133,15 @@ void main() {
       );
       await builder.build();
 
+      // saturn-patcher is no longer bundled with OpenROM Core (v4.0.0); it
+      // ships as a community extension. Point OPENROM_SATURN_PATCHER at an
+      // installed binary to run this integration check, otherwise it skips.
       final saturnPatcherCli = File(
-        '/tmp/saturn-patcher-egui/target/debug/saturn-patcher',
+        Platform.environment['OPENROM_SATURN_PATCHER'] ??
+            '/tmp/saturn-patcher-egui/target/debug/saturn-patcher',
       );
       if (!saturnPatcherCli.existsSync()) {
-        return; // Skip Rust CLI test if binary isn't built
+        return; // Skip if the extension binary isn't available
       }
 
       final targetBin = File('${tempDir.path}/target.bin');

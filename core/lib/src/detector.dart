@@ -90,8 +90,11 @@ const Map<String, String> builtinFormatColors = {
   'Neo Geo CD': '#b71c1c',
 };
 
+// Routes handled natively by the bundled core utilities. XISO, Xbox 360
+// (CCI/ZAR), NKit and Wii U (WUD/WUX/WUA) routes were decoupled in v4.0.0 and
+// are served by community `.orplug` extensions, so they are absent here.
 const Map<String, List<String>> builtinConversionMap = {
-  'ISO': ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
+  'ISO': ['CHD', 'CSO', 'ECM', 'RVZ'],
   'BIN': ['CHD', 'ECM'],
   'CUE': ['CHD'],
   'GDI': ['CHD'],
@@ -101,24 +104,16 @@ const Map<String, List<String>> builtinConversionMap = {
   'CSO': ['ISO'],
   'ZSO': ['ISO'],
   'ECM': ['ISO', 'BIN'],
-  'XISO': ['Files'],
   'RVZ': ['ISO'],
   'WIA': ['ISO'],
   'WBFS': ['ISO'],
   'GCZ': ['ISO'],
-  'WUD': ['ISO', 'WUA'],
-  'WUX': ['ISO', 'WUA'],
-  'NKIT': ['ISO'],
-  'WUA': ['ISO', 'WUD'],
-  'CCI': ['ISO'],
-  'ZAR': ['ISO'],
 };
 
 const Map<String, String> builtinCommandTemplates = {
   'ISO->CHD': 'chdman createdvd -i "{in}" -o "{out}"',
   'ISO->CSO': 'maxcso "{in}" -o "{out}"',
   'ISO->ECM': 'ecm "{in}" "{out}"',
-  'ISO->XISO': 'extract-xiso -r "{in}"',
   'ISO->RVZ': 'nodtool convert "{in}" "{out}"',
   'BIN->CHD': 'chdman createcd -i "{cue}" -o "{out}"',
   'BIN->ECM': 'ecm "{in}" "{out}"',
@@ -133,21 +128,10 @@ const Map<String, String> builtinCommandTemplates = {
   'ZSO->ISO': 'maxcso --decompress "{in}" -o "{out}"',
   'ECM->ISO': 'unecm "{in}" "{out}"',
   'ECM->BIN': 'unecm "{in}" "{out}"',
-  'XISO->Files': 'extract-xiso -x "{in}" -d "{out}"',
   'RVZ->ISO': 'nodtool convert "{in}" "{out}"',
   'WIA->ISO': 'nodtool convert "{in}" "{out}"',
   'WBFS->ISO': 'nodtool convert "{in}" "{out}"',
   'GCZ->ISO': 'nodtool convert "{in}" "{out}"',
-  'WUD->ISO': 'nkit convert -i "{in}" -o "{out}"',
-  'WUX->ISO': 'nkit convert -i "{in}" -o "{out}"',
-  'WUD->WUA': 'nkit convert -i "{in}" -o "{out}"',
-  'WUX->WUA': 'nkit convert -i "{in}" -o "{out}"',
-  'WUA->ISO': 'nkit convert -i "{in}" -o "{out}"',
-  'WUA->WUD': 'nkit convert -i "{in}" -o "{out}"',
-  'NKIT->ISO': 'nkit convert -i "{in}" -o "{out}"',
-  'ISO->NKIT': 'nkit convert -i "{in}" -o "{out}"',
-  'CCI->ISO': 'xgdtool --xiso "{in}" "{outdir}"',
-  'ZAR->ISO': 'xgdtool --xiso "{in}" "{outdir}"',
 };
 
 // Merged dynamic getters

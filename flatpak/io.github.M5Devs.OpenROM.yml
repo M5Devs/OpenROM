@@ -36,18 +36,16 @@ modules:
       # Also place VERSION next to the GUI binary so the app can read its version.
       - install -Dm644 VERSION /app/VERSION
 
-      # Install conversion and patching tools.
+      # Install the bundled conversion tools (OpenROM Core set).
       - install -Dm755 assets/linux/x86_64/chdman /app/bin/chdman
       - install -Dm755 assets/linux/x86_64/ecm /app/bin/ecm
       - install -Dm755 assets/linux/x86_64/unecm /app/bin/unecm
       - install -Dm755 assets/linux/x86_64/maxcso /app/bin/maxcso
-      - install -Dm755 assets/linux/x86_64/extract-xiso /app/bin/extract-xiso
       - install -Dm755 assets/linux/x86_64/nodtool /app/bin/nodtool
       - install -Dm755 assets/linux/x86_64/xdelta3 /app/bin/xdelta3
-      - install -Dm755 assets/linux/x86_64/saturn-patcher /app/bin/saturn-patcher
 
-      # NKit ships as a single self-contained binary.
-      - install -Dm755 assets/linux/x86_64/nkit /app/bin/nkit
+      # Specialized tools (nkit, saturn-patcher, XGDTool, extract-xiso) are
+      # distributed as community `.orplug` extensions, not bundled here.
 
       # Install desktop integration files.
       - install -Dm644 flatpak/io.github.M5Devs.OpenROM.desktop /app/share/applications/io.github.M5Devs.OpenROM.desktop

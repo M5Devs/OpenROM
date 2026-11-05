@@ -110,14 +110,10 @@ jobs:
             ecm \
             unecm \
             maxcso \
-            extract-xiso \
             nodtool \
-            xdelta3 \
-            saturn-patcher; do
+            xdelta3; do
             test -x "assets/linux/x86_64/$tool"
           done
-
-          test -x assets/linux/x86_64/nkit
 
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6

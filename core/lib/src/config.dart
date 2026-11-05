@@ -78,32 +78,13 @@ String getDefaultBundledPath(String tool) {
     archFolder = 'x86_64';
   }
 
-  if (tool == 'nkit') {
-    String res;
-    if (Platform.isWindows) {
-      res = p.join(baseDir, 'assets', 'windows', 'nkit', 'nkit.exe');
-    } else if (Platform.isMacOS) {
-      res = p.join(baseDir, 'assets', 'macos', archFolder, 'nkit', 'nkit');
-    } else {
-      res = p.join(baseDir, 'assets', 'linux', archFolder, 'nkit', 'nkit');
-    }
-    if (File(res).existsSync()) {
-      ensureExecutable(res);
-      return res;
-    }
-  }
-
   final winNames = {
     'chdman': 'chdman.exe',
     'ecm': 'ecm.exe',
     'unecm': 'unecm.exe',
     'maxcso': 'maxcso.exe',
-    'extract-xiso': 'extract-xiso.exe',
     'nodtool': 'nodtool.exe',
     'xdelta3': 'xdelta3.exe',
-    'nkit': 'nkit.exe',
-    'saturn-patcher': 'saturn-patcher.exe',
-    'xgdtool': 'XGDTool.exe',
   };
 
   final unixNames = {
@@ -111,12 +92,8 @@ String getDefaultBundledPath(String tool) {
     'ecm': 'ecm',
     'unecm': 'unecm',
     'maxcso': 'maxcso',
-    'extract-xiso': 'extract-xiso',
     'nodtool': 'nodtool',
     'xdelta3': 'xdelta3',
-    'nkit': 'nkit',
-    'saturn-patcher': 'saturn-patcher',
-    'xgdtool': 'XGDTool',
   };
 
   String bundled;
@@ -156,12 +133,8 @@ const Map<String, String> defaultConfig = {
   'maxcso': '',
   'ecm': '',
   'unecm': '',
-  'extract-xiso': '',
   'nodtool': '',
   'xdelta3': '',
-  'nkit': '',
-  'saturn-patcher': '',
-  'xgdtool': '',
 };
 
 Map<String, dynamic> loadConfig() {

@@ -281,14 +281,14 @@ jobs:
           chmod +x "$CORE/openrom-core"
           cp VERSION "$CORE/VERSION"
 
-          for tool in xdelta3 ecm unecm saturn-patcher; do
+          for tool in xdelta3 ecm unecm; do
             if [ -f "assets/linux/x86_64/$tool" ]; then
               cp "assets/linux/x86_64/$tool" "$CORE/assets/linux/x86_64/$tool"
               chmod +x "$CORE/assets/linux/x86_64/$tool"
             fi
           done
 
-          printf 'OpenROM Core CLI - Linux x86_64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_x86_64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm, saturn-patcher.\nFor CHD/CSO/RVZ/XISO conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
+          printf 'OpenROM Core CLI - Linux x86_64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_x86_64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm.\nFor CHD/CSO/RVZ conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             "$VERSION" > "$CORE/README.txt"
 
           ( cd "$CORE" && zip -r "../OpenROM-Core-v${VERSION}_Linux_x86_64.zip" . )
@@ -430,14 +430,14 @@ jobs:
           chmod +x "$CORE/openrom-core"
           cp VERSION "$CORE/VERSION"
 
-          for tool in xdelta3 ecm unecm saturn-patcher; do
+          for tool in xdelta3 ecm unecm; do
             if [ -f "assets/linux/arm64/$tool" ]; then
               cp "assets/linux/arm64/$tool" "$CORE/assets/linux/arm64/$tool"
               chmod +x "$CORE/assets/linux/arm64/$tool"
             fi
           done
 
-          printf 'OpenROM Core CLI - Linux ARM64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_arm64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm, saturn-patcher.\nFor CHD/CSO/RVZ/XISO conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
+          printf 'OpenROM Core CLI - Linux ARM64\n======================================================\nRUN THIS: ./openrom-core --help\n\nopenrom-core is the headless CLI engine. The Flutter GUI ships\nseparately as OpenROM-v%s_Linux_arm64.AppImage.\n\nBundled light tools: xdelta3, ecm, unecm.\nFor CHD/CSO/RVZ conversions use the AppImage build.\n\nDocs: https://github.com/M5Devs/OpenROM\n' \
             "$VERSION" > "$CORE/README.txt"
 
           ( cd "$CORE" && zip -r "../OpenROM-Core-v${VERSION}_Linux_arm64.zip" . )
@@ -589,7 +589,8 @@ jobs:
 
             ### Supported Formats
             - PS1/Dreamcast/Saturn/Sega CD: BIN/CUE → CHD (createcd)
-            - PS2/GameCube/Wii/Xbox: ISO → CHD (createdvd), CSO, RVZ, XISO
+            - PS2/GameCube/Wii: ISO → CHD (createdvd), CSO, RVZ
+            - Xbox: ISO → CHD (createdvd), CSO (XISO via community extension)
             - PSP: ISO → CSO
             - Universal: ZIP/7Z compression, IPS/BPS/xdelta3/DCP patching
 
@@ -607,7 +608,7 @@ jobs:
 
             ### Linux notes
             - **AppImage** — full GUI with the bundled `openrom-core` engine and all tools. Run it directly, no unzip needed.
-            - **Core CLI ZIP** — standalone `openrom-core` binary with light tools (xdelta3, ecm, unecm, saturn-patcher) for scripting and automation.
+            - **Core CLI ZIP** — standalone `openrom-core` binary with light tools (xdelta3, ecm, unecm) for scripting and automation.
 
           files: |
             artifacts/OpenROM_Windows/OpenROM-v${{ github.event.inputs.version }}_Windows_Portable.zip

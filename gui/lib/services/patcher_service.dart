@@ -65,19 +65,26 @@ class PatcherService {
     }
   }
 
-  /// Apply an SSP patch using the bundled saturn-patcher binary.
+  /// Apply an SSP patch via the `saturn-patcher` tool.
+  ///
   /// SSP patches the BIN file in-place — no output file is created.
   /// [binPath] must be the Track 1 BIN file of the Saturn disc image.
+  ///
+  /// `saturn-patcher` was decoupled from OpenROM Core in v4.0.0; it is supplied
+  /// by the "Sega Saturn SSP Patcher" community extension.
   Future<String> applySspPatch({
     required String sspPath,
     required String binPath,
   }) async {
     final saturnPatcher = await CoreBridge.getToolPath('saturn-patcher');
-    if (saturnPatcher == null || saturnPatcher.isEmpty) {
+    if (saturnPatcher == null ||
+        saturnPatcher.isEmpty ||
+        !File(saturnPatcher).existsSync()) {
       throw OpenROMException(
         OpenROMError.toolFailed,
-        details:
-            'saturn-patcher binary not found. Please check your OpenROM installation.',
+        details: 'SSP patching requires the community extension '
+            '(e.g. NKit or Xbox Suite). '
+            'Please install it from the OpenROM Extension Store.',
       );
     }
 

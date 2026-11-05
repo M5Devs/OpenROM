@@ -2,6 +2,11 @@
 # fetch-binaries.sh — Download OpenROM third-party tool binaries from SourceForge
 # and verify each one against the published checksums.sha256 before use.
 #
+# Only the six utilities OpenROM Core bundles are fetched. Specialized tools
+# (nkit, saturn-patcher, XGDTool, extract-xiso) were decoupled in v4.0.0 and now
+# ship as `.orplug` plugins from the OpenROM Extension Store; they are never
+# downloaded here even if a stale checksum entry mentions them.
+#
 # Usage:
 #   scripts/fetch-binaries.sh --os <os> [--arch <arch>] --dest <dir>
 #
@@ -30,6 +35,9 @@
 set -euo pipefail
 
 BASE_URL="${OPENROM_BINS_BASE_URL:-https://downloads.sourceforge.net/project/openrom-binaries}"
+
+# The complete set of utilities bundled with OpenROM Core.
+CORE_TOOLS="chdman nodtool maxcso xdelta3 ecm unecm"
 
 BINS_REF="${OPENROM_BINS_REF:-main}"
 if [[ ! "$BINS_REF" =~ ^[A-Za-z0-9._/-]{1,100}$ ]]; then
@@ -95,18 +103,23 @@ fi
 
 mkdir -p "$DEST"
 
-# Match "<sha>  <os>/<arch>/<file>"; filter by arch when provided.
+# Match "<sha>  <os>/<arch>/<file>"; filter by arch when provided, and keep
+# only the six core tools (the checksums file may still list decoupled ones).
 arch_filter="[^/]+"
 [[ -n "$ARCH" ]] && arch_filter="$ARCH"
 
 # Write matches to a temp file (avoids bash-4 `mapfile`, unavailable on macOS).
 tr -d '\r' < "$tmp_checksums" \
-    | awk -v os="$OS" -v arch="$arch_filter" \
-      '$2 ~ "^"os"/"arch"/" { print $1" "$2 }' > "$tmp_entries"
+    | awk -v os="$OS" -v arch="$arch_filter" -v core="$CORE_TOOLS" '
+        BEGIN { n = split(core, tools, " "); for (i = 1; i <= n; i++) allowed[tools[i]] = 1 }
+        $2 ~ "^"os"/"arch"/" {
+            fname = $2; sub(/^.*\//, "", fname); sub(/\.exe$/, "", fname)
+            if (fname in allowed) print $1" "$2
+        }' > "$tmp_entries"
 
 count=$(wc -l < "$tmp_entries" | tr -d ' ')
 if [ "$count" -eq 0 ]; then
-    echo "Error: no binaries found for $OS/${ARCH:-*}" >&2
+    echo "Error: no core binaries found for $OS/${ARCH:-*}" >&2
     exit 2
 fi
 

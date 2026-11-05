@@ -83,8 +83,9 @@ class _AboutScreenState extends State<AboutScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'OpenROM converts ROM files across popular formats (ISO, CHD, CSO, ECM, RVZ, XISO) '
-                      'using bundled CLI utilities (chdman, maxcso, ecm, nodtool, extract-xiso).',
+                      'OpenROM converts ROM files across popular formats (ISO, CHD, CSO, ECM, RVZ) '
+                      'using bundled CLI utilities (chdman, maxcso, ecm, nodtool). '
+                      'Additional formats are available as community extensions.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: theme.textSecondary, height: 1.4),
                     ),

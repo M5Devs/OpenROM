@@ -152,12 +152,10 @@ cd maxcso && make -j$(nproc)
 cp maxcso ../assets/linux/maxcso
 ```
 
-### extract-xiso
-Download the official Linux binary from the
-[extract-xiso releases page](https://github.com/XboxDev/extract-xiso/releases)
-and place it at `assets/linux/extract-xiso`.
-
 ---
+
+> Specialized tools such as `extract-xiso` are no longer bundled with Core.
+> They ship as community `.orplug` extensions.
 
 ## Code Style
 

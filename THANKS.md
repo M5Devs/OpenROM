@@ -45,7 +45,8 @@ It powers all ECM encoding and decoding in OpenROM.
 **Repository:** https://github.com/XboxDev/extract-xiso
 
 extract-xiso is the original Xbox ISO creation and extraction utility.
-It powers all XISO conversion in OpenROM.
+As of v4.0.0 it is distributed as a community `.orplug` extension rather than
+bundled with OpenROM Core.
 
 ---
 

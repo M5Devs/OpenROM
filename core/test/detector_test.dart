@@ -14,10 +14,8 @@ void main() {
       final info = detectFile(wuaPath);
       expect(info['format'], equals('WUA'));
       expect(info['platform'], equals('Wii U (ZArchive)'));
-      expect(info['valid_targets'], equals(['ISO', 'WUD']));
-
-      final cmd = getCommandPreview('WUA', 'ISO', 'game.wua');
-      expect(cmd, equals('nkit convert -i "game.wua" -o "game.iso"'));
+      // WUA conversion is a community extension; core advertises no target.
+      expect(info['valid_targets'], isEmpty);
     } finally {
       tmpDir.deleteSync(recursive: true);
     }
@@ -63,7 +61,7 @@ void main() {
       [
         'game.iso',
         'ISO',
-        ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
+        ['CHD', 'CSO', 'ECM', 'RVZ'],
       ],
       [
         'disc.bin',
@@ -98,17 +96,17 @@ void main() {
       [
         'xbox_iso.iso',
         'ISO',
-        ['CHD', 'CSO', 'ECM', 'XISO', 'RVZ', 'NKIT'],
+        ['CHD', 'CSO', 'ECM', 'RVZ'],
       ],
       [
         'game360.cci',
         'CCI',
-        ['ISO'],
+        <String>[],
       ],
       [
         'game360.zar',
         'ZAR',
-        ['ISO'],
+        <String>[],
       ],
     ];
 
@@ -170,37 +168,110 @@ void main() {
     }
   });
 
-  test('missing_tool_preflight_check', () async {
-    final tmpDir = Directory.systemTemp.createTempSync('missing_tool_test_');
+  test('decoupled_route_reports_community_extension', () async {
+    final tmpDir = Directory.systemTemp.createTempSync('decoupled_route_');
     try {
-      final dummyFile = p.join(tmpDir.path, 'dummy.cci');
-      File(dummyFile).writeAsBytesSync(List<int>.filled(100, 0));
+      // .cci / .zar / .xiso / nkit / wua are no longer handled by core: the
+      // converter must fail with the friendly extension message, never a
+      // missing-binary exception.
+      final cases = [
+        ('dummy.cci', 'ISO'),
+        ('dummy.zar', 'ISO'),
+        ('game.wua', 'ISO'),
+        ('game.wud', 'ISO'),
+      ];
 
-      // Force config to use a non-existent absolute tool path
-      saveConfig({'xgdtool': p.join(tmpDir.path, 'missing_XGDTool')});
+      for (final (filename, target) in cases) {
+        final file = p.join(tmpDir.path, filename);
+        File(file).writeAsBytesSync(List<int>.filled(100, 0));
+
+        final job = ConversionJob(
+          filepath: file,
+          outputDir: tmpDir.path,
+          targetFormat: target,
+        );
+
+        final converter = Converter();
+        final success = await converter.convert(job);
+
+        expect(success, isFalse, reason: '$filename should not convert');
+        expect(job.status, equals('Failed'));
+        expect(
+          job.error,
+          equals(
+            'Format requires a community extension (e.g. NKit or Xbox Suite). '
+            'Please install it from the OpenROM Extension Store.',
+          ),
+          reason: 'unexpected error for $filename',
+        );
+      }
+    } finally {
+      tmpDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('iso_to_xiso_requires_community_extension', () async {
+    final tmpDir = Directory.systemTemp.createTempSync('xiso_route_');
+    try {
+      final iso = p.join(tmpDir.path, 'game.iso');
+      File(iso).writeAsBytesSync(List<int>.filled(2048, 0));
 
       final job = ConversionJob(
-        filepath: dummyFile,
+        filepath: iso,
         outputDir: tmpDir.path,
-        targetFormat: 'ISO',
+        targetFormat: 'XISO',
       );
 
       final converter = Converter();
       final success = await converter.convert(job);
 
       expect(success, isFalse);
-      expect(job.status, equals('Failed'));
-      expect(job.error, contains('Tool not found'));
-      expect(job.error, contains('missing from the assets folder'));
+      expect(job.error, equals(communityExtensionError));
     } finally {
-      saveConfig({});
       tmpDir.deleteSync(recursive: true);
     }
   });
 
-  test('config_xgdtool_path', () {
-    final xgdtoolPath = getToolPath('xgdtool');
-    expect(xgdtoolPath, isNotEmpty);
+  test('config_exposes_only_core_tools', () {
+    // The decoupled tools must be gone from the bundled-tool registry.
+    for (final tool in ['nkit', 'saturn-patcher', 'xgdtool', 'extract-xiso']) {
+      expect(defaultConfig.containsKey(tool), isFalse, reason: tool);
+    }
+    for (final tool in [
+      'chdman',
+      'nodtool',
+      'maxcso',
+      'xdelta3',
+      'ecm',
+      'unecm',
+    ]) {
+      expect(defaultConfig.containsKey(tool), isTrue, reason: tool);
+    }
+  });
+
+  test('decoupled_routes_are_not_builtin_so_plugins_can_claim_them', () {
+    // A plugin may only shadow a built-in route with "override": true. These
+    // routes were decoupled, so they must be absent from builtinRoutes —
+    // otherwise a normal extension could not serve them.
+    for (final key in [
+      'CCI->ISO',
+      'ZAR->ISO',
+      'ISO->XISO',
+      'XISO->FILES',
+      'WUD->ISO',
+      'WUX->ISO',
+      'WUA->ISO',
+      'WUA->WUD',
+      'NKIT->ISO',
+      'ISO->NKIT',
+    ]) {
+      expect(builtinRoutes.contains(key), isFalse, reason: key);
+    }
+
+    // The routes that remain built-in are still protected.
+    expect(builtinRoutes.contains('ISO->CHD'), isTrue);
+    expect(builtinRoutes.contains('ISO->RVZ'), isTrue);
+    expect(builtinRoutes.contains('CSO->ISO'), isTrue);
   });
 
   test('unknown_iso_conversion_without_media_fails_safely', () async {

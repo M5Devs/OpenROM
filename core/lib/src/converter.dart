@@ -57,6 +57,43 @@ final Set<String> builtinRoutes = {
     for (final to in entry.value) '${entry.key}->${to.toUpperCase()}',
 };
 
+/// Formats that OpenROM Core no longer bundles a tool for. They are handled by
+/// community `.orplug` extensions from the OpenROM Extension Store; when no
+/// such extension is installed the converter returns [communityExtensionError]
+/// instead of failing on a missing binary.
+const Set<String> communityExtensionFormats = {
+  'XISO',
+  'CCI',
+  'ZAR',
+  'WUD',
+  'WUX',
+  'WUA',
+  'NKIT',
+};
+
+const String communityExtensionError =
+    'Format requires a community extension (e.g. NKit or Xbox Suite). '
+    'Please install it from the OpenROM Extension Store.';
+
+/// True when [fmt] or [tgt] belongs to a decoupled format family.
+bool requiresCommunityExtension(String fmt, String tgt) =>
+    communityExtensionFormats.contains(fmt.toUpperCase()) ||
+    communityExtensionFormats.contains(tgt.toUpperCase());
+
+/// Basenames of the tools that were decoupled in v4.0.0, including the
+/// Windows/legacy spellings. Used by [_Converter._run] as a last-resort guard.
+const Set<String> decoupledToolNames = {
+  'nkit',
+  'nkit.exe',
+  'saturn-patcher',
+  'saturn-patcher.exe',
+  'xgdtool',
+  'XGDTool',
+  'XGDTool.exe',
+  'extract-xiso',
+  'extract-xiso.exe',
+};
+
 List<String> cleanCommandArgs(List<String> args) {
   return args.map((arg) {
     var a = arg.trim();
@@ -232,6 +269,17 @@ class Converter {
       return await _fromEcm(job, src, tgt);
     }
 
+    // XISO / Xbox 360 / NKit / Wii U routes were decoupled in v4.0.0. They are
+    // served by community `.orplug` extensions; if none is installed (the
+    // plugin lookup above returned null), report a friendly, actionable error
+    // rather than a missing-binary failure. This runs before the built-in
+    // target check because decoupled formats advertise no core targets.
+    if (requiresCommunityExtension(fmt, tgt)) {
+      _log('[ERROR] $communityExtensionError');
+      job.error = communityExtensionError;
+      return false;
+    }
+
     final valid = detector.getValidTargets(fmt);
     if (!valid.contains(tgt) && tgt != 'BIN/CUE' && tgt != 'FILES') {
       final err = 'Cannot convert $fmt → $tgt. '
@@ -267,24 +315,6 @@ class Converter {
 
     if (tgt == 'ECM') {
       return await _toEcm(job, src);
-    }
-
-    if (fmt == 'XISO' && (tgt == 'ISO' || tgt == 'FILES')) {
-      return await _xisoToFiles(job, src);
-    }
-
-    if (tgt == 'XISO') {
-      return await _toXiso(job, src);
-    }
-
-    if ((['WUD', 'WUX', 'NKIT', 'WUA'].contains(fmt) &&
-            ['ISO', 'WUA', 'WUD'].contains(tgt)) ||
-        (fmt == 'ISO' && tgt == 'NKIT')) {
-      return await _nkitConvert(job, src, tgt);
-    }
-
-    if ((fmt == 'CCI' || fmt == 'ZAR') && tgt == 'ISO') {
-      return await _xboxConvert(job, src, fmt);
     }
 
     final err = 'Unhandled conversion route: $fmt → $tgt';
@@ -527,26 +557,6 @@ class Converter {
     return ok;
   }
 
-  Future<bool> _toXiso(ConversionJob job, String src) async {
-    final xiso = config.getToolPath('extract-xiso');
-    final cmd = [xiso, '-r', src];
-    _log('[XISO] ${p.basename(src)} — repacking to XISO...');
-    return await _run(cmd, job);
-  }
-
-  Future<bool> _xisoToFiles(ConversionJob job, String src) async {
-    final xiso = config.getToolPath('extract-xiso');
-    final base = p.basenameWithoutExtension(src);
-    final outDir = p.join(job.outputDir, '${base}_extracted');
-    Directory(outDir).createSync(recursive: true);
-    final cmd = [xiso, '-x', src, '-d', outDir];
-    _log('[XISO→FILES] Extracting ${p.basename(src)} → $outDir');
-    _log(
-      '[XISO→FILES] Output is a folder of extracted files, not a single ISO.',
-    );
-    return await _run(cmd, job);
-  }
-
   Future<bool> _toRvz(ConversionJob job, String src) async {
     final nodtool = config.getToolPath('nodtool');
     final outName = detector.getOutputName(src, 'rvz');
@@ -566,28 +576,6 @@ class Converter {
     return await _run(cmd, job);
   }
 
-  Future<bool> _nkitConvert(ConversionJob job, String src, String tgt) async {
-    final nkit = config.getToolPath('nkit');
-    final ext = tgt == 'NKIT' ? 'nkit.iso' : tgt.toLowerCase();
-    final out = _outPath(job, src, ext);
-    final cmd = [nkit, 'convert', '-i', src, '-o', out];
-    _log('[NKIT] ${p.basename(src)} → ${p.basename(out)}');
-    return await _run(cmd, job);
-  }
-
-  Future<bool> _xboxConvert(ConversionJob job, String src, String fmt) async {
-    if (Platform.isMacOS) {
-      job.error = 'Xbox format conversion is not supported on macOS. '
-          'XGDTool does not currently provide a macOS build.';
-      _log('  ❌ ${job.error}');
-      return false;
-    }
-    final xgdtool = config.getToolPath('xgdtool');
-    final cmd = [xgdtool, '--xiso', src, '--out', job.outputDir];
-    _log('[Xbox→ISO] ${p.basename(src)} → ISO via XGDTool');
-    return await _run(cmd, job);
-  }
-
   Future<bool> _run(List<String> cmd, ConversionJob job) async {
     final cleanedCmd = cleanCommandArgs(cmd);
     final toolPath = cleanedCmd.first;
@@ -599,6 +587,15 @@ class Converter {
           'Please reinstall OpenROM or set the tool path manually in Settings.';
       job.error = err;
       _log('  ❌ $err');
+      return false;
+    }
+
+    // Safety net: a decoupled tool must never reach Process.start. Routes are
+    // already intercepted in [convert], so this only fires if a future caller
+    // invokes one of the removed converters directly.
+    if (decoupledToolNames.contains(p.basename(toolPath))) {
+      _log('  ❌ $communityExtensionError');
+      job.error = communityExtensionError;
       return false;
     }
 

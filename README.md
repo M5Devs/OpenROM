@@ -138,7 +138,6 @@ not supported and fail fast.
 | ISO | CHD | chdman | `createcd` for PS1/Dreamcast/Saturn/Sega CD, `createdvd` for PS2/GC/Wii/Xbox |
 | ISO | CSO | maxcso | PSP / PS2 |
 | ISO | ECM | ecm | |
-| ISO | XISO | extract-xiso | Xbox |
 | ISO | RVZ | nodtool | GameCube / Wii |
 | BIN | CHD | chdman | Auto CUE if missing |
 | BIN | ECM | ecm | |
@@ -150,16 +149,10 @@ not supported and fail fast.
 | CSO | ISO | maxcso | |
 | ZSO | ISO | maxcso | |
 | ECM | ISO / BIN | unecm | Auto-detects output format |
-| XISO | Files | extract-xiso | Extracts to folder |
 | RVZ | ISO | nodtool | GameCube / Wii |
 | WIA | ISO | nodtool | GameCube / Wii |
 | WBFS | ISO | nodtool | Wii |
 | GCZ | ISO | nodtool | GameCube / Wii |
-| NKit | ISO | nkit | GameCube / Wii |
-| WUD | ISO, WUA | nkit | Wii U |
-| WUX | ISO, WUA | nkit | Wii U (compressed) |
-| WUA | ISO, WUD | nkit | Wii U (ZArchive) |
-| ISO | NKit | nkit | GameCube / Wii |
 
 ---
 
@@ -288,12 +281,11 @@ All tools are open source and verifiable. See [SECURITY.md](SECURITY.md) for SHA
 | **chdman** | CHD conversion (MAME) | GPL v2 |
 | **maxcso** | CSO/ZSO compression | ISC |
 | **ecm / unecm** | ECM compression | GPL v2 |
-| **extract-xiso** | Xbox ISO extraction | GPL v2 |
 | **nodtool** | GameCube / Wii formats | MIT |
 | **xdelta3** | xdelta/VCDIFF patching | Apache 2.0 |
-| **nkit / nkds** | NKit GameCube/Wii/WiiU conversion | MIT |
-| **saturn-patcher** | Sega Saturn SSP patch applier | GPL v3 |
-| **xgdtool** | Xbox Game Disc (XGD) tooling | GPL v3 |
+
+> Xbox (XISO), Wii U (WUD/WUX/WUA), NKit and Sega Saturn SSP support ship as
+> community **`.orplug` extensions** from the OpenROM Extension Store.
 
 ---
 

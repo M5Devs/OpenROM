@@ -50,4 +50,35 @@ void main() {
       );
     });
   });
+
+  group('CLI decoupled routes', () {
+    test('converting to a decoupled format reports the extension message', () {
+      final tmpDir = Directory.systemTemp.createTempSync('cli_decoupled_');
+      try {
+        final iso = File('${tmpDir.path}/game.iso')
+          ..writeAsBytesSync(List<int>.filled(2048, 0));
+
+        final r = _runCli([
+          '--input',
+          iso.path,
+          '--format',
+          'XISO',
+          '--json',
+          '--output',
+          tmpDir.path,
+        ]);
+
+        expect(r.exitCode, 1);
+        final out = r.stdout as String;
+        expect(
+          out,
+          contains('Format requires a community extension '
+              '(e.g. NKit or Xbox Suite).'),
+        );
+        expect(out, contains('OpenROM Extension Store'));
+      } finally {
+        tmpDir.deleteSync(recursive: true);
+      }
+    });
+  });
 }

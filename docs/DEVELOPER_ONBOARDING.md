@@ -229,9 +229,9 @@ Trace: *user drops `game.bin` in the GUI and clicks Convert to CHD.*
           CSO   → _toCso()      → maxcso --threads=N [--use-zopfli|--use-zlib]
           RVZ   → _toRvz()      → nodtool convert
           ECM   → _toEcm()/_fromEcm() → ecm / unecm
-          XISO  → _toXiso()/_xisoToFiles() → extract-xiso
-          WUD…  → _nkitConvert() → nkit convert -i … -o …
-          CCI/ZAR → _xboxConvert() → XGDTool --xiso
+          XISO / WUD… / WUX… / WUA / CCI / ZAR / NKIT
+                → decoupled in v4.0.0; served by community `.orplug`
+                  extensions, otherwise fail with communityExtensionError
           (BIN→CHD auto-generates a temp .cue via _autoCue())
 
 5. EXTERNAL BINARY  (Converter._run)
@@ -291,15 +291,13 @@ getToolPath(tool)
 ```
 <baseDir>/assets/
    ├── windows/                     chdman.exe, ecm.exe, unecm.exe, maxcso.exe,
-   │                                extract-xiso.exe, nodtool.exe, xdelta3.exe,
-   │                                nkit.exe, saturn-patcher.exe, XGDTool.exe
+   │                                nodtool.exe, xdelta3.exe
    ├── linux/
-   │    ├── x86_64/                 chdman, ecm, unecm, maxcso, extract-xiso,
-   │    │                           nodtool, xdelta3, saturn-patcher, XGDTool, nkit
-   │    └── arm64/                  (light tools only: xdelta3, ecm, unecm, saturn-patcher)
+   │    ├── x86_64/                 chdman, ecm, unecm, maxcso, nodtool, xdelta3
+   │    └── arm64/                  chdman, ecm, unecm, maxcso, xdelta3
    └── macos/
-        ├── arm64/  ┐
-        └── x86_64/ ┘              (no XGDTool build on macOS)
+        ├── arm64/  ┐              chdman, ecm, unecm, maxcso, nodtool, xdelta3
+        └── x86_64/ ┘
 ```
 
 `<baseDir>` is discovered by probing, in order:
@@ -311,15 +309,13 @@ getToolPath(tool)
 Architecture folder (`x86_64` vs `arm64`) is inferred from
 `'${Platform.version} ${Platform.operatingSystem}'` containing `aarch64`/`arm64`.
 
-Two naming special-cases:
-- **`nkit` is the only tool with a distinct bundled layout.** Windows looks for
-  `assets/windows/nkit.exe`; Linux/macOS look for
-  `assets/<os>/<arch>/nkit/nkit` first, then fall back to the flat
-  `assets/<os>/<arch>/nkit`. The published SourceForge layout is a **single
-  file** (`…/nkit`), which satisfies the flat fallback.
-- **Windows uses `<tool>.exe`, Linux/macOS use the bare name**, and `xgdtool`
-  maps to `XGDTool[.exe]` (capitalised). See the `winNames`/`unixNames` maps in
-  `config.dart`.
+One naming special-case:
+- **Windows uses `<tool>.exe`, Linux/macOS use the bare name.** See the
+  `winNames`/`unixNames` maps in `config.dart`.
+
+The specialized tools (`nkit`, `saturn-patcher`, `XGDTool`, `extract-xiso`) were
+decoupled from Core in v4.0.0 and are distributed as community `.orplug`
+extensions.
 
 `ensureExecutable()` runs `chmod +x` on Linux/macOS/Android paths.
 
@@ -334,8 +330,8 @@ Config directory (`getDirectoryConfig()`, also used by logger and DAT store):
 | Linux | `$XDG_CONFIG_HOME/openrom`, else `~/.config/openrom` | `XDG_CONFIG_HOME`, `HOME` |
 
 - **Config file:** `<configDir>/config.json` — a flat map of `tool → absolute path`
-  (keys: `chdman`, `maxcso`, `ecm`, `unecm`, `extract-xiso`, `nodtool`, `xdelta3`,
-  `nkit`, `saturn-patcher`, `xgdtool`). `loadConfig()`/`saveConfig()` with an
+  (keys: `chdman`, `maxcso`, `ecm`, `unecm`, `nodtool`, `xdelta3`).
+  `loadConfig()`/`saveConfig()` with an
   in-memory cache. Empty string = "use bundled/PATH".
 - **Plugins dir** (`PluginManager.pluginsDir`): Windows `%APPDATA%\OpenROM\plugins`;
   Linux/macOS `~/.local/share/openrom/plugins` (fallback `~/.openrom/plugins`).
@@ -359,12 +355,12 @@ runtime):
 | `chdman` | CD/DVD ⇄ CHD, verify | `_toChd`, `_fromChd`, `verifyChd` |
 | `maxcso` | ISO ⇄ CSO/ZSO | `_toCso`, `_csoToIso` |
 | `ecm` / `unecm` | ISO/BIN ⇄ ECM | `_toEcm`, `_fromEcm` |
-| `extract-xiso` | XISO pack/unpack | `_toXiso`, `_xisoToFiles` |
+| ~~`extract-xiso`~~ | XISO pack/unpack | community extension |
 | `nodtool` | RVZ/WIA/WBFS/GCZ ⇄ ISO | `_toRvz`, `_fromNodtool` |
-| `nkit` | WUD/WUX/WUA/NKIT ⇄ ISO | `_nkitConvert` |
-| `XGDTool` | CCI/ZAR ⇄ ISO (not on macOS) | `_xboxConvert` |
+| ~~`nkit`~~ | WUD/WUX/WUA/NKIT ⇄ ISO | community extension |
+| ~~`XGDTool`~~ | CCI/ZAR ⇄ ISO (not on macOS) | community extension |
 | `xdelta3` | xdelta/VCDIFF patches (GUI-side) | `gui/lib/patcher/xdelta_patcher.dart` |
-| `saturn-patcher` | Saturn SSP patches | SSP path |
+| ~~`saturn-patcher`~~ | Saturn SSP patches | community extension |
 | plugin binaries | `.orplug`-registered routes | `_pluginConvert` |
 
 > **`xdelta3` is resolved by the GUI, not the core** — `gui/lib/utils/config.dart`
@@ -495,7 +491,7 @@ build-windows   build-linux   build-linux-arm64  build-macos (matrix:   │
 | Platform | Runner | GUI build | Core | Packaging | Artifact(s) |
 |----------|--------|-----------|------|-----------|-------------|
 | **Windows** | `windows-2022` | `flutter build windows` | `openrom-core.exe` | Copy core/VERSION/themes/assets into `…/Release`, write `README.txt`; `Compress-Archive` → **ZIP**; install NSIS + EnVar plugin + ImageMagick, generate BMP/ICO, `makensis openrom.nsi` → **Setup.exe** | `OpenROM_Windows`, `OpenROM_Windows_Installer` |
-| **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → standalone **AppImage**; plus a **Core CLI ZIP** (`openrom-core` + light tools: xdelta3, ecm, unecm, saturn-patcher) | `OpenROM_Linux` → `…_Linux_x86_64.AppImage`, `OpenROM-Core-…_Linux_x86_64.zip` |
+| **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → standalone **AppImage**; plus a **Core CLI ZIP** (`openrom-core` + light tools: xdelta3, ecm, unecm) | `OpenROM_Linux` → `…_Linux_x86_64.AppImage`, `OpenROM-Core-…_Linux_x86_64.zip` |
 | **Linux ARM64** | `ubuntu-24.04-arm` | `flutter build linux` (manual Flutter clone + `precache --linux`) | `openrom-core` | Same as x86_64: standalone **AppImage** + **Core CLI ZIP** (light tools only — heavy conversions need x86_64) | `OpenROM_Linux_arm64` → `…_Linux_arm64.AppImage`, `OpenROM-Core-…_Linux_arm64.zip` |
 | **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/VERSION/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG** (published directly) | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
 | **Android** (`Android.yml`) | `ubuntu-latest` | `flutter build apk --release` | core **compiled into the APK** via jniLibs (below) | **APK** | `OpenROM-Android-Universal` |

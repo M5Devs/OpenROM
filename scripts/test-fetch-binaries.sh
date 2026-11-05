@@ -36,19 +36,22 @@ FIX="$WORK/fixture"
 mkdir -p "$FIX/linux/x86_64" "$FIX/linux/arm64" \
          "$FIX/windows/x86_64" "$FIX/android/arm64-v8a"
 
-printf 'A' > "$FIX/linux/x86_64/tool-a"
-printf 'B' > "$FIX/linux/arm64/tool-a"
-printf 'C' > "$FIX/android/arm64-v8a/tool-c"
-printf 'W' > "$FIX/windows/x86_64/wtool"
+printf 'A' > "$FIX/linux/x86_64/chdman"
+printf 'B' > "$FIX/linux/arm64/chdman"
+printf 'C' > "$FIX/android/arm64-v8a/maxcso"
+printf 'W' > "$FIX/windows/x86_64/chdman.exe"
+# A decoupled tool, published with a valid hash — it must be ignored.
+printf 'N' > "$FIX/linux/x86_64/nkit"
 
 sha() { sha256sum "$1" | awk '{print $1}'; }
 
 {
-    echo "$(sha "$FIX/linux/x86_64/tool-a")  linux/x86_64/tool-a"
-    echo "$(sha "$FIX/linux/arm64/tool-a")  linux/arm64/tool-a"
-    echo "$(sha "$FIX/android/arm64-v8a/tool-c")  android/arm64-v8a/tool-c"
+    echo "$(sha "$FIX/linux/x86_64/chdman")  linux/x86_64/chdman"
+    echo "$(sha "$FIX/linux/arm64/chdman")  linux/arm64/chdman"
+    echo "$(sha "$FIX/android/arm64-v8a/maxcso")  android/arm64-v8a/maxcso"
+    echo "$(sha "$FIX/linux/x86_64/nkit")  linux/x86_64/nkit"
     # Deliberately wrong hash to trigger exit 4.
-    echo "0000000000000000000000000000000000000000000000000000000000000000  windows/x86_64/wtool"
+    echo "0000000000000000000000000000000000000000000000000000000000000000  windows/x86_64/chdman.exe"
 } > "$FIX/checksums.sha256"
 
 PORT=$(( (RANDOM % 20000) + 20000 ))
@@ -62,16 +65,22 @@ export OPENROM_BINS_CHECKSUMS_URL="http://127.0.0.1:$PORT/checksums.sha256"
 echo "── success: linux/x86_64 ──────────────────────────────"
 bash "$SCRIPT" --os linux --arch x86_64 --dest "$WORK/out1" >/dev/null 2>&1
 check "success fetch" 0 $?
-[ -f "$WORK/out1/tool-a" ] && echo "ok   - tool-a present"
-if [ ! -f "$WORK/out1/tool-a" ]; then
-    echo "FAIL - tool-a missing"
+[ -f "$WORK/out1/chdman" ] && echo "ok   - chdman present"
+if [ ! -f "$WORK/out1/chdman" ]; then
+    echo "FAIL - chdman missing"
     failures=$((failures + 1))
+fi
+if [ -f "$WORK/out1/nkit" ]; then
+    echo "FAIL - decoupled tool nkit was downloaded"
+    failures=$((failures + 1))
+else
+    echo "ok   - decoupled tool nkit skipped"
 fi
 
 echo "── wrong hash -> exit 4 ───────────────────────────────"
 bash "$SCRIPT" --os windows --arch x86_64 --dest "$WORK/out2" >/dev/null 2>&1
 check "checksum mismatch" 4 $?
-[ -f "$WORK/out2/wtool" ] \
+[ -f "$WORK/out2/chdman.exe" ] \
     && { echo "FAIL - mismatched file kept"; failures=$((failures + 1)); } \
     || echo "ok   - mismatched file removed"
 
@@ -82,9 +91,9 @@ check "ambiguous arch" 1 $?
 echo "── android single arch without --arch -> exit 0 ───────"
 bash "$SCRIPT" --os android --dest "$WORK/out4" >/dev/null 2>&1
 check "android single arch" 0 $?
-[ -f "$WORK/out4/tool-c" ] && echo "ok   - tool-c present"
-if [ ! -f "$WORK/out4/tool-c" ]; then
-    echo "FAIL - tool-c missing"
+[ -f "$WORK/out4/maxcso" ] && echo "ok   - maxcso present"
+if [ ! -f "$WORK/out4/maxcso" ]; then
+    echo "FAIL - maxcso missing"
     failures=$((failures + 1))
 fi
 
