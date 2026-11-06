@@ -9,12 +9,17 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/skin_manifest.dart';
 import '../models/theme_config.dart';
+import 'skin_manager.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeConfig _currentTheme = ThemeConfig.defaultTheme();
   List<ThemeConfig> _availableThemes = [];
   ThemeMode _themeMode = ThemeMode.system;
+
+  /// Installs/removes `.orskin` bundles. Overridable for tests.
+  final SkinManager skinManager;
 
   ThemeConfig get currentTheme => _currentTheme;
   List<ThemeConfig> get availableThemes => _availableThemes;
@@ -23,7 +28,8 @@ class ThemeService extends ChangeNotifier {
   /// app follows the OS setting when no explicit choice has been stored.
   ThemeMode get themeMode => _themeMode;
 
-  ThemeService() {
+  ThemeService({SkinManager? skinManager})
+      : skinManager = skinManager ?? SkinManager() {
     init();
   }
 
@@ -132,11 +138,55 @@ class ThemeService extends ChangeNotifier {
       debugPrint('Could not scan custom themes directory: $e');
     }
 
+    // Installed `.orskin` bundles live under <configDir>/themes/<id>/.
+    for (final skin in skinManager.listInstalledSkins()) {
+      if (!_availableThemes.any((t) => t.name == skin.theme.name)) {
+        _availableThemes.add(skin.theme);
+      }
+    }
+
     if (_availableThemes.isNotEmpty &&
         _currentTheme.name == 'Gaming Dashboard') {
       _currentTheme = _availableThemes.first;
     }
     notifyListeners();
+  }
+
+  /// Imports an `.orskin` bundle, makes its palette available and applies it.
+  Future<SkinResult<SkinManifest>> importSkin(File orskin) async {
+    final result = await skinManager.importSkin(orskin);
+    if (!result.isOk) return result;
+
+    final skin = result.value!;
+    final existing = _availableThemes.indexWhere(
+      (t) => t.name == skin.theme.name,
+    );
+    if (existing >= 0) {
+      _availableThemes[existing] = skin.theme;
+    } else {
+      _availableThemes.add(skin.theme);
+    }
+    await setTheme(skin.theme);
+    return result;
+  }
+
+  /// Packs the current palette (or [theme]) into an `.orskin` bundle.
+  SkinResult<File> exportSkin({
+    required ThemeConfig theme,
+    required File outputPath,
+    File? wallpaper,
+    File? preview,
+    String? author,
+    String? version,
+  }) {
+    return skinManager.exportSkin(
+      theme: theme,
+      outputPath: outputPath,
+      wallpaper: wallpaper,
+      preview: preview,
+      author: author,
+      version: version,
+    );
   }
 
   /// Saves a custom theme as JSON to the app support directory.

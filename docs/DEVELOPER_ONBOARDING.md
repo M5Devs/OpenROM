@@ -1,6 +1,6 @@
 # OpenROM — Mental Map & Developer Onboarding Guide
 
-> Universal Retro Gaming Toolkit (M5 Dev, GPL v3) — a Flutter desktop/Android GUI
+> Universal Retro Gaming Toolkit (M5 Dev, GPL v3) — a Flutter desktop GUI
 > wrapped around a pure-Dart backend engine (`openrom-core`) that orchestrates
 > native third-party tools (`chdman`, `maxcso`, `xdelta3`, …).
 
@@ -51,7 +51,7 @@ OpenROM/
 │
 ├── gui/                        # ── FRONTEND (Flutter) ──
 │   ├── lib/
-│   │   ├── main.dart           # bootstrap: window_manager, Android MethodChannel, runApp
+│   │   ├── main.dart           # bootstrap: window_manager, deep links, runApp
 │   │   ├── app.dart            # MaterialApp + responsive shell (sidebar / bottom-nav)
 │   │   ├── screens/            # 8 screens (see §3)
 │   │   ├── controllers/        # HomeController, PluginController (ChangeNotifier)
@@ -62,7 +62,7 @@ OpenROM/
 │   │   ├── models/             # ConversionJob, RomFile, errors, ThemeConfig
 │   │   ├── l10n/               # 11 locales (.arb + generated Dart)
 │   │   └── utils/              # AppVersion, AppConfig (tool paths)
-│   ├── android/ linux/ macos/ windows/   # per-platform runner projects
+│   ├── linux/ macos/ windows/   # per-platform runner projects
 │   ├── themes/                 # JSON theme definitions
 │   └── test/                   # widget + unit tests (flutter test)
 │
@@ -116,9 +116,8 @@ not to confuse them:
 2. **In-process library calls (a few lightweight paths).** A handful of GUI files
    `import 'package:openrom_core/openrom_core.dart'` and call functions directly in
    the same Dart isolate — no subprocess. Examples:
-   - `gui/lib/utils/config.dart` → `core.getToolPath()` (Android tool paths)
+   - `gui/lib/utils/config.dart` → `core.getToolPath()`
    - `gui/lib/patcher/dcp_builder.dart` → `core.DcpBuilder`
-   - `gui/lib/main.dart` → `core.initAndroid(libDir)`
    - `gui/lib/widgets/rom_card.dart` → uses core constants (format colors, maps)
    - `gui/lib/services/plugin_service.dart`, `screens/settings_screen.dart`,
      `screens/plugins_screen.dart` → `PluginManager` directly
@@ -203,7 +202,6 @@ Trace: *user drops `game.bin` in the GUI and clicks Convert to CHD.*
                                              core: --json --detect <file>
                                              ◄─ {format,platform,valid_targets,…}
                                         └─► builds RomFile, wraps in ConversionJob
-   (main.dart Android: initAndroid(nativeLibraryDir) first)
 
 2. QUEUE
    ConversionJob holds: targetFormat, compression, verify, media, audioCodec,
@@ -275,11 +273,6 @@ All third-party tool discovery funnels through **`core/lib/src/config.dart` →
 ```
 getToolPath(tool)
   │
-  ├─ Android ──────────────────────────────────────────────────────────────
-  │    initAndroid(nativeLibraryDir) set at startup (main.dart via MethodChannel)
-  │    → '<nativeLibraryDir>/lib<tool>.so'   (chmod +x)
-  │    fallback (no dir): 'lib<tool>.so'  (relies on the loader PATH)
-  │
   ├─ Desktop (Windows / Linux / macOS) ────────────────────────────────────
   │    1. config.json override  (config[tool])  → if non-empty & (exists || absolute)
   │    2. getDefaultBundledPath(tool)  → bundled asset next to exe
@@ -317,7 +310,7 @@ The specialized tools (`nkit`, `saturn-patcher`, `XGDTool`, `extract-xiso`) were
 decoupled from Core in v4.0.0 and are distributed as community `.orplug`
 extensions.
 
-`ensureExecutable()` runs `chmod +x` on Linux/macOS/Android paths.
+`ensureExecutable()` runs `chmod +x` on Linux/macOS paths.
 
 ### 2.3 Config & environment variables
 
@@ -365,7 +358,7 @@ runtime):
 
 > **`xdelta3` is resolved by the GUI, not the core** — `gui/lib/utils/config.dart`
 > → `AppConfig.xdelta3Path` looks **next to the executable**
-> (`<exeDir>/xdelta3[.exe]`), and on Android defers to `core.getToolPath`.
+> (`<exeDir>/xdelta3[.exe]`).
 > Similarly `PluginManager` binaries resolve under the plugins dir.
 
 ---
@@ -382,7 +375,8 @@ There is **no** Provider, Riverpod, Bloc, GetX or similar package in
     `showTerminal`; drives `startConversion`, `pickFiles`, `addFilesFromPaths`,
     `removeJob`, `clearCompleted`, `reorderJobs`.
   - `PluginController` — installed plugins + store catalog.
-  - `ThemeService` — current + available themes (persisted via `shared_preferences`).
+  - `ThemeService` — current + available themes (persisted via `shared_preferences`);
+    installs/exports `.orskin` bundles via `SkinManager` (see `docs/orskin-spec.md`).
   - `LocaleProvider` — active locale (persisted via `shared_preferences`).
 - **`StatefulWidget` + `setState`** for local, screen-scoped state.
 - **Manual listener wiring**: `_OpenROMAppState` subscribes to the three global
@@ -396,7 +390,7 @@ There is **no** Provider, Riverpod, Bloc, GetX or similar package in
 ### 3.2 Screens (all in `gui/lib/screens/`)
 
 The app shell (`app.dart`) is a `MaterialApp` whose `home` is a responsive
-`LayoutBuilder`: **wide** → left `Sidebar` (index 0–7) + `TopBar`; **narrow/Android**
+`LayoutBuilder`: **wide** → left `Sidebar` (index 0–7) + `TopBar`; **narrow**
 → `TopBar` + `BottomNavigationBar` exposing a subset
 (`_mobileScreenIndices = [0, 1, 2, 4, 5]` = Convert, Patch, Tools, Plugins, Settings).
 All screens live in an `IndexedStack` (kept alive, not rebuilt).
@@ -410,10 +404,10 @@ All screens live in an `IndexedStack` (kept alive, not rebuilt).
 | 4 | Plugins | `plugins_screen.dart` | 3 tabs — installed plugins, live storefront, and the visual `.orplug` Builder Studio; drag-drop `.orplug` install; handles `openrom://` links |
 | 5 | Settings | `settings_screen.dart` | Format/compression/verify/output/audio-codec (pushed up via `onSettingsChanged`), theme, locale, update check, online features |
 | 6 | About | `about_screen.dart` | version (from `AppVersion.current` / `CoreBridge.getVersion()`), links |
-| 7 | Theme Editor | `theme_editor_screen.dart` | edit/save custom theme JSON (HSV picker) |
+| 7 | Theme Editor | `theme_editor_screen.dart` | edit/save custom theme JSON (HSV picker), wallpaper + geometry, import/export `.orskin` (spec: `docs/orskin-spec.md`) |
 
 Supporting widgets: `Sidebar`, `TopBar`, `TerminalPanel`, `RomCard`, `DropZone`,
-`ErrorDialog`.
+`ErrorDialog`, `WallpaperBackground` (composites an `.orskin` wallpaper).
 
 ### 3.3 Dynamic application version
 
@@ -434,7 +428,6 @@ Workflows live in `.github/workflows/`:
 |----------|---------|---------|
 | `Release.yml` | `workflow_dispatch` (version input) | Build + publish all desktop release artifacts |
 | `Flatpak.yml` | `workflow_dispatch` (version input) | Build a `.flatpak` bundle and attach to the release |
-| `Android.yml` | `workflow_dispatch`, `release: published` | Build the universal Android APK (gated off releases unless `ENABLE_ANDROID_RELEASE` repo var is `true`) |
 | `quality.yml` | PR/push to `main`, manual | Version consistency + format/analyze/test for `gui` and `core` |
 | `auto_fix.yml` | manual | `dart format` both packages and auto-commit |
 | `pages.yml` | push to `docs/**` | Deploy the docs site to GitHub Pages |
@@ -494,7 +487,6 @@ build-windows   build-linux   build-linux-arm64  build-macos (matrix:   │
 | **Linux x86_64** | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Build **AppDir** (`AppRun`, `.desktop`, icon), `appimagetool` → standalone **AppImage**; plus a **Core CLI ZIP** (`openrom-core` + light tools: xdelta3, ecm, unecm) | `OpenROM_Linux` → `…_Linux_x86_64.AppImage`, `OpenROM-Core-…_Linux_x86_64.zip` |
 | **Linux ARM64** | `ubuntu-24.04-arm` | `flutter build linux` (manual Flutter clone + `precache --linux`) | `openrom-core` | Same as x86_64: standalone **AppImage** + **Core CLI ZIP** (light tools only — heavy conversions need x86_64) | `OpenROM_Linux_arm64` → `…_Linux_arm64.AppImage`, `OpenROM-Core-…_Linux_arm64.zip` |
 | **macOS** | matrix `macos-15` (arm64) / `macos-15-intel` (x86_64) | `flutter build macos` | `openrom-core` | Embed core/VERSION/themes/assets into `*.app/Contents/MacOS`, **ad-hoc codesign** with `macos_entitlements.plist`, `hdiutil` → **DMG** (published directly) | `OpenROM_macOS_arm64`, `OpenROM_macOS_x86_64` |
-| **Android** (`Android.yml`) | `ubuntu-latest` | `flutter build apk --release` | core **compiled into the APK** via jniLibs (below) | **APK** | `OpenROM-Android-Universal` |
 | **Flatpak** (`Flatpak.yml`) | `ubuntu-22.04` | `flutter build linux` | `openrom-core` | Install bundle + core + tools into `/app`, `flatpak-builder` → **.flatpak** | attached to release |
 
 The final `release` job downloads all artifacts and publishes them to a GitHub
@@ -506,28 +498,13 @@ Release tagged `v<version>` with the download table in the body.
 > **`OpenROM-Core-<version>_Linux_<arch>.zip`** (headless CLI + light tools) for
 > scripting. See the release body's "Linux notes".
 
-### 4.3 Android specifics
+### 4.3 Android
 
-`Android.yml` fetches the Android tool libraries from SourceForge and stages them
-as **jniLibs**:
-
-```bash
-bash scripts/fetch-binaries.sh --os android --dest assets/android
-for abi in arm64-v8a x86_64; do
-  cp assets/android/$abi/<tool>  gui/android/app/src/main/jniLibs/$abi/lib<tool>.so
-done
-```
-
-At runtime, `main.dart` queries the native library directory over a
-`MethodChannel('com.m5dev.openrom/native')` handled by `MainActivity.kt`
-(`getNativeLibraryDir`), then calls `core.initAndroid(libDir)`. From then on
-`config.getToolPath()` returns `lib<tool>.so` inside that dir — this is the only
-platform where tools are shared libraries rather than executables.
-
-Android is **omitted from the v3.9.8 release**. The `build-android` job is guarded
-so the `release: published` trigger no longer fires it; re-enable by dispatching
-`Android.yml` manually or setting the repository variable
-`ENABLE_ANDROID_RELEASE=true`.
+Android is **no longer built from this repository**. The mobile app lives in the
+separate `OpenROM-Android` Kotlin repository, and this repo is desktop-only
+(Windows, Linux, macOS). The former `gui/android/` runner project,
+`Android.yml` workflow, `core.initAndroid()` entry point and the
+`lib<tool>.so` tool-resolution branch have all been removed.
 
 ### 4.4 `quality.yml` gate
 

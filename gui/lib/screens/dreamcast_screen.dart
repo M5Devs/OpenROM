@@ -41,7 +41,7 @@ class _DreamcastScreenState extends State<DreamcastScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: widget.theme.background,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           Container(

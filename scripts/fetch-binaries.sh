@@ -10,8 +10,8 @@
 # Usage:
 #   scripts/fetch-binaries.sh --os <os> [--arch <arch>] --dest <dir>
 #
-#   --os    linux | macos | windows | android
-#   --arch  x86_64 | arm64 | arm64-v8a   (omit to fetch every arch published for the OS)
+#   --os    linux | macos | windows
+#   --arch  x86_64 | arm64   (omit to fetch every arch published for the OS)
 #   --dest  destination directory (files are placed flat, by basename)
 #
 # Environment:
@@ -68,8 +68,8 @@ done
 [[ -n "$OS" && -n "$DEST" ]] || usage
 
 case "$OS" in
-    linux|macos|windows|android) ;;
-    *) echo "Invalid --os: $OS (expected linux, macos, windows or android)" >&2; exit 1 ;;
+    linux|macos|windows) ;;
+    *) echo "Invalid --os: $OS (expected linux, macos or windows)" >&2; exit 1 ;;
 esac
 
 # Prefer curl, fall back to wget.

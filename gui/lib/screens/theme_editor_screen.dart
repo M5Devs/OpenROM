@@ -1,6 +1,9 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../models/theme_config.dart';
@@ -35,6 +38,76 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  /// Applies the in-progress edits to the live theme service.
+  ThemeConfig _currentEdits() => _edited.copyWith(
+        name: _nameController.text.trim().isEmpty
+            ? 'Custom Skin'
+            : _nameController.text.trim(),
+      );
+
+  Future<void> _pickWallpaper() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      dialogTitle: 'Choose a wallpaper image',
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+    setState(() => _edited = _edited.copyWith(wallpaperPath: path));
+  }
+
+  Future<void> _importSkin() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['orskin'],
+      dialogTitle: 'Import an .orskin bundle',
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+
+    final imported = await widget.themeService.importSkin(File(path));
+    if (!imported.isOk) {
+      _snack('Import failed: ${imported.error}');
+      return;
+    }
+    setState(() {
+      _edited = imported.value!.theme;
+      _nameController.text = _edited.name;
+    });
+    _snack('Imported skin "${imported.value!.name}"');
+  }
+
+  Future<void> _exportSkin() async {
+    final theme = _currentEdits();
+    final suggested = '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}'
+        '.orskin';
+    final out = await FilePicker.platform.saveFile(
+      dialogTitle: 'Export .orskin bundle',
+      fileName: suggested,
+      type: FileType.custom,
+      allowedExtensions: const ['orskin'],
+    );
+    if (out == null) return;
+
+    final wallpaperPath = theme.wallpaperPath;
+    final exported = widget.themeService.exportSkin(
+      theme: theme,
+      outputPath: File(out),
+      wallpaper: wallpaperPath == null ? null : File(wallpaperPath),
+    );
+    if (!exported.isOk) {
+      _snack('Export failed: ${exported.error}');
+      return;
+    }
+    _snack('Exported ${exported.value!.path}');
   }
 
   // Opens a simple HSV color picker dialog and returns the picked color
@@ -360,6 +433,28 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                         _edited = _edited.copyWith(name: v);
                       }),
                     ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.file_download_outlined),
+                          label: const Text('Import .orskin'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: t.accent,
+                          ),
+                          onPressed: _importSkin,
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.file_upload_outlined),
+                          label: const Text('Export .orskin'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: t.accent,
+                          ),
+                          onPressed: _exportSkin,
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     Text(
                       'Colors',
@@ -414,6 +509,72 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       'Terminal Text',
                       _edited.terminalText,
                       (c) => _edited = _edited.copyWith(terminalText: c),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Skin Geometry & Wallpaper',
+                      style: TextStyle(
+                        color: t.accent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSlider(
+                      'Corner Radius',
+                      _edited.borderRadius,
+                      0,
+                      24,
+                      (v) => setState(
+                        () => _edited = _edited.copyWith(borderRadius: v),
+                      ),
+                      t.accent,
+                    ),
+                    _buildSlider(
+                      'Wallpaper Opacity',
+                      _edited.wallpaperOpacity,
+                      0,
+                      1,
+                      (v) => setState(
+                        () => _edited = _edited.copyWith(wallpaperOpacity: v),
+                      ),
+                      t.accent,
+                    ),
+                    _buildSlider(
+                      'Wallpaper Blur',
+                      _edited.wallpaperBlur,
+                      0,
+                      20,
+                      (v) => setState(
+                        () => _edited = _edited.copyWith(wallpaperBlur: v),
+                      ),
+                      t.accent,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.wallpaper),
+                          label: const Text('Choose Wallpaper'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: t.accent,
+                          ),
+                          onPressed: _pickWallpaper,
+                        ),
+                        const SizedBox(width: 12),
+                        if (_edited.wallpaperPath != null)
+                          TextButton.icon(
+                            icon: const Icon(Icons.clear),
+                            label: const Text('Remove'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: t.textSecondary,
+                            ),
+                            onPressed: () => setState(
+                              () => _edited =
+                                  _edited.copyWith(clearWallpaper: true),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(

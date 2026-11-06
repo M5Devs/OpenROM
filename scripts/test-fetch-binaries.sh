@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # test-fetch-binaries.sh — exercise scripts/fetch-binaries.sh against a local
 # HTTP fixture. Covers: success, checksum mismatch (exit 4), multiple archs
-# without --arch (exit 1), android single arch, and OPENROM_BINS_REF handling.
+# without --arch (exit 1), single arch, invalid --os, and OPENROM_BINS_REF
+# handling.
 #
 # Usage: scripts/test-fetch-binaries.sh
 set -uo pipefail
@@ -34,11 +35,11 @@ check() {
 # ── Fixture ──────────────────────────────────────────────────────────────
 FIX="$WORK/fixture"
 mkdir -p "$FIX/linux/x86_64" "$FIX/linux/arm64" \
-         "$FIX/windows/x86_64" "$FIX/android/arm64-v8a"
+         "$FIX/windows/x86_64" "$FIX/macos/arm64"
 
 printf 'A' > "$FIX/linux/x86_64/chdman"
 printf 'B' > "$FIX/linux/arm64/chdman"
-printf 'C' > "$FIX/android/arm64-v8a/maxcso"
+printf 'C' > "$FIX/macos/arm64/maxcso"
 printf 'W' > "$FIX/windows/x86_64/chdman.exe"
 # A decoupled tool, published with a valid hash — it must be ignored.
 printf 'N' > "$FIX/linux/x86_64/nkit"
@@ -48,7 +49,7 @@ sha() { sha256sum "$1" | awk '{print $1}'; }
 {
     echo "$(sha "$FIX/linux/x86_64/chdman")  linux/x86_64/chdman"
     echo "$(sha "$FIX/linux/arm64/chdman")  linux/arm64/chdman"
-    echo "$(sha "$FIX/android/arm64-v8a/maxcso")  android/arm64-v8a/maxcso"
+    echo "$(sha "$FIX/macos/arm64/maxcso")  macos/arm64/maxcso"
     echo "$(sha "$FIX/linux/x86_64/nkit")  linux/x86_64/nkit"
     # Deliberately wrong hash to trigger exit 4.
     echo "0000000000000000000000000000000000000000000000000000000000000000  windows/x86_64/chdman.exe"
@@ -88,18 +89,22 @@ echo "── multiple archs without --arch -> exit 1 ─────────
 bash "$SCRIPT" --os linux --dest "$WORK/out3" >/dev/null 2>&1
 check "ambiguous arch" 1 $?
 
-echo "── android single arch without --arch -> exit 0 ───────"
-bash "$SCRIPT" --os android --dest "$WORK/out4" >/dev/null 2>&1
-check "android single arch" 0 $?
+echo "── single arch without --arch -> exit 0 ───────────────"
+bash "$SCRIPT" --os macos --dest "$WORK/out4" >/dev/null 2>&1
+check "macos single arch" 0 $?
 [ -f "$WORK/out4/maxcso" ] && echo "ok   - maxcso present"
 if [ ! -f "$WORK/out4/maxcso" ]; then
     echo "FAIL - maxcso missing"
     failures=$((failures + 1))
 fi
 
+echo "── android is no longer a valid --os -> exit 1 ────────"
+bash "$SCRIPT" --os android --dest "$WORK/out_android" >/dev/null 2>&1
+check "android rejected" 1 $?
+
 echo "── OPENROM_BINS_REF is used in the default URL ────────"
 unset OPENROM_BINS_CHECKSUMS_URL
-out=$(OPENROM_BINS_REF=custom-ref bash "$SCRIPT" --os android --dest "$WORK/out5" 2>&1)
+out=$(OPENROM_BINS_REF=custom-ref bash "$SCRIPT" --os macos --dest "$WORK/out5" 2>&1)
 echo "$out" | head -1
 if echo "$out" | grep -q "OpenROM-bins/custom-ref/checksums.sha256"; then
     echo "ok   - custom ref appears in checksums URL"
@@ -109,7 +114,7 @@ else
 fi
 
 echo "── invalid OPENROM_BINS_REF -> exit 1 ─────────────────"
-OPENROM_BINS_REF='bad ref!' bash "$SCRIPT" --os android --dest "$WORK/out6" >/dev/null 2>&1
+OPENROM_BINS_REF='bad ref!' bash "$SCRIPT" --os macos --dest "$WORK/out6" >/dev/null 2>&1
 check "invalid ref" 1 $?
 
 echo

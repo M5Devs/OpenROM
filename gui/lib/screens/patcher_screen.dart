@@ -40,7 +40,7 @@ class _PatcherScreenState extends State<PatcherScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: theme.background,
+        backgroundColor: Colors.transparent,
         body: Column(
           children: [
             Container(

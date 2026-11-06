@@ -1,7 +1,6 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'controllers/home_controller.dart';
@@ -20,6 +19,7 @@ import 'services/deeplink_service.dart';
 import 'services/theme_service.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/top_bar.dart';
+import 'widgets/wallpaper_background.dart';
 
 class OpenROMApp extends StatefulWidget {
   final ThemeService themeService;
@@ -141,6 +141,51 @@ class _OpenROMAppState extends State<OpenROMApp> {
       surface: theme.surface,
     );
 
+    // Card and button geometry follow the skin's border radius (0 = sharp
+    // retro, 24 = modern rounded).
+    final radius = BorderRadius.circular(theme.borderRadius);
+    ThemeData buildTheme(Brightness brightness, ColorScheme scheme) {
+      return ThemeData(
+        brightness: brightness,
+        scaffoldBackgroundColor: Colors.transparent,
+        colorScheme: scheme,
+        cardTheme: CardThemeData(
+          color: theme.cardBg,
+          shape: RoundedRectangleBorder(borderRadius: radius),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: theme.surface,
+          shape: RoundedRectangleBorder(borderRadius: radius),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.accent,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: radius),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: radius),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: radius),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: theme.surface,
+          border: OutlineInputBorder(borderRadius: radius),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: theme.accent),
+        ),
+        dividerTheme: DividerThemeData(color: theme.border),
+      );
+    }
+
     final int fileCount = _homeController.fileCount;
     final bool isConverting = _homeController.isConverting;
 
@@ -185,22 +230,13 @@ class _OpenROMAppState extends State<OpenROMApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       themeMode: widget.themeService.themeMode,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: theme.background,
-        colorScheme: lightColorScheme,
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: theme.background,
-        colorScheme: darkColorScheme,
-      ),
+      theme: buildTheme(Brightness.light, lightColorScheme),
+      darkTheme: buildTheme(Brightness.dark, darkColorScheme),
       home: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 650;
-          final isMobile = isNarrow ||
-              defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS;
+          // Desktop-only build: a narrow window uses the compact layout.
+          final isMobile = isNarrow;
 
           if (isMobile) {
             final mobileCurrentIndex =
@@ -208,95 +244,101 @@ class _OpenROMAppState extends State<OpenROMApp> {
                     ? _mobileScreenIndices.indexOf(_selectedIndex)
                     : 0;
 
-            return Scaffold(
-              backgroundColor: theme.background,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(60),
-                child: TopBar(
-                  theme: theme,
-                  fileCount: fileCount,
-                  isConverting: isConverting,
-                  onConvertPressed: _onConvertPressed,
-                  onAddFilesPressed: _onAddFilesPressed,
+            return WallpaperBackground(
+              theme: theme,
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(60),
+                  child: TopBar(
+                    theme: theme,
+                    fileCount: fileCount,
+                    isConverting: isConverting,
+                    onConvertPressed: _onConvertPressed,
+                    onAddFilesPressed: _onAddFilesPressed,
+                  ),
                 ),
-              ),
-              body: IndexedStack(
-                index: _selectedIndex,
-                children: screens,
-              ),
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: mobileCurrentIndex,
-                onTap: (int index) {
-                  setState(() {
-                    _selectedIndex = _mobileScreenIndices[index];
-                  });
-                },
-                backgroundColor: theme.surface,
-                selectedItemColor: theme.accent,
-                unselectedItemColor: theme.textSecondary,
-                type: BottomNavigationBarType.fixed,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.sync_alt_outlined),
-                    activeIcon: Icon(Icons.sync_alt),
-                    label: 'Convert',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.healing_outlined),
-                    activeIcon: Icon(Icons.healing),
-                    label: 'Patch',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.construction_outlined),
-                    activeIcon: Icon(Icons.construction),
-                    label: 'Tools',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.extension_outlined),
-                    activeIcon: Icon(Icons.extension),
-                    label: 'Plugins',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.settings_outlined),
-                    activeIcon: Icon(Icons.settings),
-                    label: 'Settings',
-                  ),
-                ],
+                body: IndexedStack(
+                  index: _selectedIndex,
+                  children: screens,
+                ),
+                bottomNavigationBar: BottomNavigationBar(
+                  currentIndex: mobileCurrentIndex,
+                  onTap: (int index) {
+                    setState(() {
+                      _selectedIndex = _mobileScreenIndices[index];
+                    });
+                  },
+                  backgroundColor: theme.surface,
+                  selectedItemColor: theme.accent,
+                  unselectedItemColor: theme.textSecondary,
+                  type: BottomNavigationBarType.fixed,
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.sync_alt_outlined),
+                      activeIcon: Icon(Icons.sync_alt),
+                      label: 'Convert',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.healing_outlined),
+                      activeIcon: Icon(Icons.healing),
+                      label: 'Patch',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.construction_outlined),
+                      activeIcon: Icon(Icons.construction),
+                      label: 'Tools',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.extension_outlined),
+                      activeIcon: Icon(Icons.extension),
+                      label: 'Plugins',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.settings_outlined),
+                      activeIcon: Icon(Icons.settings),
+                      label: 'Settings',
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
-          return Scaffold(
-            backgroundColor: theme.background,
-            body: Row(
-              children: [
-                Sidebar(
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: (index) {
-                    setState(() => _selectedIndex = index);
-                  },
-                  theme: theme,
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      TopBar(
-                        theme: theme,
-                        fileCount: fileCount,
-                        isConverting: isConverting,
-                        onConvertPressed: _onConvertPressed,
-                        onAddFilesPressed: _onAddFilesPressed,
-                      ),
-                      Expanded(
-                        child: IndexedStack(
-                          index: _selectedIndex,
-                          children: screens,
-                        ),
-                      ),
-                    ],
+          return WallpaperBackground(
+            theme: theme,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Row(
+                children: [
+                  Sidebar(
+                    selectedIndex: _selectedIndex,
+                    onDestinationSelected: (index) {
+                      setState(() => _selectedIndex = index);
+                    },
+                    theme: theme,
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: Column(
+                      children: [
+                        TopBar(
+                          theme: theme,
+                          fileCount: fileCount,
+                          isConverting: isConverting,
+                          onConvertPressed: _onConvertPressed,
+                          onAddFilesPressed: _onAddFilesPressed,
+                        ),
+                        Expanded(
+                          child: IndexedStack(
+                            index: _selectedIndex,
+                            children: screens,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },

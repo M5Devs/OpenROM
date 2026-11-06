@@ -1,6 +1,8 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart';
@@ -79,6 +81,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _raUsernameController.dispose();
     _raApiKeyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _importSkinBundle() async {
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['orskin'],
+      dialogTitle: 'Import an .orskin skin bundle',
+    );
+    final path = picked?.files.single.path;
+    if (path == null) return;
+
+    final result = await widget.themeService.importSkin(File(path));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result.isOk
+              ? 'Imported skin "${result.value!.name}"'
+              : 'Import failed: ${result.error}',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportCurrentSkin() async {
+    final theme = widget.themeService.currentTheme;
+    final suggested =
+        '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}.orskin';
+    final out = await FilePicker.platform.saveFile(
+      dialogTitle: 'Export current theme as .orskin',
+      fileName: suggested,
+      type: FileType.custom,
+      allowedExtensions: const ['orskin'],
+    );
+    if (out == null) return;
+
+    final wallpaperPath = theme.wallpaperPath;
+    final result = widget.themeService.exportSkin(
+      theme: theme,
+      outputPath: File(out),
+      wallpaper: wallpaperPath == null ? null : File(wallpaperPath),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result.isOk
+              ? 'Exported ${result.value!.path}'
+              : 'Export failed: ${result.error}',
+        ),
+      ),
+    );
   }
 
   Future<void> _loadSettings() async {
@@ -516,6 +570,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            children: [
+              OutlinedButton.icon(
+                icon: const Icon(Icons.file_download_outlined),
+                label: const Text('Import .orskin'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.accent,
+                  side: BorderSide(color: theme.border),
+                ),
+                onPressed: _importSkinBundle,
+              ),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.file_upload_outlined),
+                label: const Text('Export .orskin'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.accent,
+                  side: BorderSide(color: theme.border),
+                ),
+                onPressed: _exportCurrentSkin,
+              ),
+            ],
           ),
           const SizedBox(height: 32),
 

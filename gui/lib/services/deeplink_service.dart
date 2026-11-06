@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Links arrive by three routes, all of which land here:
 ///  * **Cold start** — the OS launches the app with the URL as an argument
 ///    (Windows registry, Linux `.desktop` `%u`, macOS `Info.plist`). Handled
-///    from `main(args)` and, on Android, via `getLaunchUrl`.
+///    from `main(args)` and, when the host forwards it, via `getLaunchUrl`.
 ///  * **Warm start** — the app is already running and the OS hands the URL to
 ///    the native host, which forwards it over the `openrom.deeplink` channel.
 ///  * **Missed links** — when no listener is attached yet (or the app was
@@ -56,7 +56,7 @@ class DeepLinkService {
     }
 
     // 3. Cold start on platforms that hand the URL to the native host
-    //    (Android intent, macOS `openURLs:`).
+    //    (macOS `openURLs:`).
     try {
       final url = await _channel.invokeMethod<String>('getLaunchUrl');
       if (url != null && url.isNotEmpty) {

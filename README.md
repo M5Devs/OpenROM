@@ -8,7 +8,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"/></a>
   <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dt/openrom.svg?color=2ea043&logo=sourceforge"/></a>
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android%20soon-cyan"/>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-cyan"/>
   <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/v/release/M5Devs/OpenROM"/></a>
   <a href="https://github.com/M5Devs/OpenROM/releases/latest"><img src="https://img.shields.io/github/downloads/M5Devs/OpenROM/total"/></a>
   <a href="https://sourceforge.net/projects/openrom/files/latest/download"><img src="https://img.shields.io/sourceforge/dm/openrom.svg?color=1f6feb&logo=sourceforge"/></a>
@@ -42,11 +42,10 @@ OpenROM is a free, open-source **Universal Retro Gaming Toolkit** — one app to
 | 🐧 Linux ARM64 | [OpenROM_Linux_arm64.AppImage](https://github.com/M5Devs/OpenROM/releases/latest) · [Core CLI](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Apple Silicon | [OpenROM_macOS_arm64.dmg](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
 | 🍎 macOS Intel | [OpenROM_macOS_x86_64.dmg](https://github.com/M5Devs/OpenROM/releases/latest) | [Mirror](https://sourceforge.net/projects/openrom/files/latest/download) |
-| 🤖 Android | 🚧 Coming soon via Termux | — |
 
 Each release includes the **Flutter GUI** (`OpenROM`) and the **headless CLI** (`openrom-core`).
 
-📖 **Guides & Docs:** [Official Wiki](https://github.com/M5Devs/OpenROM/wiki) — setup, Steam Deck, Termux, FAQs.
+📖 **Guides & Docs:** [Official Wiki](https://github.com/M5Devs/OpenROM/wiki) — setup, Steam Deck, FAQs.
 
 ---
 

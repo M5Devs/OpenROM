@@ -17,7 +17,29 @@ class ThemeConfig {
   final String fontFamily;
   final double borderRadius;
   final String layout;
-  Color get border => textSecondary.withValues(alpha: 0.2);
+
+  /// Absolute path to an installed wallpaper image, or null for a flat
+  /// background. Only ever set for skins imported from `.orskin` bundles or
+  /// chosen in the Theme Editor.
+  final String? wallpaperPath;
+
+  /// Opacity of the wallpaper layer, 0.0–1.0. Defaults to a subtle 0.15.
+  final double wallpaperOpacity;
+
+  /// Gaussian blur radius (logical px) applied to the wallpaper, 0.0–20.0.
+  final double wallpaperBlur;
+
+  /// Identifier of the `.orskin` this palette came from, if any.
+  final String? skinId;
+
+  /// Optional second accent (the `.orskin` spec's `accentSecondary`).
+  final Color? accentSecondary;
+
+  /// Optional explicit border colour (the `.orskin` spec's `border`). When
+  /// null, [border] falls back to a translucent [textSecondary].
+  final Color? borderColor;
+
+  Color get border => borderColor ?? textSecondary.withValues(alpha: 0.2);
 
   /// Whether this palette is a light theme (light background, dark text).
   bool get isLight => background.computeLuminance() > 0.5;
@@ -39,6 +61,12 @@ class ThemeConfig {
       fontFamily: fontFamily,
       borderRadius: borderRadius,
       layout: layout,
+      wallpaperPath: wallpaperPath,
+      wallpaperOpacity: wallpaperOpacity,
+      wallpaperBlur: wallpaperBlur,
+      skinId: skinId,
+      accentSecondary: accentSecondary,
+      borderColor: borderColor,
     );
   }
 
@@ -58,6 +86,12 @@ class ThemeConfig {
       fontFamily: fontFamily,
       borderRadius: borderRadius,
       layout: layout,
+      wallpaperPath: wallpaperPath,
+      wallpaperOpacity: wallpaperOpacity,
+      wallpaperBlur: wallpaperBlur,
+      skinId: skinId,
+      accentSecondary: accentSecondary,
+      borderColor: borderColor,
     );
   }
 
@@ -75,6 +109,12 @@ class ThemeConfig {
     required this.fontFamily,
     required this.borderRadius,
     required this.layout,
+    this.wallpaperPath,
+    this.wallpaperOpacity = 0.15,
+    this.wallpaperBlur = 0.0,
+    this.skinId,
+    this.accentSecondary,
+    this.borderColor,
   });
 
   /// Converts a Color to a 6-char hex string e.g. '#e94560'
@@ -97,6 +137,13 @@ class ThemeConfig {
       'font_family': fontFamily,
       'border_radius': borderRadius,
       'layout': layout,
+      if (wallpaperPath != null) 'wallpaper_path': wallpaperPath,
+      'wallpaper_opacity': wallpaperOpacity,
+      'wallpaper_blur': wallpaperBlur,
+      if (skinId != null) 'skin_id': skinId,
+      if (accentSecondary != null)
+        'accent_secondary': _colorToHex(accentSecondary!),
+      if (borderColor != null) 'border_color': _colorToHex(borderColor!),
     };
   }
 
@@ -114,6 +161,13 @@ class ThemeConfig {
     String? fontFamily,
     double? borderRadius,
     String? layout,
+    String? wallpaperPath,
+    bool clearWallpaper = false,
+    double? wallpaperOpacity,
+    double? wallpaperBlur,
+    String? skinId,
+    Color? accentSecondary,
+    Color? borderColor,
   }) {
     return ThemeConfig(
       name: name ?? this.name,
@@ -129,6 +183,13 @@ class ThemeConfig {
       fontFamily: fontFamily ?? this.fontFamily,
       borderRadius: borderRadius ?? this.borderRadius,
       layout: layout ?? this.layout,
+      wallpaperPath:
+          clearWallpaper ? null : (wallpaperPath ?? this.wallpaperPath),
+      wallpaperOpacity: wallpaperOpacity ?? this.wallpaperOpacity,
+      wallpaperBlur: wallpaperBlur ?? this.wallpaperBlur,
+      skinId: skinId ?? this.skinId,
+      accentSecondary: accentSecondary ?? this.accentSecondary,
+      borderColor: borderColor ?? this.borderColor,
     );
   }
 
@@ -144,6 +205,13 @@ class ThemeConfig {
       }
     }
 
+    final accent =
+        hexToColor(json['accent'] ?? '#e94560', const Color(0xffe94560));
+    final textSecondary = hexToColor(
+      json['text_secondary'] ?? '#a0a0b0',
+      const Color(0xffa0a0b0),
+    );
+
     return ThemeConfig(
       name: json['name'] ?? 'Custom Theme',
       background: hexToColor(
@@ -154,15 +222,12 @@ class ThemeConfig {
         json['surface'] ?? '#1a1a1a',
         const Color(0xff1a1a1a),
       ),
-      accent: hexToColor(json['accent'] ?? '#e94560', const Color(0xffe94560)),
+      accent: accent,
       textPrimary: hexToColor(
         json['text_primary'] ?? '#ffffff',
         const Color(0xffffffff),
       ),
-      textSecondary: hexToColor(
-        json['text_secondary'] ?? '#a0a0b0',
-        const Color(0xffa0a0b0),
-      ),
+      textSecondary: textSecondary,
       sidebarBg: hexToColor(
         json['sidebar_bg'] ?? '#111111',
         const Color(0xff111111),
@@ -179,6 +244,21 @@ class ThemeConfig {
       fontFamily: json['font_family'] ?? 'Sans-Serif',
       borderRadius: (json['border_radius'] as num?)?.toDouble() ?? 12.0,
       layout: json['layout'] ?? 'sidebar_left',
+      wallpaperPath: (json['wallpaper_path'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : json['wallpaper_path'] as String,
+      wallpaperOpacity:
+          (json['wallpaper_opacity'] as num?)?.toDouble().clamp(0.0, 1.0) ??
+              0.15,
+      wallpaperBlur:
+          (json['wallpaper_blur'] as num?)?.toDouble().clamp(0.0, 20.0) ?? 0.0,
+      skinId: json['skin_id'] as String?,
+      accentSecondary: json['accent_secondary'] == null
+          ? null
+          : hexToColor(json['accent_secondary'], accent),
+      borderColor: json['border_color'] == null
+          ? null
+          : hexToColor(json['border_color'], textSecondary),
     );
   }
 

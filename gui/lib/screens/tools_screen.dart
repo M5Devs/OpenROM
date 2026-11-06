@@ -48,7 +48,7 @@ class _ToolsScreenState extends State<ToolsScreen>
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: widget.theme.background,
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           // Sub-Tab Navigation Header
