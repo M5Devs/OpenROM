@@ -39,6 +39,22 @@ class ThemeConfig {
   /// null, [border] falls back to a translucent [textSecondary].
   final Color? borderColor;
 
+  /// Absolute path to an installed `.orskin` dropzone illustration (`.gif` or
+  /// `.png`), or null to use the default dropzone icon.
+  final String? dropzonePath;
+
+  /// Absolute path to an installed `.orskin` custom font file (`.ttf`/`.otf`),
+  /// or null to use the system/[fontFamily] typeface.
+  final String? fontPath;
+
+  /// Absolute path to an installed `.orskin` sidebar icon directory, or null
+  /// to use the built-in Material icons.
+  final String? iconDir;
+
+  /// Navigation tab ids this skin hides (e.g. `['dreamcast']`). Empty means
+  /// every tab is visible.
+  final List<String> hiddenTabs;
+
   Color get border => borderColor ?? textSecondary.withValues(alpha: 0.2);
 
   /// Whether this palette is a light theme (light background, dark text).
@@ -67,6 +83,10 @@ class ThemeConfig {
       skinId: skinId,
       accentSecondary: accentSecondary,
       borderColor: borderColor,
+      dropzonePath: dropzonePath,
+      fontPath: fontPath,
+      iconDir: iconDir,
+      hiddenTabs: hiddenTabs,
     );
   }
 
@@ -92,6 +112,10 @@ class ThemeConfig {
       skinId: skinId,
       accentSecondary: accentSecondary,
       borderColor: borderColor,
+      dropzonePath: dropzonePath,
+      fontPath: fontPath,
+      iconDir: iconDir,
+      hiddenTabs: hiddenTabs,
     );
   }
 
@@ -115,6 +139,10 @@ class ThemeConfig {
     this.skinId,
     this.accentSecondary,
     this.borderColor,
+    this.dropzonePath,
+    this.fontPath,
+    this.iconDir,
+    this.hiddenTabs = const <String>[],
   });
 
   /// Converts a Color to a 6-char hex string e.g. '#e94560'
@@ -144,6 +172,10 @@ class ThemeConfig {
       if (accentSecondary != null)
         'accent_secondary': _colorToHex(accentSecondary!),
       if (borderColor != null) 'border_color': _colorToHex(borderColor!),
+      if (dropzonePath != null) 'dropzone_path': dropzonePath,
+      if (fontPath != null) 'font_path': fontPath,
+      if (iconDir != null) 'icon_dir': iconDir,
+      if (hiddenTabs.isNotEmpty) 'hidden_tabs': hiddenTabs,
     };
   }
 
@@ -168,6 +200,13 @@ class ThemeConfig {
     String? skinId,
     Color? accentSecondary,
     Color? borderColor,
+    String? dropzonePath,
+    bool clearDropzone = false,
+    String? fontPath,
+    bool clearFont = false,
+    String? iconDir,
+    bool clearIconDir = false,
+    List<String>? hiddenTabs,
   }) {
     return ThemeConfig(
       name: name ?? this.name,
@@ -190,6 +229,10 @@ class ThemeConfig {
       skinId: skinId ?? this.skinId,
       accentSecondary: accentSecondary ?? this.accentSecondary,
       borderColor: borderColor ?? this.borderColor,
+      dropzonePath: clearDropzone ? null : (dropzonePath ?? this.dropzonePath),
+      fontPath: clearFont ? null : (fontPath ?? this.fontPath),
+      iconDir: clearIconDir ? null : (iconDir ?? this.iconDir),
+      hiddenTabs: hiddenTabs ?? this.hiddenTabs,
     );
   }
 
@@ -259,6 +302,20 @@ class ThemeConfig {
       borderColor: json['border_color'] == null
           ? null
           : hexToColor(json['border_color'], textSecondary),
+      dropzonePath: (json['dropzone_path'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : json['dropzone_path'] as String,
+      fontPath: (json['font_path'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : json['font_path'] as String,
+      iconDir: (json['icon_dir'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : json['icon_dir'] as String,
+      hiddenTabs: (json['hidden_tabs'] as List?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList(growable: false) ??
+          const <String>[],
     );
   }
 

@@ -26,22 +26,41 @@ class SkinResult<T> {
 
 /// Installs, exports and removes `.orskin` skin bundles.
 ///
-/// An `.orskin` is a plain ZIP archive:
+/// An `.orskin` is a plain ZIP archive. v2 bundles may carry any of:
 /// ```
 /// my-theme.orskin
-/// ├── theme.json      # required — the SkinManifest
-/// ├── wallpaper.png   # optional — embedded offline background
-/// ├── preview.png     # optional — swatch/screenshot
-/// └── README.md       # optional — creator notes
+/// ├── skin.json          # required — the SkinManifest (v1 name: theme.json)
+/// ├── wallpaper.gif|png  # optional — animated or static background
+/// ├── dropzone.gif|png   # optional — custom dropzone illustration
+/// ├── font.ttf|otf       # optional — runtime-loaded UI font
+/// ├── icons/<tab>.png    # optional — sidebar icon overrides
+/// ├── preview.png        # optional — storefront screenshot
+/// └── README.md          # optional — creator notes
 /// ```
 ///
 /// Installed skins live in `<configDir>/themes/<id>/`, each holding the
-/// extracted `theme.json` plus any bundled images.
+/// extracted manifest plus any bundled assets.
 class SkinManager {
   /// Refuse archives larger than this to bound memory during import.
   static const int maxArchiveBytes = 64 * 1024 * 1024;
   static const int maxEntryBytes = 32 * 1024 * 1024;
   static const int maxEntries = 512;
+
+  /// Image extensions accepted for wallpapers and dropzones.
+  static const List<String> imageExtensions = [
+    'gif',
+    'webp',
+    'png',
+    'jpg',
+    'jpeg'
+  ];
+
+  /// Font extensions accepted for the runtime-loaded UI font.
+  static const List<String> fontExtensions = ['ttf', 'otf'];
+
+  /// Fixed timestamp baked into exported archives so identical inputs always
+  /// produce a byte-identical `.orskin` (deterministic builds).
+  static final DateTime _epoch = DateTime.utc(1980, 1, 1);
 
   /// Root directory holding installed skins.
   ///
@@ -107,18 +126,25 @@ class SkinManager {
       return SkinResult.fail('Not a valid .orskin (ZIP) archive: $e');
     }
 
-    // Resolve theme.json first so the destination dir is derived from the
-    // manifest id rather than a caller-supplied name.
+    // Resolve the manifest first so the destination dir is derived from the
+    // manifest id rather than a caller-supplied name. v2 bundles name it
+    // "skin.json"; v1 bundles named it "theme.json".
     ArchiveFile? manifestEntry;
     for (final entry in archive) {
-      if (entry.isFile &&
-          p.normalize(entry.name.replaceAll('\\', '/')) == 'theme.json') {
-        manifestEntry = entry;
-        break;
+      if (!entry.isFile) continue;
+      final normalized = p.normalize(entry.name.replaceAll('\\', '/'));
+      if (normalized == 'skin.json' || normalized == 'theme.json') {
+        // Prefer skin.json if a (malformed) archive contains both.
+        if (manifestEntry == null || normalized == 'skin.json') {
+          manifestEntry = entry;
+        }
+        if (normalized == 'skin.json') break;
       }
     }
     if (manifestEntry == null) {
-      return SkinResult.fail('Archive does not contain a "theme.json".');
+      return SkinResult.fail(
+        'Archive does not contain a "skin.json" (or legacy "theme.json").',
+      );
     }
 
     final SkinManifest manifest;
@@ -126,7 +152,7 @@ class SkinManager {
       final json = jsonDecode(utf8.decode(manifestEntry.content as List<int>));
       manifest = SkinManifest.fromJson((json as Map).cast<String, dynamic>());
     } catch (e) {
-      return SkinResult.fail('Malformed "theme.json": $e');
+      return SkinResult.fail('Malformed "${manifestEntry.name}": $e');
     }
 
     final dest = skinDir(manifest.id);
@@ -184,86 +210,178 @@ class SkinManager {
       }
     }
 
-    // Point the palette at the freshly extracted wallpaper, if any.
-    final wallpaper = _findWallpaper(dest);
-    final themed = manifest.copyWith(
+    // Point the palette at the freshly extracted assets, if any.
+    return SkinResult.ok(_applyAssets(manifest, dest));
+  }
+
+  /// Resolves the v2 assets inside an extracted skin [dir] onto [manifest]'s
+  /// theme, clearing any that are absent so a re-import never leaves a stale
+  /// path behind.
+  SkinManifest _applyAssets(SkinManifest manifest, Directory dir) {
+    final wallpaper = _findAsset(dir, 'wallpaper');
+    final dropzone = _findAsset(dir, 'dropzone');
+    final font = manifest.hasCustomFont
+        ? _findFont(dir, manifest.fontFileName)
+        : _findAssetOfType(dir, 'font', fontExtensions);
+    final iconDir = _findIconDir(dir);
+
+    return manifest.copyWith(
       theme: manifest.theme.copyWith(
         wallpaperPath: wallpaper?.path,
         clearWallpaper: wallpaper == null,
+        dropzonePath: dropzone?.path,
+        clearDropzone: dropzone == null,
+        fontPath: font?.path,
+        clearFont: font == null,
+        iconDir: iconDir?.path,
+        clearIconDir: iconDir == null,
       ),
     );
-    return SkinResult.ok(themed);
   }
 
-  /// Returns the extracted wallpaper image inside [dir], or null.
-  File? _findWallpaper(Directory dir) {
-    const names = [
-      'wallpaper.png',
-      'wallpaper.jpg',
-      'wallpaper.jpeg',
-      'wallpaper.webp',
-      'wallpaper.bmp',
-    ];
-    for (final name in names) {
-      final file = File(p.join(dir.path, name));
+  /// Returns `<dir>/<base>.<ext>` for the first supported [imageExtensions].
+  File? _findAsset(Directory dir, String base) =>
+      _findAssetOfType(dir, base, imageExtensions);
+
+  File? _findAssetOfType(
+    Directory dir,
+    String base,
+    List<String> extensions,
+  ) {
+    for (final ext in extensions) {
+      final file = File(p.join(dir.path, '$base.$ext'));
       if (file.existsSync()) return file;
     }
     return null;
   }
 
-  /// Packs [theme] (plus an optional [wallpaper] and [preview] image) into an
-  /// `.orskin` bundle at [outputPath].
+  /// Locates the custom font. When the manifest names it ([fileName]) that exact
+  /// (basename-sanitised) file is used; otherwise any `font.<ext>` is accepted.
+  File? _findFont(Directory dir, String? fileName) {
+    if (fileName != null && fileName.isNotEmpty) {
+      final safe = p.basename(fileName.replaceAll('\\', '/'));
+      final file = File(p.join(dir.path, safe));
+      if (file.existsSync()) return file;
+    }
+    return _findAssetOfType(dir, 'font', fontExtensions);
+  }
+
+  /// Returns `<dir>/icons` when it holds at least one icon, else null.
+  Directory? _findIconDir(Directory dir) {
+    final icons = Directory(p.join(dir.path, 'icons'));
+    if (!icons.existsSync()) return null;
+    final hasAny = icons
+        .listSync()
+        .whereType<File>()
+        .any((f) => p.extension(f.path).toLowerCase() == '.png');
+    return hasAny ? icons : null;
+  }
+
+  /// Packs [theme] (plus any of the v2 assets: [wallpaper], [dropzone],
+  /// [font], [iconsDir] and [preview]) into an `.orskin` bundle at
+  /// [outputPath].
+  ///
+  /// The manifest is written as `skin.json` (v2). Assets are stored under their
+  /// canonical names (`wallpaper.<ext>`, `dropzone.<ext>`, `font.<ext>`,
+  /// `icons/<tab>.png`) so import can find them regardless of the source file
+  /// name. The archive is deterministic: entries are sorted and stamped with a
+  /// fixed timestamp, so identical inputs always yield identical bytes.
   ///
   /// Returns the written file on success.
   SkinResult<File> exportSkin({
     required ThemeConfig theme,
     required File outputPath,
     File? wallpaper,
+    File? dropzone,
+    File? font,
+    Directory? iconsDir,
     File? preview,
     String? id,
     String? author,
     String? version,
     String? readme,
   }) {
+    // Resolve assets from explicit arguments, falling back to the theme's own
+    // paths (so exporting the currently-applied skin just works).
+    final resolvedWallpaper = wallpaper ?? _existingFile(theme.wallpaperPath);
+    final resolvedDropzone = dropzone ?? _existingFile(theme.dropzonePath);
+    final resolvedFont = font ?? _existingFile(theme.fontPath);
+    final resolvedIcons =
+        iconsDir ?? (theme.iconDir == null ? null : Directory(theme.iconDir!));
+
     final manifest = SkinManifest.fromTheme(
       theme,
       id: id,
       author: author,
       version: version,
+    ).copyWith(
+      hasCustomFont: resolvedFont != null,
+      clearFontFileName: resolvedFont == null,
+      fontFileName: resolvedFont == null
+          ? null
+          : 'font${_safeExtension(resolvedFont.path, fontExtensions)}',
+      hasCustomIcons: _hasPng(resolvedIcons),
+      hasCustomDropzone: resolvedDropzone != null,
     );
 
-    final archive = Archive();
+    // Collect entries, then add them in sorted order so the archive is
+    // deterministic regardless of the order assets were supplied.
     final manifestBytes = utf8.encode(
       const JsonEncoder.withIndent('  ').convert(manifest.toJson()),
     );
-    archive.addFile(
-      ArchiveFile('theme.json', manifestBytes.length, manifestBytes),
-    );
+    final entries = <MapEntry<String, List<int>>>[
+      MapEntry('skin.json', manifestBytes),
+    ];
 
-    if (wallpaper != null && wallpaper.existsSync()) {
-      final data = wallpaper.readAsBytesSync();
-      final ext = p.extension(wallpaper.path).toLowerCase();
-      final safeExt = ext.isEmpty ? '.png' : ext;
-      archive.addFile(
-        ArchiveFile('wallpaper$safeExt', data.length, data),
-      );
+    if (resolvedWallpaper != null) {
+      final ext = _safeExtension(resolvedWallpaper.path, imageExtensions);
+      entries
+          .add(MapEntry('wallpaper$ext', resolvedWallpaper.readAsBytesSync()));
+    }
+
+    if (resolvedDropzone != null) {
+      final ext = _safeExtension(resolvedDropzone.path, imageExtensions);
+      entries.add(MapEntry('dropzone$ext', resolvedDropzone.readAsBytesSync()));
+    }
+
+    if (resolvedFont != null) {
+      final ext = _safeExtension(resolvedFont.path, fontExtensions);
+      entries.add(MapEntry('font$ext', resolvedFont.readAsBytesSync()));
+    }
+
+    if (resolvedIcons != null && resolvedIcons.existsSync()) {
+      final pngs = resolvedIcons
+          .listSync()
+          .whereType<File>()
+          .where((f) => p.extension(f.path).toLowerCase() == '.png')
+          .toList()
+        ..sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+      for (final icon in pngs) {
+        final name = p.basename(icon.path);
+        if (!SkinManifest.tabIds.contains(p.basenameWithoutExtension(name))) {
+          continue;
+        }
+        entries.add(MapEntry('icons/$name', icon.readAsBytesSync()));
+      }
     }
 
     if (preview != null && preview.existsSync()) {
-      final data = preview.readAsBytesSync();
-      final ext = p.extension(preview.path).toLowerCase();
-      final safeExt = ext.isEmpty ? '.png' : ext;
-      archive.addFile(ArchiveFile('preview$safeExt', data.length, data));
+      final ext = _safeExtension(preview.path, imageExtensions);
+      entries.add(MapEntry('preview$ext', preview.readAsBytesSync()));
     }
 
-    final readmeText = readme ?? _defaultReadme(manifest);
-    final readmeBytes = utf8.encode(readmeText);
-    archive.addFile(
-      ArchiveFile('README.md', readmeBytes.length, readmeBytes),
-    );
+    entries.add(
+        MapEntry('README.md', utf8.encode(readme ?? _defaultReadme(manifest))));
+    entries.sort((a, b) => a.key.compareTo(b.key));
+
+    final archive = Archive();
+    for (final e in entries) {
+      archive.addFile(ArchiveFile(e.key, e.value.length, e.value));
+    }
 
     try {
-      final encoded = ZipEncoder().encode(archive);
+      // Deterministic: entries already sorted + a fixed modification timestamp.
+      final encoded = ZipEncoder().encode(archive, modified: _epoch);
       if (encoded == null) {
         return const SkinResult.fail('Failed to encode the .orskin archive.');
       }
@@ -273,6 +391,27 @@ class SkinManager {
     } catch (e) {
       return SkinResult.fail('Failed to write ${outputPath.path}: $e');
     }
+  }
+
+  File? _existingFile(String? path) {
+    if (path == null || path.isEmpty) return null;
+    final file = File(path);
+    return file.existsSync() ? file : null;
+  }
+
+  static bool _hasPng(Directory? dir) {
+    if (dir == null || !dir.existsSync()) return false;
+    return dir
+        .listSync()
+        .whereType<File>()
+        .any((f) => p.extension(f.path).toLowerCase() == '.png');
+  }
+
+  /// Returns [path]'s extension when it is one of [allowed], else the first
+  /// allowed extension as a safe default.
+  static String _safeExtension(String path, List<String> allowed) {
+    final ext = p.extension(path).toLowerCase().replaceFirst('.', '');
+    return allowed.contains(ext) ? '.$ext' : '.${allowed.first}';
   }
 
   /// Removes an installed skin by [id]. Returns true if something was deleted.
@@ -296,21 +435,18 @@ class SkinManager {
 
     for (final entry in root.listSync()) {
       if (entry is! Directory) continue;
-      final manifest = File(p.join(entry.path, 'theme.json'));
-      if (!manifest.existsSync()) continue;
+      // v2 skins use skin.json; v1 skins used theme.json.
+      final skinJson = File(p.join(entry.path, 'skin.json'));
+      final legacyJson = File(p.join(entry.path, 'theme.json'));
+      final manifest = skinJson.existsSync()
+          ? skinJson
+          : (legacyJson.existsSync() ? legacyJson : null);
+      if (manifest == null) continue;
       try {
         final json =
             jsonDecode(manifest.readAsStringSync()) as Map<String, dynamic>;
         final skin = SkinManifest.fromJson(json);
-        final wallpaper = _findWallpaper(entry);
-        result.add(
-          skin.copyWith(
-            theme: skin.theme.copyWith(
-              wallpaperPath: wallpaper?.path,
-              clearWallpaper: wallpaper == null,
-            ),
-          ),
-        );
+        result.add(_applyAssets(skin, entry));
       } catch (e) {
         debugPrint('Skipping unreadable skin at ${entry.path}: $e');
       }

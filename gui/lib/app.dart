@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'controllers/home_controller.dart';
 import 'controllers/plugin_builder_controller.dart';
 import 'l10n/app_localizations.dart';
+import 'models/skin_manifest.dart';
+import 'models/theme_config.dart';
 import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
 import 'screens/dreamcast_screen.dart';
@@ -52,6 +54,26 @@ class _OpenROMAppState extends State<OpenROMApp> {
   String _audioCodec = 'flac';
 
   static const List<int> _mobileScreenIndices = [0, 1, 2, 4, 5];
+
+  /// Screen indices (into [screens]) that are hidden by the active skin.
+  Set<int> _hiddenScreenIndices(ThemeConfig theme) {
+    final hidden = theme.hiddenTabs.toSet();
+    final result = <int>{};
+    for (var i = 0; i < SkinManifest.tabIds.length; i++) {
+      if (hidden.contains(SkinManifest.tabIds[i])) result.add(i);
+    }
+    return result;
+  }
+
+  /// The screen index to actually display, clamped to a visible tab so a skin
+  /// hiding the current tab can never leave the UI on a hidden screen.
+  int _effectiveIndex(Set<int> hidden, List<int> visible) {
+    if (visible.isEmpty) return 0;
+    if (hidden.contains(_selectedIndex) || !visible.contains(_selectedIndex)) {
+      return visible.first;
+    }
+    return _selectedIndex;
+  }
 
   @override
   void initState() {
@@ -130,6 +152,18 @@ class _OpenROMAppState extends State<OpenROMApp> {
         WidgetsBinding.instance.platformDispatcher.platformBrightness;
     final theme = widget.themeService.resolvedTheme(brightness);
 
+    // A skin may hide tabs; compute the visible set and clamp the selection so
+    // a hidden tab can never be displayed or crash an index lookup.
+    final hiddenIndices = _hiddenScreenIndices(theme);
+    final visibleIndices = <int>[
+      for (var i = 0; i < SkinManifest.tabIds.length; i++)
+        if (!hiddenIndices.contains(i)) i,
+    ];
+    final effectiveIndex = _effectiveIndex(hiddenIndices, visibleIndices);
+
+    // Prefer a dynamically-loaded skin font; fall back to the theme family.
+    final fontFamily = widget.themeService.resolvedFontFamily;
+
     final lightColorScheme = ColorScheme.fromSeed(
       seedColor: theme.accent,
       brightness: Brightness.light,
@@ -148,6 +182,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
       return ThemeData(
         brightness: brightness,
         scaffoldBackgroundColor: Colors.transparent,
+        fontFamily: fontFamily,
         colorScheme: scheme,
         cardTheme: CardThemeData(
           color: theme.cardBg,
@@ -239,10 +274,11 @@ class _OpenROMAppState extends State<OpenROMApp> {
           final isMobile = isNarrow;
 
           if (isMobile) {
-            final mobileCurrentIndex =
-                _mobileScreenIndices.contains(_selectedIndex)
-                    ? _mobileScreenIndices.indexOf(_selectedIndex)
-                    : 0;
+            final mobileVisible =
+                _mobileScreenIndices.where(visibleIndices.contains).toList();
+            final mobileCurrentIndex = mobileVisible.contains(effectiveIndex)
+                ? mobileVisible.indexOf(effectiveIndex)
+                : 0;
 
             return WallpaperBackground(
               theme: theme,
@@ -259,14 +295,14 @@ class _OpenROMAppState extends State<OpenROMApp> {
                   ),
                 ),
                 body: IndexedStack(
-                  index: _selectedIndex,
+                  index: effectiveIndex,
                   children: screens,
                 ),
                 bottomNavigationBar: BottomNavigationBar(
                   currentIndex: mobileCurrentIndex,
                   onTap: (int index) {
                     setState(() {
-                      _selectedIndex = _mobileScreenIndices[index];
+                      _selectedIndex = mobileVisible[index];
                     });
                   },
                   backgroundColor: theme.surface,
@@ -312,7 +348,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
               body: Row(
                 children: [
                   Sidebar(
-                    selectedIndex: _selectedIndex,
+                    selectedIndex: effectiveIndex,
                     onDestinationSelected: (index) {
                       setState(() => _selectedIndex = index);
                     },
@@ -330,7 +366,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
                         ),
                         Expanded(
                           child: IndexedStack(
-                            index: _selectedIndex,
+                            index: effectiveIndex,
                             children: screens,
                           ),
                         ),

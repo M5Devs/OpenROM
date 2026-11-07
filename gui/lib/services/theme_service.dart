@@ -14,15 +14,29 @@ import '../models/theme_config.dart';
 import 'skin_manager.dart';
 
 class ThemeService extends ChangeNotifier {
+  /// The font family registered by [loadSkinFont] for a skin's bundled font.
+  static const String skinFontFamily = 'SkinCustomFont';
+
   ThemeConfig _currentTheme = ThemeConfig.defaultTheme();
   List<ThemeConfig> _availableThemes = [];
   ThemeMode _themeMode = ThemeMode.system;
+
+  /// Path of the skin font currently registered at runtime, or null.
+  String? _loadedSkinFontPath;
 
   /// Installs/removes `.orskin` bundles. Overridable for tests.
   final SkinManager skinManager;
 
   ThemeConfig get currentTheme => _currentTheme;
   List<ThemeConfig> get availableThemes => _availableThemes;
+
+  /// Whether a custom skin font is currently loaded and applied.
+  bool get hasLoadedSkinFont => _loadedSkinFontPath != null;
+
+  /// The font family the UI should render with: the dynamically-loaded skin
+  /// font when one is registered, else the active theme's family.
+  String get resolvedFontFamily =>
+      _loadedSkinFontPath != null ? skinFontFamily : _currentTheme.fontFamily;
 
   /// The user's light/dark preference. Defaults to [ThemeMode.system] so the
   /// app follows the OS setting when no explicit choice has been stored.
@@ -44,6 +58,8 @@ class ThemeService extends ChangeNotifier {
     if (savedMode != null) {
       _themeMode = _parseThemeMode(savedMode);
     }
+    // Ensure any font bundled with the active skin is registered at startup.
+    await _syncSkinFont(_currentTheme);
     notifyListeners();
   }
 
@@ -175,6 +191,9 @@ class ThemeService extends ChangeNotifier {
     required ThemeConfig theme,
     required File outputPath,
     File? wallpaper,
+    File? dropzone,
+    File? font,
+    Directory? iconsDir,
     File? preview,
     String? author,
     String? version,
@@ -183,6 +202,9 @@ class ThemeService extends ChangeNotifier {
       theme: theme,
       outputPath: outputPath,
       wallpaper: wallpaper,
+      dropzone: dropzone,
+      font: font,
+      iconsDir: iconsDir,
       preview: preview,
       author: author,
       version: version,
@@ -210,9 +232,50 @@ class ThemeService extends ChangeNotifier {
 
   Future<void> setTheme(ThemeConfig theme) async {
     _currentTheme = theme;
+    await _syncSkinFont(theme);
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_theme', theme.name);
+  }
+
+  /// Loads (or clears) the skin's runtime font to match [theme].
+  ///
+  /// When [ThemeConfig.fontPath] points at an existing `.ttf`/`.otf`, the font
+  /// is registered under [skinFontFamily] via a [FontLoader] and applied to the
+  /// global [ThemeData.fontFamily] without an app restart. Any failure (missing
+  /// file, corrupt font) degrades cleanly to the theme's default family.
+  Future<void> _syncSkinFont(ThemeConfig theme) async {
+    final path = theme.fontPath;
+    if (path == null || path.isEmpty) {
+      if (_loadedSkinFontPath != null) {
+        _loadedSkinFontPath = null;
+      }
+      return;
+    }
+    if (path == _loadedSkinFontPath) return;
+
+    final ok = await loadSkinFont(File(path));
+    _loadedSkinFontPath = ok ? path : null;
+  }
+
+  /// Registers [fontFile] under [skinFontFamily]. Returns true on success and
+  /// false (without throwing) if the font is missing or unreadable.
+  Future<bool> loadSkinFont(File fontFile) async {
+    try {
+      if (!fontFile.existsSync()) return false;
+      final bytes = await fontFile.readAsBytes();
+      if (bytes.isEmpty) return false;
+      final loader = FontLoader(skinFontFamily)
+        ..addFont(
+          Future.value(ByteData.view(
+              bytes.buffer, bytes.offsetInBytes, bytes.lengthInBytes)),
+        );
+      await loader.load();
+      return true;
+    } catch (e) {
+      debugPrint('Failed to load skin font ${fontFile.path}: $e');
+      return false;
+    }
   }
 
   void setThemeByName(String name) {

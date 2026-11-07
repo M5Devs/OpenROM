@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../models/skin_manifest.dart';
 import '../models/theme_config.dart';
 import '../services/theme_service.dart';
 
@@ -56,12 +57,47 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
 
   Future<void> _pickWallpaper() async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      dialogTitle: 'Choose a wallpaper image',
+      type: FileType.custom,
+      allowedExtensions: const ['gif', 'png', 'jpg', 'jpeg', 'webp'],
+      dialogTitle: 'Choose a wallpaper (GIF, PNG, JPG or WebP)',
     );
     final path = result?.files.single.path;
     if (path == null) return;
     setState(() => _edited = _edited.copyWith(wallpaperPath: path));
+  }
+
+  Future<void> _pickDropzone() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['gif', 'png'],
+      dialogTitle: 'Choose a dropzone illustration (GIF or PNG)',
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+    setState(() => _edited = _edited.copyWith(dropzonePath: path));
+  }
+
+  Future<void> _pickFont() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['ttf', 'otf'],
+      dialogTitle: 'Choose a UI font (TTF or OTF)',
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+    setState(() => _edited = _edited.copyWith(fontPath: path));
+  }
+
+  void _toggleHiddenTab(String tabId) {
+    setState(() {
+      final next = _edited.hiddenTabs.toList();
+      if (next.contains(tabId)) {
+        next.remove(tabId);
+      } else {
+        next.add(tabId);
+      }
+      _edited = _edited.copyWith(hiddenTabs: next);
+    });
   }
 
   Future<void> _importSkin() async {
@@ -97,17 +133,26 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     );
     if (out == null) return;
 
-    final wallpaperPath = theme.wallpaperPath;
+    // Assets are resolved from the theme's own paths, so every picked file is
+    // packed automatically.
     final exported = widget.themeService.exportSkin(
       theme: theme,
       outputPath: File(out),
-      wallpaper: wallpaperPath == null ? null : File(wallpaperPath),
+      wallpaper: _fileOrNull(theme.wallpaperPath),
+      dropzone: _fileOrNull(theme.dropzonePath),
+      font: _fileOrNull(theme.fontPath),
     );
     if (!exported.isOk) {
       _snack('Export failed: ${exported.error}');
       return;
     }
     _snack('Exported ${exported.value!.path}');
+  }
+
+  static File? _fileOrNull(String? path) {
+    if (path == null || path.isEmpty) return null;
+    final file = File(path);
+    return file.existsSync() ? file : null;
   }
 
   // Opens a simple HSV color picker dialog and returns the picked color
@@ -217,6 +262,47 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  // One asset picker row: a "Choose …" button plus a Remove button when set.
+  Widget _assetPickerRow(
+    ThemeConfig t, {
+    required IconData icon,
+    required String label,
+    required String? current,
+    required VoidCallback onPick,
+    required VoidCallback onClear,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          OutlinedButton.icon(
+            icon: Icon(icon),
+            label: Text(label),
+            style: OutlinedButton.styleFrom(foregroundColor: t.accent),
+            onPressed: onPick,
+          ),
+          const SizedBox(width: 12),
+          if (current != null) ...[
+            Flexible(
+              child: Text(
+                current.split(Platform.pathSeparator).last,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: t.textSecondary, fontSize: 12),
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton.icon(
+              icon: const Icon(Icons.clear),
+              label: const Text('Remove'),
+              style: TextButton.styleFrom(foregroundColor: t.textSecondary),
+              onPressed: onClear,
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -551,27 +637,72 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       t.accent,
                     ),
                     const SizedBox(height: 8),
-                    Row(
+                    _assetPickerRow(
+                      t,
+                      icon: Icons.wallpaper,
+                      label: 'Choose Wallpaper',
+                      current: _edited.wallpaperPath,
+                      onPick: _pickWallpaper,
+                      onClear: () => setState(
+                        () => _edited = _edited.copyWith(clearWallpaper: true),
+                      ),
+                    ),
+                    _assetPickerRow(
+                      t,
+                      icon: Icons.animation,
+                      label: 'Choose Dropzone',
+                      current: _edited.dropzonePath,
+                      onPick: _pickDropzone,
+                      onClear: () => setState(
+                        () => _edited = _edited.copyWith(clearDropzone: true),
+                      ),
+                    ),
+                    _assetPickerRow(
+                      t,
+                      icon: Icons.text_fields,
+                      label: 'Choose Font',
+                      current: _edited.fontPath,
+                      onPick: _pickFont,
+                      onClear: () => setState(
+                        () => _edited = _edited.copyWith(clearFont: true),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Sidebar Tabs',
+                      style: TextStyle(
+                        color: t.accent,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Uncheck a tab to hide it from the sidebar and navigation.',
+                      style: TextStyle(color: t.textSecondary, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 4,
                       children: [
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.wallpaper),
-                          label: const Text('Choose Wallpaper'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: t.accent,
-                          ),
-                          onPressed: _pickWallpaper,
-                        ),
-                        const SizedBox(width: 12),
-                        if (_edited.wallpaperPath != null)
-                          TextButton.icon(
-                            icon: const Icon(Icons.clear),
-                            label: const Text('Remove'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: t.textSecondary,
-                            ),
-                            onPressed: () => setState(
-                              () => _edited =
-                                  _edited.copyWith(clearWallpaper: true),
+                        for (final tab in SkinManifest.tabIds)
+                          SizedBox(
+                            width: 150,
+                            child: CheckboxListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: !_edited.hiddenTabs.contains(tab),
+                              activeColor: t.accent,
+                              title: Text(
+                                tab[0].toUpperCase() + tab.substring(1),
+                                style: TextStyle(
+                                  color: t.textPrimary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              onChanged: (_) => _toggleHiddenTab(tab),
                             ),
                           ),
                       ],

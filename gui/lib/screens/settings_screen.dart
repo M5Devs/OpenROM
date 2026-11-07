@@ -117,11 +117,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (out == null) return;
 
-    final wallpaperPath = theme.wallpaperPath;
+    // exportSkin resolves wallpaper/dropzone/font from the theme's own paths.
     final result = widget.themeService.exportSkin(
       theme: theme,
       outputPath: File(out),
-      wallpaper: wallpaperPath == null ? null : File(wallpaperPath),
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

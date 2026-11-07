@@ -108,11 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.drive_folder_upload,
-                          size: 64,
-                          color: widget.theme.textSecondary,
-                        ),
+                        DropzoneArtwork(theme: widget.theme, size: 64),
                         const SizedBox(height: 16),
                         Text(
                           '${l10n.dropZoneHint}, ${l10n.dropZoneSubHint.toLowerCase()}',
