@@ -50,6 +50,126 @@ class BinMergeResult {
   });
 }
 
+/// A single event emitted by the background watch-folder daemon.
+class WatchEvent {
+  final String type; // 'log' | 'progress' | 'done' | 'error'
+  final String message;
+  final String file;
+  final double percent;
+  final bool success;
+  final String? error;
+
+  const WatchEvent({
+    required this.type,
+    this.message = '',
+    this.file = '',
+    this.percent = 0,
+    this.success = false,
+    this.error,
+  });
+
+  factory WatchEvent.fromJson(Map<String, dynamic> json) {
+    return WatchEvent(
+      type: json['type'] as String? ?? 'log',
+      message: json['message'] as String? ?? '',
+      file: json['file'] as String? ?? '',
+      percent: (json['percent'] as num?)?.toDouble() ?? 0,
+      success: json['success'] as bool? ?? false,
+      error: json['error'] as String?,
+    );
+  }
+}
+
+/// Owns a `openrom-core --watch …` child process for the lifetime of a watch
+/// session. Events are forwarded to [onEvent]; [stop] terminates the child.
+class WatchFolderSession {
+  Process? _process;
+  bool _stopping = false;
+
+  bool get isRunning => _process != null;
+
+  Future<void> start({
+    required String inputDir,
+    required String outputDir,
+    required String format,
+    String compression = 'Normal',
+    bool deleteSource = false,
+    required void Function(WatchEvent event) onEvent,
+    void Function(Object error)? onError,
+  }) async {
+    if (_process != null) return;
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll([
+      '--json',
+      '--watch',
+      inputDir,
+      '--format',
+      format,
+      '--compression',
+      compression,
+      '--output',
+      outputDir,
+    ]);
+    if (deleteSource) args.add('--delete-source');
+
+    final process = await Process.start(corePath, args);
+    _process = process;
+    _stopping = false;
+
+    process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.trim().isEmpty) return;
+      try {
+        final Map<String, dynamic> event = jsonDecode(line);
+        onEvent(WatchEvent.fromJson(Map<String, dynamic>.from(event)));
+      } catch (_) {
+        onEvent(WatchEvent(type: 'log', message: line));
+      }
+    });
+
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.trim().isNotEmpty) {
+        onEvent(WatchEvent(type: 'log', message: '[stderr] $line'));
+      }
+    });
+
+    // Reap the child so a crash surfaces instead of leaving a phantom session.
+    unawaited(process.exitCode.then((code) {
+      _process = null;
+      if (!_stopping) {
+        onEvent(WatchEvent(
+          type: 'error',
+          message: 'Watch daemon stopped unexpectedly (exit $code)',
+        ));
+      }
+    }).catchError((Object e) {
+      _process = null;
+      onError?.call(e);
+    }));
+  }
+
+  Future<void> stop() async {
+    final process = _process;
+    if (process == null) return;
+    _stopping = true;
+    process.kill();
+    _process = null;
+  }
+}
+
 /// Result of hashing a ROM file.
 class HashResult {
   final String filePath;

@@ -9,6 +9,7 @@ import '../models/conversion_job.dart';
 import '../models/errors.dart';
 import '../models/theme_config.dart';
 import '../services/core_bridge.dart';
+import '../widgets/batch_complete_dialog.dart';
 import '../widgets/drop_zone.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/rom_card.dart';
@@ -54,8 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onControllerChanged() {
     final converting = widget.controller.isConverting;
-    // Detect the running -> finished edge and surface a completion dialog once
-    // the batch settles. Only celebrate when nothing failed.
+    // Detect the running -> finished edge and surface the celebration dialog
+    // once the batch settles. Only celebrate when nothing failed.
     if (_wasConverting && !converting) {
       final jobs = widget.controller.jobs;
       final anyFailed = jobs.any((j) => j.status == JobStatus.failed);
@@ -69,29 +70,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showSuccess() {
     if (!mounted) return;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const RomeoMascot(asset: RomeoAssets.success, size: 120),
-            const SizedBox(height: 16),
-            const Text(
-              'Batch Completed! All files converted successfully',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(AppLocalizations.of(ctx).closeButton),
-          ),
-        ],
-      ),
+    showBatchCompleteDialog(
+      context,
+      stats: widget.controller.lastBatchStats,
+      theme: widget.theme,
+      outputDir: widget.controller.lastOutputDir,
     );
   }
 

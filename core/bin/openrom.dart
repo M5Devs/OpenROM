@@ -44,6 +44,15 @@ ArgParser buildParser() {
       abbr: 'f',
       help: 'convert all supported ROMs in a folder',
     )
+    ..addOption(
+      'watch',
+      help: 'watch a folder and auto-convert new ROMs as they arrive',
+    )
+    ..addOption(
+      'settle-seconds',
+      defaultsTo: '3',
+      help: 'seconds a new file must stay unchanged before --watch converts it',
+    )
     ..addOption('detect', help: 'detect file format and info')
     ..addOption(
       'hash',
@@ -1080,6 +1089,68 @@ Future<int> _runCli(List<String> args) async {
     return 0;
   }
 
+  final watchDir = results['watch'] as String?;
+  if (watchDir != null) {
+    final targetFmt = (results['format'] as String?) ?? 'CHD';
+    final outDir = (results['output'] as String?) ?? watchDir;
+    final settle =
+        int.tryParse(results['settle-seconds'] as String? ?? '3') ?? 3;
+
+    final daemon = WatchFolderDaemon(
+      inputDir: watchDir,
+      outputDir: outDir,
+      targetFormat: targetFmt,
+      compression: results['compression'] as String,
+      verify: results['verify'] == true,
+      deleteSource: results['delete-source'] == true,
+      audioCodec: results['audio-codec'] as String? ?? 'flac',
+      settleSeconds: settle,
+      onLog: (msg) {
+        if (isJson) {
+          _jsonPrint({'type': 'log', 'message': msg});
+        } else {
+          print(msg);
+        }
+      },
+      onProgress: (file, pct) {
+        if (isJson) {
+          _jsonPrint({'type': 'progress', 'file': file, 'percent': pct});
+        } else {
+          _renderProgress(file, pct);
+        }
+      },
+      onDone: (file, success, err) {
+        if (isJson) {
+          _jsonPrint({
+            'type': 'done',
+            'file': p.basename(file),
+            'success': success,
+            if (err != null) 'error': err,
+          });
+        } else {
+          print(success
+              ? '✅ ${p.basename(file)} → $targetFmt'
+              : '❌ ${p.basename(file)} failed: $err');
+        }
+      },
+    );
+
+    // Ctrl+C / SIGTERM stop the daemon cleanly so the process can exit.
+    ProcessSignal.sigint.watch().listen((_) async {
+      await daemon.stop();
+      exit(0);
+    });
+    if (!Platform.isWindows) {
+      ProcessSignal.sigterm.watch().listen((_) async {
+        await daemon.stop();
+        exit(0);
+      });
+    }
+
+    await daemon.start();
+    return 0;
+  }
+
   final inputFile = (results['input'] ?? results['convert']) as String?;
   final folder = results['folder'] as String?;
 
@@ -1164,19 +1235,71 @@ Future<int> _runCli(List<String> args) async {
   );
 
   int failed = 0;
+  final deleteSource = results['delete-source'] == true;
+  final single = jobs.length == 1;
 
   for (final job in jobs) {
     final ok = await converter.convert(job);
     if (!isJson) _clearProgress();
     if (ok) {
-      if (isJson) _jsonPrint({'type': 'done', 'success': true});
+      if (deleteSource) {
+        try {
+          final src = File(job.filepath);
+          if (src.existsSync()) {
+            src.deleteSync();
+            if (isJson) {
+              _jsonPrint({
+                'type': 'log',
+                'message': '[DELETE] Removed source: ${p.basename(job.filepath)}',
+              });
+            }
+          }
+        } catch (e) {
+          if (isJson) {
+            _jsonPrint({
+              'type': 'log',
+              'message': '[WARN] Could not delete source: $e',
+            });
+          }
+        }
+      }
+      if (isJson) {
+        // A single-job run carries the batch metrics on its completion payload
+        // so one-shot consumers (the GUI) get them without a second event.
+        _jsonPrint({
+          'type': 'done',
+          'success': true,
+          if (single) ...BatchStats.fromJobs(jobs).toJson(),
+        });
+      }
     } else {
       failed++;
       if (isJson) {
         final err = job.error ?? 'Conversion failed';
         _jsonPrint({'type': 'error', 'message': err});
-        _jsonPrint({'type': 'done', 'success': false, 'error': err});
+        _jsonPrint({
+          'type': 'done',
+          'success': false,
+          'error': err,
+          if (single) ...BatchStats.fromJobs(jobs).toJson(),
+        });
       }
+    }
+  }
+
+  if (!single) {
+    final stats = BatchStats.fromJobs(jobs);
+    if (isJson) {
+      _jsonPrint({
+        'type': 'done',
+        'success': failed == 0,
+        'failed': failed,
+        ...stats.toJson(),
+      });
+    } else {
+      print('Batch complete: ${stats.jobsCompleted} converted, $failed failed.');
+      print('  Space saved: ${stats.bytesSavedReadable} '
+          '(${stats.savedPercentageReadable})');
     }
   }
 

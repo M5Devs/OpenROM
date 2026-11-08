@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../models/batch_stats.dart';
 import '../models/errors.dart';
 import '../models/conversion_job.dart';
 import '../models/rom_file.dart';
@@ -14,6 +15,7 @@ import '../utils/app_version.dart';
 typedef ProgressCallback = void Function(double percent);
 typedef LogCallback = void Function(String log);
 typedef DoneCallback = void Function(bool success, String? error);
+typedef BatchDoneCallback = void Function(BatchStats stats);
 
 class OpenROMException implements Exception {
   final OpenROMError error;
@@ -142,6 +144,7 @@ class CoreBridge {
     required ProgressCallback onProgress,
     required LogCallback onLog,
     required DoneCallback onDone,
+    BatchDoneCallback? onBatchStats,
   }) async {
     if (!await coreExists()) {
       onDone(false, 'openrom-core binary missing');
@@ -215,6 +218,9 @@ class CoreBridge {
           } else if (type == 'done') {
             final bool success = event['success'] ?? false;
             final String? err = event['error'];
+            if (event.containsKey('bytes_saved')) {
+              onBatchStats?.call(BatchStats.fromJson(event));
+            }
             onDone(success, err);
           } else if (type == 'error') {
             final String msg = event['message'] ?? 'Unknown error';

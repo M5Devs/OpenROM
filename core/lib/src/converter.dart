@@ -169,6 +169,16 @@ class ConversionJob {
   final List<String> tempFiles;
   Map<String, dynamic>? _fileInfo;
 
+  /// Size of the primary input file, captured when the job starts.
+  int originalSizeBytes = 0;
+
+  /// Total size of the files this job produced, measured after success.
+  int outputSizeBytes = 0;
+
+  /// Absolute paths of every file the conversion is expected to write. Used to
+  /// measure [outputSizeBytes] without re-deriving the route's naming rules.
+  final List<String> outputPaths;
+
   ConversionJob({
     required this.filepath,
     required this.outputDir,
@@ -183,8 +193,15 @@ class ConversionJob {
     List<String>? logLines,
     this.error,
     List<String>? tempFiles,
+    List<String>? outputPaths,
   })  : logLines = logLines ?? [],
-        tempFiles = tempFiles ?? [];
+        tempFiles = tempFiles ?? [],
+        outputPaths = outputPaths ?? [];
+
+  /// Registers a file the conversion is expected to create.
+  void addOutput(String path) {
+    if (!outputPaths.contains(path)) outputPaths.add(path);
+  }
 
   Map<String, dynamic> getFileInfo() {
     if (_fileInfo == null) {
@@ -194,6 +211,60 @@ class ConversionJob {
       }
     }
     return _fileInfo!;
+  }
+}
+
+/// Aggregate size statistics for a completed conversion batch. Byte figures
+/// sum only successful jobs; [bytesSaved] may be negative when the outputs are
+/// larger than the inputs (e.g. decompressing CHD → ISO).
+class BatchStats {
+  final int jobsCompleted;
+  final int totalOriginalBytes;
+  final int totalOutputBytes;
+
+  const BatchStats({
+    required this.jobsCompleted,
+    required this.totalOriginalBytes,
+    required this.totalOutputBytes,
+  });
+
+  int get bytesSaved => totalOriginalBytes - totalOutputBytes;
+
+  /// Percentage of the input size reclaimed, or 0 when there is no input.
+  double get savedPercentage =>
+      totalOriginalBytes <= 0 ? 0.0 : (bytesSaved / totalOriginalBytes) * 100.0;
+
+  String get bytesSavedReadable => detector.humanBytes(bytesSaved);
+
+  /// One-decimal percentage, e.g. `64.3%`. Negative (expansion) keeps its sign.
+  String get savedPercentageReadable =>
+      '${savedPercentage.toStringAsFixed(1)}%';
+
+  Map<String, dynamic> toJson() => {
+        'jobs_completed': jobsCompleted,
+        'original_bytes': totalOriginalBytes,
+        'output_bytes': totalOutputBytes,
+        'bytes_saved': bytesSaved,
+        'bytes_saved_readable': bytesSavedReadable,
+        'saved_percentage': savedPercentageReadable,
+      };
+
+  /// Builds stats from the successful jobs in [jobs].
+  static BatchStats fromJobs(Iterable<ConversionJob> jobs) {
+    var original = 0;
+    var output = 0;
+    var completed = 0;
+    for (final job in jobs) {
+      if (job.status != 'Done') continue;
+      completed++;
+      original += job.originalSizeBytes;
+      output += job.outputSizeBytes;
+    }
+    return BatchStats(
+      jobsCompleted: completed,
+      totalOriginalBytes: original,
+      totalOutputBytes: output,
+    );
   }
 }
 
@@ -211,6 +282,14 @@ class Converter {
   Future<bool> convert(ConversionJob job) async {
     job.status = 'Converting';
     try {
+      // Snapshot the input size before any tool runs; the source may be
+      // deleted by --delete-source on success.
+      try {
+        job.originalSizeBytes = File(job.filepath).lengthSync();
+      } catch (_) {
+        job.originalSizeBytes = 0;
+      }
+
       bool ok = await _dispatch(job);
       if (ok && job.verify && job.targetFormat.toUpperCase() == 'CHD') {
         final chdOut = _outPath(job, job.filepath, '.chd');
@@ -219,6 +298,10 @@ class Converter {
           final verOk = verifyChd(chdOut, onLog: _log);
           if (!verOk) ok = false;
         }
+      }
+
+      if (ok) {
+        job.outputSizeBytes = _measureOutputs(job);
       }
 
       job.status = ok ? 'Done' : 'Failed';
@@ -231,6 +314,34 @@ class Converter {
     } finally {
       _cleanup(job);
     }
+  }
+
+  /// Sums the on-disk size of every registered output. Falls back to scanning
+  /// [ConversionJob.outputDir] for a file sharing the source's base name when
+  /// a route registered no explicit output (e.g. plugin routes).
+  int _measureOutputs(ConversionJob job) {
+    var total = 0;
+    for (final path in job.outputPaths) {
+      try {
+        final f = File(path);
+        if (f.existsSync()) total += f.lengthSync();
+      } catch (_) {}
+    }
+    if (total > 0) return total;
+
+    try {
+      final base = p.basenameWithoutExtension(job.filepath).toLowerCase();
+      final dir = Directory(job.outputDir);
+      if (dir.existsSync()) {
+        for (final e in dir.listSync()) {
+          if (e is File &&
+              p.basenameWithoutExtension(e.path).toLowerCase() == base) {
+            total += e.lengthSync();
+          }
+        }
+      }
+    } catch (_) {}
+    return total;
   }
 
   Future<bool> _dispatch(ConversionJob job) async {
@@ -561,6 +672,7 @@ class Converter {
     final nodtool = config.getToolPath('nodtool');
     final outName = detector.getOutputName(src, 'rvz');
     final out = p.join(job.outputDir, p.basename(outName));
+    job.addOutput(out);
     final cmd = [nodtool, 'convert', src, out];
     _log('[RVZ] ${p.basename(src)} → ${p.basename(out)}');
     return await _run(cmd, job);
@@ -570,6 +682,7 @@ class Converter {
     final nodtool = config.getToolPath('nodtool');
     final outName = detector.getOutputName(src, 'iso');
     final out = p.join(job.outputDir, p.basename(outName));
+    job.addOutput(out);
     final fmt = p.extension(src).toUpperCase().replaceAll('.', '');
     final cmd = [nodtool, 'convert', src, out];
     _log('[$fmt→ISO] ${p.basename(src)} → ${p.basename(out)}');
@@ -671,7 +784,9 @@ class Converter {
 
   String _outPath(ConversionJob job, String src, String ext) {
     final outName = detector.getOutputName(p.basename(src), ext);
-    return p.join(job.outputDir, outName);
+    final out = p.join(job.outputDir, outName);
+    job.addOutput(out);
+    return out;
   }
 
   void _log(String msg) {

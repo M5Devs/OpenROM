@@ -4,6 +4,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 
+import '../models/batch_stats.dart';
 import '../models/conversion_job.dart';
 import '../models/errors.dart';
 import '../services/core_bridge.dart';
@@ -14,11 +15,20 @@ class HomeController extends ChangeNotifier {
   final List<String> _logs = [];
   bool _isConverting = false;
   bool _showTerminal = false;
+  BatchStats _lastBatchStats = BatchStats.empty;
+  String _lastOutputDir = '';
 
   List<ConversionJob> get jobs => List.unmodifiable(_jobs);
   List<String> get logs => List.unmodifiable(_logs);
   bool get isConverting => _isConverting;
   bool get showTerminal => _showTerminal;
+
+  /// Size statistics accumulated for the most recent batch. Reset at the start
+  /// of every run so a completion dialog never shows stale figures.
+  BatchStats get lastBatchStats => _lastBatchStats;
+
+  /// Directory the most recent batch wrote to (empty = alongside each source).
+  String get lastOutputDir => _lastOutputDir;
   int get fileCount => _jobs.length;
 
   void toggleTerminal(bool show) {
@@ -82,6 +92,8 @@ class HomeController extends ChangeNotifier {
 
     _isConverting = true;
     _showTerminal = true;
+    _lastBatchStats = BatchStats.empty;
+    _lastOutputDir = outputDir;
     _logs.add('[START] Batch conversion started at ${DateTime.now()}');
     notifyListeners();
 
@@ -160,6 +172,9 @@ class HomeController extends ChangeNotifier {
               _logs.add('[ERROR] $err');
             }
             notifyListeners();
+          },
+          onBatchStats: (stats) {
+            _lastBatchStats = _lastBatchStats + stats;
           },
         );
       } on OpenROMException catch (e) {

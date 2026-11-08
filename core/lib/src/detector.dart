@@ -652,13 +652,18 @@ String? _findPair(String filepath, String targetExt) {
   return File(candidate).existsSync() ? candidate : null;
 }
 
-String _humanSize(int size) {
-  double doubleSize = size.toDouble();
-  for (final unit in ['B', 'KB', 'MB', 'GB']) {
-    if (doubleSize < 1024) {
-      return '${doubleSize.toStringAsFixed(1)} $unit';
-    }
-    doubleSize /= 1024;
+String _humanSize(int size) => humanBytes(size);
+
+/// Formats a byte count using binary (1024-based) units, e.g. `45.0 GB`.
+/// Negative values keep their sign so "space expanded" figures read correctly.
+String humanBytes(int size) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  double value = size.abs().toDouble();
+  int i = 0;
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
   }
-  return '${doubleSize.toStringAsFixed(1)} TB';
+  final text = '${value.toStringAsFixed(1)} ${units[i]}';
+  return size < 0 ? '-$text' : text;
 }

@@ -34,7 +34,7 @@ class _ToolsScreenState extends State<ToolsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 9, vsync: this);
+    _tabController = TabController(length: 10, vsync: this);
   }
 
   @override
@@ -93,6 +93,10 @@ class _ToolsScreenState extends State<ToolsScreen>
                   icon: const Icon(Icons.fingerprint),
                   text: 'ROM Hasher',
                 ),
+                Tab(
+                  icon: const Icon(Icons.folder_shared_outlined),
+                  text: 'Watch Folder',
+                ),
               ],
             ),
           ),
@@ -109,6 +113,7 @@ class _ToolsScreenState extends State<ToolsScreen>
                 _RomRenamerTab(theme: widget.theme),
                 _OneGOneRCleanerTab(theme: widget.theme),
                 _RomHasherTab(theme: widget.theme),
+                _WatchFolderTab(theme: widget.theme),
               ],
             ),
           ),
@@ -3087,6 +3092,375 @@ class _RomHasherTabState extends State<_RomHasherTab> {
             icon: Icon(Icons.copy, color: theme.accent),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Tab 10: Watch Folder ──────────────────────────────────────────────────────
+
+class _WatchFolderTab extends StatefulWidget {
+  final ThemeConfig theme;
+  const _WatchFolderTab({required this.theme});
+
+  @override
+  State<_WatchFolderTab> createState() => _WatchFolderTabState();
+}
+
+class _WatchFolderTabState extends State<_WatchFolderTab>
+    with SingleTickerProviderStateMixin {
+  static const List<String> _formats = ['CHD', 'RVZ', 'CSO', 'ECM', 'ISO', 'BIN/CUE'];
+
+  final WatchFolderSession _session = WatchFolderSession();
+  final List<String> _logLines = [];
+
+  String _inputDir = '';
+  String _outputDir = '';
+  String _format = 'CHD';
+  bool _deleteSource = false;
+  bool _isWatching = false;
+  bool _isStarting = false;
+
+  // Runs only while watching; a permanently repeating controller would make
+  // `pumpAndSettle` never settle in widget tests.
+  late final AnimationController _pulseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _session.stop();
+    super.dispose();
+  }
+
+  Future<void> _pickInput() async {
+    final dir = await FilePicker.platform.getDirectoryPath();
+    if (dir != null && dir.isNotEmpty) {
+      setState(() => _inputDir = dir);
+    }
+  }
+
+  Future<void> _pickOutput() async {
+    final dir = await FilePicker.platform.getDirectoryPath();
+    if (dir != null && dir.isNotEmpty) {
+      setState(() => _outputDir = dir);
+    }
+  }
+
+  void _appendLog(String line) {
+    if (!mounted) return;
+    final stamp = DateTime.now().toIso8601String().substring(11, 19);
+    setState(() => _logLines.add('[$stamp] $line'));
+  }
+
+  Future<void> _toggleWatching() async {
+    if (_isWatching) {
+      await _session.stop();
+      if (mounted) {
+        _pulseController.stop();
+        setState(() => _isWatching = false);
+        _appendLog('Watch stopped.');
+      }
+      return;
+    }
+
+    if (_inputDir.isEmpty || _outputDir.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Select both an input and an output folder first.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isStarting = true);
+    try {
+      await _session.start(
+        inputDir: _inputDir,
+        outputDir: _outputDir,
+        format: _format,
+        deleteSource: _deleteSource,
+        onEvent: (event) {
+          if (!mounted) return;
+          switch (event.type) {
+            case 'progress':
+              _appendLog('${event.file}: ${event.percent.toStringAsFixed(1)}%');
+              break;
+            case 'done':
+              _appendLog(event.success
+                  ? '✅ Converted ${event.file}'
+                  : '❌ Failed ${event.file}: ${event.error ?? ''}');
+              break;
+            case 'error':
+              _appendLog('⚠ ${event.message}');
+              break;
+            default:
+              _appendLog(event.message);
+          }
+        },
+        onError: (e) => _appendLog('Error: $e'),
+      );
+      if (mounted) {
+        _pulseController.repeat(reverse: true);
+        setState(() {
+          _isWatching = true;
+          _isStarting = false;
+        });
+        _appendLog('Watching $_inputDir → $_outputDir ($_format).');
+      }
+    } on OpenROMException catch (e) {
+      if (mounted) {
+        setState(() => _isStarting = false);
+        showOpenROMError(context, e.error, details: e.details);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isStarting = false);
+        _appendLog('Error: $e');
+      }
+    }
+  }
+
+  Widget _dirPicker({
+    required String label,
+    required String value,
+    required VoidCallback onPick,
+  }) {
+    final theme = widget.theme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: theme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onPick,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: theme.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.folder_outlined, size: 18, color: theme.accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    value.isEmpty ? 'Choose folder…' : value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: value.isEmpty
+                          ? theme.textSecondary
+                          : theme.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+
+    return Container(
+      color: theme.background,
+      padding: const EdgeInsets.all(20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.folder_shared_outlined,
+                    color: theme.accent, size: 28),
+                const SizedBox(width: 10),
+                Text(
+                  'Watch Folder',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Automatically convert ROMs as they land in a folder.',
+              style: TextStyle(fontSize: 12, color: theme.textSecondary),
+            ),
+            const SizedBox(height: 20),
+
+            _dirPicker(
+              label: 'Input Folder',
+              value: _inputDir,
+              onPick: _pickInput,
+            ),
+            const SizedBox(height: 16),
+            _dirPicker(
+              label: 'Output Folder',
+              value: _outputDir,
+              onPick: _pickOutput,
+            ),
+            const SizedBox(height: 20),
+
+            Text(
+              'Target Format',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _formats.map((fmt) {
+                final selected = _format == fmt;
+                return ChoiceChip(
+                  label: Text(fmt),
+                  selected: selected,
+                  selectedColor: theme.accent,
+                  backgroundColor: theme.surface,
+                  labelStyle: TextStyle(
+                    color: selected ? Colors.black : theme.textPrimary,
+                    fontWeight:
+                        selected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  onSelected: (_) => setState(() => _format = fmt),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+
+            Row(
+              children: [
+                Switch(
+                  value: _deleteSource,
+                  activeThumbColor: theme.accent,
+                  onChanged: (v) => setState(() => _deleteSource = v),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Delete source after conversion',
+                  style: TextStyle(fontSize: 13, color: theme.textPrimary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Start/stop control with a green pulse while active.
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _isStarting ? null : _toggleWatching,
+                  icon: _isStarting
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          _isWatching ? Icons.stop : Icons.play_arrow,
+                          size: 18,
+                        ),
+                  label: Text(_isWatching ? 'Stop Watching' : 'Start Watching'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isWatching ? Colors.redAccent : theme.accent,
+                    foregroundColor: _isWatching ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                if (_isWatching)
+                  FadeTransition(
+                    opacity: Tween<double>(begin: 0.3, end: 1.0)
+                        .animate(_pulseController),
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: Colors.greenAccent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                if (_isWatching) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    'Active',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            Text(
+              'Live Log',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: theme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              height: 220,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: _logLines.isEmpty
+                  ? Text(
+                      'No activity yet.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _logLines.length,
+                      itemBuilder: (context, i) => Text(
+                        _logLines[i],
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          color: theme.terminalText,
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

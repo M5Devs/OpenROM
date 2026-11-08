@@ -4,6 +4,7 @@
 export 'src/config.dart';
 export 'src/detector.dart';
 export 'src/converter.dart';
+export 'src/watch_folder.dart';
 export 'src/compressor.dart';
 export 'src/seven_zip.dart';
 export 'src/cue_generator.dart';

@@ -80,6 +80,18 @@ void main() {
             'streaming pass.'),
         findsOneWidget,
       );
+
+      final watchTabFinder = find.widgetWithText(Tab, 'Watch Folder');
+      expect(watchTabFinder, findsOneWidget);
+      await tester.tap(watchTabFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Watch Folder'), findsNWidgets(2));
+      expect(find.text('Input Folder'), findsOneWidget);
+      expect(find.text('Output Folder'), findsOneWidget);
+      expect(find.text('Target Format'), findsOneWidget);
+      expect(find.text('Delete source after conversion'), findsOneWidget);
+      expect(find.text('Start Watching'), findsOneWidget);
+      expect(find.text('No activity yet.'), findsOneWidget);
     });
   });
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -80,5 +81,106 @@ void main() {
         tmpDir.deleteSync(recursive: true);
       }
     });
+  });
+
+  group('CLI batch metrics', () {
+    test('a single-job completion payload carries the space-saved fields', () {
+      final tmpDir = Directory.systemTemp.createTempSync('cli_metrics_');
+      try {
+        final iso = File('${tmpDir.path}/game.iso')
+          ..writeAsBytesSync(List<int>.filled(2048, 0));
+
+        // The decoupled XISO route fails, but the completion `done` event must
+        // still advertise the metrics keys so consumers can rely on the shape.
+        final r = _runCli([
+          '--input',
+          iso.path,
+          '--format',
+          'XISO',
+          '--json',
+          '--output',
+          tmpDir.path,
+        ]);
+
+        final lines = (r.stdout as String)
+            .split('\n')
+            .where((l) => l.trim().startsWith('{'))
+            .map((l) => jsonDecode(l) as Map<String, dynamic>)
+            .toList();
+        final done = lines.lastWhere((e) => e['type'] == 'done');
+        expect(done['success'], isFalse);
+        expect(done.containsKey('jobs_completed'), isTrue);
+        expect(done.containsKey('original_bytes'), isTrue);
+        expect(done.containsKey('output_bytes'), isTrue);
+        expect(done.containsKey('bytes_saved'), isTrue);
+        expect(done.containsKey('bytes_saved_readable'), isTrue);
+        expect(done.containsKey('saved_percentage'), isTrue);
+      } finally {
+        tmpDir.deleteSync(recursive: true);
+      }
+    });
+  });
+
+  group('CLI --watch', () {
+    test('--help advertises --watch and --settle-seconds', () {
+      final r = _runCli(['--help']);
+      expect(r.exitCode, 0);
+      final out = r.stdout as String;
+      expect(out, contains('--watch'));
+      expect(out, contains('--settle-seconds'));
+    });
+
+    test('--watch with a missing directory creates it and logs readiness', () async {
+      final tmpDir = Directory.systemTemp.createTempSync('cli_watch_');
+      final inDir = Directory('${tmpDir.path}/incoming');
+      final outDir = Directory('${tmpDir.path}/library');
+      try {
+        final process = await Process.start(
+          Platform.resolvedExecutable,
+          [
+            'bin/openrom.dart',
+            '--json',
+            '--watch',
+            inDir.path,
+            '--format',
+            'CHD',
+            '--output',
+            outDir.path,
+          ],
+        );
+
+        final lines = <String>[];
+        final sub = process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen(lines.add);
+
+        // Wait for the readiness log, then shut the daemon down.
+        final deadline = DateTime.now().add(const Duration(seconds: 20));
+        while (DateTime.now().isBefore(deadline) &&
+            !lines.any((l) => l.contains('[WATCH] Watching'))) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+
+        process.kill();
+        await process.exitCode;
+        await sub.cancel();
+
+        expect(inDir.existsSync(), isTrue);
+        expect(outDir.existsSync(), isTrue);
+        final events = lines
+            .where((l) => l.trim().startsWith('{'))
+            .map((l) => jsonDecode(l) as Map<String, dynamic>)
+            .toList();
+        expect(
+          events.any((e) =>
+              e['type'] == 'log' &&
+              (e['message'] as String).contains('[WATCH] Watching')),
+          isTrue,
+        );
+      } finally {
+        if (tmpDir.existsSync()) tmpDir.deleteSync(recursive: true);
+      }
+    }, timeout: const Timeout(Duration(seconds: 60)));
   });
 }
