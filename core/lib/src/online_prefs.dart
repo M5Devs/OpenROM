@@ -11,4 +11,7 @@ abstract class OnlinePrefs {
   static const String raEnabled = 'online_ra_enabled';
   static const String raApiKey = 'online_ra_api_key';
   static const String raUsername = 'online_ra_username';
+
+  // Hasheous hash lookup (transmits the ROM's SHA-1 for identification)
+  static const String hasheousEnabled = 'online_hasheous_enabled';
 }

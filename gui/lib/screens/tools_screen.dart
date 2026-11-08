@@ -7,9 +7,13 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openrom_core/openrom_core.dart'
+    show HasheousClient, HasheousLookupResult, OnlinePrefs;
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/error_dialog.dart';
+import '../widgets/hasheous_result_card.dart';
 import '../models/errors.dart';
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
@@ -2781,23 +2785,40 @@ class _RomHasherTabState extends State<_RomHasherTab> {
   String _statusMsg = '';
   HashResult? _result;
 
+  // Hasheous identification state.
+  bool _isIdentifying = false;
+  HasheousLookupResult? _identify;
+  bool _hasheousEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHasheousPref();
+  }
+
+  Future<void> _loadHasheousPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _hasheousEnabled = prefs.getBool(OnlinePrefs.hasheousEnabled) ?? false;
+    });
+  }
+
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: false);
-    if (result != null && result.paths.isNotEmpty) {
-      setState(() {
-        _filePath = result.paths.first;
-        _result = null;
-        _statusMsg = '';
-      });
-    }
+    final path = result?.paths.first;
+    if (path != null) _setFile(path);
   }
 
   void _setFile(String path) {
     setState(() {
       _filePath = path;
       _result = null;
+      _identify = null;
       _statusMsg = '';
     });
+    // Opt-in one-click flow: dropping a file hashes and identifies it.
+    if (_hasheousEnabled) _hash();
   }
 
   Future<void> _hash() async {
@@ -2808,6 +2829,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
       _isHashing = true;
       _progress = 0.0;
       _result = null;
+      _identify = null;
       _statusMsg = 'Hashing ${p.basename(path)}…';
     });
 
@@ -2824,6 +2846,8 @@ class _RomHasherTabState extends State<_RomHasherTab> {
         _progress = 100.0;
         _statusMsg = '';
       });
+      // Privacy: only reach the network when the user opted in.
+      if (_hasheousEnabled) await _identifyRom();
     } on OpenROMException catch (e) {
       if (mounted) {
         setState(() => _statusMsg = 'Error: ${e.details ?? e.error}');
@@ -2833,6 +2857,31 @@ class _RomHasherTabState extends State<_RomHasherTab> {
       if (mounted) setState(() => _statusMsg = 'Error: $e');
     } finally {
       if (mounted) setState(() => _isHashing = false);
+    }
+  }
+
+  /// Looks the current hash up on Hasheous. Never throws: failures surface as
+  /// an unmatched [HasheousLookupResult] carrying an error message.
+  Future<void> _identifyRom() async {
+    final res = _result;
+    if (res == null || _isIdentifying) return;
+
+    setState(() {
+      _isIdentifying = true;
+      _identify = null;
+    });
+
+    final client = HasheousClient();
+    try {
+      final lookup = await client.lookupByHash(
+        sha1: res.sha1,
+        md5: res.md5,
+        crc: res.crc32,
+      );
+      if (mounted) setState(() => _identify = lookup);
+    } finally {
+      client.close();
+      if (mounted) setState(() => _isIdentifying = false);
     }
   }
 
@@ -3049,11 +3098,63 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                _buildIdentifySection(),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// "Identify Game (Hasheous)" action plus its loading / result / no-match
+  /// states, shown beneath the hash cards.
+  Widget _buildIdentifySection() {
+    final theme = widget.theme;
+    final lookup = _identify;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            ElevatedButton.icon(
+              onPressed: _isIdentifying ? null : _identifyRom,
+              icon: _isIdentifying
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.travel_explore, size: 16),
+              label: Text(
+                _isIdentifying ? 'Identifying…' : 'Identify Game (Hasheous)',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.accent,
+                foregroundColor: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 10),
+            if (!_hasheousEnabled)
+              Expanded(
+                child: Text(
+                  'Sends the file SHA-1 to hasheous.org. Enable in Settings → '
+                  'Online Features.',
+                  style: TextStyle(fontSize: 11, color: theme.textSecondary),
+                ),
+              ),
+          ],
+        ),
+        if (lookup != null) ...[
+          const SizedBox(height: 14),
+          HasheousResultCard.fromLookup(context, lookup),
+        ],
+      ],
     );
   }
 

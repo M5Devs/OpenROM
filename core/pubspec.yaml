@@ -12,6 +12,7 @@ dependencies:
   crypto: ^3.0.3
   archive: ^3.6.1
   xml: ^6.5.0
+  http: ^1.2.0
 
 dev_dependencies:
   test: ^1.25.0

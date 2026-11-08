@@ -58,6 +58,11 @@ ArgParser buildParser() {
       'hash',
       help: 'compute CRC32/MD5/SHA-1/SHA-256 checksums for a ROM file',
     )
+    ..addFlag(
+      'identify',
+      negatable: false,
+      help: 'with --hash: identify the ROM via the Hasheous preservation API',
+    )
     ..addOption('convert', help: 'single file to convert (alias for --input)')
     ..addMultiOption(
       'compress',
@@ -505,6 +510,40 @@ Future<int> _runCli(List<String> args) async {
       print('MD5:    ${res.md5}');
       print('SHA-1:  ${res.sha1}');
       print('SHA-256:${res.sha256}');
+    }
+
+    if (results['identify'] == true) {
+      final client = HasheousClient();
+      final lookup = await client.lookupByHash(
+        sha1: res.sha1,
+        md5: res.md5,
+        crc: res.crc32,
+      );
+      client.close();
+
+      if (isJson) {
+        _jsonPrint({
+          'type': 'identification',
+          ...lookup.toJson(),
+        });
+      } else if (lookup.matched && lookup.match != null) {
+        final m = lookup.match!;
+        print('');
+        print('Identified: ${m.gameName}');
+        print('  ROM:      ${m.romName}');
+        print('  Platform: ${m.platform}');
+        if (m.region != null) print('  Region:   ${m.region}');
+        print('  Source:   ${m.sourceDat}');
+        if (lookup.sources.length > 1) {
+          print('  Also in:  ${lookup.sources.skip(1).join(', ')}');
+        }
+      } else if (lookup.hasError) {
+        print('');
+        print('Identification unavailable: ${lookup.error}');
+      } else {
+        print('');
+        print('No match found in preservation databases.');
+      }
     }
     return 0;
   }

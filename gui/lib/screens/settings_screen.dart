@@ -62,6 +62,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _raApiKey = '';
   bool _obscureApiKey = true;
 
+  bool _hasheousEnabled = false;
+
   late TextEditingController _raUsernameController;
   late TextEditingController _raApiKeyController;
 
@@ -152,6 +154,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _raUsername = prefs.getString(OnlinePrefs.raUsername) ?? '';
       _raApiKey = prefs.getString(OnlinePrefs.raApiKey) ?? '';
 
+      _hasheousEnabled =
+          prefs.getBool(OnlinePrefs.hasheousEnabled) ?? false;
+
       _raUsernameController.text = _raUsername;
       _raApiKeyController.text = _raApiKey;
     });
@@ -169,6 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await prefs.setBool(OnlinePrefs.autoUpdateEnabled, _autoUpdateEnabled);
     await prefs.setBool(OnlinePrefs.raEnabled, _raEnabled);
+    await prefs.setBool(OnlinePrefs.hasheousEnabled, _hasheousEnabled);
     await prefs.setString(
       OnlinePrefs.raUsername,
       _raUsernameController.text.trim(),
@@ -789,6 +795,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+          const SizedBox(height: 24),
+
+          // Sub-section C: Hasheous hash lookup
+          _buildSectionTitle('Hasheous'),
+          Material(
+            color: Colors.transparent,
+            child: SwitchListTile(
+              title: Text(
+                'Enable Hasheous hash lookup',
+                style: TextStyle(color: theme.textPrimary),
+              ),
+              subtitle: Text(
+                'Identifies games by transmitting the ROM SHA-1 to '
+                'hasheous.org. Off by default; only your file hash is sent.',
+                style: TextStyle(color: theme.textSecondary),
+              ),
+              value: _hasheousEnabled,
+              activeThumbColor: theme.accent,
+              onChanged: (val) {
+                setState(() => _hasheousEnabled = val);
+                _saveSettings();
+              },
+            ),
+          ),
         ],
       ),
     );

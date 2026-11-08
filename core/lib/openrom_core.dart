@@ -14,6 +14,7 @@ export 'src/header_remover.dart';
 export 'src/m3u_generator.dart';
 export 'src/rom_renamer.dart';
 export 'src/hasher.dart';
+export 'src/hasheous_client.dart';
 export 'src/dcp_patcher.dart';
 export 'src/dcp_builder.dart';
 export 'src/ssp_builder.dart';

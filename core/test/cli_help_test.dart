@@ -28,6 +28,12 @@ void main() {
       expect(r.stdout as String, contains('Usage: openrom-core [options]'));
     });
 
+    test('--help advertises the --identify flag', () {
+      final r = _runCli(['--help']);
+      expect(r.exitCode, 0);
+      expect(r.stdout as String, contains('--identify'));
+    });
+
     test('no arguments prints usage and exits 0', () {
       final r = _runCli([]);
       expect(r.exitCode, 0);
