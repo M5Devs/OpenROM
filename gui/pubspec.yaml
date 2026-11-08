@@ -38,3 +38,4 @@ flutter:
   assets:
     - themes/
     - assets/images/
+    - assets/images/romeo/

@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
+import 'romeo_mascot.dart';
 
 class TerminalPanel extends StatelessWidget {
   final List<String> logs;
   final ThemeConfig theme;
+  final bool isConverting;
   final VoidCallback onClose;
   final VoidCallback onClear;
 
@@ -16,6 +18,7 @@ class TerminalPanel extends StatelessWidget {
     super.key,
     required this.logs,
     required this.theme,
+    this.isConverting = false,
     required this.onClose,
     required this.onClear,
   });
@@ -69,6 +72,28 @@ class TerminalPanel extends StatelessWidget {
               ],
             ),
           ),
+          // Live processing indicator: the animated working mascot sits above
+          // the execution log while a batch is running.
+          if (isConverting)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              color: Colors.black.withValues(alpha: 0.2),
+              child: Column(
+                children: [
+                  const RomeoMascot(asset: RomeoAssets.working, size: 100),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.statusConverting,
+                    style: TextStyle(
+                      color: theme.terminalText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Output lines
           Expanded(
             child: ListView.builder(

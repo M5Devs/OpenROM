@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/errors.dart';
+import 'romeo_mascot.dart';
 
 void showOpenROMError(
   BuildContext context,
@@ -94,34 +95,19 @@ class _OpenROMErrorDialogState extends State<OpenROMErrorDialog> {
       titlePadding: const EdgeInsets.fromLTRB(24, 20, 16, 8),
       contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      title: Stack(
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(widget.error.icon, color: widget.error.color, size: 32),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  _getLocalizedTitle(l10n),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+          const RomeoMascot(asset: RomeoAssets.error, size: 100),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _getLocalizedTitle(l10n),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
-            ],
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/icons/romeo_sad.png',
-              width: 40,
-              height: 40,
-              errorBuilder: (context, error, stackTrace) =>
-                  const SizedBox.shrink(),
             ),
           ),
         ],

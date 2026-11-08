@@ -12,6 +12,7 @@ import '../services/core_bridge.dart';
 import '../widgets/drop_zone.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/rom_card.dart';
+import '../widgets/romeo_mascot.dart';
 import '../widgets/terminal_panel.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,6 +26,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _wasConverting = false;
+
   @override
   void initState() {
     super.initState();
@@ -50,7 +53,46 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onControllerChanged() {
+    final converting = widget.controller.isConverting;
+    // Detect the running -> finished edge and surface a completion dialog once
+    // the batch settles. Only celebrate when nothing failed.
+    if (_wasConverting && !converting) {
+      final jobs = widget.controller.jobs;
+      final anyFailed = jobs.any((j) => j.status == JobStatus.failed);
+      if (jobs.isNotEmpty && !anyFailed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _showSuccess());
+      }
+    }
+    _wasConverting = converting;
     setState(() {});
+  }
+
+  void _showSuccess() {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const RomeoMascot(asset: RomeoAssets.success, size: 120),
+            const SizedBox(height: 16),
+            const Text(
+              'Batch Completed! All files converted successfully',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(AppLocalizations.of(ctx).closeButton),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _checkCoreOnStartup() async {
@@ -108,7 +150,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        DropzoneArtwork(theme: widget.theme, size: 64),
+                        // A skin may ship its own dropzone illustration; fall
+                        // back to the animated ROMéo idle mascot otherwise.
+                        if (skinDropzoneArt(widget.theme) != null)
+                          DropzoneArtwork(theme: widget.theme, size: 120)
+                        else
+                          const RomeoMascot(
+                            asset: RomeoAssets.idle,
+                            size: 120,
+                          ),
                         const SizedBox(height: 16),
                         Text(
                           '${l10n.dropZoneHint}, ${l10n.dropZoneSubHint.toLowerCase()}',
@@ -140,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TerminalPanel(
               logs: controller.logs,
               theme: widget.theme,
+              isConverting: controller.isConverting,
               onClose: () => controller.toggleTerminal(false),
               onClear: controller.clearLogs,
             ),
