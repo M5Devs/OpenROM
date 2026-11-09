@@ -1,0 +1,44 @@
+name: openrom
+base: core24
+version: '4.0.0'
+summary: Universal Retro Gaming & ROM Management Toolkit
+description: |
+  OpenROM is a free, open-source universal toolkit to convert, compress, 
+  and patch ROMs for emulators.
+  Features batch conversion (ISO to CHD, RVZ, CSO), ROM Hasher with Hasheous
+  verification, M3U playlist generation, BIN track merging, and 9 patch formats.
+grade: stable
+confinement: strict
+icon: assets/icons/icon.png
+
+apps:
+  openrom:
+    command: bin/openrom
+    extensions: [gnome]
+    plugs:
+      - home
+      - removable-media
+      - network
+
+parts:
+  openrom-bundle:
+    plugin: nil
+    build-packages:
+      - curl
+      - file
+    override-build: |
+      case "$CRAFT_ARCH" in
+        amd64) ARCH="x86_64" ;;
+        arm64) ARCH="arm64" ;;
+        *) echo "Unsupported architecture: $CRAFT_ARCH"; exit 1 ;;
+      esac
+
+      URL="https://github.com/M5Devs/OpenROM/releases/download/v4.0.0/OpenROM-v4.0.0_Linux_${ARCH}.AppImage"
+      echo "Fetching OpenROM payload from $URL..."
+      curl -L -f -o openrom.AppImage "$URL"
+      chmod +x openrom.AppImage
+      ./openrom.AppImage --appimage-extract
+
+      mkdir -p "$CRAFT_PART_INSTALL/bin"
+      cp -r squashfs-root/* "$CRAFT_PART_INSTALL/"
+      ln -sf "$CRAFT_PART_INSTALL/AppRun" "$CRAFT_PART_INSTALL/bin/openrom"
