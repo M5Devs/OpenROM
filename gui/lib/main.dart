@@ -19,19 +19,17 @@ void main(List<String> args) async {
   final deepLinkService = DeepLinkService();
 
   try {
-    await windowManager.ensureInitialized();
-    const windowOptions = WindowOptions(
-      size: Size(1100, 720),
-      minimumSize: Size(800, 500),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      title: 'OpenROM — Universal ROM Compression Suite',
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    final window = WindowManager.instance.getCurrent();
+    if (window != null) {
+      window.setSize(const Size(1100, 720).toNative(), false);
+      window.minimumSize = const Size(800, 500).toNative();
+      window.title = 'OpenROM — Universal ROM Compression Suite';
+      window.backgroundColor = Colors.transparent.toNative();
+      window.isVisibleInTaskbar = true;
+      window.center();
+      window.show();
+      window.focus();
+    }
   } catch (_) {
     // Window manager setup fallback if headlessly executing or uninitialized
   }
