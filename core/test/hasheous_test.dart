@@ -79,7 +79,8 @@ void main() {
       );
       final client = HasheousClient(client: mock);
 
-      final result = await client.lookupByHash(sha1: sha1, md5: md5Hex, crc: crc);
+      final result =
+          await client.lookupByHash(sha1: sha1, md5: md5Hex, crc: crc);
 
       expect(result.matched, isTrue);
       expect(result.error, isNull);

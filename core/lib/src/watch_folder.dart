@@ -90,9 +90,8 @@ class WatchFolderDaemon {
   /// Returns the settled size, or null when the file vanished. A file that
   /// never stops growing keeps the loop alive until it stabilises (or [stop]).
   Future<int?> awaitStable(String path) async {
-    final intervalMs = pollInterval.inMilliseconds <= 0
-        ? 1
-        : pollInterval.inMilliseconds;
+    final intervalMs =
+        pollInterval.inMilliseconds <= 0 ? 1 : pollInterval.inMilliseconds;
     final requiredStableChecks =
         (settleSeconds * 1000 / intervalMs).ceil().clamp(1, 1 << 30);
 
@@ -199,20 +198,21 @@ class WatchFolderDaemon {
     if (_stopped) return;
     final completer = Completer<void>();
     _sub = dir.watch().listen(
-      (event) {
-        if (_stopped) return;
-        final path = event.path;
-        if (event is FileSystemCreateEvent || event is FileSystemModifyEvent) {
-          // Creation/modify events fire repeatedly while a file is written;
-          // handleFile's settle loop + _inFlight guard dedupe them.
-          unawaited(handleFile(path));
-        }
-      },
-      onError: (Object e) => _log('[WARN] Watch error: $e'),
-      onDone: () {
-        if (!completer.isCompleted) completer.complete();
-      },
-    );
+          (event) {
+            if (_stopped) return;
+            final path = event.path;
+            if (event is FileSystemCreateEvent ||
+                event is FileSystemModifyEvent) {
+              // Creation/modify events fire repeatedly while a file is written;
+              // handleFile's settle loop + _inFlight guard dedupe them.
+              unawaited(handleFile(path));
+            }
+          },
+          onError: (Object e) => _log('[WARN] Watch error: $e'),
+          onDone: () {
+            if (!completer.isCompleted) completer.complete();
+          },
+        );
     await completer.future;
   }
 

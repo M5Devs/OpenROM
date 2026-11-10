@@ -1289,7 +1289,8 @@ Future<int> _runCli(List<String> args) async {
             if (isJson) {
               _jsonPrint({
                 'type': 'log',
-                'message': '[DELETE] Removed source: ${p.basename(job.filepath)}',
+                'message':
+                    '[DELETE] Removed source: ${p.basename(job.filepath)}',
               });
             }
           }
@@ -1336,7 +1337,8 @@ Future<int> _runCli(List<String> args) async {
         ...stats.toJson(),
       });
     } else {
-      print('Batch complete: ${stats.jobsCompleted} converted, $failed failed.');
+      print(
+          'Batch complete: ${stats.jobsCompleted} converted, $failed failed.');
       print('  Space saved: ${stats.bytesSavedReadable} '
           '(${stats.savedPercentageReadable})');
     }
