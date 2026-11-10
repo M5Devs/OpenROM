@@ -1,9 +1,9 @@
 {
-  "@@locale": "zh",
+  "@@locale": "zh-CN",
   "appTitle": "OpenROM",
-  "appSubtitle": "通用 ROM 转换套件",
-  "convertButton": "转换",
-  "convertButtonWithCount": "转换（{count} 个文件）",
+  "appSubtitle": "Universal ROM Conversion Suite",
+  "convertButton": "Convert",
+  "convertButtonWithCount": "Convert ({count} Files)",
   "@convertButtonWithCount": {
     "placeholders": {
       "count": {
@@ -11,67 +11,67 @@
       }
     }
   },
-  "dropZoneHint": "将 ROM 文件拖放到此处",
-  "dropZoneSubHint": "或点击浏览",
-  "settingsTitle": "转换设置",
-  "outputFormat": "输出格式",
-  "compressionLevel": "压缩等级",
-  "compressionNormal": "标准",
-  "compressionHigh": "高",
-  "compressionMax": "最大",
-  "postProcessing": "后处理",
-  "verifyAfterConversion": "转换后验证",
-  "outputDestination": "输出位置",
-  "browse": "浏览",
-  "statusWaiting": "等待中...",
-  "statusConverting": "转换中...",
-  "statusDone": "完成",
-  "statusFailed": "失败",
-  "aboutTitle": "关于 OpenROM",
-  "settingsScreen": "设置",
-  "aboutScreen": "关于",
-  "themeScreen": "主题",
-  "errorCoreNotFound": "应用程序文件夹中缺少 openrom-core。",
-  "errorUnsupportedFormat": "此文件格式无法使用所选输出进行转换。",
-  "errorDiskSpace": "可用空间不足以完成此转换。",
-  "errorToolFailed": "转换工具（chdman/maxcso）意外退出。",
-  "errorConversionFailed": "转换在完成前停止。",
-  "errorFileNotFound": "输入文件已被移动或删除。",
-  "errorOutputDirNotFound": "所选输出文件夹已不存在。",
-  "errorPermissionDenied": "OpenROM 无法写入输出文件夹。",
-  "errorCorruptedFile": "文件似乎已损坏或为 0 字节。",
-  "errorUnknown": "发生错误。这可能是 Bug。",
-  "errorDetailsLabel": "详细信息",
-  "retryButton": "重试",
-  "closeButton": "关闭",
-  "reportBugButton": "报告问题",
-  "clearQueue": "清除队列",
-  "removeFile": "移除",
-  "openOutputFolder": "打开输出文件夹",
-  "patcherTitle": "ROM 修补器",
-  "patcherRomFile": "ROM 文件",
-  "patcherPatchFile": "补丁文件",
-  "patcherOutputFile": "输出文件",
-  "patcherSameFolder": "与 ROM 相同文件夹",
-  "patcherIgnoreChecksum": "忽略校验和错误",
-  "patcherApplyButton": "应用补丁",
-  "patcherSuccess": "修补成功！",
-  "patcherFormat": "格式",
+  "dropZoneHint": "Drag & Drop ROM files here",
+  "dropZoneSubHint": "or Click to browse",
+  "settingsTitle": "Conversion Settings",
+  "outputFormat": "Output Format",
+  "compressionLevel": "Compression Level",
+  "compressionNormal": "Normal",
+  "compressionHigh": "High",
+  "compressionMax": "Max",
+  "postProcessing": "Post-Processing",
+  "verifyAfterConversion": "Verify after conversion",
+  "outputDestination": "Output Destination",
+  "browse": "Browse",
+  "statusWaiting": "Waiting...",
+  "statusConverting": "Converting...",
+  "statusDone": "Done",
+  "statusFailed": "Failed",
+  "aboutTitle": "About OpenROM",
+  "settingsScreen": "Settings",
+  "aboutScreen": "About",
+  "themeScreen": "Themes",
+  "errorCoreNotFound": "openrom-core is missing from the app folder.",
+  "errorUnsupportedFormat": "This file format cannot be converted with the selected output.",
+  "errorDiskSpace": "Not enough free space to complete this conversion.",
+  "errorToolFailed": "The conversion tool (chdman/maxcso) exited unexpectedly.",
+  "errorConversionFailed": "Conversion stopped before completing.",
+  "errorFileNotFound": "The input file was moved or deleted.",
+  "errorOutputDirNotFound": "The selected output folder no longer exists.",
+  "errorPermissionDenied": "OpenROM can't write to the output folder.",
+  "errorCorruptedFile": "The file appears to be corrupted or is 0 bytes.",
+  "errorUnknown": "Something went wrong. This might be a bug.",
+  "errorDetailsLabel": "Details",
+  "retryButton": "Retry",
+  "closeButton": "Close",
+  "reportBugButton": "Report Bug",
+  "clearQueue": "Clear Queue",
+  "removeFile": "Remove",
+  "openOutputFolder": "Open Output Folder",
+  "patcherTitle": "ROM Patcher",
+  "patcherRomFile": "ROM File",
+  "patcherPatchFile": "Patch File",
+  "patcherOutputFile": "Output File",
+  "patcherSameFolder": "Same folder as ROM",
+  "patcherIgnoreChecksum": "Ignore checksum errors",
+  "patcherApplyButton": "Apply Patch",
+  "patcherSuccess": "Patched successfully!",
+  "patcherFormat": "Format",
   "patcherChecksumPassed": "通过",
-  "patcherChecksumSkipped": "已跳过",
-  "patcherDropHint": "将 ROM 和补丁文件拖放到此处",
-  "toolsTitle": "工具",
-  "compressorTitle": "ROM 压缩器",
-  "compressorAddFiles": "添加文件",
-  "compressorAddFolder": "添加文件夹",
-  "compressorOutputFormat": "输出格式",
-  "compressorLevel": "压缩等级",
-  "compressorLevelFast": "快速",
-  "compressorLevelNormal": "标准",
-  "compressorLevelUltra": "极致",
-  "compressorDeleteSource": "完成后删除源文件",
-  "compressorSameFolder": "与源文件相同文件夹",
-  "compressorButton": "压缩（{count} 个文件）",
+  "patcherChecksumSkipped": "skipped",
+  "patcherDropHint": "Drop ROM + Patch files here",
+  "toolsTitle": "Tools",
+  "compressorTitle": "ROM Compressor",
+  "compressorAddFiles": "Add Files",
+  "compressorAddFolder": "Add Folder",
+  "compressorOutputFormat": "Output Format",
+  "compressorLevel": "Compression Level",
+  "compressorLevelFast": "Fast",
+  "compressorLevelNormal": "Normal",
+  "compressorLevelUltra": "Ultra",
+  "compressorDeleteSource": "Delete source after done",
+  "compressorSameFolder": "Same folder as source",
+  "compressorButton": "Compress ({count} Files)",
   "@compressorButton": {
     "placeholders": {
       "count": {
@@ -79,12 +79,12 @@
       }
     }
   },
-  "compressorSkipped": "已跳过（已压缩）",
-  "m3uTitle": "M3U 生成器",
-  "m3uDropHint": "将光盘文件拖放到此处",
-  "m3uOutputLabel": "输出文件夹",
-  "m3uButton": "生成 M3U",
-  "m3uSuccess": "已创建：{filename}",
+  "compressorSkipped": "Skipped (already compressed)",
+  "m3uTitle": "M3U Generator",
+  "m3uDropHint": "Drop disc files here",
+  "m3uOutputLabel": "Output folder",
+  "m3uButton": "Generate M3U",
+  "m3uSuccess": "Created: {filename}",
   "@m3uSuccess": {
     "placeholders": {
       "filename": {
@@ -92,11 +92,11 @@
       }
     }
   },
-  "cueGeneratorTitle": "CUE 生成器",
-  "cueGeneratorBinFile": "BIN 文件",
-  "cueGeneratorDetectedMode": "检测模式",
-  "cueGeneratorButton": "生成 CUE",
-  "cueGeneratorSuccess": "已创建：{filename}",
+  "cueGeneratorTitle": "CUE Generator",
+  "cueGeneratorBinFile": "BIN File",
+  "cueGeneratorDetectedMode": "Detected mode",
+  "cueGeneratorButton": "Generate CUE",
+  "cueGeneratorSuccess": "Created: {filename}",
   "@cueGeneratorSuccess": {
     "placeholders": {
       "filename": {
@@ -104,9 +104,9 @@
       }
     }
   },
-  "binMergerTitle": "BIN 合并器",
-  "binMergerCueFile": "CUE 文件（多轨道）",
-  "binMergerDetected": "检测到：{count} 个 BIN 文件",
+  "binMergerTitle": "BIN Merger",
+  "binMergerCueFile": "CUE File (multi-track)",
+  "binMergerDetected": "Detected: {count} BIN files",
   "@binMergerDetected": {
     "placeholders": {
       "count": {
@@ -114,8 +114,8 @@
       }
     }
   },
-  "binMergerButton": "合并 BIN",
-  "binMergerSuccess": "已合并：{filename}",
+  "binMergerButton": "Merge BINs",
+  "binMergerSuccess": "Merged: {filename}",
   "@binMergerSuccess": {
     "placeholders": {
       "filename": {
@@ -123,14 +123,14 @@
       }
     }
   },
-  "headerRemoverTitle": "文件头移除器",
-  "headerRemoverSystem": "系统",
-  "headerRemoverFound": "找到文件头",
-  "headerRemoverNotFound": "未找到文件头",
-  "headerRemoverConfidence": "置信度",
-  "headerRemoverBackup": "保留备份（.bak）",
-  "headerRemoverButton": "移除文件头",
-  "headerRemoverSuccess": "干净的 ROM：{filename}",
+  "headerRemoverTitle": "Header Remover",
+  "headerRemoverSystem": "System",
+  "headerRemoverFound": "Header Found",
+  "headerRemoverNotFound": "No Header Found",
+  "headerRemoverConfidence": "Confidence",
+  "headerRemoverBackup": "Keep backup (.bak)",
+  "headerRemoverButton": "Remove Header",
+  "headerRemoverSuccess": "Clean ROM: {filename}",
   "@headerRemoverSuccess": {
     "placeholders": {
       "filename": {
@@ -138,48 +138,48 @@
       }
     }
   },
-  "headerRemoverNoHeader": "未检测到文件头。",
+  "headerRemoverNoHeader": "No copier header detected.",
   "dreamcastTitle": "Dreamcast",
-  "dreamcastDcpTab": "应用 DCP",
-  "dreamcastIpbinTab": "IP.BIN 编辑器",
-  "dreamcastGdiTab": "GDI 信息",
-  "dreamcastDiscDir": "光盘目录",
-  "dreamcastDcpFile": "DCP 补丁文件",
-  "dreamcastOutputDir": "输出目录",
-  "dreamcastApplyButton": "应用 DCP 补丁",
-  "dreamcastApplySuccess": "DCP 补丁应用成功！",
-  "dreamcastIpbinFile": "IP.BIN 或 GDI 文件",
-  "dreamcastIpbinLoad": "加载",
-  "dreamcastIpbinSave": "保存更改",
-  "dreamcastIpbinTitle": "游戏名称",
-  "dreamcastIpbinProductNumber": "产品编号",
-  "dreamcastIpbinVersion": "版本",
-  "dreamcastIpbinDate": "发行日期",
-  "dreamcastIpbinRegion": "区域",
-  "dreamcastIpbinRegionJapan": "日本",
-  "dreamcastIpbinRegionUSA": "美国",
-  "dreamcastIpbinRegionEurope": "欧洲",
-  "dreamcastIpbinRegionFree": "全区",
-  "dreamcastIpbinVga": "启用 VGA",
-  "dreamcastIpbinSaveSuccess": "IP.BIN 保存成功！",
-  "dreamcastGdiFile": "GDI 文件",
-  "dreamcastGdiLoad": "加载 GDI",
+  "dreamcastDcpTab": "Apply DCP",
+  "dreamcastIpbinTab": "IP.BIN Editor",
+  "dreamcastGdiTab": "GDI Info",
+  "dreamcastDiscDir": "Disc Directory",
+  "dreamcastDcpFile": "DCP Patch File",
+  "dreamcastOutputDir": "Output Directory",
+  "dreamcastApplyButton": "Apply DCP Patch",
+  "dreamcastApplySuccess": "DCP patch applied successfully!",
+  "dreamcastIpbinFile": "IP.BIN or GDI File",
+  "dreamcastIpbinLoad": "Load",
+  "dreamcastIpbinSave": "Save Changes",
+  "dreamcastIpbinTitle": "Game Title",
+  "dreamcastIpbinProductNumber": "Product Number",
+  "dreamcastIpbinVersion": "Version",
+  "dreamcastIpbinDate": "Release Date",
+  "dreamcastIpbinRegion": "Region",
+  "dreamcastIpbinRegionJapan": "Japan",
+  "dreamcastIpbinRegionUSA": "USA",
+  "dreamcastIpbinRegionEurope": "Europe",
+  "dreamcastIpbinRegionFree": "Region Free",
+  "dreamcastIpbinVga": "Enable VGA",
+  "dreamcastIpbinSaveSuccess": "IP.BIN saved successfully!",
+  "dreamcastGdiFile": "GDI File",
+  "dreamcastGdiLoad": "Load GDI",
   "dreamcastGdiTracks": "轨道列表",
   "dreamcastGdiTrackNum": "轨道",
   "dreamcastGdiTrackLba": "LBA",
-  "dreamcastGdiTrackType": "类型",
-  "dreamcastGdiTrackSize": "扇区大小",
-  "dreamcastGdiTrackFile": "文件",
-  "dreamcastGdiAudio": "音频",
-  "dreamcastGdiData": "数据",
-  "dreamcastSameFolder": "与源文件相同文件夹",
+  "dreamcastGdiTrackType": "Type",
+  "dreamcastGdiTrackSize": "Sector Size",
+  "dreamcastGdiTrackFile": "File",
+  "dreamcastGdiAudio": "Audio",
+  "dreamcastGdiData": "Data",
+  "dreamcastSameFolder": "Same folder as source",
   "dreamcastBrowse": "浏览",
-  "onlineFeaturesSection": "在线功能",
-  "onlineFeaturesSub": "所有功能均为可选启用。未经您的同意，不会收集任何数据。",
-  "autoUpdateTitle": "自动检查更新",
-  "autoUpdateSub": "启动时在 GitHub 上检查新版本",
-  "autoUpdateCheckNow": "立即检查",
-  "autoUpdateUpToDate": "已是最新版本（{version}）",
+  "onlineFeaturesSection": "Online Features",
+  "onlineFeaturesSub": "All features are opt-in. No data is collected without your consent.",
+  "autoUpdateTitle": "Check for updates automatically",
+  "autoUpdateSub": "Checks GitHub on startup for a newer version",
+  "autoUpdateCheckNow": "Check now",
+  "autoUpdateUpToDate": "You're up to date ({version})",
   "@autoUpdateUpToDate": {
     "placeholders": {
       "version": {
@@ -187,7 +187,7 @@
       }
     }
   },
-  "autoUpdateAvailable": "有可用更新：v{version}",
+  "autoUpdateAvailable": "Update available: v{version}",
   "@autoUpdateAvailable": {
     "placeholders": {
       "version": {
@@ -195,15 +195,15 @@
       }
     }
   },
-  "autoUpdateDownload": "下载",
+  "autoUpdateDownload": "Download",
   "raSection": "RetroAchievements",
-  "raEnabledTitle": "启用 RetroAchievements 哈希检查",
-  "raEnabledSub": "加载前检查您的 ROM 是否受支持",
-  "raUsername": "用户名",
-  "raApiKey": "API 密钥",
-  "raApiKeyHint": "在 retroachievements.org/settings 获取您的密钥",
-  "raHashChecking": "正在检查哈希值...",
-  "raHashFound": "✅ 已支持 — {title}（{count} 个成就）",
+  "raEnabledTitle": "Enable RetroAchievements hash check",
+  "raEnabledSub": "Checks if your ROM is supported before loading",
+  "raUsername": "Username",
+  "raApiKey": "API Key",
+  "raApiKeyHint": "Get your key at retroachievements.org/settings",
+  "raHashChecking": "Checking hash...",
+  "raHashFound": "✅ Supported — {title} ({count} achievements)",
   "@raHashFound": {
     "placeholders": {
       "title": {
@@ -214,8 +214,8 @@
       }
     }
   },
-  "raHashNotFound": "⚠️ 在 RetroAchievements 上未找到",
-  "raHashError": "错误：{msg}",
+  "raHashNotFound": "⚠️ Not found on RetroAchievements",
+  "raHashError": "Error: {msg}",
   "@raHashError": {
     "placeholders": {
       "msg": {
@@ -223,202 +223,351 @@
       }
     }
   },
-  "raViewGame": "在 RA 上查看",
-  "raSaveCredentials": "保存",
-  "navPatch": "应用补丁",
-  "navTools": "工具",
-  "navPlugins": "插件",
-  "mediaTypeTitle": "无法识别媒体类型",
-  "mediaTypeBody": "无法识别媒体类型：这个游戏是 CD 还是 DVD？\n\n文件：{file}",
+  "raViewGame": "View on RA",
+  "raSaveCredentials": "Save",
+  "navPatch": "Patch",
+  "navTools": "Tools",
+  "navPlugins": "Plugins",
+  "mediaTypeTitle": "Unrecognized Media Type",
+  "mediaTypeBody": "Unrecognized Media Type: Is this game a CD or DVD?\n\nFile: {file}",
+  "@mediaTypeBody": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
   "mediaCd": "CD",
   "mediaDvd": "DVD",
-  "commonCancel": "取消",
-  "commonOk": "确定",
-  "commonAdd": "添加",
-  "commonDone": "完成",
-  "commonApply": "应用",
-  "commonRemove": "移除",
-  "commonInstall": "安装",
-  "pluginsTabInstalled": "已安装插件 📦",
-  "pluginsTabStore": "插件商店 🌐🛒",
-  "pluginsTabStudio": "创建 / 工作室 🛠️",
-  "pluginsDropTitle": "将 .orplug 压缩包拖放到这里",
-  "pluginsDropSubtitle": "安装自定义 ROM 工具、扩展和格式",
-  "pluginsBrowse": "浏览 .orplug 文件",
-  "pluginsInstalledHeading": "已安装插件（{count}）",
-  "pluginsEmptyTitle": "尚未安装任何插件",
-  "pluginsEmptyBody": "将 .orplug 包拖放到上方，或到插件商店浏览社区插件。",
-  "pluginsUninstall": "卸载",
-  "pluginsUninstallTitle": "卸载插件",
-  "pluginsUninstallBody": "确定要卸载“{name}”（{id}）吗？",
-  "pluginsInstallFailed": "安装失败",
-  "pluginsAlreadyInstalled": "{name} 已经安装过了",
-  "pluginsInstalledToast": "已安装 {name}",
-  "storeTitle": "插件市集",
-  "storeRefresh": "刷新目录",
-  "storeSubtitleLive": "由商店实时提供的官方与社区插件。",
-  "storeSubtitleCached": "当前显示上次缓存的目录，重新连接后可更新。",
-  "storeBadgeLive": "在线",
-  "storeBadgeOffline": "离线",
-  "storeSearchHint": "搜索插件、发布者、转换路径…",
-  "storeAll": "全部",
-  "storeOfflineTitle": "ROMéo 离线了",
-  "storeEmptyTitle": "还没有任何插件上架",
-  "storeNoMatchTitle": "没有符合筛选条件的插件",
-  "storeOfflineBody": "无法连接到商店，且本地没有缓存。请检查网络连接后刷新。",
-  "storeEmptyBody": "敬请期待，新插件会陆续上架。",
-  "storeNoMatchBody": "换个关键词或分类试试。",
-  "storeVerifiedPublisher": "已验证发布者",
-  "storeInstalled": "已安装",
-  "storeByPublisher": "作者：{name}",
-  "storeCoreMin": "核心 ≥ {version}",
-  "deepLinkTitle": "要从链接安装插件吗？",
-  "deepLinkBody": "有 openrom:// 链接请求安装插件，请先确认内容再继续。",
-  "deepLinkPlugin": "插件",
-  "deepLinkId": "标识符",
-  "deepLinkVersion": "版本",
-  "deepLinkPublisher": "发布者",
-  "deepLinkCategory": "分类",
-  "deepLinkRequiresCore": "需要核心版本",
-  "deepLinkVerified": "安装前会使用商店公布的 SHA-256 校验下载文件。",
-  "deepLinkNotFoundTitle": "找不到插件",
-  "deepLinkNotFoundBody": "商店目录中找不到标识符为“{id}”的插件。",
-  "studioTitle": "可视化 .orplug 制作工作室",
-  "studioIntro": "创建新插件，或打开现有的项目文件夹。",
-  "studioNew": "新建",
-  "studioOpen": "打开",
-  "studioRescan": "重新扫描项目",
-  "studioIdentity": "基本信息",
-  "studioPluginId": "插件标识符",
-  "studioDisplayName": "显示名称",
-  "studioVersion": "版本（SemVer）",
-  "studioMinCore": "最低核心版本",
-  "studioCategory": "分类",
-  "studioPublisher": "发布者",
-  "studioPublisherId": "发布者标识符",
-  "studioPublisherName": "发布者名称",
-  "studioVerified": "已验证",
-  "studioVerifiedTip": "已验证的发布者会在商店显示蓝色勾选标记。",
-  "studioDescriptionRoutes": "说明与转换路径",
-  "studioDescription": "说明",
-  "studioRouteHint": "添加转换路径（例如 ISO -> WUA）",
-  "studioNoRoutes": "尚未添加任何转换路径。",
-  "studioBinaries": "可执行文件",
-  "studioBinariesHelp": "每个平台附加一个可执行文件。保存或构建时会自动计算 SHA-256。",
-  "studioNotSet": "未设置",
-  "studioReplace": "替换",
-  "studioExecutionArgs": "执行参数",
-  "studioPlaceholders": "预留字段：bin（可执行文件）、in（输入）、out（输出）、outdir（输出目录）、cue（cue 文件）",
-  "studioArgsTemplate": "参数模板",
-  "studioBuild": "构建",
-  "studioSaveManifest": "保存清单",
-  "studioValidate": "校验",
-  "studioBuildPackage": "构建 .orplug",
-  "studioLastBuild": "上次构建：{path} · sha256 {sha}",
-  "studioCopyMarketplace": "复制市集 JSON",
-  "studioMarketplaceCopied": "已复制市集 JSON",
-  "studioManifestValid": "清单有效",
-  "studioValidationIssues": "校验问题",
-  "studioBuiltTitle": "已构建 .orplug",
-  "studioArchive": "压缩包",
-  "studioSize": "大小",
-  "studioSizeBytes": "{bytes} 字节",
-  "studioMarketplaceEntry": "商店条目（粘贴到商店目录）：",
-  "studioCopyJson": "复制 JSON",
-  "studioNewProjectTitle": "选择插件的创建位置",
-  "studioOpenProjectTitle": "选择插件项目文件夹",
-  "studioDefaultName": "我的工具",
-  "themeEditorTitle": "主题编辑器",
-  "themeCustomSkin": "自定义外观",
-  "themeCustomTheme": "自定义主题",
-  "themeThemeName": "主题名称",
-  "themePickWallpaper": "选择壁纸（GIF、PNG、JPG 或 WebP）",
-  "themePickDropzone": "选择拖放区插图（GIF 或 PNG）",
-  "themePickFont": "选择界面字体（TTF 或 OTF）",
-  "themeImportSkinBundle": "导入 .orskin 外观包",
-  "themeExportSkinBundle": "导出 .orskin 外观包",
-  "themeImportShort": "导入 .orskin",
-  "themeExportShort": "导出 .orskin",
-  "themeImportFailed": "导入失败：{error}",
-  "themeExportFailed": "导出失败：{error}",
-  "themeImported": "已导入外观“{name}”",
-  "themeExported": "已导出 {path}",
-  "themePickColor": "选择颜色",
-  "themeHue": "色相",
-  "themeSaturation": "饱和度",
-  "themeValue": "明度",
-  "themeColors": "颜色",
-  "themeBackground": "背景",
-  "themeSurface": "表面色",
-  "themeAccent": "强调色",
-  "themeTextPrimary": "主要文字",
-  "themeTextSecondary": "次要文字",
-  "themeSidebarBg": "侧边栏背景",
-  "themeCardBg": "卡片背景",
-  "themeTerminalBg": "终端背景",
-  "themeTerminalText": "终端文字",
-  "themeGeometry": "外观几何与壁纸",
-  "themeCornerRadius": "圆角半径",
-  "themeWallpaperOpacity": "壁纸不透明度",
-  "themeWallpaperBlur": "壁纸模糊",
-  "themeChooseWallpaper": "选择壁纸",
-  "themeChooseDropzone": "选择拖放区",
-  "themeChooseFont": "选择字体",
-  "themeSidebarTabs": "侧边栏标签页",
-  "themeSidebarTabsHelp": "取消勾选即可从侧边栏和导航中隐藏。",
-  "themeSaveTheme": "保存主题",
-  "themeLivePreview": "实时预览",
-  "settingsLanguage": "语言",
-  "settingsAudioCodec": "CD 音频编码（CHD）",
-  "settingsCodecFlac": "无损（FLAC）－推荐",
-  "settingsCodecVorbis": "最大压缩（Vorbis）",
-  "settingsVerifySub": "对新建的 CHD 文件运行 chdman verify",
-  "settingsSameFolder": "与源文件相同的文件夹",
-  "settingsSelectDir": "选择文件夹…",
-  "settingsThemeSystem": "跟随系统",
-  "settingsThemeLight": "浅色",
-  "settingsThemeDark": "深色",
-  "settingsUpdateError": "检查更新时出错",
-  "settingsRaSaved": "已保存 RetroAchievements 凭据",
+  "commonCancel": "Cancel",
+  "commonOk": "OK",
+  "commonAdd": "Add",
+  "commonDone": "Done",
+  "commonApply": "Apply",
+  "commonRemove": "Remove",
+  "commonInstall": "Install",
+  "pluginsTabInstalled": "Installed Plugins 📦",
+  "pluginsTabStore": "Plugin Store 🌐🛒",
+  "pluginsTabStudio": "Create / Studio 🛠️",
+  "pluginsDropTitle": "Drag & Drop .orplug Archive Here",
+  "pluginsDropSubtitle": "Install custom ROM tools, extensions, and formats",
+  "pluginsBrowse": "Browse .orplug File",
+  "pluginsInstalledHeading": "Installed Plugins ({count})",
+  "@pluginsInstalledHeading": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pluginsEmptyTitle": "No Plugins Installed Yet",
+  "pluginsEmptyBody": "Drop an .orplug package above or explore community plugins in the Plugin Store.",
+  "pluginsUninstall": "Uninstall",
+  "pluginsUninstallTitle": "Uninstall Plugin",
+  "pluginsUninstallBody": "Are you sure you want to uninstall \"{name}\" ({id})?",
+  "@pluginsUninstallBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "pluginsInstallFailed": "Install failed",
+  "pluginsAlreadyInstalled": "{name} is already installed",
+  "@pluginsAlreadyInstalled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pluginsInstalledToast": "{name} installed",
+  "@pluginsInstalledToast": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "storeTitle": "Plugin Marketplace",
+  "storeRefresh": "Refresh catalogue",
+  "storeSubtitleLive": "Official and community plugins, served live from the store.",
+  "storeSubtitleCached": "Showing the last cached catalogue. Reconnect to refresh.",
+  "storeBadgeLive": "Live",
+  "storeBadgeOffline": "Offline",
+  "storeSearchHint": "Search plugins, publishers, routes…",
+  "storeAll": "All",
+  "storeOfflineTitle": "ROMéo is offline",
+  "storeEmptyTitle": "No plugins published yet",
+  "storeNoMatchTitle": "No plugins match your filters",
+  "storeOfflineBody": "The store could not be reached and no cached copy exists. Check your connection and refresh.",
+  "storeEmptyBody": "Check back soon — new plugins land often.",
+  "storeNoMatchBody": "Try a different search term or category.",
+  "storeVerifiedPublisher": "Verified publisher",
+  "storeInstalled": "Installed",
+  "storeByPublisher": "by {name}",
+  "@storeByPublisher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "storeCoreMin": "core ≥ {version}",
+  "@storeCoreMin": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "deepLinkTitle": "Install plugin from link?",
+  "deepLinkBody": "An openrom:// link wants to install a plugin. Review it before continuing.",
+  "deepLinkPlugin": "Plugin",
+  "deepLinkId": "ID",
+  "deepLinkVersion": "Version",
+  "deepLinkPublisher": "Publisher",
+  "deepLinkCategory": "Category",
+  "deepLinkRequiresCore": "Requires core",
+  "deepLinkVerified": "The download is verified against the published SHA-256 before installation.",
+  "deepLinkNotFoundTitle": "Plugin not found",
+  "deepLinkNotFoundBody": "No plugin with the id \"{id}\" was found in the store catalogue.",
+  "@deepLinkNotFoundBody": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "studioTitle": "Visual .orplug Builder Studio",
+  "studioIntro": "Start a new plugin or open an existing project folder.",
+  "studioNew": "New",
+  "studioOpen": "Open",
+  "studioRescan": "Rescan project",
+  "studioIdentity": "Identity",
+  "studioPluginId": "Plugin ID",
+  "studioDisplayName": "Display Name",
+  "studioVersion": "Version (SemVer)",
+  "studioMinCore": "Min Core Version",
+  "studioCategory": "Category",
+  "studioPublisher": "Publisher",
+  "studioPublisherId": "Publisher ID",
+  "studioPublisherName": "Publisher Name",
+  "studioVerified": "Verified",
+  "studioVerifiedTip": "Verified publishers get the blue check in the store",
+  "studioDescriptionRoutes": "Description & Routes",
+  "studioDescription": "Description",
+  "studioRouteHint": "Add route (e.g. ISO -> WUA)",
+  "studioNoRoutes": "No routes yet.",
+  "studioBinaries": "Binaries",
+  "studioBinariesHelp": "Attach one executable per platform. SHA-256 hashes are computed automatically when you save or build.",
+  "studioNotSet": "not set",
+  "studioReplace": "Replace",
+  "studioExecutionArgs": "Execution Arguments",
+  "studioPlaceholders": "Placeholders: bin (executable) · in (input) · out (output) · outdir (output dir) · cue (cue sheet)",
+  "studioArgsTemplate": "Argument template",
+  "studioBuild": "Build",
+  "studioSaveManifest": "Save Manifest",
+  "studioValidate": "Validate",
+  "studioBuildPackage": "Build .orplug",
+  "studioLastBuild": "Last build: {path} · sha256 {sha}",
+  "@studioLastBuild": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "studioCopyMarketplace": "Copy marketplace JSON",
+  "studioMarketplaceCopied": "Marketplace JSON copied",
+  "studioManifestValid": "Manifest is valid",
+  "studioValidationIssues": "Validation issues",
+  "studioBuiltTitle": "Built .orplug",
+  "studioArchive": "Archive",
+  "studioSize": "Size",
+  "studioSizeBytes": "{bytes} bytes",
+  "@studioSizeBytes": {
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "studioMarketplaceEntry": "Marketplace entry (paste into the store catalogue):",
+  "studioCopyJson": "Copy JSON",
+  "studioNewProjectTitle": "Select where to create the plugin",
+  "studioOpenProjectTitle": "Select a plugin project folder",
+  "studioDefaultName": "My Tool",
+  "themeEditorTitle": "Theme Editor",
+  "themeCustomSkin": "Custom Skin",
+  "themeCustomTheme": "Custom Theme",
+  "themeThemeName": "Theme Name",
+  "themePickWallpaper": "Choose a wallpaper (GIF, PNG, JPG or WebP)",
+  "themePickDropzone": "Choose a dropzone illustration (GIF or PNG)",
+  "themePickFont": "Choose a UI font (TTF or OTF)",
+  "themeImportSkinBundle": "Import an .orskin bundle",
+  "themeExportSkinBundle": "Export .orskin bundle",
+  "themeImportShort": "Import .orskin",
+  "themeExportShort": "Export .orskin",
+  "themeImportFailed": "Import failed: {error}",
+  "@themeImportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeExportFailed": "Export failed: {error}",
+  "@themeExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeImported": "Imported skin \"{name}\"",
+  "@themeImported": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "themeExported": "Exported {path}",
+  "@themeExported": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "themePickColor": "Pick Color",
+  "themeHue": "Hue",
+  "themeSaturation": "Saturation",
+  "themeValue": "Value",
+  "themeColors": "Colors",
+  "themeBackground": "Background",
+  "themeSurface": "Surface",
+  "themeAccent": "Accent",
+  "themeTextPrimary": "Text Primary",
+  "themeTextSecondary": "Text Secondary",
+  "themeSidebarBg": "Sidebar Background",
+  "themeCardBg": "Card Background",
+  "themeTerminalBg": "Terminal Background",
+  "themeTerminalText": "Terminal Text",
+  "themeGeometry": "Skin Geometry & Wallpaper",
+  "themeCornerRadius": "Corner Radius",
+  "themeWallpaperOpacity": "Wallpaper Opacity",
+  "themeWallpaperBlur": "Wallpaper Blur",
+  "themeChooseWallpaper": "Choose Wallpaper",
+  "themeChooseDropzone": "Choose Dropzone",
+  "themeChooseFont": "Choose Font",
+  "themeSidebarTabs": "Sidebar Tabs",
+  "themeSidebarTabsHelp": "Uncheck a tab to hide it from the sidebar and navigation.",
+  "themeSaveTheme": "Save Theme",
+  "themeLivePreview": "Live Preview",
+  "settingsLanguage": "Language",
+  "settingsAudioCodec": "CD Audio Codec (CHD)",
+  "settingsCodecFlac": "Lossless (FLAC) - Recommended",
+  "settingsCodecVorbis": "Max Compression (Vorbis)",
+  "settingsVerifySub": "Runs chdman verify on newly created CHD files",
+  "settingsSameFolder": "Same folder as source file",
+  "settingsSelectDir": "Select directory...",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsUpdateError": "Error checking for updates",
+  "settingsRaSaved": "RetroAchievements credentials saved",
   "settingsHasheous": "Hasheous",
-  "settingsHasheousEnable": "启用 Hasheous 哈希查询",
-  "settingsHasheousSub": "将 ROM 的 SHA-1 发送至 hasheous.org 来识别游戏。默认关闭，仅发送文件哈希。",
-  "batchTitle": "批量处理完成！🎉",
-  "batchSaved": "你刚刚节省了 {amount}",
-  "batchSavedDetail": "（缩减 {percent}）共 {count} 个游戏！",
-  "batchAllProcessed": "全部 {count} 个文件处理完成！",
-  "batchAwesome": "太棒了！",
-  "hasheousUnknown": "未知标题",
-  "hasheousMore": "另有 {count} 个来源",
-  "hasheousVerifiedIn": "已在 {source} 验证",
-  "hasheousNoMatch": "在保存数据库中找不到匹配项。",
-  "toolsTabCue": "CUE 编辑器",
-  "toolsTabRenamer": "ROM 重命名",
-  "toolsTab1g1r": "1G1R 清理器",
-  "toolsTabHasher": "ROM 哈希计算",
-  "toolsWatchTitle": "监视文件夹",
-  "toolsHasherIntro": "单次流式计算 CRC32、MD5、SHA-1 和 SHA-256。",
-  "toolsHasherDrop": "将 ROM 拖放到这里，或点击浏览",
-  "toolsChooseFile": "选择文件",
-  "toolsComputeHashes": "计算哈希",
-  "toolsResults": "结果",
-  "toolsCopyAll": "全部复制",
-  "toolsFileSize": "文件大小",
-  "toolsIdentifying": "识别中…",
-  "toolsIdentifyGame": "识别游戏（Hasheous）",
-  "toolsHasheousHint": "会将文件的 SHA-1 发送至 hasheous.org。请在“设置 → 在线功能”中启用。",
-  "toolsWatchStopped": "已停止监视。",
-  "toolsWatchNeedFolders": "请先选择输入和输出文件夹。",
-  "toolsChooseFolder": "选择文件夹…",
-  "toolsWatchIntro": "自动转换进入文件夹的 ROM。",
-  "toolsInputFolder": "输入文件夹",
-  "toolsOutputFolder": "输出文件夹",
-  "toolsTargetFormat": "目标格式",
-  "toolsDeleteSource": "转换后删除源文件",
-  "toolsStopWatching": "停止监视",
-  "toolsStartWatching": "开始监视",
-  "toolsActive": "运行中",
-  "toolsLiveLog": "实时日志",
-  "toolsNoActivity": "尚无活动。",
-  "themeSaved": "已保存主题“{name}”！"
+  "settingsHasheousEnable": "Enable Hasheous hash lookup",
+  "settingsHasheousSub": "Identifies games by transmitting the ROM SHA-1 to hasheous.org. Off by default; only your file hash is sent.",
+  "batchTitle": "Batch Complete! 🎉",
+  "batchSaved": "You just saved {amount}",
+  "@batchSaved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "batchSavedDetail": "({percent} reduction) across {count} {count, plural, =1{game} other{games}}!",
+  "@batchSavedDetail": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAllProcessed": "All {count} {count, plural, =1{file} other{files}} processed successfully!",
+  "@batchAllProcessed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAwesome": "Awesome!",
+  "hasheousUnknown": "Unknown title",
+  "hasheousMore": "+ {count} more",
+  "@hasheousMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hasheousVerifiedIn": "Verified in {source}",
+  "@hasheousVerifiedIn": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "hasheousNoMatch": "No match found in preservation databases.",
+  "toolsTabCue": "CUE Editor",
+  "toolsTabRenamer": "ROM Renamer",
+  "toolsTab1g1r": "1G1R Cleaner",
+  "toolsTabHasher": "ROM Hasher",
+  "toolsWatchTitle": "Watch Folder",
+  "toolsHasherIntro": "Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.",
+  "toolsHasherDrop": "Drag & drop a ROM here, or click to browse",
+  "toolsChooseFile": "Choose File",
+  "toolsComputeHashes": "Compute Hashes",
+  "toolsResults": "Results",
+  "toolsCopyAll": "Copy All",
+  "toolsFileSize": "File Size",
+  "toolsIdentifying": "Identifying…",
+  "toolsIdentifyGame": "Identify Game (Hasheous)",
+  "toolsHasheousHint": "Sends the file SHA-1 to hasheous.org. Enable in Settings → Online Features.",
+  "toolsWatchStopped": "Watch stopped.",
+  "toolsWatchNeedFolders": "Select both an input and an output folder first.",
+  "toolsChooseFolder": "Choose folder…",
+  "toolsWatchIntro": "Automatically convert ROMs as they land in a folder.",
+  "toolsInputFolder": "Input Folder",
+  "toolsOutputFolder": "Output Folder",
+  "toolsTargetFormat": "Target Format",
+  "toolsDeleteSource": "Delete source after conversion",
+  "toolsStopWatching": "Stop Watching",
+  "toolsStartWatching": "Start Watching",
+  "toolsActive": "Active",
+  "toolsLiveLog": "Live Log",
+  "toolsNoActivity": "No activity yet.",
+  "themeSaved": "Theme \"{name}\" saved!",
+  "@themeSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
