@@ -9,7 +9,7 @@ void main() {
     test('AppVersion.current returns dynamic current version string', () {
       final version = AppVersion.current;
       expect(version, isNotEmpty);
-      expect(version, equals('4.0.0'));
+      expect(version, equals('4.1.0'));
     });
   });
 }
