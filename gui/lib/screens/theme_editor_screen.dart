@@ -54,7 +54,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   /// Applies the in-progress edits to the live theme service.
   ThemeConfig _currentEdits() => _edited.copyWith(
         name: _nameController.text.trim().isEmpty
-            ? _l10n.themeCustomSkin
+            ? 'Custom Skin'
             : _nameController.text.trim(),
       );
 
@@ -726,7 +726,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       onPressed: () async {
                         final saved = _edited.copyWith(
                           name: _nameController.text.trim().isEmpty
-                              ? _l10n.themeCustomTheme
+                              ? 'Custom Theme'
                               : _nameController.text.trim(),
                         );
                         await widget.themeService.saveCustomTheme(saved);

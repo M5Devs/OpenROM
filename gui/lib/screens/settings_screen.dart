@@ -297,7 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return DropdownMenuItem<Locale>(
                     value: locale,
                     child: Text(
-                      LocaleProvider.getNativeName(locale.languageCode),
+                      LocaleProvider.getNativeName(locale),
                       style: TextStyle(color: theme.textPrimary),
                     ),
                   );
