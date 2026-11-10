@@ -986,6 +986,1182 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get raSaveCredentials;
+
+  /// No description provided for @navPatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Patch'**
+  String get navPatch;
+
+  /// No description provided for @navTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get navTools;
+
+  /// No description provided for @navPlugins.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugins'**
+  String get navPlugins;
+
+  /// No description provided for @mediaTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized Media Type'**
+  String get mediaTypeTitle;
+
+  /// No description provided for @mediaTypeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized Media Type: Is this game a CD or DVD?\n\nFile: {file}'**
+  String mediaTypeBody(String file);
+
+  /// No description provided for @mediaCd.
+  ///
+  /// In en, this message translates to:
+  /// **'CD'**
+  String get mediaCd;
+
+  /// No description provided for @mediaDvd.
+  ///
+  /// In en, this message translates to:
+  /// **'DVD'**
+  String get mediaDvd;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @commonAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get commonAdd;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @commonApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get commonApply;
+
+  /// No description provided for @commonRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get commonRemove;
+
+  /// No description provided for @commonInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get commonInstall;
+
+  /// No description provided for @pluginsTabInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed Plugins 📦'**
+  String get pluginsTabInstalled;
+
+  /// No description provided for @pluginsTabStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Store 🌐🛒'**
+  String get pluginsTabStore;
+
+  /// No description provided for @pluginsTabStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Create / Studio 🛠️'**
+  String get pluginsTabStudio;
+
+  /// No description provided for @pluginsDropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag & Drop .orplug Archive Here'**
+  String get pluginsDropTitle;
+
+  /// No description provided for @pluginsDropSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Install custom ROM tools, extensions, and formats'**
+  String get pluginsDropSubtitle;
+
+  /// No description provided for @pluginsBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse .orplug File'**
+  String get pluginsBrowse;
+
+  /// No description provided for @pluginsInstalledHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed Plugins ({count})'**
+  String pluginsInstalledHeading(int count);
+
+  /// No description provided for @pluginsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Plugins Installed Yet'**
+  String get pluginsEmptyTitle;
+
+  /// No description provided for @pluginsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop an .orplug package above or explore community plugins in the Plugin Store.'**
+  String get pluginsEmptyBody;
+
+  /// No description provided for @pluginsUninstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Uninstall'**
+  String get pluginsUninstall;
+
+  /// No description provided for @pluginsUninstallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uninstall Plugin'**
+  String get pluginsUninstallTitle;
+
+  /// No description provided for @pluginsUninstallBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to uninstall \"{name}\" ({id})?'**
+  String pluginsUninstallBody(String name, String id);
+
+  /// No description provided for @pluginsInstallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Install failed'**
+  String get pluginsInstallFailed;
+
+  /// No description provided for @pluginsAlreadyInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already installed'**
+  String pluginsAlreadyInstalled(String name);
+
+  /// No description provided for @pluginsInstalledToast.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} installed'**
+  String pluginsInstalledToast(String name);
+
+  /// No description provided for @storeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Marketplace'**
+  String get storeTitle;
+
+  /// No description provided for @storeRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh catalogue'**
+  String get storeRefresh;
+
+  /// No description provided for @storeSubtitleLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Official and community plugins, served live from the store.'**
+  String get storeSubtitleLive;
+
+  /// No description provided for @storeSubtitleCached.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the last cached catalogue. Reconnect to refresh.'**
+  String get storeSubtitleCached;
+
+  /// No description provided for @storeBadgeLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get storeBadgeLive;
+
+  /// No description provided for @storeBadgeOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get storeBadgeOffline;
+
+  /// No description provided for @storeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search plugins, publishers, routes…'**
+  String get storeSearchHint;
+
+  /// No description provided for @storeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get storeAll;
+
+  /// No description provided for @storeOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ROMéo is offline'**
+  String get storeOfflineTitle;
+
+  /// No description provided for @storeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugins published yet'**
+  String get storeEmptyTitle;
+
+  /// No description provided for @storeNoMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugins match your filters'**
+  String get storeNoMatchTitle;
+
+  /// No description provided for @storeOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The store could not be reached and no cached copy exists. Check your connection and refresh.'**
+  String get storeOfflineBody;
+
+  /// No description provided for @storeEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back soon — new plugins land often.'**
+  String get storeEmptyBody;
+
+  /// No description provided for @storeNoMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term or category.'**
+  String get storeNoMatchBody;
+
+  /// No description provided for @storeVerifiedPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified publisher'**
+  String get storeVerifiedPublisher;
+
+  /// No description provided for @storeInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed'**
+  String get storeInstalled;
+
+  /// No description provided for @storeByPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String storeByPublisher(String name);
+
+  /// No description provided for @storeCoreMin.
+  ///
+  /// In en, this message translates to:
+  /// **'core ≥ {version}'**
+  String storeCoreMin(String version);
+
+  /// No description provided for @deepLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Install plugin from link?'**
+  String get deepLinkTitle;
+
+  /// No description provided for @deepLinkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An openrom:// link wants to install a plugin. Review it before continuing.'**
+  String get deepLinkBody;
+
+  /// No description provided for @deepLinkPlugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin'**
+  String get deepLinkPlugin;
+
+  /// No description provided for @deepLinkId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get deepLinkId;
+
+  /// No description provided for @deepLinkVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get deepLinkVersion;
+
+  /// No description provided for @deepLinkPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher'**
+  String get deepLinkPublisher;
+
+  /// No description provided for @deepLinkCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get deepLinkCategory;
+
+  /// No description provided for @deepLinkRequiresCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires core'**
+  String get deepLinkRequiresCore;
+
+  /// No description provided for @deepLinkVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'The download is verified against the published SHA-256 before installation.'**
+  String get deepLinkVerified;
+
+  /// No description provided for @deepLinkNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin not found'**
+  String get deepLinkNotFoundTitle;
+
+  /// No description provided for @deepLinkNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No plugin with the id \"{id}\" was found in the store catalogue.'**
+  String deepLinkNotFoundBody(String id);
+
+  /// No description provided for @studioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual .orplug Builder Studio'**
+  String get studioTitle;
+
+  /// No description provided for @studioIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new plugin or open an existing project folder.'**
+  String get studioIntro;
+
+  /// No description provided for @studioNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get studioNew;
+
+  /// No description provided for @studioOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get studioOpen;
+
+  /// No description provided for @studioRescan.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan project'**
+  String get studioRescan;
+
+  /// No description provided for @studioIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get studioIdentity;
+
+  /// No description provided for @studioPluginId.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin ID'**
+  String get studioPluginId;
+
+  /// No description provided for @studioDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get studioDisplayName;
+
+  /// No description provided for @studioVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version (SemVer)'**
+  String get studioVersion;
+
+  /// No description provided for @studioMinCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Core Version'**
+  String get studioMinCore;
+
+  /// No description provided for @studioCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get studioCategory;
+
+  /// No description provided for @studioPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher'**
+  String get studioPublisher;
+
+  /// No description provided for @studioPublisherId.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher ID'**
+  String get studioPublisherId;
+
+  /// No description provided for @studioPublisherName.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher Name'**
+  String get studioPublisherName;
+
+  /// No description provided for @studioVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get studioVerified;
+
+  /// No description provided for @studioVerifiedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified publishers get the blue check in the store'**
+  String get studioVerifiedTip;
+
+  /// No description provided for @studioDescriptionRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Description & Routes'**
+  String get studioDescriptionRoutes;
+
+  /// No description provided for @studioDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get studioDescription;
+
+  /// No description provided for @studioRouteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add route (e.g. ISO -> WUA)'**
+  String get studioRouteHint;
+
+  /// No description provided for @studioNoRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'No routes yet.'**
+  String get studioNoRoutes;
+
+  /// No description provided for @studioBinaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Binaries'**
+  String get studioBinaries;
+
+  /// No description provided for @studioBinariesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach one executable per platform. SHA-256 hashes are computed automatically when you save or build.'**
+  String get studioBinariesHelp;
+
+  /// No description provided for @studioNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'not set'**
+  String get studioNotSet;
+
+  /// No description provided for @studioReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get studioReplace;
+
+  /// No description provided for @studioExecutionArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution Arguments'**
+  String get studioExecutionArgs;
+
+  /// No description provided for @studioPlaceholders.
+  ///
+  /// In en, this message translates to:
+  /// **'Placeholders: bin (executable) · in (input) · out (output) · outdir (output dir) · cue (cue sheet)'**
+  String get studioPlaceholders;
+
+  /// No description provided for @studioArgsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Argument template'**
+  String get studioArgsTemplate;
+
+  /// No description provided for @studioBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get studioBuild;
+
+  /// No description provided for @studioSaveManifest.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Manifest'**
+  String get studioSaveManifest;
+
+  /// No description provided for @studioValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate'**
+  String get studioValidate;
+
+  /// No description provided for @studioBuildPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Build .orplug'**
+  String get studioBuildPackage;
+
+  /// No description provided for @studioLastBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Last build: {path} · sha256 {sha}'**
+  String studioLastBuild(String path, String sha);
+
+  /// No description provided for @studioCopyMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy marketplace JSON'**
+  String get studioCopyMarketplace;
+
+  /// No description provided for @studioMarketplaceCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace JSON copied'**
+  String get studioMarketplaceCopied;
+
+  /// No description provided for @studioManifestValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Manifest is valid'**
+  String get studioManifestValid;
+
+  /// No description provided for @studioValidationIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation issues'**
+  String get studioValidationIssues;
+
+  /// No description provided for @studioBuiltTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Built .orplug'**
+  String get studioBuiltTitle;
+
+  /// No description provided for @studioArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get studioArchive;
+
+  /// No description provided for @studioSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get studioSize;
+
+  /// No description provided for @studioSizeBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} bytes'**
+  String studioSizeBytes(int bytes);
+
+  /// No description provided for @studioMarketplaceEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace entry (paste into the store catalogue):'**
+  String get studioMarketplaceEntry;
+
+  /// No description provided for @studioCopyJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy JSON'**
+  String get studioCopyJson;
+
+  /// No description provided for @studioNewProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select where to create the plugin'**
+  String get studioNewProjectTitle;
+
+  /// No description provided for @studioOpenProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a plugin project folder'**
+  String get studioOpenProjectTitle;
+
+  /// No description provided for @studioDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'My Tool'**
+  String get studioDefaultName;
+
+  /// No description provided for @themeEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Editor'**
+  String get themeEditorTitle;
+
+  /// No description provided for @themeCustomSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Skin'**
+  String get themeCustomSkin;
+
+  /// No description provided for @themeCustomTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Theme'**
+  String get themeCustomTheme;
+
+  /// No description provided for @themeThemeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Name'**
+  String get themeThemeName;
+
+  /// No description provided for @themePickWallpaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a wallpaper (GIF, PNG, JPG or WebP)'**
+  String get themePickWallpaper;
+
+  /// No description provided for @themePickDropzone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a dropzone illustration (GIF or PNG)'**
+  String get themePickDropzone;
+
+  /// No description provided for @themePickFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a UI font (TTF or OTF)'**
+  String get themePickFont;
+
+  /// No description provided for @themeImportSkinBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import an .orskin bundle'**
+  String get themeImportSkinBundle;
+
+  /// No description provided for @themeExportSkinBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export .orskin bundle'**
+  String get themeExportSkinBundle;
+
+  /// No description provided for @themeImportShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Import .orskin'**
+  String get themeImportShort;
+
+  /// No description provided for @themeExportShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Export .orskin'**
+  String get themeExportShort;
+
+  /// No description provided for @themeImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String themeImportFailed(String error);
+
+  /// No description provided for @themeExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String themeExportFailed(String error);
+
+  /// No description provided for @themeImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported skin \"{name}\"'**
+  String themeImported(String name);
+
+  /// No description provided for @themeExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {path}'**
+  String themeExported(String path);
+
+  /// No description provided for @themePickColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Color'**
+  String get themePickColor;
+
+  /// No description provided for @themeHue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get themeHue;
+
+  /// No description provided for @themeSaturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get themeSaturation;
+
+  /// No description provided for @themeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get themeValue;
+
+  /// No description provided for @themeColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get themeColors;
+
+  /// No description provided for @themeBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get themeBackground;
+
+  /// No description provided for @themeSurface.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface'**
+  String get themeSurface;
+
+  /// No description provided for @themeAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent'**
+  String get themeAccent;
+
+  /// No description provided for @themeTextPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Primary'**
+  String get themeTextPrimary;
+
+  /// No description provided for @themeTextSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Secondary'**
+  String get themeTextSecondary;
+
+  /// No description provided for @themeSidebarBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar Background'**
+  String get themeSidebarBg;
+
+  /// No description provided for @themeCardBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Background'**
+  String get themeCardBg;
+
+  /// No description provided for @themeTerminalBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal Background'**
+  String get themeTerminalBg;
+
+  /// No description provided for @themeTerminalText.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal Text'**
+  String get themeTerminalText;
+
+  /// No description provided for @themeGeometry.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin Geometry & Wallpaper'**
+  String get themeGeometry;
+
+  /// No description provided for @themeCornerRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Corner Radius'**
+  String get themeCornerRadius;
+
+  /// No description provided for @themeWallpaperOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallpaper Opacity'**
+  String get themeWallpaperOpacity;
+
+  /// No description provided for @themeWallpaperBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallpaper Blur'**
+  String get themeWallpaperBlur;
+
+  /// No description provided for @themeChooseWallpaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Wallpaper'**
+  String get themeChooseWallpaper;
+
+  /// No description provided for @themeChooseDropzone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Dropzone'**
+  String get themeChooseDropzone;
+
+  /// No description provided for @themeChooseFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Font'**
+  String get themeChooseFont;
+
+  /// No description provided for @themeSidebarTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar Tabs'**
+  String get themeSidebarTabs;
+
+  /// No description provided for @themeSidebarTabsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncheck a tab to hide it from the sidebar and navigation.'**
+  String get themeSidebarTabsHelp;
+
+  /// No description provided for @themeSaveTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Theme'**
+  String get themeSaveTheme;
+
+  /// No description provided for @themeLivePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Preview'**
+  String get themeLivePreview;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsAudioCodec.
+  ///
+  /// In en, this message translates to:
+  /// **'CD Audio Codec (CHD)'**
+  String get settingsAudioCodec;
+
+  /// No description provided for @settingsCodecFlac.
+  ///
+  /// In en, this message translates to:
+  /// **'Lossless (FLAC) - Recommended'**
+  String get settingsCodecFlac;
+
+  /// No description provided for @settingsCodecVorbis.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Compression (Vorbis)'**
+  String get settingsCodecVorbis;
+
+  /// No description provided for @settingsVerifySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs chdman verify on newly created CHD files'**
+  String get settingsVerifySub;
+
+  /// No description provided for @settingsSameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Same folder as source file'**
+  String get settingsSameFolder;
+
+  /// No description provided for @settingsSelectDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Select directory...'**
+  String get settingsSelectDir;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error checking for updates'**
+  String get settingsUpdateError;
+
+  /// No description provided for @settingsRaSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'RetroAchievements credentials saved'**
+  String get settingsRaSaved;
+
+  /// No description provided for @settingsHasheous.
+  ///
+  /// In en, this message translates to:
+  /// **'Hasheous'**
+  String get settingsHasheous;
+
+  /// No description provided for @settingsHasheousEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Hasheous hash lookup'**
+  String get settingsHasheousEnable;
+
+  /// No description provided for @settingsHasheousSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifies games by transmitting the ROM SHA-1 to hasheous.org. Off by default; only your file hash is sent.'**
+  String get settingsHasheousSub;
+
+  /// No description provided for @batchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Complete! 🎉'**
+  String get batchTitle;
+
+  /// No description provided for @batchSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You just saved {amount}'**
+  String batchSaved(String amount);
+
+  /// No description provided for @batchSavedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'({percent} reduction) across {count} {count, plural, =1{game} other{games}}!'**
+  String batchSavedDetail(String percent, int count);
+
+  /// No description provided for @batchAllProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} {count, plural, =1{file} other{files}} processed successfully!'**
+  String batchAllProcessed(int count);
+
+  /// No description provided for @batchAwesome.
+  ///
+  /// In en, this message translates to:
+  /// **'Awesome!'**
+  String get batchAwesome;
+
+  /// No description provided for @hasheousUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown title'**
+  String get hasheousUnknown;
+
+  /// No description provided for @hasheousMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more'**
+  String hasheousMore(int count);
+
+  /// No description provided for @hasheousVerifiedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified in {source}'**
+  String hasheousVerifiedIn(String source);
+
+  /// No description provided for @hasheousNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No match found in preservation databases.'**
+  String get hasheousNoMatch;
+
+  /// No description provided for @toolsTabCue.
+  ///
+  /// In en, this message translates to:
+  /// **'CUE Editor'**
+  String get toolsTabCue;
+
+  /// No description provided for @toolsTabRenamer.
+  ///
+  /// In en, this message translates to:
+  /// **'ROM Renamer'**
+  String get toolsTabRenamer;
+
+  /// No description provided for @toolsTab1g1r.
+  ///
+  /// In en, this message translates to:
+  /// **'1G1R Cleaner'**
+  String get toolsTab1g1r;
+
+  /// No description provided for @toolsTabHasher.
+  ///
+  /// In en, this message translates to:
+  /// **'ROM Hasher'**
+  String get toolsTabHasher;
+
+  /// No description provided for @toolsWatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Folder'**
+  String get toolsWatchTitle;
+
+  /// No description provided for @toolsHasherIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.'**
+  String get toolsHasherIntro;
+
+  /// No description provided for @toolsHasherDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag & drop a ROM here, or click to browse'**
+  String get toolsHasherDrop;
+
+  /// No description provided for @toolsChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File'**
+  String get toolsChooseFile;
+
+  /// No description provided for @toolsComputeHashes.
+  ///
+  /// In en, this message translates to:
+  /// **'Compute Hashes'**
+  String get toolsComputeHashes;
+
+  /// No description provided for @toolsResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get toolsResults;
+
+  /// No description provided for @toolsCopyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy All'**
+  String get toolsCopyAll;
+
+  /// No description provided for @toolsFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File Size'**
+  String get toolsFileSize;
+
+  /// No description provided for @toolsIdentifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifying…'**
+  String get toolsIdentifying;
+
+  /// No description provided for @toolsIdentifyGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify Game (Hasheous)'**
+  String get toolsIdentifyGame;
+
+  /// No description provided for @toolsHasheousHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends the file SHA-1 to hasheous.org. Enable in Settings → Online Features.'**
+  String get toolsHasheousHint;
+
+  /// No description provided for @toolsWatchStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch stopped.'**
+  String get toolsWatchStopped;
+
+  /// No description provided for @toolsWatchNeedFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Select both an input and an output folder first.'**
+  String get toolsWatchNeedFolders;
+
+  /// No description provided for @toolsChooseFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder…'**
+  String get toolsChooseFolder;
+
+  /// No description provided for @toolsWatchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically convert ROMs as they land in a folder.'**
+  String get toolsWatchIntro;
+
+  /// No description provided for @toolsInputFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Input Folder'**
+  String get toolsInputFolder;
+
+  /// No description provided for @toolsOutputFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Output Folder'**
+  String get toolsOutputFolder;
+
+  /// No description provided for @toolsTargetFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Format'**
+  String get toolsTargetFormat;
+
+  /// No description provided for @toolsDeleteSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete source after conversion'**
+  String get toolsDeleteSource;
+
+  /// No description provided for @toolsStopWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Watching'**
+  String get toolsStopWatching;
+
+  /// No description provided for @toolsStartWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Watching'**
+  String get toolsStartWatching;
+
+  /// No description provided for @toolsActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get toolsActive;
+
+  /// No description provided for @toolsLiveLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Log'**
+  String get toolsLiveLog;
+
+  /// No description provided for @toolsNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet.'**
+  String get toolsNoActivity;
+
+  /// No description provided for @themeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme \"{name}\" saved!'**
+  String themeSaved(String name);
 }
 
 class _AppLocalizationsDelegate

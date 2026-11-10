@@ -69,7 +69,7 @@ class Sidebar extends StatelessWidget {
         index: 4,
         id: 'plugins',
         icon: Icons.extension_outlined,
-        tooltip: 'Plugins',
+        tooltip: l10n.navPlugins,
       ),
       _NavItem(
         index: 5,

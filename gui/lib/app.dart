@@ -114,22 +114,25 @@ class _OpenROMAppState extends State<OpenROMApp> {
       onPromptMedia: (job) async {
         return await showDialog<String>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Unrecognized Media Type'),
-            content: Text(
-              'Unrecognized Media Type: Is this game a CD or DVD?\n\nFile: ${job.romFile.filename}',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop('cd'),
-                child: const Text('CD'),
+          builder: (ctx) {
+            final l10n = AppLocalizations.of(ctx);
+            return AlertDialog(
+              title: Text(l10n.mediaTypeTitle),
+              content: Text(
+                l10n.mediaTypeBody(job.romFile.filename),
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop('dvd'),
-                child: const Text('DVD'),
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop('cd'),
+                  child: Text(l10n.mediaCd),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop('dvd'),
+                  child: Text(l10n.mediaDvd),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -269,6 +272,7 @@ class _OpenROMAppState extends State<OpenROMApp> {
       darkTheme: buildTheme(Brightness.dark, darkColorScheme),
       home: LayoutBuilder(
         builder: (context, constraints) {
+          final l10n = AppLocalizations.of(context);
           final isNarrow = constraints.maxWidth < 650;
           // Desktop-only build: a narrow window uses the compact layout.
           final isMobile = isNarrow;
@@ -309,31 +313,31 @@ class _OpenROMAppState extends State<OpenROMApp> {
                   selectedItemColor: theme.accent,
                   unselectedItemColor: theme.textSecondary,
                   type: BottomNavigationBarType.fixed,
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.sync_alt_outlined),
-                      activeIcon: Icon(Icons.sync_alt),
-                      label: 'Convert',
+                      icon: const Icon(Icons.sync_alt_outlined),
+                      activeIcon: const Icon(Icons.sync_alt),
+                      label: l10n.convertButton,
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.healing_outlined),
-                      activeIcon: Icon(Icons.healing),
-                      label: 'Patch',
+                      icon: const Icon(Icons.healing_outlined),
+                      activeIcon: const Icon(Icons.healing),
+                      label: l10n.navPatch,
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.construction_outlined),
-                      activeIcon: Icon(Icons.construction),
-                      label: 'Tools',
+                      icon: const Icon(Icons.construction_outlined),
+                      activeIcon: const Icon(Icons.construction),
+                      label: l10n.navTools,
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.extension_outlined),
-                      activeIcon: Icon(Icons.extension),
-                      label: 'Plugins',
+                      icon: const Icon(Icons.extension_outlined),
+                      activeIcon: const Icon(Icons.extension),
+                      label: l10n.navPlugins,
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.settings_outlined),
-                      activeIcon: Icon(Icons.settings),
-                      label: 'Settings',
+                      icon: const Icon(Icons.settings_outlined),
+                      activeIcon: const Icon(Icons.settings),
+                      label: l10n.settingsScreen,
                     ),
                   ],
                 ),

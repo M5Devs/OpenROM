@@ -4,11 +4,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gui/widgets/hasheous_result_card.dart';
+import 'package:gui/l10n/app_localizations.dart';
 import 'package:openrom_core/openrom_core.dart'
     show HasheousGameMatch, HasheousLookupResult;
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: SingleChildScrollView(child: child)),
       );
 

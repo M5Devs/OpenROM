@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:openrom_core/openrom_core.dart';
 
 import '../controllers/plugin_builder_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 /// Keys used by widget tests to drive the studio.
@@ -56,6 +57,8 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
   bool _ownsController = false;
 
   final _idCtrl = TextEditingController();
+
+  AppLocalizations get _l10n => AppLocalizations.of(context);
   final _nameCtrl = TextEditingController();
   final _versionCtrl = TextEditingController();
   final _minCoreCtrl = TextEditingController();
@@ -116,7 +119,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
   }
 
   Future<void> _newProject() async {
-    final parent = await _pickDirectory('Select where to create the plugin');
+    final parent = await _pickDirectory(_l10n.studioNewProjectTitle);
     if (parent == null) return;
     final id = _idCtrl.text.trim().isEmpty
         ? 'my-tool'
@@ -129,7 +132,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
   }
 
   Future<void> _openProject() async {
-    final dir = await _pickDirectory('Select a plugin project folder');
+    final dir = await _pickDirectory(_l10n.studioOpenProjectTitle);
     if (dir == null) return;
     await _controller.openProject(dir);
     _syncFieldsFromController();
@@ -167,7 +170,8 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
           children: [
             Icon(Icons.check_circle, color: theme.accent),
             const SizedBox(width: 8),
-            Text('Built .orplug', style: TextStyle(color: theme.textPrimary)),
+            Text(_l10n.studioBuiltTitle,
+                style: TextStyle(color: theme.textPrimary)),
           ],
         ),
         content: SizedBox(
@@ -176,12 +180,13 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _kv('Archive', res.outputPath ?? '—', theme),
-              _kv('Size', '${res.archiveSize} bytes', theme),
+              _kv(_l10n.studioArchive, res.outputPath ?? '—', theme),
+              _kv(_l10n.studioSize, _l10n.studioSizeBytes(res.archiveSize),
+                  theme),
               _kv('SHA-256', res.archiveSha256 ?? '—', theme, mono: true),
               const SizedBox(height: 12),
               Text(
-                'Marketplace entry (paste into the store catalogue):',
+                _l10n.studioMarketplaceEntry,
                 style: TextStyle(color: theme.textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 6),
@@ -211,11 +216,11 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 ClipboardData(text: _controller.marketplaceJson ?? ''),
               );
               ScaffoldMessenger.of(ctx).showSnackBar(
-                const SnackBar(content: Text('Marketplace JSON copied')),
+                SnackBar(content: Text(_l10n.studioMarketplaceCopied)),
               );
             },
             icon: const Icon(Icons.copy),
-            label: const Text('Copy JSON'),
+            label: Text(_l10n.studioCopyJson),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -223,7 +228,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
               foregroundColor: Colors.black,
             ),
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Done'),
+            child: Text(_l10n.commonDone),
           ),
         ],
       ),
@@ -265,14 +270,14 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
       children: [
         _header(theme),
         const SizedBox(height: 16),
-        _card(theme, 'Identity', [
+        _card(theme, _l10n.studioIdentity, [
           Row(
             children: [
               Expanded(
                 child: _field(
                   theme,
                   BuilderStudioKeys.idField,
-                  'Plugin ID',
+                  _l10n.studioPluginId,
                   _idCtrl,
                   hint: 'my-tool',
                   onChanged: (v) => _controller.setIdentity(id: v),
@@ -283,9 +288,9 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 child: _field(
                   theme,
                   BuilderStudioKeys.nameField,
-                  'Display Name',
+                  _l10n.studioDisplayName,
                   _nameCtrl,
-                  hint: 'My Tool',
+                  hint: _l10n.studioDefaultName,
                   onChanged: (v) => _controller.setIdentity(name: v),
                 ),
               ),
@@ -298,7 +303,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 child: _field(
                   theme,
                   BuilderStudioKeys.versionField,
-                  'Version (SemVer)',
+                  _l10n.studioVersion,
                   _versionCtrl,
                   hint: '1.0.0',
                   onChanged: _controller.setVersion,
@@ -309,7 +314,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 child: _field(
                   theme,
                   BuilderStudioKeys.minCoreField,
-                  'Min Core Version',
+                  _l10n.studioMinCore,
                   _minCoreCtrl,
                   hint: '3.9.0',
                   onChanged: _controller.setMinCoreVersion,
@@ -321,14 +326,14 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
           ),
         ]),
         const SizedBox(height: 12),
-        _card(theme, 'Publisher', [
+        _card(theme, _l10n.studioPublisher, [
           Row(
             children: [
               Expanded(
                 child: _field(
                   theme,
                   BuilderStudioKeys.publisherIdField,
-                  'Publisher ID',
+                  _l10n.studioPublisherId,
                   _pubIdCtrl,
                   onChanged: (v) => _controller.setPublisher(id: v),
                 ),
@@ -338,17 +343,17 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 child: _field(
                   theme,
                   BuilderStudioKeys.publisherNameField,
-                  'Publisher Name',
+                  _l10n.studioPublisherName,
                   _pubNameCtrl,
                   onChanged: (v) => _controller.setPublisher(name: v),
                 ),
               ),
               const SizedBox(width: 12),
               Tooltip(
-                message: 'Verified publishers get the blue check in the store',
+                message: _l10n.studioVerifiedTip,
                 child: Column(
                   children: [
-                    Text('Verified',
+                    Text(_l10n.studioVerified,
                         style: TextStyle(
                             color: theme.textSecondary, fontSize: 12)),
                     Switch(
@@ -363,11 +368,11 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
           ),
         ]),
         const SizedBox(height: 12),
-        _card(theme, 'Description & Routes', [
+        _card(theme, _l10n.studioDescriptionRoutes, [
           _field(
             theme,
             BuilderStudioKeys.descriptionField,
-            'Description',
+            _l10n.studioDescription,
             _descCtrl,
             maxLines: 2,
             onChanged: _controller.setDescription,
@@ -380,7 +385,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 child: _field(
                   theme,
                   BuilderStudioKeys.routeField,
-                  'Add route (e.g. ISO -> WUA)',
+                  _l10n.studioRouteHint,
                   _routeCtrl,
                   onSubmitted: (v) {
                     _controller.addRoute(v);
@@ -401,7 +406,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                     _controller.addRoute(_routeCtrl.text);
                     _routeCtrl.clear();
                   },
-                  child: const Text('Add'),
+                  child: Text(_l10n.commonAdd),
                 ),
               ),
             ],
@@ -412,7 +417,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
             runSpacing: 4,
             children: _controller.routes.isEmpty
                 ? [
-                    Text('No routes yet.',
+                    Text(_l10n.studioNoRoutes,
                         style: TextStyle(
                             color: theme.textSecondary, fontSize: 12)),
                   ]
@@ -422,17 +427,16 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
         const SizedBox(height: 12),
         _binariesCard(theme),
         const SizedBox(height: 12),
-        _card(theme, 'Execution Arguments', [
+        _card(theme, _l10n.studioExecutionArgs, [
           Text(
-            'Placeholders: {bin} executable · {in} input · {out} output · '
-            '{outdir} output dir · {cue} cue sheet',
+            _l10n.studioPlaceholders,
             style: TextStyle(color: theme.textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 8),
           _field(
             theme,
             BuilderStudioKeys.argsField,
-            'Argument template',
+            _l10n.studioArgsTemplate,
             _argsCtrl,
             hint: 'convert --input {in} --output {out}',
             onChanged: _controller.setArgsTemplate,
@@ -468,7 +472,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Visual .orplug Builder Studio',
+                  _l10n.studioTitle,
                   style: TextStyle(
                     color: theme.textPrimary,
                     fontSize: 16,
@@ -477,9 +481,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  dir.isEmpty
-                      ? 'Start a new plugin or open an existing project folder.'
-                      : dir,
+                  dir.isEmpty ? _l10n.studioIntro : dir,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: theme.textSecondary, fontSize: 12),
@@ -493,7 +495,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
             style: OutlinedButton.styleFrom(foregroundColor: theme.accent),
             onPressed: _controller.isBusy ? null : _newProject,
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('New'),
+            label: Text(_l10n.studioNew),
           ),
           const SizedBox(width: 8),
           OutlinedButton.icon(
@@ -501,13 +503,13 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
             style: OutlinedButton.styleFrom(foregroundColor: theme.accent),
             onPressed: _controller.isBusy ? null : _openProject,
             icon: const Icon(Icons.folder_open, size: 18),
-            label: const Text('Open'),
+            label: Text(_l10n.studioOpen),
           ),
           if (dir.isNotEmpty) ...[
             const SizedBox(width: 8),
             IconButton(
               key: BuilderStudioKeys.refresh,
-              tooltip: 'Rescan project',
+              tooltip: _l10n.studioRescan,
               onPressed: _controller.isBusy ? null : _controller.refresh,
               icon: Icon(Icons.refresh, color: theme.textSecondary),
             ),
@@ -527,7 +529,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category',
+        Text(_l10n.studioCategory,
             style: TextStyle(color: theme.textSecondary, fontSize: 12)),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
@@ -563,10 +565,9 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
   }
 
   Widget _binariesCard(ThemeConfig theme) {
-    return _card(theme, 'Binaries', [
+    return _card(theme, _l10n.studioBinaries, [
       Text(
-        'Attach one executable per platform. SHA-256 hashes are computed '
-        'automatically when you save or build.',
+        _l10n.studioBinariesHelp,
         style: TextStyle(color: theme.textSecondary, fontSize: 12),
       ),
       const SizedBox(height: 10),
@@ -594,7 +595,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
           ),
           Expanded(
             child: bin == null
-                ? Text('not set',
+                ? Text(_l10n.studioNotSet,
                     style: TextStyle(color: theme.textSecondary, fontSize: 12))
                 : Row(
                     children: [
@@ -623,11 +624,11 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                   },
             icon: Icon(bin == null ? Icons.upload_file : Icons.swap_horiz,
                 size: 16),
-            label: Text(bin == null ? 'Add' : 'Replace'),
+            label: Text(bin == null ? _l10n.commonAdd : _l10n.studioReplace),
           ),
           if (bin != null)
             IconButton(
-              tooltip: 'Remove',
+              tooltip: _l10n.commonRemove,
               onPressed: _controller.isBusy
                   ? null
                   : () async {
@@ -644,7 +645,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
 
   Widget _actionsCard(ThemeConfig theme) {
     final busy = _controller.isBusy;
-    return _card(theme, 'Build', [
+    return _card(theme, _l10n.studioBuild, [
       Row(
         children: [
           ElevatedButton.icon(
@@ -657,7 +658,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 ? null
                 : () => _controller.saveManifest(),
             icon: const Icon(Icons.save_outlined, size: 18),
-            label: const Text('Save Manifest'),
+            label: Text(_l10n.studioSaveManifest),
           ),
           const SizedBox(width: 10),
           ElevatedButton.icon(
@@ -670,7 +671,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                 ? null
                 : _controller.validate,
             icon: const Icon(Icons.rule, size: 18),
-            label: const Text('Validate'),
+            label: Text(_l10n.studioValidate),
           ),
           const SizedBox(width: 10),
           ElevatedButton.icon(
@@ -681,7 +682,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
             ),
             onPressed: busy || !_controller.canBuild ? null : _build,
             icon: const Icon(Icons.inventory_2_outlined, size: 18),
-            label: const Text('Build .orplug'),
+            label: Text(_l10n.studioBuildPackage),
           ),
           const Spacer(),
           if (busy)
@@ -710,20 +711,22 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
           children: [
             Expanded(
               child: Text(
-                'Last build: ${_controller.packOutputPath}  ·  '
-                'sha256 ${_controller.packResult!.archiveSha256}',
+                _l10n.studioLastBuild(
+                  _controller.packOutputPath!,
+                  _controller.packResult!.archiveSha256!,
+                ),
                 style: TextStyle(color: theme.textSecondary, fontSize: 11),
               ),
             ),
             IconButton(
               key: BuilderStudioKeys.copyMarketplace,
-              tooltip: 'Copy marketplace JSON',
+              tooltip: _l10n.studioCopyMarketplace,
               onPressed: () {
                 Clipboard.setData(
                   ClipboardData(text: _controller.marketplaceJson ?? ''),
                 );
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Marketplace JSON copied')),
+                  SnackBar(content: Text(_l10n.studioMarketplaceCopied)),
                 );
               },
               icon:
@@ -755,7 +758,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
                   size: 18, color: ok ? theme.accent : Colors.redAccent),
               const SizedBox(width: 8),
               Text(
-                ok ? 'Manifest is valid' : 'Validation issues',
+                ok ? _l10n.studioManifestValid : _l10n.studioValidationIssues,
                 style: TextStyle(
                   color: theme.textPrimary,
                   fontWeight: FontWeight.bold,

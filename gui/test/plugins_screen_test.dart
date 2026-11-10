@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gui/controllers/plugin_controller.dart';
 import 'package:gui/models/theme_config.dart';
+import 'package:gui/l10n/app_localizations.dart';
 import 'package:gui/screens/plugins_screen.dart';
 import 'package:gui/services/plugin_service.dart';
 import 'package:gui/widgets/orplug_builder_studio.dart';
@@ -160,6 +161,8 @@ void main() {
       final controller = PluginController(service: FakePluginService());
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(theme: testTheme, controller: controller),
           ),
@@ -178,6 +181,8 @@ void main() {
       final controller = PluginController(service: FakePluginService());
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(theme: testTheme, controller: controller),
           ),
@@ -199,6 +204,8 @@ void main() {
       final controller = PluginController(service: FakePluginService());
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(theme: testTheme, controller: controller),
           ),
@@ -222,6 +229,8 @@ void main() {
           PluginController(service: FakePluginService(live: false));
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(theme: testTheme, controller: controller),
           ),
@@ -248,6 +257,8 @@ void main() {
       final controller = PluginController(service: FakePluginService());
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(theme: testTheme, controller: controller),
           ),
