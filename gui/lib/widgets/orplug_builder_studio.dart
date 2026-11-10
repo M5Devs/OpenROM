@@ -140,7 +140,7 @@ class _OrplugBuilderStudioState extends State<OrplugBuilderStudio> {
 
   Future<String?> _pickDirectory(String title) async {
     try {
-      final selected = await FilePicker.platform.getDirectoryPath(
+      final selected = await FilePicker.getDirectoryPath(
         dialogTitle: title,
       );
       if (selected == null || selected.isEmpty) return null;

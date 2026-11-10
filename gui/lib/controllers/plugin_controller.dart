@@ -257,13 +257,13 @@ class PluginController extends ChangeNotifier {
   /// Opens file picker for `.orplug` files and installs the selected file.
   Future<bool> pickAndInstallPlugin() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['orplug', 'zip'],
       );
 
-      if (result != null && result.files.single.path != null) {
-        return await installPluginFromPath(result.files.single.path!);
+      if (result?.path != null) {
+        return await installPluginFromPath(result!.path!);
       }
     } catch (e) {
       _errorMessage = 'Failed to pick plugin file: $e';

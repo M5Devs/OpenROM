@@ -1,6 +1,8 @@
 // OpenROM — Universal ROM Compression Suite
 // M5 Dev | GPL v3
 
+import 'dart:typed_data';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -124,13 +126,13 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
   }
 
   Future<void> _pickRomFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: _isSspPatch ? FileType.custom : FileType.any,
       allowedExtensions: _isSspPatch ? ['bin'] : null,
     );
-    if (result != null && result.files.single.path != null) {
+    if (result?.path != null) {
       setState(() {
-        _romPath = result.files.single.path!;
+        _romPath = result!.path!;
         _report = null;
       });
       _updateOutputPath();
@@ -138,13 +140,13 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
   }
 
   Future<void> _pickPatchFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: PatcherFactory.supportedExtensions.toList(),
     );
-    if (result != null && result.files.single.path != null) {
+    if (result?.path != null) {
       setState(() {
-        _patchPath = result.files.single.path!;
+        _patchPath = result!.path!;
         _report = null;
       });
       _updateOutputPath();
@@ -161,12 +163,14 @@ class _ApplyPatchTabState extends State<_ApplyPatchTab> {
       initialName = '${nameWithoutExt}_patched$ext';
     }
 
-    final savePath = await FilePicker.platform.saveFile(
+    final outUri = await FilePicker.saveFile(
       dialogTitle: 'Select Output File',
       fileName: initialName ?? 'patched_game',
       initialDirectory: initialDir,
+      bytes: Uint8List(0),
     );
 
+    final savePath = _pathFromSaveUri(outUri);
     if (savePath != null && savePath.isNotEmpty) {
       setState(() {
         _outputPath = savePath;
@@ -757,10 +761,10 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   }
 
   Future<void> _pickOriginalFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result != null && result.files.single.path != null) {
+    final result = await FilePicker.pickFile(type: FileType.any);
+    if (result?.path != null) {
       setState(() {
-        _originalPath = result.files.single.path!;
+        _originalPath = result!.path!;
         _report = null;
       });
       _updateOutputPath();
@@ -768,10 +772,10 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
   }
 
   Future<void> _pickModifiedFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result != null && result.files.single.path != null) {
+    final result = await FilePicker.pickFile(type: FileType.any);
+    if (result?.path != null) {
       setState(() {
-        _modifiedPath = result.files.single.path!;
+        _modifiedPath = result!.path!;
         _report = null;
       });
     }
@@ -787,12 +791,14 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
       initialName = '${nameWithoutExt}_patch$ext';
     }
 
-    final savePath = await FilePicker.platform.saveFile(
+    final outUri = await FilePicker.saveFile(
       dialogTitle: 'Select Patch Output File',
       fileName: initialName ?? 'patch',
       initialDirectory: initialDir,
+      bytes: Uint8List(0),
     );
 
+    final savePath = _pathFromSaveUri(outUri);
     if (savePath != null && savePath.isNotEmpty) {
       setState(() {
         _outputPath = savePath;
@@ -1126,4 +1132,11 @@ class _BuildPatchTabState extends State<_BuildPatchTab> {
       ],
     );
   }
+}
+
+// file_picker 13 returns the chosen destination as a Uri instead of a path
+// string. The app writes the output itself, so only the location matters.
+String? _pathFromSaveUri(Uri? uri) {
+  if (uri == null) return null;
+  return uri.isScheme('file') ? uri.toFilePath() : uri.toString();
 }

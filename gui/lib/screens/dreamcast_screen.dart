@@ -107,7 +107,7 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
   bool? _ipbinReplaced;
 
   Future<void> _pickDiscDir() async {
-    final path = await FilePicker.platform.getDirectoryPath();
+    final path = await FilePicker.getDirectoryPath();
     if (path != null && path.isNotEmpty) {
       setState(() {
         _discDir = path;
@@ -119,19 +119,19 @@ class _DcpApplyTabState extends State<_DcpApplyTab> {
   }
 
   Future<void> _pickDcpFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['dcp'],
     );
-    if (result != null && result.files.single.path != null) {
+    if (result?.path != null) {
       setState(() {
-        _dcpPath = result.files.single.path!;
+        _dcpPath = result!.path!;
       });
     }
   }
 
   Future<void> _pickOutputDir() async {
-    final path = await FilePicker.platform.getDirectoryPath();
+    final path = await FilePicker.getDirectoryPath();
     if (path != null && path.isNotEmpty) {
       setState(() {
         _outputDir = path;
@@ -531,13 +531,13 @@ class _IpBinEditorTabState extends State<_IpBinEditorTab> {
   }
 
   Future<void> _pickIpBinFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['bin', 'gdi'],
     );
-    if (result != null && result.files.single.path != null) {
+    if (result?.path != null) {
       setState(() {
-        _ipbinPath = result.files.single.path!;
+        _ipbinPath = result!.path!;
         _isLoaded = false;
       });
     }
@@ -1042,13 +1042,13 @@ class _GdiInfoTabState extends State<_GdiInfoTab> {
   List<Map<String, dynamic>> _tracks = [];
 
   Future<void> _pickGdiFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['gdi'],
     );
-    if (result != null && result.files.single.path != null) {
+    if (result?.path != null) {
       setState(() {
-        _gdiPath = result.files.single.path!;
+        _gdiPath = result!.path!;
         _tracks.clear();
       });
     }

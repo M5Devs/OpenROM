@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -87,12 +88,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _importSkinBundle() async {
     final l10n = AppLocalizations.of(context);
-    final picked = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
       dialogTitle: l10n.themeImportSkinBundle,
     );
-    final path = picked?.files.single.path;
+    final path = picked?.path;
     if (path == null) return;
 
     final result = await widget.themeService.importSkin(File(path));
@@ -113,12 +114,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = widget.themeService.currentTheme;
     final suggested =
         '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}.orskin';
-    final out = await FilePicker.platform.saveFile(
+    final outUri = await FilePicker.saveFile(
       dialogTitle: l10n.themeExportSkinBundle,
       fileName: suggested,
-      type: FileType.custom,
-      allowedExtensions: const ['orskin'],
+      bytes: Uint8List(0),
     );
+    final out = _pathFromSaveUri(outUri);
     if (out == null) return;
 
     // exportSkin resolves wallpaper/dropzone/font from the theme's own paths.
@@ -136,6 +137,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  // file_picker 13 returns the chosen destination as a Uri instead of a path
+  // string. exportSkin writes the bundle itself, so only the location matters.
+  String? _pathFromSaveUri(Uri? uri) {
+    if (uri == null) return null;
+    return uri.isScheme('file') ? uri.toFilePath() : uri.toString();
   }
 
   Future<void> _loadSettings() async {
@@ -200,8 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _pickOutputDirectory() async {
-    final String? selectedDirectory =
-        await FilePicker.platform.getDirectoryPath();
+    final String? selectedDirectory = await FilePicker.getDirectoryPath();
     if (selectedDirectory != null) {
       setState(() {
         _outputDestination = selectedDirectory;

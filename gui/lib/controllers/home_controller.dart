@@ -69,12 +69,11 @@ class HomeController extends ChangeNotifier {
   }
 
   void pickFiles({void Function(OpenROMException e)? onError}) async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
+    final result = await FilePicker.pickFiles(
       type: FileType.any,
     );
-    if (result != null) {
-      final paths = result.paths.whereType<String>().toList();
+    if (result.isNotEmpty) {
+      final paths = result.map((f) => f.path).whereType<String>().toList();
       addFilesFromPaths(paths, onError: onError);
     }
   }

@@ -2,6 +2,7 @@
 // M5 Dev | GPL v3
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -59,34 +60,34 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
       );
 
   Future<void> _pickWallpaper() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['gif', 'png', 'jpg', 'jpeg', 'webp'],
       dialogTitle: _l10n.themePickWallpaper,
     );
-    final path = result?.files.single.path;
+    final path = result?.path;
     if (path == null) return;
     setState(() => _edited = _edited.copyWith(wallpaperPath: path));
   }
 
   Future<void> _pickDropzone() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['gif', 'png'],
       dialogTitle: _l10n.themePickDropzone,
     );
-    final path = result?.files.single.path;
+    final path = result?.path;
     if (path == null) return;
     setState(() => _edited = _edited.copyWith(dropzonePath: path));
   }
 
   Future<void> _pickFont() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['ttf', 'otf'],
       dialogTitle: _l10n.themePickFont,
     );
-    final path = result?.files.single.path;
+    final path = result?.path;
     if (path == null) return;
     setState(() => _edited = _edited.copyWith(fontPath: path));
   }
@@ -104,12 +105,12 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   }
 
   Future<void> _importSkin() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
       dialogTitle: _l10n.themeImportSkinBundle,
     );
-    final path = result?.files.single.path;
+    final path = result?.path;
     if (path == null) return;
 
     final imported = await widget.themeService.importSkin(File(path));
@@ -128,12 +129,12 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final theme = _currentEdits();
     final suggested = '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}'
         '.orskin';
-    final out = await FilePicker.platform.saveFile(
+    final outUri = await FilePicker.saveFile(
       dialogTitle: _l10n.themeExportSkinBundle,
       fileName: suggested,
-      type: FileType.custom,
-      allowedExtensions: const ['orskin'],
+      bytes: Uint8List(0),
     );
+    final out = _pathFromSaveUri(outUri);
     if (out == null) return;
 
     // Assets are resolved from the theme's own paths, so every picked file is
@@ -156,6 +157,13 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     if (path == null || path.isEmpty) return null;
     final file = File(path);
     return file.existsSync() ? file : null;
+  }
+
+  // file_picker 13 returns the chosen destination as a Uri instead of a path
+  // string. exportSkin writes the bundle itself, so only the location matters.
+  String? _pathFromSaveUri(Uri? uri) {
+    if (uri == null) return null;
+    return uri.isScheme('file') ? uri.toFilePath() : uri.toString();
   }
 
   // Opens a simple HSV color picker dialog and returns the picked color

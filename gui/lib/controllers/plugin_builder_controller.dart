@@ -203,7 +203,7 @@ class PluginBuilderController extends ChangeNotifier {
   /// Picks an existing project folder and loads it.
   Future<void> pickProjectDir() async {
     try {
-      final selected = await FilePicker.platform.getDirectoryPath(
+      final selected = await FilePicker.getDirectoryPath(
         dialogTitle: 'Select a plugin project folder',
       );
       if (selected == null || selected.isEmpty) return;
@@ -299,10 +299,10 @@ class PluginBuilderController extends ChangeNotifier {
     if (binDir == null) return;
 
     try {
-      final picked = await FilePicker.platform.pickFiles(
+      final picked = await FilePicker.pickFile(
         dialogTitle: 'Select the ${platformLabel(platformKey)} binary',
       );
-      final source = picked?.files.single.path;
+      final source = picked?.path;
       if (source == null || source.isEmpty) return;
 
       final targetDir = Directory(p.join(_projectDir, binDir))
