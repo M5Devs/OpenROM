@@ -56,7 +56,7 @@ class BatchCompleteDialog extends StatelessWidget {
           const RomeoMascot(asset: RomeoAssets.success, size: 120),
           const SizedBox(height: 16),
           Text(
-            'Batch Complete! 🎉',
+            l10n.batchTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -79,7 +79,7 @@ class BatchCompleteDialog extends StatelessWidget {
                   Icon(Icons.savings_outlined, color: theme.accent, size: 32),
                   const SizedBox(height: 8),
                   Text(
-                    'You just saved ${stats.bytesSavedReadable}',
+                    l10n.batchSaved(stats.bytesSavedReadable),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
@@ -89,8 +89,10 @@ class BatchCompleteDialog extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '(${stats.savedPercentageReadable} reduction) '
-                    'across $jobs ${jobs == 1 ? "game" : "games"}!',
+                    l10n.batchSavedDetail(
+                      stats.savedPercentageReadable,
+                      jobs,
+                    ),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13, color: theme.textSecondary),
                   ),
@@ -99,8 +101,7 @@ class BatchCompleteDialog extends StatelessWidget {
                       color: theme.accent, size: 32),
                   const SizedBox(height: 8),
                   Text(
-                    'All $jobs ${jobs == 1 ? "file" : "files"} '
-                    'processed successfully!',
+                    l10n.batchAllProcessed(jobs),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,
@@ -128,7 +129,7 @@ class BatchCompleteDialog extends StatelessWidget {
             backgroundColor: theme.accent,
             foregroundColor: Colors.black,
           ),
-          child: const Text('Awesome!'),
+          child: Text(l10n.batchAwesome),
         ),
       ],
     );

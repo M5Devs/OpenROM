@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart'
     show HasheousGameMatch, HasheousLookupResult;
 
+import '../l10n/app_localizations.dart';
+
 /// High-contrast illustrated card for a successful Hasheous match.
 ///
 /// Shows the game title, platform/region, and a `Verified in <DAT>` badge with
@@ -38,6 +40,7 @@ class HasheousResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const glow = Color(0xFF3DDC97); // green/cyan
     const cyan = Color(0xFF2EC4B6);
 
@@ -73,7 +76,9 @@ class HasheousResultCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  match.gameName.isEmpty ? 'Unknown title' : match.gameName,
+                  match.gameName.isEmpty
+                      ? l10n.hasheousUnknown
+                      : match.gameName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -117,7 +122,7 @@ class HasheousResultCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    '+ ${sources.length - 1} more',
+                    l10n.hasheousMore(sources.length - 1),
                     style: const TextStyle(fontSize: 11, color: Colors.white54),
                   ),
                 ),
@@ -138,6 +143,7 @@ class VerifiedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const glow = Color(0xFF3DDC97);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -155,7 +161,7 @@ class VerifiedBadge extends StatelessWidget {
           const Icon(Icons.verified, size: 15, color: glow),
           const SizedBox(width: 6),
           Text(
-            'Verified in $sourceDat',
+            l10n.hasheousVerifiedIn(sourceDat),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -174,6 +180,7 @@ class HasheousNoMatchBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -182,14 +189,14 @@ class HasheousNoMatchBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white12),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.search_off, color: Colors.white54, size: 20),
-          SizedBox(width: 10),
+          const Icon(Icons.search_off, color: Colors.white54, size: 20),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'No match found in preservation databases.',
-              style: TextStyle(fontSize: 13, color: Colors.white70),
+              l10n.hasheousNoMatch,
+              style: const TextStyle(fontSize: 13, color: Colors.white70),
             ),
           ),
         ],

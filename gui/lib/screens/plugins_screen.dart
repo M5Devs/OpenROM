@@ -9,6 +9,7 @@ import 'package:openrom_core/openrom_core.dart';
 
 import '../controllers/plugin_builder_controller.dart';
 import '../controllers/plugin_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 import '../services/deeplink_service.dart';
 import '../widgets/deep_link_dialog.dart';
@@ -39,6 +40,8 @@ class _PluginsScreenState extends State<PluginsScreen>
   late final PluginController _controller;
   StreamSubscription<DeepLinkTarget>? _deepLinkSub;
   bool _isDragging = false;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context);
 
   @override
   void initState() {
@@ -106,7 +109,7 @@ class _PluginsScreenState extends State<PluginsScreen>
 
     if (_controller.isPluginInstalled(listing.id)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${listing.name} is already installed')),
+        SnackBar(content: Text(_l10n.pluginsAlreadyInstalled(listing.name))),
       );
       return;
     }
@@ -123,8 +126,8 @@ class _PluginsScreenState extends State<PluginsScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok
-            ? '${listing.name} installed'
-            : _controller.errorMessage ?? 'Install failed'),
+            ? _l10n.pluginsInstalledToast(listing.name)
+            : _controller.errorMessage ?? _l10n.pluginsInstallFailed),
       ),
     );
   }
@@ -166,18 +169,18 @@ class _PluginsScreenState extends State<PluginsScreen>
             indicatorColor: theme.accent,
             labelColor: theme.accent,
             unselectedLabelColor: theme.textSecondary,
-            tabs: const [
+            tabs: [
               Tab(
-                icon: Icon(Icons.extension_outlined),
-                text: 'Installed Plugins 📦',
+                icon: const Icon(Icons.extension_outlined),
+                text: _l10n.pluginsTabInstalled,
               ),
               Tab(
-                icon: Icon(Icons.storefront_outlined),
-                text: 'Plugin Store 🌐🛒',
+                icon: const Icon(Icons.storefront_outlined),
+                text: _l10n.pluginsTabStore,
               ),
               Tab(
-                icon: Icon(Icons.handyman_outlined),
-                text: 'Create / Studio 🛠️',
+                icon: const Icon(Icons.handyman_outlined),
+                text: _l10n.pluginsTabStudio,
               ),
             ],
           ),
@@ -262,7 +265,7 @@ class _PluginsScreenState extends State<PluginsScreen>
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Drag & Drop .orplug Archive Here',
+                  _l10n.pluginsDropTitle,
                   style: TextStyle(
                     color: theme.textPrimary,
                     fontSize: 16,
@@ -271,7 +274,7 @@ class _PluginsScreenState extends State<PluginsScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Install custom ROM tools, extensions, and formats',
+                  _l10n.pluginsDropSubtitle,
                   style: TextStyle(
                     color: theme.textSecondary,
                     fontSize: 13,
@@ -289,8 +292,8 @@ class _PluginsScreenState extends State<PluginsScreen>
                   ),
                   onPressed: () => _controller.pickAndInstallPlugin(),
                   icon: const Icon(Icons.folder_open),
-                  label: const Text(
-                    'Browse .orplug File',
+                  label: Text(
+                    _l10n.pluginsBrowse,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -300,7 +303,7 @@ class _PluginsScreenState extends State<PluginsScreen>
           const SizedBox(height: 24),
 
           Text(
-            'Installed Plugins (${_controller.installedPlugins.length})',
+            _l10n.pluginsInstalledHeading(_controller.installedPlugins.length),
             style: TextStyle(
               color: theme.textPrimary,
               fontSize: 18,
@@ -337,7 +340,7 @@ class _PluginsScreenState extends State<PluginsScreen>
           ),
           const SizedBox(height: 12),
           Text(
-            'No Plugins Installed Yet',
+            _l10n.pluginsEmptyTitle,
             style: TextStyle(
               color: theme.textPrimary,
               fontSize: 16,
@@ -346,7 +349,7 @@ class _PluginsScreenState extends State<PluginsScreen>
           ),
           const SizedBox(height: 6),
           Text(
-            'Drop an .orplug package above or explore community plugins in the Plugin Store.',
+            _l10n.pluginsEmptyBody,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: theme.textSecondary,
@@ -446,7 +449,7 @@ class _PluginsScreenState extends State<PluginsScreen>
                 ),
                 onPressed: () => _confirmUninstall(plugin, theme),
                 icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('Uninstall'),
+                label: Text(_l10n.pluginsUninstall),
               ),
             ],
           ),
@@ -502,18 +505,18 @@ class _PluginsScreenState extends State<PluginsScreen>
       builder: (ctx) => AlertDialog(
         backgroundColor: theme.surface,
         title: Text(
-          'Uninstall Plugin',
+          _l10n.pluginsUninstallTitle,
           style: TextStyle(color: theme.textPrimary),
         ),
         content: Text(
-          'Are you sure you want to uninstall "${plugin.name}" (${plugin.id})?',
+          _l10n.pluginsUninstallBody(plugin.name, plugin.id),
           style: TextStyle(color: theme.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
-              'Cancel',
+              _l10n.commonCancel,
               style: TextStyle(color: theme.textSecondary),
             ),
           ),
@@ -526,7 +529,7 @@ class _PluginsScreenState extends State<PluginsScreen>
               Navigator.of(ctx).pop();
               await _controller.uninstallPlugin(plugin.id);
             },
-            child: const Text('Uninstall'),
+            child: Text(_l10n.pluginsUninstall),
           ),
         ],
       ),

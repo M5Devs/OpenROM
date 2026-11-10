@@ -86,10 +86,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _importSkinBundle() async {
+    final l10n = AppLocalizations.of(context);
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
-      dialogTitle: 'Import an .orskin skin bundle',
+      dialogTitle: l10n.themeImportSkinBundle,
     );
     final path = picked?.files.single.path;
     if (path == null) return;
@@ -100,19 +101,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       SnackBar(
         content: Text(
           result.isOk
-              ? 'Imported skin "${result.value!.name}"'
-              : 'Import failed: ${result.error}',
+              ? l10n.themeImported(result.value!.name)
+              : l10n.themeImportFailed('${result.error}'),
         ),
       ),
     );
   }
 
   Future<void> _exportCurrentSkin() async {
+    final l10n = AppLocalizations.of(context);
     final theme = widget.themeService.currentTheme;
     final suggested =
         '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}.orskin';
     final out = await FilePicker.platform.saveFile(
-      dialogTitle: 'Export current theme as .orskin',
+      dialogTitle: l10n.themeExportSkinBundle,
       fileName: suggested,
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
@@ -129,8 +131,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       SnackBar(
         content: Text(
           result.isOk
-              ? 'Exported ${result.value!.path}'
-              : 'Export failed: ${result.error}',
+              ? l10n.themeExported(result.value!.path)
+              : l10n.themeExportFailed('${result.error}'),
         ),
       ),
     );
@@ -154,8 +156,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _raUsername = prefs.getString(OnlinePrefs.raUsername) ?? '';
       _raApiKey = prefs.getString(OnlinePrefs.raApiKey) ?? '';
 
-      _hasheousEnabled =
-          prefs.getBool(OnlinePrefs.hasheousEnabled) ?? false;
+      _hasheousEnabled = prefs.getBool(OnlinePrefs.hasheousEnabled) ?? false;
 
       _raUsernameController.text = _raUsername;
       _raApiKeyController.text = _raApiKey;
@@ -278,7 +279,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Language Selector
-          _buildSectionTitle('Language'),
+          _buildSectionTitle(l10n.settingsLanguage),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
@@ -296,7 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return DropdownMenuItem<Locale>(
                     value: locale,
                     child: Text(
-                      LocaleProvider.getNativeName(locale.languageCode),
+                      LocaleProvider.getNativeName(locale),
                       style: TextStyle(color: theme.textPrimary),
                     ),
                   );
@@ -364,12 +365,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // CD Audio Codec
-          _buildSectionTitle('CD Audio Codec (CHD)'),
+          _buildSectionTitle(l10n.settingsAudioCodec),
           Wrap(
             spacing: 12,
             children: [
               ChoiceChip(
-                label: const Text('Lossless (FLAC) - Recommended'),
+                label: Text(l10n.settingsCodecFlac),
                 selected: _selectedAudioCodec == 'flac',
                 selectedColor: theme.accent,
                 backgroundColor: theme.surface,
@@ -387,7 +388,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               ),
               ChoiceChip(
-                label: const Text('Max Compression (Vorbis)'),
+                label: Text(l10n.settingsCodecVorbis),
                 selected: _selectedAudioCodec == 'vorbis',
                 selectedColor: theme.accent,
                 backgroundColor: theme.surface,
@@ -418,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(color: theme.textPrimary),
               ),
               subtitle: Text(
-                'Runs chdman verify on newly created CHD files',
+                l10n.settingsVerifySub,
                 style: TextStyle(color: theme.textSecondary),
               ),
               value: _verifyAfterConversion,
@@ -437,7 +438,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Colors.transparent,
             child: CheckboxListTile(
               title: Text(
-                'Same folder as source file',
+                l10n.settingsSameFolder,
                 style: TextStyle(color: theme.textPrimary),
               ),
               value: _sameFolderAsSource,
@@ -464,7 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     child: Text(
                       _outputDestination.isEmpty
-                          ? 'Select directory...'
+                          ? l10n.settingsSelectDir
                           : _outputDestination,
                       style: TextStyle(color: theme.textPrimary),
                     ),
@@ -490,21 +491,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle(l10n.themeScreen),
           const SizedBox(height: 12),
           SegmentedButton<ThemeMode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: ThemeMode.system,
-                label: Text('System'),
-                icon: Icon(Icons.brightness_auto),
+                label: Text(l10n.settingsThemeSystem),
+                icon: const Icon(Icons.brightness_auto),
               ),
               ButtonSegment(
                 value: ThemeMode.light,
-                label: Text('Light'),
-                icon: Icon(Icons.light_mode),
+                label: Text(l10n.settingsThemeLight),
+                icon: const Icon(Icons.light_mode),
               ),
               ButtonSegment(
                 value: ThemeMode.dark,
-                label: Text('Dark'),
-                icon: Icon(Icons.dark_mode),
+                label: Text(l10n.settingsThemeDark),
+                icon: const Icon(Icons.dark_mode),
               ),
             ],
             selected: {widget.themeService.themeMode},
@@ -582,7 +583,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               OutlinedButton.icon(
                 icon: const Icon(Icons.file_download_outlined),
-                label: const Text('Import .orskin'),
+                label: Text(l10n.themeImportShort),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.accent,
                   side: BorderSide(color: theme.border),
@@ -591,7 +592,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.file_upload_outlined),
-                label: const Text('Export .orskin'),
+                label: Text(l10n.themeExportShort),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.accent,
                   side: BorderSide(color: theme.border),
@@ -686,7 +687,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                 ] else if (_updateStatus == 'error')
                   Text(
-                    'Error checking for updates',
+                    l10n.settingsUpdateError,
                     style: TextStyle(color: Colors.redAccent, fontSize: 13),
                   ),
               ],
@@ -775,10 +776,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onPressed: () {
                         _saveSettings();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'RetroAchievements credentials saved',
-                            ),
+                          SnackBar(
+                            content: Text(l10n.settingsRaSaved),
                           ),
                         );
                       },
@@ -798,17 +797,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Sub-section C: Hasheous hash lookup
-          _buildSectionTitle('Hasheous'),
+          _buildSectionTitle(l10n.settingsHasheous),
           Material(
             color: Colors.transparent,
             child: SwitchListTile(
               title: Text(
-                'Enable Hasheous hash lookup',
+                l10n.settingsHasheousEnable,
                 style: TextStyle(color: theme.textPrimary),
               ),
               subtitle: Text(
-                'Identifies games by transmitting the ROM SHA-1 to '
-                'hasheous.org. Off by default; only your file hash is sent.',
+                l10n.settingsHasheousSub,
                 style: TextStyle(color: theme.textSecondary),
               ),
               value: _hasheousEnabled,

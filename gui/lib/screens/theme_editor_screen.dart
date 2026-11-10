@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/skin_manifest.dart';
 import '../models/theme_config.dart';
 import '../services/theme_service.dart';
@@ -27,6 +28,8 @@ class ThemeEditorScreen extends StatefulWidget {
 class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
   late ThemeConfig _edited;
   late TextEditingController _nameController;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context);
 
   @override
   void initState() {
@@ -59,7 +62,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['gif', 'png', 'jpg', 'jpeg', 'webp'],
-      dialogTitle: 'Choose a wallpaper (GIF, PNG, JPG or WebP)',
+      dialogTitle: _l10n.themePickWallpaper,
     );
     final path = result?.files.single.path;
     if (path == null) return;
@@ -70,7 +73,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['gif', 'png'],
-      dialogTitle: 'Choose a dropzone illustration (GIF or PNG)',
+      dialogTitle: _l10n.themePickDropzone,
     );
     final path = result?.files.single.path;
     if (path == null) return;
@@ -81,7 +84,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['ttf', 'otf'],
-      dialogTitle: 'Choose a UI font (TTF or OTF)',
+      dialogTitle: _l10n.themePickFont,
     );
     final path = result?.files.single.path;
     if (path == null) return;
@@ -104,21 +107,21 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
-      dialogTitle: 'Import an .orskin bundle',
+      dialogTitle: _l10n.themeImportSkinBundle,
     );
     final path = result?.files.single.path;
     if (path == null) return;
 
     final imported = await widget.themeService.importSkin(File(path));
     if (!imported.isOk) {
-      _snack('Import failed: ${imported.error}');
+      _snack(_l10n.themeImportFailed('${imported.error}'));
       return;
     }
     setState(() {
       _edited = imported.value!.theme;
       _nameController.text = _edited.name;
     });
-    _snack('Imported skin "${imported.value!.name}"');
+    _snack(_l10n.themeImported(imported.value!.name));
   }
 
   Future<void> _exportSkin() async {
@@ -126,7 +129,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
     final suggested = '${theme.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}'
         '.orskin';
     final out = await FilePicker.platform.saveFile(
-      dialogTitle: 'Export .orskin bundle',
+      dialogTitle: _l10n.themeExportSkinBundle,
       fileName: suggested,
       type: FileType.custom,
       allowedExtensions: const ['orskin'],
@@ -143,10 +146,10 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
       font: _fileOrNull(theme.fontPath),
     );
     if (!exported.isOk) {
-      _snack('Export failed: ${exported.error}');
+      _snack(_l10n.themeExportFailed('${exported.error}'));
       return;
     }
-    _snack('Exported ${exported.value!.path}');
+    _snack(_l10n.themeExported(exported.value!.path));
   }
 
   static File? _fileOrNull(String? path) {
@@ -163,7 +166,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: widget.theme.surface,
         title: Text(
-          'Pick Color',
+          _l10n.themePickColor,
           style: TextStyle(color: widget.theme.textPrimary),
         ),
         content: SizedBox(
@@ -173,13 +176,14 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Hue slider
-                _buildSlider('Hue', HSVColor.fromColor(temp).hue, 0, 360, (v) {
+                _buildSlider(
+                    _l10n.themeHue, HSVColor.fromColor(temp).hue, 0, 360, (v) {
                   setInner(() {
                     temp = HSVColor.fromColor(temp).withHue(v).toColor();
                   });
                 }, temp),
                 _buildSlider(
-                  'Saturation',
+                  _l10n.themeSaturation,
                   HSVColor.fromColor(temp).saturation,
                   0,
                   1,
@@ -192,7 +196,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   },
                   temp,
                 ),
-                _buildSlider('Value', HSVColor.fromColor(temp).value, 0, 1, (
+                _buildSlider(
+                    _l10n.themeValue, HSVColor.fromColor(temp).value, 0, 1, (
                   v,
                 ) {
                   setInner(() {
@@ -216,7 +221,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Cancel',
+              _l10n.commonCancel,
               style: TextStyle(color: widget.theme.textSecondary),
             ),
           ),
@@ -228,7 +233,8 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
               Navigator.pop(ctx);
               onPicked(temp);
             },
-            child: const Text('Apply', style: TextStyle(color: Colors.white)),
+            child: Text(_l10n.commonApply,
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -296,7 +302,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
             const SizedBox(width: 8),
             TextButton.icon(
               icon: const Icon(Icons.clear),
-              label: const Text('Remove'),
+              label: Text(_l10n.commonRemove),
               style: TextButton.styleFrom(foregroundColor: t.textSecondary),
               onPressed: onClear,
             ),
@@ -443,7 +449,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       borderRadius: BorderRadius.circular(t.borderRadius / 2),
                     ),
                     child: Text(
-                      'Convert',
+                      _l10n.convertButton,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -470,7 +476,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Theme Editor',
+            _l10n.themeEditorTitle,
             style: TextStyle(
               color: t.textPrimary,
               fontSize: 24,
@@ -488,7 +494,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                   children: [
                     // Theme name field
                     Text(
-                      'Theme Name',
+                      _l10n.themeThemeName,
                       style: TextStyle(
                         color: t.accent,
                         fontSize: 14,
@@ -524,7 +530,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       children: [
                         OutlinedButton.icon(
                           icon: const Icon(Icons.file_download_outlined),
-                          label: const Text('Import .orskin'),
+                          label: Text(_l10n.themeImportShort),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: t.accent,
                           ),
@@ -533,7 +539,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                         const SizedBox(width: 12),
                         OutlinedButton.icon(
                           icon: const Icon(Icons.file_upload_outlined),
-                          label: const Text('Export .orskin'),
+                          label: Text(_l10n.themeExportShort),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: t.accent,
                           ),
@@ -543,7 +549,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Colors',
+                      _l10n.themeColors,
                       style: TextStyle(
                         color: t.accent,
                         fontSize: 14,
@@ -552,53 +558,53 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     const SizedBox(height: 8),
                     _buildColorRow(
-                      'Background',
+                      _l10n.themeBackground,
                       _edited.background,
                       (c) => _edited = _edited.copyWith(background: c),
                     ),
                     _buildColorRow(
-                      'Surface',
+                      _l10n.themeSurface,
                       _edited.surface,
                       (c) => _edited = _edited.copyWith(surface: c),
                     ),
                     _buildColorRow(
-                      'Accent',
+                      _l10n.themeAccent,
                       _edited.accent,
                       (c) => _edited = _edited.copyWith(accent: c),
                     ),
                     _buildColorRow(
-                      'Text Primary',
+                      _l10n.themeTextPrimary,
                       _edited.textPrimary,
                       (c) => _edited = _edited.copyWith(textPrimary: c),
                     ),
                     _buildColorRow(
-                      'Text Secondary',
+                      _l10n.themeTextSecondary,
                       _edited.textSecondary,
                       (c) => _edited = _edited.copyWith(textSecondary: c),
                     ),
                     _buildColorRow(
-                      'Sidebar Background',
+                      _l10n.themeSidebarBg,
                       _edited.sidebarBg,
                       (c) => _edited = _edited.copyWith(sidebarBg: c),
                     ),
                     _buildColorRow(
-                      'Card Background',
+                      _l10n.themeCardBg,
                       _edited.cardBg,
                       (c) => _edited = _edited.copyWith(cardBg: c),
                     ),
                     _buildColorRow(
-                      'Terminal Background',
+                      _l10n.themeTerminalBg,
                       _edited.terminalBg,
                       (c) => _edited = _edited.copyWith(terminalBg: c),
                     ),
                     _buildColorRow(
-                      'Terminal Text',
+                      _l10n.themeTerminalText,
                       _edited.terminalText,
                       (c) => _edited = _edited.copyWith(terminalText: c),
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Skin Geometry & Wallpaper',
+                      _l10n.themeGeometry,
                       style: TextStyle(
                         color: t.accent,
                         fontSize: 14,
@@ -607,7 +613,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     const SizedBox(height: 8),
                     _buildSlider(
-                      'Corner Radius',
+                      _l10n.themeCornerRadius,
                       _edited.borderRadius,
                       0,
                       24,
@@ -617,7 +623,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       t.accent,
                     ),
                     _buildSlider(
-                      'Wallpaper Opacity',
+                      _l10n.themeWallpaperOpacity,
                       _edited.wallpaperOpacity,
                       0,
                       1,
@@ -627,7 +633,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                       t.accent,
                     ),
                     _buildSlider(
-                      'Wallpaper Blur',
+                      _l10n.themeWallpaperBlur,
                       _edited.wallpaperBlur,
                       0,
                       20,
@@ -640,7 +646,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     _assetPickerRow(
                       t,
                       icon: Icons.wallpaper,
-                      label: 'Choose Wallpaper',
+                      label: _l10n.themeChooseWallpaper,
                       current: _edited.wallpaperPath,
                       onPick: _pickWallpaper,
                       onClear: () => setState(
@@ -650,7 +656,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     _assetPickerRow(
                       t,
                       icon: Icons.animation,
-                      label: 'Choose Dropzone',
+                      label: _l10n.themeChooseDropzone,
                       current: _edited.dropzonePath,
                       onPick: _pickDropzone,
                       onClear: () => setState(
@@ -660,7 +666,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     _assetPickerRow(
                       t,
                       icon: Icons.text_fields,
-                      label: 'Choose Font',
+                      label: _l10n.themeChooseFont,
                       current: _edited.fontPath,
                       onPick: _pickFont,
                       onClear: () => setState(
@@ -669,7 +675,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Sidebar Tabs',
+                      _l10n.themeSidebarTabs,
                       style: TextStyle(
                         color: t.accent,
                         fontSize: 14,
@@ -678,7 +684,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Uncheck a tab to hide it from the sidebar and navigation.',
+                      _l10n.themeSidebarTabsHelp,
                       style: TextStyle(color: t.textSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 8),
@@ -710,9 +716,9 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.save, color: Colors.white),
-                      label: const Text(
-                        'Save Theme',
-                        style: TextStyle(color: Colors.white),
+                      label: Text(
+                        _l10n.themeSaveTheme,
+                        style: const TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: t.accent,
@@ -728,7 +734,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Theme "${saved.name}" saved!'),
+                              content: Text(_l10n.themeSaved(saved.name)),
                             ),
                           );
                         }
@@ -743,7 +749,7 @@ class _ThemeEditorScreenState extends State<ThemeEditorScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Live Preview',
+                    _l10n.themeLivePreview,
                     style: TextStyle(
                       color: t.accent,
                       fontSize: 14,

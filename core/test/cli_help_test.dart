@@ -136,7 +136,8 @@ void main() {
       expect(out, contains('--settle-seconds'));
     });
 
-    test('--watch with a missing directory creates it and logs readiness', () async {
+    test('--watch with a missing directory creates it and logs readiness',
+        () async {
       final tmpDir = Directory.systemTemp.createTempSync('cli_watch_');
       final inDir = Directory('${tmpDir.path}/incoming');
       final outDir = Directory('${tmpDir.path}/library');

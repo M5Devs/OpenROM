@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart';
 
 import '../controllers/plugin_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 /// Keys used by widget tests to drive the storefront.
@@ -37,6 +38,8 @@ class StorefrontView extends StatefulWidget {
 class _StorefrontViewState extends State<StorefrontView> {
   final _searchCtrl = TextEditingController();
 
+  AppLocalizations get _l10n => AppLocalizations.of(context);
+
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -63,7 +66,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                   Icon(Icons.storefront, color: theme.accent, size: 24),
                   const SizedBox(width: 8),
                   Text(
-                    'Plugin Marketplace',
+                    _l10n.storeTitle,
                     style: TextStyle(
                       color: theme.textPrimary,
                       fontSize: 18,
@@ -75,7 +78,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                   const Spacer(),
                   IconButton(
                     key: StorefrontKeys.refresh,
-                    tooltip: 'Refresh catalogue',
+                    tooltip: _l10n.storeRefresh,
                     onPressed: controller.isLoading
                         ? null
                         : () => controller.fetchLiveStore(force: true),
@@ -86,8 +89,8 @@ class _StorefrontViewState extends State<StorefrontView> {
               const SizedBox(height: 4),
               Text(
                 controller.storeIsLive
-                    ? 'Official and community plugins, served live from the store.'
-                    : 'Showing the last cached catalogue. Reconnect to refresh.',
+                    ? _l10n.storeSubtitleLive
+                    : _l10n.storeSubtitleCached,
                 style: TextStyle(color: theme.textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 12),
@@ -124,7 +127,7 @@ class _StorefrontViewState extends State<StorefrontView> {
               size: 13, color: color),
           const SizedBox(width: 5),
           Text(
-            live ? 'Live' : 'Offline',
+            live ? _l10n.storeBadgeLive : _l10n.storeBadgeOffline,
             style: TextStyle(
                 color: color, fontSize: 11, fontWeight: FontWeight.w600),
           ),
@@ -141,7 +144,7 @@ class _StorefrontViewState extends State<StorefrontView> {
       onChanged: controller.setStoreQuery,
       decoration: InputDecoration(
         isDense: true,
-        hintText: 'Search plugins, publishers, routes…',
+        hintText: _l10n.storeSearchHint,
         hintStyle: TextStyle(
             color: theme.textSecondary.withValues(alpha: 0.6), fontSize: 13),
         prefixIcon: Icon(Icons.search, size: 18, color: theme.textSecondary),
@@ -177,7 +180,7 @@ class _StorefrontViewState extends State<StorefrontView> {
       spacing: 8,
       runSpacing: 4,
       children: [
-        _chip(theme, 'All', selected == null, () {
+        _chip(theme, _l10n.storeAll, selected == null, () {
           controller.setStoreCategory(null);
         }, key: StorefrontKeys.category('all')),
         ...categories.map((c) {
@@ -260,10 +263,10 @@ class _StorefrontViewState extends State<StorefrontView> {
             const SizedBox(height: 16),
             Text(
               offline
-                  ? 'ROMéo is offline'
+                  ? _l10n.storeOfflineTitle
                   : controller.storeQuery.isEmpty
-                      ? 'No plugins published yet'
-                      : 'No plugins match your filters',
+                      ? _l10n.storeEmptyTitle
+                      : _l10n.storeNoMatchTitle,
               style: TextStyle(
                 color: theme.textPrimary,
                 fontSize: 16,
@@ -273,11 +276,10 @@ class _StorefrontViewState extends State<StorefrontView> {
             const SizedBox(height: 6),
             Text(
               offline
-                  ? 'The store could not be reached and no cached copy exists. '
-                      'Check your connection and refresh.'
+                  ? _l10n.storeOfflineBody
                   : controller.storeQuery.isEmpty
-                      ? 'Check back soon — new plugins land often.'
-                      : 'Try a different search term or category.',
+                      ? _l10n.storeEmptyBody
+                      : _l10n.storeNoMatchBody,
               textAlign: TextAlign.center,
               style: TextStyle(color: theme.textSecondary, fontSize: 13),
             ),
@@ -339,9 +341,9 @@ class _StorefrontViewState extends State<StorefrontView> {
                         _pill(theme, listing.category),
                         if (listing.publisherVerified) ...[
                           const SizedBox(width: 6),
-                          const Tooltip(
-                            message: 'Verified publisher',
-                            child: Icon(Icons.verified,
+                          Tooltip(
+                            message: _l10n.storeVerifiedPublisher,
+                            child: const Icon(Icons.verified,
                                 color: Color(0xFF00E5FF), size: 16),
                           ),
                         ],
@@ -349,7 +351,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'by ${listing.publisherName}',
+                      _l10n.storeByPublisher(listing.publisherName),
                       style:
                           TextStyle(color: theme.textSecondary, fontSize: 12),
                     ),
@@ -404,7 +406,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: Text(
-                    'core ≥ ${listing.minCoreVersion}',
+                    _l10n.storeCoreMin(listing.minCoreVersion!),
                     style: TextStyle(color: theme.textSecondary, fontSize: 11),
                   ),
                 ),
@@ -413,7 +415,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                   children: [
                     Icon(Icons.check_circle, size: 16, color: theme.accent),
                     const SizedBox(width: 6),
-                    Text('Installed',
+                    Text(_l10n.storeInstalled,
                         style: TextStyle(color: theme.accent, fontSize: 12)),
                   ],
                 )
@@ -432,7 +434,7 @@ class _StorefrontViewState extends State<StorefrontView> {
                       ? null
                       : () => _install(controller, listing),
                   icon: const Icon(Icons.download, size: 16),
-                  label: const Text('Install',
+                  label: Text(_l10n.commonInstall,
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
             ],
@@ -469,7 +471,7 @@ class _StorefrontViewState extends State<StorefrontView> {
     final messenger = ScaffoldMessenger.of(context);
     if (ok) {
       messenger.showSnackBar(
-        SnackBar(content: Text('${listing.name} installed')),
+        SnackBar(content: Text(_l10n.pluginsInstalledToast(listing.name))),
       );
     } else if (controller.errorMessage != null) {
       messenger.showSnackBar(

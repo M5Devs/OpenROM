@@ -71,7 +71,10 @@ class LocaleProvider extends ChangeNotifier {
     await prefs.setString(_prefKey, _localeCode);
   }
 
-  static String getNativeName(String code) {
+  static String getNativeName(Locale locale) {
+    final code = locale.countryCode == null || locale.countryCode!.isEmpty
+        ? locale.languageCode
+        : '${locale.languageCode}_${locale.countryCode}';
     switch (code) {
       case 'ar':
         return 'العربية';

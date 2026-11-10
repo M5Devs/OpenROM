@@ -84,22 +84,25 @@ class _ToolsScreenState extends State<ToolsScreen>
                   icon: const Icon(Icons.content_cut_outlined),
                   text: l10n.headerRemoverTitle,
                 ),
-                Tab(icon: const Icon(Icons.edit_document), text: 'CUE Editor'),
+                Tab(
+                  icon: const Icon(Icons.edit_document),
+                  text: l10n.toolsTabCue,
+                ),
                 Tab(
                   icon: const Icon(Icons.drive_file_rename_outline),
-                  text: 'ROM Renamer',
+                  text: l10n.toolsTabRenamer,
                 ),
                 Tab(
                   icon: const Icon(Icons.cleaning_services_outlined),
-                  text: '1G1R Cleaner',
+                  text: l10n.toolsTab1g1r,
                 ),
                 Tab(
                   icon: const Icon(Icons.fingerprint),
-                  text: 'ROM Hasher',
+                  text: l10n.toolsTabHasher,
                 ),
                 Tab(
                   icon: const Icon(Icons.folder_shared_outlined),
-                  text: 'Watch Folder',
+                  text: l10n.toolsWatchTitle,
                 ),
               ],
             ),
@@ -2907,6 +2910,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
 
     return DropTarget(
@@ -2932,7 +2936,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                   Icon(Icons.fingerprint, color: theme.accent, size: 28),
                   const SizedBox(width: 10),
                   Text(
-                    'ROM Hasher',
+                    l10n.toolsTabHasher,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -2943,7 +2947,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.',
+                l10n.toolsHasherIntro,
                 style: TextStyle(fontSize: 12, color: theme.textSecondary),
               ),
               const SizedBox(height: 16),
@@ -2976,7 +2980,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                       const SizedBox(height: 10),
                       Text(
                         _filePath == null
-                            ? 'Drag & drop a ROM here, or click to browse'
+                            ? l10n.toolsHasherDrop
                             : p.basename(_filePath!),
                         style: TextStyle(
                           fontSize: 14,
@@ -3007,7 +3011,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                   ElevatedButton.icon(
                     onPressed: _pickFile,
                     icon: const Icon(Icons.folder_open, size: 16),
-                    label: const Text('Choose File'),
+                    label: Text(l10n.toolsChooseFile),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.surface,
                       foregroundColor: theme.textPrimary,
@@ -3024,7 +3028,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.fingerprint, size: 16),
-                    label: const Text('Compute Hashes'),
+                    label: Text(l10n.toolsComputeHashes),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.accent,
                       foregroundColor: Colors.black,
@@ -3064,7 +3068,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                 Row(
                   children: [
                     Text(
-                      'Results',
+                      l10n.toolsResults,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -3075,7 +3079,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                     TextButton.icon(
                       onPressed: _copyAll,
                       icon: const Icon(Icons.copy_all, size: 16),
-                      label: const Text('Copy All'),
+                      label: Text(l10n.toolsCopyAll),
                     ),
                   ],
                 ),
@@ -3089,7 +3093,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                   ),
                   child: Column(
                     children: [
-                      _hashRow('File Size',
+                      _hashRow(l10n.toolsFileSize,
                           '${_result!.size} bytes (${_result!.sizeHuman})'),
                       _hashRow('CRC32', _result!.crc32),
                       _hashRow('MD5', _result!.md5),
@@ -3111,6 +3115,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
   /// "Identify Game (Hasheous)" action plus its loading / result / no-match
   /// states, shown beneath the hash cards.
   Widget _buildIdentifySection() {
+    final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
     final lookup = _identify;
 
@@ -3132,7 +3137,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
                     )
                   : const Icon(Icons.travel_explore, size: 16),
               label: Text(
-                _isIdentifying ? 'Identifying…' : 'Identify Game (Hasheous)',
+                _isIdentifying ? l10n.toolsIdentifying : l10n.toolsIdentifyGame,
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.accent,
@@ -3143,8 +3148,7 @@ class _RomHasherTabState extends State<_RomHasherTab> {
             if (!_hasheousEnabled)
               Expanded(
                 child: Text(
-                  'Sends the file SHA-1 to hasheous.org. Enable in Settings → '
-                  'Online Features.',
+                  l10n.toolsHasheousHint,
                   style: TextStyle(fontSize: 11, color: theme.textSecondary),
                 ),
               ),
@@ -3210,7 +3214,14 @@ class _WatchFolderTab extends StatefulWidget {
 
 class _WatchFolderTabState extends State<_WatchFolderTab>
     with SingleTickerProviderStateMixin {
-  static const List<String> _formats = ['CHD', 'RVZ', 'CSO', 'ECM', 'ISO', 'BIN/CUE'];
+  static const List<String> _formats = [
+    'CHD',
+    'RVZ',
+    'CSO',
+    'ECM',
+    'ISO',
+    'BIN/CUE'
+  ];
 
   final WatchFolderSession _session = WatchFolderSession();
   final List<String> _logLines = [];
@@ -3221,6 +3232,8 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
   bool _deleteSource = false;
   bool _isWatching = false;
   bool _isStarting = false;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context);
 
   // Runs only while watching; a permanently repeating controller would make
   // `pumpAndSettle` never settle in widget tests.
@@ -3262,16 +3275,14 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
       if (mounted) {
         _pulseController.stop();
         setState(() => _isWatching = false);
-        _appendLog('Watch stopped.');
+        _appendLog(_l10n.toolsWatchStopped);
       }
       return;
     }
 
     if (_inputDir.isEmpty || _outputDir.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select both an input and an output folder first.'),
-        ),
+        SnackBar(content: Text(_l10n.toolsWatchNeedFolders)),
       );
       return;
     }
@@ -3359,7 +3370,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    value.isEmpty ? 'Choose folder…' : value,
+                    value.isEmpty ? _l10n.toolsChooseFolder : value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -3380,6 +3391,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = widget.theme;
 
     return Container(
@@ -3395,7 +3407,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                     color: theme.accent, size: 28),
                 const SizedBox(width: 10),
                 Text(
-                  'Watch Folder',
+                  l10n.toolsWatchTitle,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -3406,26 +3418,26 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
             ),
             const SizedBox(height: 4),
             Text(
-              'Automatically convert ROMs as they land in a folder.',
+              l10n.toolsWatchIntro,
               style: TextStyle(fontSize: 12, color: theme.textSecondary),
             ),
             const SizedBox(height: 20),
 
             _dirPicker(
-              label: 'Input Folder',
+              label: l10n.toolsInputFolder,
               value: _inputDir,
               onPick: _pickInput,
             ),
             const SizedBox(height: 16),
             _dirPicker(
-              label: 'Output Folder',
+              label: l10n.toolsOutputFolder,
               value: _outputDir,
               onPick: _pickOutput,
             ),
             const SizedBox(height: 20),
 
             Text(
-              'Target Format',
+              l10n.toolsTargetFormat,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -3445,8 +3457,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                   backgroundColor: theme.surface,
                   labelStyle: TextStyle(
                     color: selected ? Colors.black : theme.textPrimary,
-                    fontWeight:
-                        selected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                   ),
                   onSelected: (_) => setState(() => _format = fmt),
                 );
@@ -3463,7 +3474,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Delete source after conversion',
+                  l10n.toolsDeleteSource,
                   style: TextStyle(fontSize: 13, color: theme.textPrimary),
                 ),
               ],
@@ -3485,7 +3496,9 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                           _isWatching ? Icons.stop : Icons.play_arrow,
                           size: 18,
                         ),
-                  label: Text(_isWatching ? 'Stop Watching' : 'Start Watching'),
+                  label: Text(_isWatching
+                      ? l10n.toolsStopWatching
+                      : l10n.toolsStartWatching),
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         _isWatching ? Colors.redAccent : theme.accent,
@@ -3509,7 +3522,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
                 if (_isWatching) ...[
                   const SizedBox(width: 8),
                   Text(
-                    'Active',
+                    l10n.toolsActive,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -3522,7 +3535,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
             const SizedBox(height: 20),
 
             Text(
-              'Live Log',
+              l10n.toolsLiveLog,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -3541,7 +3554,7 @@ class _WatchFolderTabState extends State<_WatchFolderTab>
               ),
               child: _logLines.isEmpty
                   ? Text(
-                      'No activity yet.',
+                      l10n.toolsNoActivity,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.textSecondary,

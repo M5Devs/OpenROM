@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:openrom_core/openrom_core.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/theme_config.dart';
 
 /// Keys used by widget tests to drive the deep-link dialog.
@@ -24,6 +25,7 @@ Future<bool> showDeepLinkInstallDialog({
   required ThemeConfig theme,
   required StoreListing listing,
 }) async {
+  final l10n = AppLocalizations.of(context);
   final confirmed = await showDialog<bool>(
     context: context,
     barrierDismissible: true,
@@ -35,7 +37,7 @@ Future<bool> showDeepLinkInstallDialog({
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Install plugin from link?',
+              l10n.deepLinkTitle,
               style: TextStyle(color: theme.textPrimary),
             ),
           ),
@@ -48,19 +50,18 @@ Future<bool> showDeepLinkInstallDialog({
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'An openrom:// link wants to install a plugin. Review it before '
-              'continuing.',
+              l10n.deepLinkBody,
               style: TextStyle(color: theme.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 14),
-            _row(theme, 'Plugin', listing.name),
-            _row(theme, 'ID', listing.id),
-            _row(theme, 'Version', listing.version),
-            _row(theme, 'Publisher', listing.publisherName),
-            _row(theme, 'Category', listing.category),
+            _row(theme, l10n.deepLinkPlugin, listing.name),
+            _row(theme, l10n.deepLinkId, listing.id),
+            _row(theme, l10n.deepLinkVersion, listing.version),
+            _row(theme, l10n.deepLinkPublisher, listing.publisherName),
+            _row(theme, l10n.deepLinkCategory, listing.category),
             if (listing.minCoreVersion != null &&
                 listing.minCoreVersion!.isNotEmpty)
-              _row(theme, 'Requires core', listing.minCoreVersion!),
+              _row(theme, l10n.deepLinkRequiresCore, listing.minCoreVersion!),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
@@ -75,8 +76,7 @@ Future<bool> showDeepLinkInstallDialog({
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'The download is verified against the store\'s published '
-                      'SHA-256 before installation.',
+                      l10n.deepLinkVerified,
                       style:
                           TextStyle(color: theme.textSecondary, fontSize: 11),
                     ),
@@ -91,7 +91,7 @@ Future<bool> showDeepLinkInstallDialog({
         TextButton(
           key: DeepLinkDialogKeys.cancel,
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         ElevatedButton.icon(
           key: DeepLinkDialogKeys.install,
@@ -101,7 +101,7 @@ Future<bool> showDeepLinkInstallDialog({
           ),
           onPressed: () => Navigator.of(ctx).pop(true),
           icon: const Icon(Icons.download, size: 18),
-          label: const Text('Install'),
+          label: Text(l10n.commonInstall),
         ),
       ],
     ),
@@ -115,6 +115,7 @@ Future<void> showDeepLinkNotFoundDialog({
   required ThemeConfig theme,
   required DeepLinkTarget target,
 }) {
+  final l10n = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -124,14 +125,13 @@ Future<void> showDeepLinkNotFoundDialog({
           const Icon(Icons.link_off, color: Colors.orangeAccent),
           const SizedBox(width: 8),
           Expanded(
-            child: Text('Plugin not found',
+            child: Text(l10n.deepLinkNotFoundTitle,
                 style: TextStyle(color: theme.textPrimary)),
           ),
         ],
       ),
       content: Text(
-        'No plugin with the id "${target.id}" was found in the store '
-        'catalogue.',
+        l10n.deepLinkNotFoundBody(target.id),
         style: TextStyle(color: theme.textSecondary, fontSize: 13),
       ),
       actions: [
@@ -141,7 +141,7 @@ Future<void> showDeepLinkNotFoundDialog({
             foregroundColor: Colors.black,
           ),
           onPressed: () => Navigator.of(ctx).pop(),
-          child: const Text('OK'),
+          child: Text(l10n.commonOk),
         ),
       ],
     ),

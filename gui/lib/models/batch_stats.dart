@@ -19,9 +19,8 @@ class BatchStats {
 
   int get bytesSaved => totalOriginalBytes - totalOutputBytes;
 
-  double get savedPercentage => totalOriginalBytes <= 0
-      ? 0.0
-      : (bytesSaved / totalOriginalBytes) * 100.0;
+  double get savedPercentage =>
+      totalOriginalBytes <= 0 ? 0.0 : (bytesSaved / totalOriginalBytes) * 100.0;
 
   /// True only when the batch genuinely shrank the data.
   bool get hasSavings => bytesSaved > 0;

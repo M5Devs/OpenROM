@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gui/controllers/plugin_controller.dart';
 import 'package:gui/models/theme_config.dart';
+import 'package:gui/l10n/app_localizations.dart';
 import 'package:gui/screens/plugins_screen.dart';
 import 'package:gui/services/deeplink_service.dart';
 import 'package:gui/services/plugin_service.dart';
@@ -59,6 +60,8 @@ void main() {
       bool? result;
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (ctx) => Scaffold(
               body: ElevatedButton(
@@ -93,6 +96,8 @@ void main() {
       bool? result;
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (ctx) => Scaffold(
               body: ElevatedButton(
@@ -127,6 +132,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(
               theme: testTheme,
@@ -157,6 +164,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(
               theme: testTheme,
@@ -184,6 +193,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PluginsScreen(
               theme: testTheme,

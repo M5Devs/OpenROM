@@ -224,5 +224,350 @@
     }
   },
   "raViewGame": "View on RA",
-  "raSaveCredentials": "Save"
+  "raSaveCredentials": "Save",
+  "navPatch": "Patch",
+  "navTools": "Tools",
+  "navPlugins": "Plugins",
+  "mediaTypeTitle": "Unrecognized Media Type",
+  "mediaTypeBody": "Unrecognized Media Type: Is this game a CD or DVD?\n\nFile: {file}",
+  "@mediaTypeBody": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaCd": "CD",
+  "mediaDvd": "DVD",
+  "commonCancel": "Cancel",
+  "commonOk": "OK",
+  "commonAdd": "Add",
+  "commonDone": "Done",
+  "commonApply": "Apply",
+  "commonRemove": "Remove",
+  "commonInstall": "Install",
+  "pluginsTabInstalled": "Installed Plugins 📦",
+  "pluginsTabStore": "Plugin Store 🌐🛒",
+  "pluginsTabStudio": "Create / Studio 🛠️",
+  "pluginsDropTitle": "Drag & Drop .orplug Archive Here",
+  "pluginsDropSubtitle": "Install custom ROM tools, extensions, and formats",
+  "pluginsBrowse": "Browse .orplug File",
+  "pluginsInstalledHeading": "Installed Plugins ({count})",
+  "@pluginsInstalledHeading": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pluginsEmptyTitle": "No Plugins Installed Yet",
+  "pluginsEmptyBody": "Drop an .orplug package above or explore community plugins in the Plugin Store.",
+  "pluginsUninstall": "Uninstall",
+  "pluginsUninstallTitle": "Uninstall Plugin",
+  "pluginsUninstallBody": "Are you sure you want to uninstall \"{name}\" ({id})?",
+  "@pluginsUninstallBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "pluginsInstallFailed": "Install failed",
+  "pluginsAlreadyInstalled": "{name} is already installed",
+  "@pluginsAlreadyInstalled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pluginsInstalledToast": "{name} installed",
+  "@pluginsInstalledToast": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "storeTitle": "Plugin Marketplace",
+  "storeRefresh": "Refresh catalogue",
+  "storeSubtitleLive": "Official and community plugins, served live from the store.",
+  "storeSubtitleCached": "Showing the last cached catalogue. Reconnect to refresh.",
+  "storeBadgeLive": "Live",
+  "storeBadgeOffline": "Offline",
+  "storeSearchHint": "Search plugins, publishers, routes…",
+  "storeAll": "All",
+  "storeOfflineTitle": "ROMéo is offline",
+  "storeEmptyTitle": "No plugins published yet",
+  "storeNoMatchTitle": "No plugins match your filters",
+  "storeOfflineBody": "The store could not be reached and no cached copy exists. Check your connection and refresh.",
+  "storeEmptyBody": "Check back soon — new plugins land often.",
+  "storeNoMatchBody": "Try a different search term or category.",
+  "storeVerifiedPublisher": "Verified publisher",
+  "storeInstalled": "Installed",
+  "storeByPublisher": "by {name}",
+  "@storeByPublisher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "storeCoreMin": "core ≥ {version}",
+  "@storeCoreMin": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "deepLinkTitle": "Install plugin from link?",
+  "deepLinkBody": "An openrom:// link wants to install a plugin. Review it before continuing.",
+  "deepLinkPlugin": "Plugin",
+  "deepLinkId": "ID",
+  "deepLinkVersion": "Version",
+  "deepLinkPublisher": "Publisher",
+  "deepLinkCategory": "Category",
+  "deepLinkRequiresCore": "Requires core",
+  "deepLinkVerified": "The download is verified against the published SHA-256 before installation.",
+  "deepLinkNotFoundTitle": "Plugin not found",
+  "deepLinkNotFoundBody": "No plugin with the id \"{id}\" was found in the store catalogue.",
+  "@deepLinkNotFoundBody": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "studioTitle": "Visual .orplug Builder Studio",
+  "studioIntro": "Start a new plugin or open an existing project folder.",
+  "studioNew": "New",
+  "studioOpen": "Open",
+  "studioRescan": "Rescan project",
+  "studioIdentity": "Identity",
+  "studioPluginId": "Plugin ID",
+  "studioDisplayName": "Display Name",
+  "studioVersion": "Version (SemVer)",
+  "studioMinCore": "Min Core Version",
+  "studioCategory": "Category",
+  "studioPublisher": "Publisher",
+  "studioPublisherId": "Publisher ID",
+  "studioPublisherName": "Publisher Name",
+  "studioVerified": "Verified",
+  "studioVerifiedTip": "Verified publishers get the blue check in the store",
+  "studioDescriptionRoutes": "Description & Routes",
+  "studioDescription": "Description",
+  "studioRouteHint": "Add route (e.g. ISO -> WUA)",
+  "studioNoRoutes": "No routes yet.",
+  "studioBinaries": "Binaries",
+  "studioBinariesHelp": "Attach one executable per platform. SHA-256 hashes are computed automatically when you save or build.",
+  "studioNotSet": "not set",
+  "studioReplace": "Replace",
+  "studioExecutionArgs": "Execution Arguments",
+  "studioPlaceholders": "Placeholders: bin (executable) · in (input) · out (output) · outdir (output dir) · cue (cue sheet)",
+  "studioArgsTemplate": "Argument template",
+  "studioBuild": "Build",
+  "studioSaveManifest": "Save Manifest",
+  "studioValidate": "Validate",
+  "studioBuildPackage": "Build .orplug",
+  "studioLastBuild": "Last build: {path} · sha256 {sha}",
+  "@studioLastBuild": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "sha": {
+        "type": "String"
+      }
+    }
+  },
+  "studioCopyMarketplace": "Copy marketplace JSON",
+  "studioMarketplaceCopied": "Marketplace JSON copied",
+  "studioManifestValid": "Manifest is valid",
+  "studioValidationIssues": "Validation issues",
+  "studioBuiltTitle": "Built .orplug",
+  "studioArchive": "Archive",
+  "studioSize": "Size",
+  "studioSizeBytes": "{bytes} bytes",
+  "@studioSizeBytes": {
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "studioMarketplaceEntry": "Marketplace entry (paste into the store catalogue):",
+  "studioCopyJson": "Copy JSON",
+  "studioNewProjectTitle": "Select where to create the plugin",
+  "studioOpenProjectTitle": "Select a plugin project folder",
+  "studioDefaultName": "My Tool",
+  "themeEditorTitle": "Theme Editor",
+  "themeCustomSkin": "Custom Skin",
+  "themeCustomTheme": "Custom Theme",
+  "themeThemeName": "Theme Name",
+  "themePickWallpaper": "Choose a wallpaper (GIF, PNG, JPG or WebP)",
+  "themePickDropzone": "Choose a dropzone illustration (GIF or PNG)",
+  "themePickFont": "Choose a UI font (TTF or OTF)",
+  "themeImportSkinBundle": "Import an .orskin bundle",
+  "themeExportSkinBundle": "Export .orskin bundle",
+  "themeImportShort": "Import .orskin",
+  "themeExportShort": "Export .orskin",
+  "themeImportFailed": "Import failed: {error}",
+  "@themeImportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeExportFailed": "Export failed: {error}",
+  "@themeExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeImported": "Imported skin \"{name}\"",
+  "@themeImported": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "themeExported": "Exported {path}",
+  "@themeExported": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "themePickColor": "Pick Color",
+  "themeHue": "Hue",
+  "themeSaturation": "Saturation",
+  "themeValue": "Value",
+  "themeColors": "Colors",
+  "themeBackground": "Background",
+  "themeSurface": "Surface",
+  "themeAccent": "Accent",
+  "themeTextPrimary": "Text Primary",
+  "themeTextSecondary": "Text Secondary",
+  "themeSidebarBg": "Sidebar Background",
+  "themeCardBg": "Card Background",
+  "themeTerminalBg": "Terminal Background",
+  "themeTerminalText": "Terminal Text",
+  "themeGeometry": "Skin Geometry & Wallpaper",
+  "themeCornerRadius": "Corner Radius",
+  "themeWallpaperOpacity": "Wallpaper Opacity",
+  "themeWallpaperBlur": "Wallpaper Blur",
+  "themeChooseWallpaper": "Choose Wallpaper",
+  "themeChooseDropzone": "Choose Dropzone",
+  "themeChooseFont": "Choose Font",
+  "themeSidebarTabs": "Sidebar Tabs",
+  "themeSidebarTabsHelp": "Uncheck a tab to hide it from the sidebar and navigation.",
+  "themeSaveTheme": "Save Theme",
+  "themeLivePreview": "Live Preview",
+  "settingsLanguage": "Language",
+  "settingsAudioCodec": "CD Audio Codec (CHD)",
+  "settingsCodecFlac": "Lossless (FLAC) - Recommended",
+  "settingsCodecVorbis": "Max Compression (Vorbis)",
+  "settingsVerifySub": "Runs chdman verify on newly created CHD files",
+  "settingsSameFolder": "Same folder as source file",
+  "settingsSelectDir": "Select directory...",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsUpdateError": "Error checking for updates",
+  "settingsRaSaved": "RetroAchievements credentials saved",
+  "settingsHasheous": "Hasheous",
+  "settingsHasheousEnable": "Enable Hasheous hash lookup",
+  "settingsHasheousSub": "Identifies games by transmitting the ROM SHA-1 to hasheous.org. Off by default; only your file hash is sent.",
+  "batchTitle": "Batch Complete! 🎉",
+  "batchSaved": "You just saved {amount}",
+  "@batchSaved": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "batchSavedDetail": "({percent} reduction) across {count} {count, plural, =1{game} other{games}}!",
+  "@batchSavedDetail": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAllProcessed": "All {count} {count, plural, =1{file} other{files}} processed successfully!",
+  "@batchAllProcessed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "batchAwesome": "Awesome!",
+  "hasheousUnknown": "Unknown title",
+  "hasheousMore": "+ {count} more",
+  "@hasheousMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hasheousVerifiedIn": "Verified in {source}",
+  "@hasheousVerifiedIn": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "hasheousNoMatch": "No match found in preservation databases.",
+  "toolsTabCue": "CUE Editor",
+  "toolsTabRenamer": "ROM Renamer",
+  "toolsTab1g1r": "1G1R Cleaner",
+  "toolsTabHasher": "ROM Hasher",
+  "toolsWatchTitle": "Watch Folder",
+  "toolsHasherIntro": "Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.",
+  "toolsHasherDrop": "Drag & drop a ROM here, or click to browse",
+  "toolsChooseFile": "Choose File",
+  "toolsComputeHashes": "Compute Hashes",
+  "toolsResults": "Results",
+  "toolsCopyAll": "Copy All",
+  "toolsFileSize": "File Size",
+  "toolsIdentifying": "Identifying…",
+  "toolsIdentifyGame": "Identify Game (Hasheous)",
+  "toolsHasheousHint": "Sends the file SHA-1 to hasheous.org. Enable in Settings → Online Features.",
+  "toolsWatchStopped": "Watch stopped.",
+  "toolsWatchNeedFolders": "Select both an input and an output folder first.",
+  "toolsChooseFolder": "Choose folder…",
+  "toolsWatchIntro": "Automatically convert ROMs as they land in a folder.",
+  "toolsInputFolder": "Input Folder",
+  "toolsOutputFolder": "Output Folder",
+  "toolsTargetFormat": "Target Format",
+  "toolsDeleteSource": "Delete source after conversion",
+  "toolsStopWatching": "Stop Watching",
+  "toolsStartWatching": "Start Watching",
+  "toolsActive": "Active",
+  "toolsLiveLog": "Live Log",
+  "toolsNoActivity": "No activity yet.",
+  "themeSaved": "Theme \"{name}\" saved!",
+  "@themeSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
