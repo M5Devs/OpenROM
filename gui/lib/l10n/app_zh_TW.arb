@@ -397,6 +397,7 @@
   "toolsTab1g1r": "1G1R 整理器",
   "toolsTabHasher": "ROM 雜湊計算",
   "toolsWatchTitle": "監看資料夾",
+  "toolsArcadeTitle": "街機 / MAME",
   "toolsHasherIntro": "以單次串流計算 CRC32、MD5、SHA-1 與 SHA-256。",
   "toolsHasherDrop": "將 ROM 拖放到這裡，或點擊瀏覽",
   "toolsChooseFile": "選擇檔案",

@@ -2019,6 +2019,12 @@ abstract class AppLocalizations {
   /// **'Watch Folder'**
   String get toolsWatchTitle;
 
+  /// No description provided for @toolsArcadeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arcade / MAME'**
+  String get toolsArcadeTitle;
+
   /// No description provided for @toolsHasherIntro.
   ///
   /// In en, this message translates to:

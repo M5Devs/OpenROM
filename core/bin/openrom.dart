@@ -99,6 +99,32 @@ ArgParser buildParser() {
       'rename-roms',
       help: 'rename ROMs in a folder to canonical DAT names',
     )
+    // MAME / Arcade auditor
+    ..addFlag(
+      'audit-mame',
+      negatable: false,
+      help: 'audit an arcade ROM folder against a MAME XML / Logiqx DAT '
+          '(used with --dat and --folder)',
+    )
+    ..addOption(
+      'dat',
+      help: 'path to a MAME XML or Logiqx DAT file (used with --audit-mame)',
+    )
+    ..addFlag(
+      'only-present',
+      negatable: false,
+      help: 'with --audit-mame: only report sets whose zip is present',
+    )
+    ..addFlag(
+      'no-crc-check',
+      negatable: false,
+      help: 'with --audit-mame: match ROMs by size only, ignoring CRC',
+    )
+    ..addFlag(
+      'include-bios',
+      negatable: false,
+      help: 'with --audit-mame: include BIOS / device-only sets',
+    )
     // Plugin Management
     ..addOption('install-plugin', help: 'install a plugin from a .orplug file')
     ..addFlag('list-plugins',
@@ -1027,6 +1053,82 @@ Future<int> _runCli(List<String> args) async {
       }
     }
     return 0;
+  }
+
+  if (results['audit-mame'] == true) {
+    final datPath = results['dat'] as String?;
+    final folder = results['folder'] as String?;
+    if (datPath == null || folder == null) {
+      const msg = '--audit-mame requires --dat DATFILE and --folder DIR';
+      if (isJson) {
+        _jsonPrint({'type': 'error', 'message': msg});
+      } else {
+        print('Error: $msg');
+      }
+      return 2;
+    }
+
+    final auditOptions = MameAuditOptions(
+      verifyCrc: results['no-crc-check'] != true,
+      onlyPresentSets: results['only-present'] == true,
+      includeBiosSets: results['include-bios'] == true,
+    );
+
+    try {
+      final report = await auditMameCollection(
+        datPath: datPath,
+        folder: folder,
+        options: auditOptions,
+        onProgress: (stage, done, total) {
+          if (isJson) {
+            _jsonPrint({
+              'type': 'progress',
+              'stage': stage,
+              'done': done,
+              if (total > 0) 'total': total,
+            });
+          } else if (stage == 'audit' && total > 0) {
+            _renderProgress(
+                'auditing ${p.basename(folder)}', done / total * 100.0);
+          }
+        },
+      );
+      if (!isJson) _clearProgress();
+
+      if (isJson) {
+        _jsonPrint(
+            {'type': 'result', 'action': 'audit-mame', ...report.toJson()});
+      } else {
+        print('MAME Audit — ${report.datName}');
+        print('  Folder: ${report.folder}');
+        print('  Total games: ${report.total}');
+        print('  🟢 Complete:       ${report.completeCount}');
+        print('  🟡 Missing BIOS:   ${report.missingBiosCount}');
+        print('  🟡 Missing Parent: ${report.missingParentCount}');
+        print('  🔴 Incomplete:     ${report.incompleteCount}');
+        print('  💽 Missing CHD:    ${report.missingChdCount}');
+        print('  🔴 Missing Set:    ${report.missingCount}');
+        if (report.errorCount > 0) {
+          print('  ⚠️  Unreadable:     ${report.errorCount}');
+        }
+        print('  Health: ${report.healthPercent.toStringAsFixed(1)}%');
+        print('');
+        for (final r in report.results) {
+          if (r.isComplete) continue;
+          print('  ${r.status.label}  ${r.name} — ${r.description}');
+          print('      ${r.detail}');
+        }
+      }
+      return 0;
+    } catch (e) {
+      if (!isJson) _clearProgress();
+      if (isJson) {
+        _jsonPrint({'type': 'done', 'success': false, 'error': e.toString()});
+      } else {
+        print('❌ MAME audit failed: $e');
+      }
+      return 2;
+    }
   }
 
   if (results['dcp'] != null) {

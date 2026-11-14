@@ -92,6 +92,16 @@ void main() {
       expect(find.text('Delete source after conversion'), findsOneWidget);
       expect(find.text('Start Watching'), findsOneWidget);
       expect(find.text('No activity yet.'), findsOneWidget);
+
+      final arcadeTabFinder = find.widgetWithText(Tab, 'Arcade / MAME');
+      expect(arcadeTabFinder, findsOneWidget);
+      await tester.tap(arcadeTabFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Select MAME XML / DAT file'), findsOneWidget);
+      expect(find.text('Select Arcade ROMs Folder'), findsOneWidget);
+      expect(find.text('Audit Arcade Collection'), findsOneWidget);
+      expect(find.text('No DAT selected'), findsOneWidget);
+      expect(find.text('No folder selected'), findsOneWidget);
     });
   });
 }

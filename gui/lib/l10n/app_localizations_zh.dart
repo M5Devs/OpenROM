@@ -1022,6 +1022,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toolsWatchTitle => '监视文件夹';
 
   @override
+  String get toolsArcadeTitle => '街机 / MAME';
+
+  @override
   String get toolsHasherIntro => '单次流式计算 CRC32、MD5、SHA-1 和 SHA-256。';
 
   @override
@@ -2113,6 +2116,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get toolsWatchTitle => '監看資料夾';
+
+  @override
+  String get toolsArcadeTitle => '街機 / MAME';
 
   @override
   String get toolsHasherIntro => '以單次串流計算 CRC32、MD5、SHA-1 與 SHA-256。';

@@ -50,6 +50,161 @@ class BinMergeResult {
   });
 }
 
+/// One missing / mismatched chip or disk reported by the MAME auditor.
+class ArcadeMissingEntry {
+  final String kind; // 'rom' | 'disk'
+  final String name;
+  final int expectedSize;
+  final String expectedCrc;
+  final String reason; // 'missing' | 'crc_mismatch'
+  final String actualCrc;
+  final String? fromSet;
+
+  ArcadeMissingEntry({
+    required this.kind,
+    required this.name,
+    this.expectedSize = 0,
+    this.expectedCrc = '',
+    this.reason = 'missing',
+    this.actualCrc = '',
+    this.fromSet,
+  });
+
+  factory ArcadeMissingEntry.fromJson(Map<String, dynamic> json) {
+    return ArcadeMissingEntry(
+      kind: json['kind'] as String? ?? 'rom',
+      name: json['name'] as String? ?? '',
+      expectedSize: (json['expected_size'] as num?)?.toInt() ?? 0,
+      expectedCrc: json['expected_crc'] as String? ?? '',
+      reason: json['reason'] as String? ?? 'missing',
+      actualCrc: json['actual_crc'] as String? ?? '',
+      fromSet: json['from_set'] as String?,
+    );
+  }
+}
+
+/// Audit result for a single arcade machine.
+class ArcadeGameAudit {
+  final String name;
+  final String description;
+  final String status; // complete | missing_bios | missing_parent | ...
+  final String statusLabel;
+  final String detail;
+  final bool isClone;
+  final bool isBios;
+  final int romsChecked;
+  final int romsPresent;
+  final int disksChecked;
+  final int disksPresent;
+  final List<String> missingBios;
+  final List<String> missingParents;
+  final List<ArcadeMissingEntry> missingRoms;
+  final List<ArcadeMissingEntry> missingDisks;
+
+  ArcadeGameAudit({
+    required this.name,
+    required this.description,
+    required this.status,
+    required this.statusLabel,
+    required this.detail,
+    this.isClone = false,
+    this.isBios = false,
+    this.romsChecked = 0,
+    this.romsPresent = 0,
+    this.disksChecked = 0,
+    this.disksPresent = 0,
+    this.missingBios = const [],
+    this.missingParents = const [],
+    this.missingRoms = const [],
+    this.missingDisks = const [],
+  });
+
+  bool get isComplete => status == 'complete';
+
+  factory ArcadeGameAudit.fromJson(Map<String, dynamic> json) {
+    List<T> listOf<T>(String key, T Function(Map<String, dynamic>) f) =>
+        (json[key] as List<dynamic>? ?? [])
+            .cast<Map<String, dynamic>>()
+            .map(f)
+            .toList();
+    return ArcadeGameAudit(
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      status: json['status'] as String? ?? 'incomplete',
+      statusLabel: json['status_label'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      isClone: json['is_clone'] as bool? ?? false,
+      isBios: json['is_bios'] as bool? ?? false,
+      romsChecked: (json['roms_checked'] as num?)?.toInt() ?? 0,
+      romsPresent: (json['roms_present'] as num?)?.toInt() ?? 0,
+      disksChecked: (json['disks_checked'] as num?)?.toInt() ?? 0,
+      disksPresent: (json['disks_present'] as num?)?.toInt() ?? 0,
+      missingBios: (json['missing_bios'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      missingParents: (json['missing_parents'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      missingRoms: listOf('missing_roms', ArcadeMissingEntry.fromJson),
+      missingDisks: listOf('missing_disks', ArcadeMissingEntry.fromJson),
+    );
+  }
+}
+
+/// Aggregate MAME audit report for a whole collection.
+class ArcadeAuditReport {
+  final String datName;
+  final String folder;
+  final int totalGames;
+  final int skippedDevices;
+  final int complete;
+  final int missingBios;
+  final int missingParent;
+  final int incomplete;
+  final int missingChd;
+  final int missingSet;
+  final int errors;
+  final double healthPercent;
+  final List<ArcadeGameAudit> games;
+
+  ArcadeAuditReport({
+    required this.datName,
+    required this.folder,
+    required this.totalGames,
+    this.skippedDevices = 0,
+    this.complete = 0,
+    this.missingBios = 0,
+    this.missingParent = 0,
+    this.incomplete = 0,
+    this.missingChd = 0,
+    this.missingSet = 0,
+    this.errors = 0,
+    this.healthPercent = 0,
+    this.games = const [],
+  });
+
+  factory ArcadeAuditReport.fromJson(Map<String, dynamic> json) {
+    return ArcadeAuditReport(
+      datName: json['dat'] as String? ?? '',
+      folder: json['folder'] as String? ?? '',
+      totalGames: (json['total_games'] as num?)?.toInt() ?? 0,
+      skippedDevices: (json['skipped_devices'] as num?)?.toInt() ?? 0,
+      complete: (json['complete'] as num?)?.toInt() ?? 0,
+      missingBios: (json['missing_bios'] as num?)?.toInt() ?? 0,
+      missingParent: (json['missing_parent'] as num?)?.toInt() ?? 0,
+      incomplete: (json['incomplete'] as num?)?.toInt() ?? 0,
+      missingChd: (json['missing_chd'] as num?)?.toInt() ?? 0,
+      missingSet: (json['missing_set'] as num?)?.toInt() ?? 0,
+      errors: (json['errors'] as num?)?.toInt() ?? 0,
+      healthPercent: (json['health_percent'] as num?)?.toDouble() ?? 0,
+      games: (json['games'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>()
+          .map(ArcadeGameAudit.fromJson)
+          .toList(),
+    );
+  }
+}
+
 /// A single event emitted by the background watch-folder daemon.
 class WatchEvent {
   final String type; // 'log' | 'progress' | 'done' | 'error'
@@ -787,5 +942,83 @@ class ToolsService {
       OpenROMError.conversionFailed,
       details: err.isNotEmpty ? err : '1G1R filter failed',
     );
+  }
+
+  /// Audit an arcade ROM folder against a MAME XML / Logiqx DAT file.
+  Future<ArcadeAuditReport> auditMame({
+    required String datPath,
+    required String folderPath,
+    bool onlyPresent = false,
+    bool includeBios = false,
+    void Function(int done, int total)? onProgress,
+  }) async {
+    if (!await CoreBridge.coreExists()) {
+      throw OpenROMException(OpenROMError.coreNotFound);
+    }
+    if (!File(datPath).existsSync()) {
+      throw OpenROMException(
+        OpenROMError.fileNotFound,
+        details: 'DAT file not found: $datPath',
+      );
+    }
+
+    final corePath = await CoreBridge.getCoreExecutablePath();
+    final List<String> args = [];
+    if (corePath.endsWith('python3') || corePath.endsWith('python')) {
+      args.add('main.py');
+    }
+    args.addAll([
+      '--json',
+      '--audit-mame',
+      '--dat',
+      datPath,
+      '--folder',
+      folderPath,
+    ]);
+    if (onlyPresent) args.add('--only-present');
+    if (includeBios) args.add('--include-bios');
+
+    final process = await Process.start(corePath, args);
+    final stderrLog = StringBuffer();
+    Map<String, dynamic>? resultEvent;
+
+    process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.trim().isEmpty) return;
+      try {
+        final Map<String, dynamic> event = jsonDecode(line);
+        if (event['type'] == 'result') {
+          resultEvent = Map<String, dynamic>.from(event);
+        } else if (event['type'] == 'progress' && onProgress != null) {
+          onProgress(
+            (event['done'] as num?)?.toInt() ?? 0,
+            (event['total'] as num?)?.toInt() ?? 0,
+          );
+        } else if (event['type'] == 'error') {
+          stderrLog.writeln(event['message'] ?? '');
+        }
+      } catch (_) {}
+    });
+
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+      if (line.trim().isNotEmpty) {
+        stderrLog.writeln(line);
+      }
+    });
+
+    final exitCode = await process.exitCode;
+    final result = resultEvent;
+    if (exitCode != 0 || result == null) {
+      final details = stderrLog.isNotEmpty
+          ? stderrLog.toString().trim()
+          : 'MAME audit failed with code $exitCode';
+      throw OpenROMException(OpenROMError.conversionFailed, details: details);
+    }
+    return ArcadeAuditReport.fromJson(result);
   }
 }

@@ -397,6 +397,7 @@
   "toolsTab1g1r": "1G1R 清理器",
   "toolsTabHasher": "ROM 哈希计算",
   "toolsWatchTitle": "监视文件夹",
+  "toolsArcadeTitle": "街机 / MAME",
   "toolsHasherIntro": "单次流式计算 CRC32、MD5、SHA-1 和 SHA-256。",
   "toolsHasherDrop": "将 ROM 拖放到这里，或点击浏览",
   "toolsChooseFile": "选择文件",

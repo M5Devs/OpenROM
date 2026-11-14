@@ -1048,6 +1048,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toolsWatchTitle => 'Watch Folder';
 
   @override
+  String get toolsArcadeTitle => 'Arcade / MAME';
+
+  @override
   String get toolsHasherIntro =>
       'Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.';
 
