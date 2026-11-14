@@ -539,6 +539,7 @@
   "toolsTab1g1r": "1G1R Cleaner",
   "toolsTabHasher": "ROM Hasher",
   "toolsWatchTitle": "Watch Folder",
+  "toolsArcadeTitle": "Arcade / MAME",
   "toolsHasherIntro": "Compute CRC32, MD5, SHA-1 and SHA-256 in a single streaming pass.",
   "toolsHasherDrop": "Drag & drop a ROM here, or click to browse",
   "toolsChooseFile": "Choose File",
