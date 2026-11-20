@@ -408,7 +408,7 @@ class Converter {
       return await _fromChd(job, src, tgt, info);
     }
 
-    if (tgt == 'CSO') {
+    if (tgt == 'CSO' || tgt == 'ZSO') {
       return await _toCso(job, src);
     }
 
@@ -614,15 +614,26 @@ class Converter {
 
   Future<bool> _toCso(ConversionJob job, String src) async {
     final maxcso = config.getToolPath('maxcso');
-    final out = _outPath(job, src, '.cso');
+    final isZso = job.targetFormat.toUpperCase() == 'ZSO';
+    final out = _outPath(job, src, isZso ? '.zso' : '.cso');
     final threads = Platform.numberOfProcessors;
-    final cmd = [maxcso, '--threads=$threads', src, '-o', out];
-    if (job.compression == 'Max') {
-      cmd.insert(1, '--use-zopfli');
-    } else if (job.compression == 'High') {
-      cmd.insert(1, '--use-zlib');
-    }
-    _log('[CSO] ${p.basename(src)} → ${p.basename(out)}');
+
+    // maxcso picks a larger block size on big ISOs, but PSP firmware and
+    // PSVita Adrenaline only read 2048-byte blocks. Pin it for both formats.
+    // ZSO cannot carry DEFLATE blocks, so the deflate methods are CSO-only.
+    final cmd = [
+      maxcso,
+      '--threads=$threads',
+      '--block=2048',
+      if (isZso) ...['--format=zso', '--use-lz4brute'],
+      if (!isZso && job.compression == 'Max') '--use-zopfli',
+      if (!isZso && job.compression == 'High') '--use-zlib',
+      src,
+      '-o',
+      out,
+    ];
+
+    _log('[${isZso ? 'ZSO' : 'CSO'}] ${p.basename(src)} → ${p.basename(out)}');
     return await _run(cmd, job);
   }
 

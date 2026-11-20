@@ -224,7 +224,9 @@ Trace: *user drops `game.bin` in the GUI and clicks Convert to CHD.*
      └─ _dispatch() picks the handler:
           CHD   → _toChd()      → chdman createcd|createdvd  (codec per platform)
           ISO   → _fromChd()    → chdman extractcd|extractdvd
-          CSO   → _toCso()      → maxcso --threads=N [--use-zopfli|--use-zlib]
+          CSO   → _toCso()      → maxcso --block=2048 --threads=N
+          ZSO   → _toCso()        [--use-zopfli|--use-zlib]  (CSO only)
+                                  [--format=zso --use-lz4brute]  (ZSO)
           RVZ   → _toRvz()      → nodtool convert
           ECM   → _toEcm()/_fromEcm() → ecm / unecm
           XISO / WUD… / WUX… / WUA / CCI / ZAR / NKIT

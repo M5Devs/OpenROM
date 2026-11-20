@@ -94,7 +94,7 @@ const Map<String, String> builtinFormatColors = {
 // (CCI/ZAR), NKit and Wii U (WUD/WUX/WUA) routes were decoupled in v4.0.0 and
 // are served by community `.orplug` extensions, so they are absent here.
 const Map<String, List<String>> builtinConversionMap = {
-  'ISO': ['CHD', 'CSO', 'ECM', 'RVZ'],
+  'ISO': ['CHD', 'CSO', 'ZSO', 'ECM', 'RVZ'],
   'BIN': ['CHD', 'ECM'],
   'CUE': ['CHD'],
   'GDI': ['CHD'],
@@ -112,7 +112,9 @@ const Map<String, List<String>> builtinConversionMap = {
 
 const Map<String, String> builtinCommandTemplates = {
   'ISO->CHD': 'chdman createdvd -i "{in}" -o "{out}"',
-  'ISO->CSO': 'maxcso "{in}" -o "{out}"',
+  'ISO->CSO': 'maxcso --block=2048 "{in}" -o "{out}"',
+  'ISO->ZSO':
+      'maxcso --format=zso --block=2048 --use-lz4brute "{in}" -o "{out}"',
   'ISO->ECM': 'ecm "{in}" "{out}"',
   'ISO->RVZ': 'nodtool convert "{in}" "{out}"',
   'BIN->CHD': 'chdman createcd -i "{cue}" -o "{out}"',

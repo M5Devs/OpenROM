@@ -135,7 +135,8 @@ not supported and fail fast.
 | Input | Output | Tool | Notes |
 |-------|--------|------|-------|
 | ISO | CHD | chdman | `createcd` for PS1/Dreamcast/Saturn/Sega CD, `createdvd` for PS2/GC/Wii/Xbox |
-| ISO | CSO | maxcso | PSP / PS2 |
+| ISO | CSO | maxcso | PSP / PS2 — always `--block=2048` for PSP/PSVita hardware |
+| ISO | ZSO | maxcso | PSP / PSVita — `--format=zso --block=2048 --use-lz4brute` |
 | ISO | ECM | ecm | |
 | ISO | RVZ | nodtool | GameCube / Wii |
 | BIN | CHD | chdman | Auto CUE if missing |

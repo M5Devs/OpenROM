@@ -61,7 +61,7 @@ void main() {
       [
         'game.iso',
         'ISO',
-        ['CHD', 'CSO', 'ECM', 'RVZ'],
+        ['CHD', 'CSO', 'ZSO', 'ECM', 'RVZ'],
       ],
       [
         'disc.bin',
@@ -96,7 +96,7 @@ void main() {
       [
         'xbox_iso.iso',
         'ISO',
-        ['CHD', 'CSO', 'ECM', 'RVZ'],
+        ['CHD', 'CSO', 'ZSO', 'ECM', 'RVZ'],
       ],
       [
         'game360.cci',

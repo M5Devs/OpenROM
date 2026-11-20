@@ -183,7 +183,7 @@ ArgParser buildParser() {
     ..addOption(
       'format',
       abbr: 'F',
-      help: 'output format: CHD, CSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP',
+      help: 'output format: CHD, CSO, ZSO, ECM, ISO, BIN, BIN/CUE, XISO, ZIP',
     )
     ..addOption('force-platform', help: 'override automatic platform detection')
     ..addOption(
