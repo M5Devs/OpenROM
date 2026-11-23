@@ -199,20 +199,10 @@ BinMergeResult mergeBins(
 
       List<CueTrackIndex> computedIndexes;
       if (parsedIndexes.isNotEmpty) {
-        CueTrackIndex? idx01Entry;
-        for (final item in parsedIndexes) {
-          if (item.number == 1) {
-            idx01Entry = item;
-            break;
-          }
-        }
-        final idx01Offset =
-            idx01Entry != null ? _msfToSectors(idx01Entry.msf) : 0;
-
         computedIndexes = [];
         for (final idxItem in parsedIndexes) {
-          final idxOffset = _msfToSectors(idxItem.msf);
-          final idxSectors = accumulatedSectors + (idxOffset - idx01Offset);
+          // INDEX times are relative to the start of the track's own file.
+          final idxSectors = accumulatedSectors + _msfToSectors(idxItem.msf);
           computedIndexes.add(
             CueTrackIndex(
               number: idxItem.number,
