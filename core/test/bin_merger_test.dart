@@ -178,5 +178,31 @@ FILE "Pokémon (Europe) (Track 2).bin" BINARY
       // Track 2 starts after track 1's 2352-byte sector = 00:00:01.
       expect(mergedCue, contains('INDEX 01 00:00:01'));
     });
+
+    test('keeps INDEX offsets inside each track file', () {
+      // Track 1: 1000 sectors. Track 2: 300 sectors with a 2 second pregap.
+      File(p.join(tmp.path, 'Game (Track 1).bin'))
+          .writeAsBytesSync(List<int>.filled(2352 * 1000, 0));
+      File(p.join(tmp.path, 'Game (Track 2).bin'))
+          .writeAsBytesSync(List<int>.filled(2352 * 300, 0));
+
+      final cue = _writeCue(tmp, 'Game.cue', '''
+FILE "Game (Track 1).bin" BINARY
+  TRACK 01 MODE2/2352
+    INDEX 01 00:00:00
+FILE "Game (Track 2).bin" BINARY
+  TRACK 02 AUDIO
+    INDEX 00 00:00:00
+    INDEX 01 00:02:00
+''');
+
+      final out = Directory(p.join(tmp.path, 'out'))..createSync();
+      final mergedCue = File(mergeBins(cue, outputDir: out.path).mergedCuePath)
+          .readAsStringSync();
+
+      // Track 2's file starts at sector 1000 = 00:13:25.
+      expect(mergedCue, contains('INDEX 00 00:13:25'));
+      expect(mergedCue, contains('INDEX 01 00:15:25'));
+    });
   });
 }
